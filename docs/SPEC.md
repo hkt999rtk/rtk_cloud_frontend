@@ -23,7 +23,7 @@ Implemented today:
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
-- Protected admin lead review and CSV export when `ADMIN_TOKEN` is set.
+- Protected admin lead review with filtering, pagination, and filtered CSV export when `ADMIN_TOKEN` is set.
 - Plain-text `/healthz` endpoint.
 - Multi-stage Docker packaging that ships the server binary plus runtime templates/static assets and defaults SQLite storage to `/data/connectplus.db` inside the container.
 

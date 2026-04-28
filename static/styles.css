@@ -538,6 +538,40 @@ textarea:focus {
   padding-top: 18px;
 }
 
+.admin-filters {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.filter-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.filter-grid label,
+.filter-actions,
+.admin-summary {
+  display: grid;
+  gap: 8px;
+}
+
+.filter-grid span {
+  color: var(--navy);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.filter-actions {
+  grid-auto-flow: column;
+  justify-content: flex-start;
+}
+
 .admin-actions {
   display: flex;
   align-items: center;
@@ -548,6 +582,11 @@ textarea:focus {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--bg-soft);
+}
+
+.admin-summary p,
+.admin-actions p {
+  margin: 0;
 }
 
 code {
@@ -602,6 +641,20 @@ td a {
   background: #fff;
 }
 
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.admin-pagination p {
+  margin: 0;
+  color: var(--navy);
+  font-weight: 700;
+}
+
 .success-message {
   display: grid;
   gap: 16px;
@@ -646,7 +699,8 @@ td a {
   .feature-grid,
   .docs-entry-grid,
   .use-case-list,
-  .detail-grid {
+  .detail-grid,
+  .filter-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -664,9 +718,14 @@ td a {
 
   .cta-band,
   .site-footer,
-  .admin-actions {
+  .admin-actions,
+  .admin-pagination {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .filter-actions {
+    grid-auto-flow: row;
   }
 }
 
@@ -694,7 +753,8 @@ td a {
   .feature-grid,
   .docs-entry-grid,
   .use-case-list,
-  .detail-grid {
+  .detail-grid,
+  .filter-grid {
     grid-template-columns: 1fr;
   }
 

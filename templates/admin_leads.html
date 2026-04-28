@@ -6,7 +6,43 @@
 </section>
 
 <section class="section admin-section">
+  <form class="admin-filters" method="get" action="/admin/leads">
+    {{if .LeadFilters.Token}}
+    <input type="hidden" name="token" value="{{.LeadFilters.Token}}">
+    {{end}}
+    <div class="filter-grid">
+      <label>
+        <span>Email</span>
+        <input type="search" name="email" value="{{.LeadFilters.Email}}" placeholder="Search by email">
+      </label>
+      <label>
+        <span>Company</span>
+        <input type="search" name="company" value="{{.LeadFilters.Company}}" placeholder="Search by company">
+      </label>
+      <label>
+        <span>Interest</span>
+        <input type="search" name="interest" value="{{.LeadFilters.Interest}}" placeholder="Search by interest">
+      </label>
+    </div>
+    <div class="filter-actions">
+      <button class="button" type="submit">Apply filters</button>
+      {{if .LeadFilters.HasActive}}
+      <a class="button secondary" href="{{.LeadFilters.ClearHref}}">Clear filters</a>
+      {{end}}
+    </div>
+  </form>
+
   <div class="admin-actions">
+    <div class="admin-summary">
+      {{if .LeadPagination.TotalCount}}
+      <p>Showing {{.LeadPagination.Start}}-{{.LeadPagination.End}} of {{.LeadPagination.TotalCount}} leads.</p>
+      <p>Page {{.LeadPagination.Page}} of {{.LeadPagination.TotalPages}}.</p>
+      {{else if .LeadFilters.HasActive}}
+      <p>No leads match the current filters.</p>
+      {{else}}
+      <p>No leads have been captured yet.</p>
+      {{end}}
+    </div>
     <a class="button secondary" href="{{.AdminCSVHref}}">Export CSV</a>
     <p>CSV export requires the same <code>X-Admin-Token</code> header, or a <code>?token=...</code> query parameter when using a browser.</p>
   </div>
@@ -40,6 +76,17 @@
       </tbody>
     </table>
   </div>
+  {{if gt .LeadPagination.TotalPages 1}}
+  <div class="admin-pagination">
+    {{if .LeadPagination.PreviousHref}}
+    <a class="button secondary" href="{{.LeadPagination.PreviousHref}}">Previous</a>
+    {{end}}
+    <p>Page {{.LeadPagination.Page}} of {{.LeadPagination.TotalPages}}</p>
+    {{if .LeadPagination.NextHref}}
+    <a class="button secondary" href="{{.LeadPagination.NextHref}}">Next</a>
+    {{end}}
+  </div>
+  {{end}}
   {{else}}
   <div class="empty-state">
     <h2>No leads yet.</h2>
