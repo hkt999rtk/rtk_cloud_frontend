@@ -19,7 +19,7 @@ Implemented today:
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
-- Feature overview and detail pages for Provision, OTA, Fleet Management, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured mobile app delivery comparison story, and a structured private deployment comparison story.
+- Feature overview and detail pages for Provision, OTA, Fleet Management, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured mobile app delivery comparison story, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
@@ -81,7 +81,7 @@ Realtek Connect+ presents the following ESP RainMaker-aligned capabilities:
 - App SDK: iOS/Android SDK layers, sample app and rebrand path, push notifications, app publishing path, and launch-readiness ownership boundaries.
 - Insights: activation statistics, firmware distribution, logs, crash reports, reboot reasons, RSSI/memory metrics.
 - Private Cloud: public evaluation versus private commercial deployment, data ownership, custom domain, regional placement, upgrade path, deployment FAQ, and commercial support positioning.
-- Integrations: Alexa, Google Assistant, Matter, REST API, MQTT over TLS, webhooks.
+- Integrations: Matter Fabric positioning, Alexa/Google Assistant paths, REST APIs, MQTT over TLS, webhooks, and cloud-to-cloud integration boundaries.
 
 ## RainMaker Parity Gap
 
@@ -103,7 +103,7 @@ Status values:
 | Mobile App SDK | Implemented | `/features/app-sdk` now covers iOS and Android SDK layers, sample app and rebrand paths, push notifications, App Store/Google Play publishing guidance, and a structured delivery-path comparison without introducing a client-side framework. |
 | Insights | Content Partial | Add logs, crash reports, reboot reasons, custom metrics, RSSI/memory metrics, firmware distribution, support workflows, and dashboard visuals. |
 | Private Cloud / Deployment | Implemented | `/features/private-cloud` now compares public evaluation, managed private deployment, and customer-operated private regions with explicit coverage for data ownership, custom domains, regional placement, upgrade path, deployment FAQ, and production support boundaries. |
-| Matter / Ecosystem Integrations | Content Partial | Add Matter ecosystem positioning, Matter Fabric concept, voice assistants, MQTT over TLS, REST APIs, webhooks, cloud-to-cloud integration, and protocol diagrams. |
+| Matter / Ecosystem Integrations | Implemented | `/features/integrations` now covers Matter Fabric positioning, voice assistants, MQTT over TLS, REST APIs, webhooks, and a structured integration-path comparison without promising unsupported live services. |
 | Developer Docs / APIs / SDKs / CLI | Content Partial | Docs portal structure now exists across Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes; deeper implementation detail and reference content still needs follow-on work. |
 | SEO / Launch Readiness | Content Partial | Metadata, sitemap, and robots now exist; remaining work includes accessibility pass, visual smoke checks, deployment packaging, and CI. |
 | Real IoT Cloud Operations | Out of Scope for website v1 | The public website will describe platform capabilities; it will not implement real device provisioning, OTA delivery, user auth, or telemetry ingestion in v1. |
