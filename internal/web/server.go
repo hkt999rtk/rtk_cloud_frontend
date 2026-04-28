@@ -2,10 +2,13 @@ package web
 
 import (
 	"context"
+	"encoding/csv"
 	"html/template"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,18 +19,21 @@ import (
 
 type LeadStore interface {
 	Insert(context.Context, leads.Lead) error
+	List(context.Context, int) ([]leads.LeadRecord, error)
 }
 
 type Config struct {
 	TemplatesDir string
 	StaticDir    string
 	LeadStore    LeadStore
+	AdminToken   string
 }
 
 type Server struct {
 	templatesDir string
 	staticDir    string
 	leadStore    LeadStore
+	adminToken   string
 }
 
 type pageData struct {
@@ -41,6 +47,9 @@ type pageData struct {
 	Errors       map[string]string
 	Success      bool
 	SubmittedFor string
+	Leads        []leads.LeadRecord
+	AdminEnabled bool
+	AdminCSVHref string
 }
 
 type contactForm struct {
@@ -62,6 +71,7 @@ func NewServer(cfg Config) (*Server, error) {
 		templatesDir: cfg.TemplatesDir,
 		staticDir:    cfg.StaticDir,
 		leadStore:    cfg.LeadStore,
+		adminToken:   cfg.AdminToken,
 	}, nil
 }
 
@@ -74,6 +84,9 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("/features", s.handleFeatures)
 	mux.HandleFunc("/features/", s.handleFeatureDetail)
 	mux.HandleFunc("/contact", s.handleContact)
+	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
+	mux.HandleFunc("/admin/leads.csv", s.handleAdminLeadsCSV)
+	mux.HandleFunc("/healthz", s.handleHealthz)
 	return securityHeaders(mux)
 }
 
@@ -139,6 +152,20 @@ func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/healthz" {
+		http.NotFound(w, r)
+		return
+	}
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("ok\n"))
+}
+
 func (s *Server) handleFeatures(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/features" {
 		http.NotFound(w, r)
@@ -154,6 +181,107 @@ func (s *Server) handleFeatures(w http.ResponseWriter, r *http.Request) {
 		Docs:        docs.All(),
 		Features:    features.All(),
 	})
+}
+
+func (s *Server) handleAdminLeads(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/admin/leads" {
+		http.NotFound(w, r)
+		return
+	}
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+	if !s.authorized(r) {
+		s.unauthorized(w)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+	records, err := s.leadStore.List(ctx, 100)
+	if err != nil {
+		http.Error(w, "could not load leads", http.StatusInternalServerError)
+		return
+	}
+
+	s.render(w, http.StatusOK, "admin_leads.html", pageData{
+		Title:        "Leads | Realtek Connect+",
+		CurrentPath:  r.URL.Path,
+		Features:     features.All(),
+		Leads:        records,
+		AdminEnabled: s.adminToken != "",
+		AdminCSVHref: s.adminCSVHref(r),
+	})
+}
+
+func (s *Server) handleAdminLeadsCSV(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/admin/leads.csv" {
+		http.NotFound(w, r)
+		return
+	}
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+	if !s.authorized(r) {
+		s.unauthorized(w)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+	records, err := s.leadStore.List(ctx, 500)
+	if err != nil {
+		http.Error(w, "could not load leads", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+	w.Header().Set("Content-Disposition", `attachment; filename="realtek-connect-leads.csv"`)
+	w.WriteHeader(http.StatusOK)
+
+	writer := csv.NewWriter(w)
+	_ = writer.Write([]string{"id", "name", "company", "email", "interest", "message", "created_at"})
+	for _, record := range records {
+		_ = writer.Write([]string{
+			strconv.FormatInt(record.ID, 10),
+			record.Name,
+			record.Company,
+			record.Email,
+			record.Interest,
+			record.Message,
+			formatTime(record.CreatedAt),
+		})
+	}
+	writer.Flush()
+}
+
+func (s *Server) authorized(r *http.Request) bool {
+	if s.adminToken == "" {
+		return false
+	}
+	token := r.Header.Get("X-Admin-Token")
+	if token == "" {
+		token = r.URL.Query().Get("token")
+	}
+	return token == s.adminToken
+}
+
+func (s *Server) adminCSVHref(r *http.Request) string {
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		return "/admin/leads.csv"
+	}
+	return "/admin/leads.csv?token=" + url.QueryEscape(token)
+}
+
+func (s *Server) unauthorized(w http.ResponseWriter) {
+	if s.adminToken == "" {
+		http.Error(w, "404 page not found", http.StatusNotFound)
+		return
+	}
+	http.Error(w, "unauthorized", http.StatusUnauthorized)
 }
 
 func (s *Server) handleFeatureDetail(w http.ResponseWriter, r *http.Request) {
@@ -276,7 +404,9 @@ func (s *Server) render(w http.ResponseWriter, status int, name string, data pag
 		filepath.Join(s.templatesDir, "layout.html"),
 		filepath.Join(s.templatesDir, name),
 	}
-	tmpl, err := template.ParseFiles(files...)
+	tmpl, err := template.New("layout.html").Funcs(template.FuncMap{
+		"formatTime": formatTime,
+	}).ParseFiles(files...)
 	if err != nil {
 		http.Error(w, "template parse error", http.StatusInternalServerError)
 		return
@@ -286,6 +416,13 @@ func (s *Server) render(w http.ResponseWriter, status int, name string, data pag
 	if err := tmpl.ExecuteTemplate(w, "layout", data); err != nil {
 		http.Error(w, "template render error", http.StatusInternalServerError)
 	}
+}
+
+func formatTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.UTC().Format("2006-01-02 15:04:05 UTC")
 }
 
 func methodNotAllowed(w http.ResponseWriter) {

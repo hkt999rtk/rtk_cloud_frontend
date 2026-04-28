@@ -1,0 +1,50 @@
+{{define "content"}}
+<section class="page-hero compact">
+  <p class="eyebrow">Admin</p>
+  <h1>Lead registrations</h1>
+  <p>Recent Realtek Connect+ contact and early access requests stored in SQLite.</p>
+</section>
+
+<section class="section admin-section">
+  <div class="admin-actions">
+    <a class="button secondary" href="{{.AdminCSVHref}}">Export CSV</a>
+    <p>CSV export requires the same <code>X-Admin-Token</code> header, or a <code>?token=...</code> query parameter when using a browser.</p>
+  </div>
+
+  {{if .Leads}}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Email</th>
+          <th>Interest</th>
+          <th>Message</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Leads}}
+        <tr>
+          <td>{{.ID}}</td>
+          <td>{{.Name}}</td>
+          <td>{{.Company}}</td>
+          <td><a href="mailto:{{.Email}}">{{.Email}}</a></td>
+          <td>{{.Interest}}</td>
+          <td>{{.Message}}</td>
+          <td>{{formatTime .CreatedAt}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <div class="empty-state">
+    <h2>No leads yet.</h2>
+    <p>Submitted contact requests will appear here after the form writes to SQLite.</p>
+  </div>
+  {{end}}
+</section>
+{{end}}
