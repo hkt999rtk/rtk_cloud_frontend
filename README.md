@@ -30,6 +30,11 @@ Environment variables:
 - `DATABASE_PATH`: SQLite database path, default `data/connectplus.db`.
 - `ADMIN_TOKEN`: enables protected lead viewing and CSV export.
 
+Runtime behavior:
+
+- HTTP server uses read, write, and idle timeouts for a safer default operational baseline.
+- `SIGINT` and `SIGTERM` trigger graceful shutdown with a bounded drain window before exit.
+
 ## Routes
 
 - `GET /`
