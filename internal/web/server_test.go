@@ -58,7 +58,7 @@ func testServerWithAdminToken(t *testing.T, store LeadStore, adminToken string) 
 
 func TestRoutesReturnOK(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
-	paths := []string{"/", "/docs", "/features", "/contact", "/healthz"}
+	paths := []string{"/", "/docs", "/features", "/contact", "/healthz", "/robots.txt", "/sitemap.xml"}
 	for _, section := range docs.All() {
 		paths = append(paths, "/docs/"+section.Slug)
 	}
@@ -73,6 +73,114 @@ func TestRoutesReturnOK(t *testing.T) {
 		if rec.Code != http.StatusOK {
 			t.Fatalf("%s returned %d, want 200", path, rec.Code)
 		}
+	}
+}
+
+func TestHomeMetadataIncludesSocialTags(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"<title>Realtek Connect&#43; | IoT Cloud Platform</title>",
+		`<meta name="description" content="Realtek Connect&#43; is an IoT cloud platform for provisioning, OTA, fleet management, app SDKs, insights, private cloud, and integrations.">`,
+		`<link rel="canonical" href="http://example.com/">`,
+		`<meta property="og:title" content="Realtek Connect&#43; | IoT Cloud Platform">`,
+		`<meta property="og:url" content="http://example.com/">`,
+		`<meta property="og:image" content="http://example.com/static/assets/connectplus-hero.png">`,
+		`<meta name="twitter:card" content="summary_large_image">`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
+func TestFeatureMetadataUsesFeatureSummary(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features/ota", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		`<title>OTA | Realtek Connect&#43;</title>`,
+		`<meta name="description" content="Upload firmware, create rollout campaigns, monitor jobs, and protect devices with version validation.">`,
+		`<meta property="og:url" content="http://example.com/features/ota">`,
+		`<meta name="twitter:title" content="OTA | Realtek Connect&#43;">`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
+func TestRobotsTxtIncludesSitemap(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/robots.txt", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	if got := rec.Header().Get("Content-Type"); !strings.Contains(got, "text/plain") {
+		t.Fatalf("content type = %q, want text/plain", got)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"User-agent: *",
+		"Disallow: /admin/",
+		"Sitemap: http://example.com/sitemap.xml",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("robots.txt does not contain %q: %s", want, body)
+		}
+	}
+}
+
+func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/sitemap.xml", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	if got := rec.Header().Get("Content-Type"); !strings.Contains(got, "application/xml") {
+		t.Fatalf("content type = %q, want application/xml", got)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		`<?xml version="1.0" encoding="UTF-8"?>`,
+		`<loc>http://example.com/</loc>`,
+		`<loc>http://example.com/docs/product-overview</loc>`,
+		`<loc>http://example.com/features/ota</loc>`,
+		`<loc>http://example.com/contact</loc>`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("sitemap does not contain %q: %s", want, body)
+		}
+	}
+	if strings.Contains(body, "/admin/leads") {
+		t.Fatalf("sitemap should not contain admin routes: %s", body)
 	}
 }
 
