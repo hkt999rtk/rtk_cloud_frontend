@@ -433,6 +433,10 @@ p {
   min-height: 300px;
 }
 
+.detail-panel > p:not(.eyebrow) {
+  margin: 14px 0 0;
+}
+
 .accent-panel {
   background: var(--bg-panel);
 }
@@ -459,6 +463,14 @@ p {
   height: 10px;
   border-radius: 50%;
   background: var(--brand);
+}
+
+.detail-table {
+  margin-top: 30px;
+}
+
+.supplemental-detail-grid {
+  margin-top: 0;
 }
 
 .contact-section {
