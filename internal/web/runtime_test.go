@@ -71,3 +71,24 @@ func TestLoggingMiddlewareLogsRequestOutcome(t *testing.T) {
 		t.Fatalf("log line = %q, want method, path, and status", logLine)
 	}
 }
+
+func TestLoggingMiddlewareRedactsSensitiveQueryParameters(t *testing.T) {
+	var output bytes.Buffer
+	logger := log.New(&output, "", 0)
+
+	handler := LoggingMiddleware(logger)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/admin/leads?token=secret&view=full", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	logLine := output.String()
+	if strings.Contains(logLine, "secret") {
+		t.Fatalf("log line = %q, secret token leaked", logLine)
+	}
+	if !strings.Contains(logLine, "/admin/leads?token=REDACTED&view=full 200") {
+		t.Fatalf("log line = %q, want redacted token and preserved request details", logLine)
+	}
+}
