@@ -112,7 +112,7 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 | APIs | Content Partial | `/docs/apis`, `/features/integrations` | API positioning exists, but website v1 still lacks reference-grade endpoint coverage, auth flows, webhook payload examples, and error-model detail. |
 | SDK Reference | Content Partial | `/docs/sdks`, `/features/app-sdk` | The docs and feature surfaces position the mobile SDK layers, but they do not yet provide install guides, versioned reference material, or language-specific sample code depth. |
 | CLI | Content Partial | `/docs/cli` | The CLI section exists as part of the docs portal, but website v1 still needs command catalogs, auth/session examples, and operator workflow walkthroughs. |
-| SEO / Launch Readiness | Content Partial | Shared layout metadata, `/robots.txt`, `/sitemap.xml` | Metadata, sitemap, robots, CI, deployment packaging, and visual smoke checks now exist; remaining work is mostly visual assets plus any final accessibility polish. |
+| SEO / Launch Readiness | Content Partial | Shared layout metadata, `/robots.txt`, `/sitemap.xml`, `go run ./cmd/visual-smoke` | Metadata, sitemap, robots, CI, deployment packaging, and homepage visual smoke checks now exist; remaining work is broader launch polish such as expanded product visuals plus final parity and documentation close-out. |
 | Real IoT Cloud Operations | Out of Scope for website v1 | Public marketing and docs copy only | The public website will describe platform capabilities, but it will not implement real device provisioning, OTA delivery, user auth, telemetry ingestion, or a production device-operations control plane in v1. |
 
 ## Website Completion Roadmap
@@ -236,7 +236,8 @@ Contact form fields:
 - Valid contact POST writes SQLite and shows success.
 - Invalid contact POST shows validation errors and does not write a lead.
 - Admin lead routes require `ADMIN_TOKEN`; unauthorized requests return 401, disabled admin routes return 404.
-- Manual browser checks verify desktop/mobile layout, Realtek-style white + teal palette, generated image loading, and no npm/React/Tailwind dependency.
+- `go run ./cmd/visual-smoke`
+- The visual smoke command checks homepage desktop/mobile layout, verifies the hero image loads, and fails on horizontal overflow without adding npm dependencies.
 
 ## Definition of Done
 
@@ -477,6 +478,11 @@ Acceptance criteria:
 - Check homepage desktop and mobile widths.
 - Verify hero image loads and no horizontal overflow.
 - Avoid adding npm project dependencies.
+
+Implementation notes:
+
+- `go run ./cmd/visual-smoke` starts the existing Go-rendered server in-process by default and drives local Chrome headlessly for desktop/mobile homepage checks.
+- The command can also target an already running server with `-base-url`.
 
 ## First-Version Limits
 
