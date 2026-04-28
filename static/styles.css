@@ -461,6 +461,14 @@ p {
   background: var(--brand);
 }
 
+.detail-table {
+  margin-top: 30px;
+}
+
+.supplemental-detail-grid {
+  margin-top: 0;
+}
+
 .contact-section {
   display: grid;
   grid-template-columns: minmax(0, 0.72fr) minmax(360px, 1fr);

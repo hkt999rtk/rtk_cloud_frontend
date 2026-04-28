@@ -9,6 +9,28 @@ type Feature struct {
 	Highlights   []string
 	Capabilities []string
 	Outcomes     []string
+	Sections     []FeatureSection
+	Table        FeatureTable
+}
+
+type FeatureSection struct {
+	Eyebrow string
+	Title   string
+	Intro   string
+	Items   []string
+	Accent  bool
+}
+
+type FeatureTable struct {
+	Eyebrow string
+	Title   string
+	Intro   string
+	Columns []string
+	Rows    []FeatureTableRow
+}
+
+type FeatureTableRow struct {
+	Cells []string
 }
 
 func All() []Feature {
@@ -77,11 +99,65 @@ func All() []Feature {
 			Slug:         "private-cloud",
 			Title:        "Private Cloud",
 			Kicker:       "Deploy with enterprise ownership and control.",
-			Summary:      "Customer-owned deployment options for data control, custom domains, regional constraints, and commercial support.",
-			Description:  "Private Cloud positions Realtek Connect+ for commercial products that need ownership boundaries, customization, and deployment control beyond public evaluation environments.",
-			Highlights:   []string{"Enterprise-owned deployment model", "Custom domain and cloud customization", "Data ownership and commercial support"},
-			Capabilities: []string{"Dedicated deployment planning", "Environment-specific policies", "Integration with customer operations"},
-			Outcomes:     []string{"Meet enterprise requirements", "Control data boundaries", "Prepare for commercial scale"},
+			Summary:      "Compare public evaluation with private commercial deployment, regional hosting, custom domains, and enterprise upgrade planning.",
+			Description:  "Private Cloud explains how Realtek Connect+ moves from a shared evaluation story into dedicated commercial deployment. It positions data ownership, regional placement, custom domain control, and upgrade planning as enterprise buying criteria rather than unsupported promises about this website's own runtime.",
+			Highlights:   []string{"Public evaluation versus dedicated private commercial deployment", "Data ownership, regional hosting boundaries, and custom domain control", "Commercial onboarding, upgrade path, and deployment support expectations"},
+			Capabilities: []string{"Dedicated environment planning for customer-operated or managed private regions", "Reverse-proxy TLS termination, network policy alignment, and branded service endpoints", "Release promotion and maintenance-window planning across evaluation and production environments"},
+			Outcomes:     []string{"Match enterprise procurement requirements", "Keep ownership boundaries explicit", "Create a credible path from pilot to production"},
+			Sections: []FeatureSection{
+				{
+					Eyebrow: "Commercial Models",
+					Title:   "Start with evaluation, then move into owned deployment boundaries",
+					Intro:   "The page frames public evaluation as a fast proof-of-concept path and private deployment as the commercial operating model for products with stricter ownership and compliance requirements.",
+					Items: []string{
+						"Use a shared evaluation environment to validate device flows, dashboards, and integration assumptions before commercial rollout.",
+						"Transition to a dedicated deployment once product teams need tenant isolation, formal support processes, and customer-specific change windows.",
+						"Keep the website explicit that these are platform deployment models, not evidence that this repo already ships a full private cloud control plane.",
+					},
+				},
+				{
+					Eyebrow: "Ownership",
+					Title:   "Define where data lives and how the service is branded",
+					Intro:   "Private deployment content is grounded in enterprise concerns about who operates the stack and where customer traffic terminates.",
+					Items: []string{
+						"Document customer-owned data boundaries for device metadata, operator access, and retained support exports.",
+						"Offer custom domains and branded entry points so the deployment can align with the customer's DNS, certificate, and support model.",
+						"Choose regional placement around residency, latency, and operational coverage requirements instead of forcing every product through one public region.",
+					},
+					Accent: true,
+				},
+				{
+					Eyebrow: "Upgrade Path",
+					Title:   "Promote proven configurations into commercial production",
+					Intro:   "The upgrade path is described as an engineering and operations workflow rather than a one-click migration promise.",
+					Items: []string{
+						"Carry validated device models, app configuration, and integration settings from evaluation into a dedicated deployment plan.",
+						"Use release promotion, maintenance windows, and rollback checkpoints to move from pilot tenants into production operations safely.",
+						"Align the commercial cutover with customer security review, support readiness, and staged onboarding of real fleets.",
+					},
+				},
+				{
+					Eyebrow: "Deployment FAQ",
+					Title:   "Answer the questions enterprise buyers raise first",
+					Intro:   "FAQ-style guidance keeps the page practical without implying unsupported hosting features inside the website itself.",
+					Items: []string{
+						"Production TLS still terminates at a reverse proxy, ingress, or deployment platform in front of the Go website runtime.",
+						"Private regions can follow customer-approved network boundaries and upgrade calendars instead of a shared public release schedule.",
+						"Commercial support covers deployment planning, environment hardening expectations, and the path for future platform customization requests.",
+					},
+				},
+			},
+			Table: FeatureTable{
+				Eyebrow: "Deployment Paths",
+				Title:   "Compare evaluation and private commercial operating models",
+				Intro:   "Realtek Connect+ positions deployment choice as a commercial decision: shared evaluation speeds discovery, while private environments add ownership, branding, and regional control for production programs.",
+				Columns: []string{"Model", "Operations boundary", "What teams get", "Best fit"},
+				Rows: []FeatureTableRow{
+					{Cells: []string{"Public evaluation", "Shared environment for workshops, pilot demos, and early integration discovery.", "Fast access to core platform flows without committing to a customer-specific operating boundary.", "Early evaluations, internal validation, and short proof-of-concept cycles."}},
+					{Cells: []string{"Managed private deployment", "Dedicated commercial environment operated with agreed support windows and customer-specific policies.", "Tenant isolation, custom domain options, regional placement choices, and a clearer production support model.", "Teams that want private deployment outcomes without owning the day-to-day platform operations stack."}},
+					{Cells: []string{"Customer-operated private region", "Customer-selected infrastructure and network boundary with coordinated release and upgrade planning.", "Maximum control over residency, access policies, and environment-level change management.", "Products with strict enterprise governance, regulated data boundaries, or regional hosting mandates."}},
+				},
+			},
 		},
 		{
 			Slug:         "integrations",

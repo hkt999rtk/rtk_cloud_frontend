@@ -215,6 +215,36 @@ func TestUserManagementFeatureClarifiesPlatformScope(t *testing.T) {
 	}
 }
 
+func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features/private-cloud", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"Compare evaluation and private commercial operating models",
+		"Public evaluation versus dedicated private commercial deployment",
+		"Transition to a dedicated deployment once product teams need tenant isolation, formal support processes, and customer-specific change windows.",
+		"Offer custom domains and branded entry points so the deployment can align with the customer&#39;s DNS, certificate, and support model.",
+		"Choose regional placement around residency, latency, and operational coverage requirements instead of forcing every product through one public region.",
+		"Use release promotion, maintenance windows, and rollback checkpoints to move from pilot tenants into production operations safely.",
+		"Production TLS still terminates at a reverse proxy, ingress, or deployment platform in front of the Go website runtime.",
+		"<th scope=\"col\">Model</th>",
+		"Managed private deployment",
+		"Customer-operated private region",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
 func TestRobotsTxtIncludesSitemap(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
