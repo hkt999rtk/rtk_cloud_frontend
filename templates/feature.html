@@ -1,11 +1,20 @@
 {{define "content"}}
 <section class="page-hero feature-detail">
-  <p class="eyebrow">{{.Feature.Kicker}}</p>
-  <h1>{{.Feature.Title}}</h1>
-  <p>{{.Feature.Description}}</p>
-  <div class="hero-actions">
-    <a class="button primary" href="/contact">Discuss {{.Feature.Title}}</a>
-    <a class="button secondary" href="/features">All Features</a>
+  <div class="feature-hero-grid{{if not .Feature.ImagePath}} feature-hero-grid-single{{end}}">
+    <div class="feature-hero-copy">
+      <p class="eyebrow">{{.Feature.Kicker}}</p>
+      <h1>{{.Feature.Title}}</h1>
+      <p>{{.Feature.Description}}</p>
+      <div class="hero-actions">
+        <a class="button primary" href="/contact">Discuss {{.Feature.Title}}</a>
+        <a class="button secondary" href="/features">All Features</a>
+      </div>
+    </div>
+    {{if .Feature.ImagePath}}
+    <div class="feature-visual">
+      <img src="{{.Feature.ImagePath}}" alt="{{.Feature.ImageAlt}}">
+    </div>
+    {{end}}
   </div>
 </section>
 

@@ -425,6 +425,39 @@ p {
   padding-bottom: 64px;
 }
 
+.feature-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.84fr) minmax(320px, 0.96fr);
+  gap: clamp(24px, 4vw, 54px);
+  align-items: center;
+}
+
+.feature-hero-grid-single {
+  grid-template-columns: 1fr;
+}
+
+.feature-hero-copy {
+  min-width: 0;
+}
+
+.feature-visual {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at top left, rgba(0, 111, 120, 0.16), transparent 40%),
+    linear-gradient(180deg, #ffffff, #eff8f9);
+  box-shadow: var(--shadow);
+}
+
+.feature-visual img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
 .detail-grid {
   align-items: stretch;
 }
@@ -759,7 +792,8 @@ td a {
 
   .hero,
   .intro,
-  .contact-section {
+  .contact-section,
+  .feature-hero-grid {
     grid-template-columns: 1fr;
   }
 
