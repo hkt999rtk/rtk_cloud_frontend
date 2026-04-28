@@ -67,6 +67,7 @@ UI system:
 - Icon coverage: hero chips, primary CTAs, feature cards, architecture nodes, architecture module chips, protocol rails, use cases, docs cards, contact/admin controls, and text links must use semantic icons rather than letter placeholders.
 - Feature hierarchy: homepage cards should separate primary product surfaces such as Provision, OTA, Fleet Management, and Private Cloud from secondary surfaces with stronger card scale, larger icons, and subtle platform-diagram styling.
 - Architecture visual language: the homepage architecture area should show device, cloud, and app/dashboard nodes with smaller semantic module chips for provisioning, identity, telemetry, registry, OTA, APIs, insights, and support workflows. Protocol labels such as MQTT over TLS, signed firmware image, REST APIs, and webhooks should appear as scannable rails where relevant.
+- Page rhythm: use stronger full-width section contrast inspired by modern IoT platform pages, including pale blue enterprise bands, design-principle panels, product surface imagery, component/service cards with visual previews, and public-vs-private deployment comparison cards.
 - Typography: keep the Inter/system stack for performance and operational familiarity, but use a clearer type scale. H1 is strong but restrained so product visuals stay visible; section H2 uses tighter hierarchy; card titles and body copy must be distinct enough for scanning. Eyebrow text should be used sparingly with modest letter spacing so pages do not read like a specification dump.
 
 Assets:

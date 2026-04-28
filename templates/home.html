@@ -51,6 +51,37 @@
   </div>
 </section>
 
+<section class="section principles-section">
+  <div class="section-heading centered">
+    <p class="eyebrow">Design principles</p>
+    <h2>Built for enterprise connected-product programs.</h2>
+  </div>
+  <div class="principles-shell">
+    <div class="principle-tabs" aria-label="Realtek Connect+ design principles">
+      <span class="active"><span class="module-icon">{{icon "dashboard"}}</span>Manageability</span>
+      <span><span class="module-icon">{{icon "fleet"}}</span>Scalability</span>
+      <span><span class="module-icon">{{icon "cloud-lock"}}</span>Security</span>
+      <span><span class="module-icon">{{icon "shield-user"}}</span>Privacy</span>
+      <span><span class="module-icon">{{icon "route"}}</span>Cost control</span>
+      <span><span class="module-icon">{{icon "package"}}</span>Customizability</span>
+    </div>
+    <article class="principle-panel">
+      <div>
+        <span class="icon-box page-hero-icon">{{icon "dashboard"}}</span>
+        <p class="eyebrow">Manageability</p>
+        <h3>Operate firmware, users, fleets, and support workflows from one platform story.</h3>
+        <p>Realtek Connect+ is presented as a lifecycle system: onboarding, cloud identity, OTA, app SDKs, metrics, and enterprise deployment work together instead of living as disconnected product pages.</p>
+      </div>
+      <div class="principle-metrics" aria-label="Platform management surfaces">
+        <span><strong>OTA</strong><small>campaigns</small></span>
+        <span><strong>Fleet</strong><small>registry</small></span>
+        <span><strong>SDK</strong><small>mobile app</small></span>
+        <span><strong>API</strong><small>integrations</small></span>
+      </div>
+    </article>
+  </div>
+</section>
+
 <section class="section" id="services">
   <div class="section-heading">
     <p class="eyebrow">Core services</p>
@@ -60,6 +91,11 @@
     {{range .Features}}
     <a class="feature-card" href="/features/{{.Slug}}">
       <span class="icon-box feature-icon">{{icon .Icon}}</span>
+      {{if .ImagePath}}
+      <span class="feature-preview">
+        <img src="{{.ImagePath}}" alt="">
+      </span>
+      {{end}}
       <h3>{{.Title}}</h3>
       <p>{{.Summary}}</p>
       <span class="text-link">View details <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
@@ -120,6 +156,29 @@
     <span><span class="module-icon">{{icon "route"}}</span>MQTT over TLS</span>
     <span><span class="module-icon">{{icon "upload"}}</span>Signed firmware image</span>
     <span><span class="module-icon">{{icon "nodes"}}</span>REST APIs and webhooks</span>
+  </div>
+</section>
+
+<section class="section deployment-section">
+  <div class="section-heading centered">
+    <p class="eyebrow">Public vs private cloud</p>
+    <h2>Start with evaluation, mature into controlled deployment.</h2>
+  </div>
+  <div class="deployment-grid">
+    <article>
+      <span class="icon-box panel-icon">{{icon "cloud-lock"}}</span>
+      <p class="card-kicker">Public evaluation</p>
+      <h3>Validate product fit before committing to a private footprint.</h3>
+      <p>Use the public-facing website and documentation structure to align firmware, mobile, cloud, and product stakeholders before commercial deployment planning.</p>
+      <a class="button secondary" href="/docs/deployment"><span class="button-icon">{{icon "document"}}</span>Deployment Docs</a>
+    </article>
+    <article>
+      <span class="icon-box panel-icon">{{icon "certificate"}}</span>
+      <p class="card-kicker">Private commercial cloud</p>
+      <h3>Plan data ownership, custom domains, regional placement, and support boundaries.</h3>
+      <p>The private cloud narrative gives enterprise buyers a clear path from concept validation to branded, controlled, commercially supported operation.</p>
+      <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Discuss Private Cloud</a>
+    </article>
   </div>
 </section>
 
