@@ -1,0 +1,57 @@
+{{define "content"}}
+<section class="page-hero compact">
+  <p class="eyebrow">Contact</p>
+  <h1>Register interest in Realtek Connect+.</h1>
+  <p>Tell us which service matters most for your product team. Requests are stored locally in SQLite for this first version.</p>
+</section>
+
+<section class="contact-section">
+  <div class="contact-context">
+    <p class="eyebrow">Early access</p>
+    <h2>For IoT product planning, firmware maintenance, and private cloud evaluation.</h2>
+    <p>Use this form for provisioning, OTA, fleet management, app SDK, insights, private cloud, or integration discussions.</p>
+  </div>
+
+  <div class="form-card">
+    {{if .Success}}
+    <div class="success-message" role="status">
+      <h2>Thanks, {{.SubmittedFor}}.</h2>
+      <p>Your Realtek Connect+ request has been recorded.</p>
+      <a class="button secondary" href="/features">Review features</a>
+    </div>
+    {{else}}
+    <form method="post" action="/contact" novalidate>
+      <label>
+        <span>Name</span>
+        {{with index .Errors "name"}}<em>{{.}}</em>{{end}}
+        <input name="name" value="{{.Form.Name}}" autocomplete="name" required>
+      </label>
+      <label>
+        <span>Company</span>
+        <input name="company" value="{{.Form.Company}}" autocomplete="organization">
+      </label>
+      <label>
+        <span>Email</span>
+        {{with index .Errors "email"}}<em>{{.}}</em>{{end}}
+        <input name="email" value="{{.Form.Email}}" type="email" autocomplete="email" required>
+      </label>
+      <label>
+        <span>Interest</span>
+        {{with index .Errors "interest"}}<em>{{.}}</em>{{end}}
+        <select name="interest" required>
+          <option value="">Select a service</option>
+          {{range .Features}}
+          <option value="{{.Title}}" {{if eq $.Form.Interest .Title}}selected{{end}}>{{.Title}}</option>
+          {{end}}
+        </select>
+      </label>
+      <label>
+        <span>Message</span>
+        <textarea name="message" rows="5">{{.Form.Message}}</textarea>
+      </label>
+      <button class="button primary" type="submit">Submit Request</button>
+    </form>
+    {{end}}
+  </div>
+</section>
+{{end}}

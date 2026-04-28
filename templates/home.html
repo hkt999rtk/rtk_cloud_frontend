@@ -1,0 +1,103 @@
+{{define "content"}}
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">IoT cloud platform for product teams</p>
+    <h1>Realtek Connect+</h1>
+    <p class="hero-lede">Bring Realtek-based devices online with provisioning, OTA, fleet operations, app SDKs, insights, private cloud options, and ecosystem integrations.</p>
+    <div class="hero-actions">
+      <a class="button primary" href="/contact">Contact Sales</a>
+      <a class="button secondary" href="/features">Explore Services</a>
+    </div>
+    <div class="hero-points" aria-label="Platform highlights">
+      <span>Device SDK</span>
+      <span>Secure Cloud</span>
+      <span>Mobile App</span>
+      <span>Operations</span>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <img src="/static/assets/connectplus-hero.png" alt="Realtek Connect+ device, cloud, mobile app, and dashboard platform flow">
+  </div>
+</section>
+
+<section class="section intro">
+  <div class="section-heading">
+    <p class="eyebrow">Platform overview</p>
+    <h2>From chipset to connected product lifecycle.</h2>
+  </div>
+  <p class="section-lede">Connect+ frames Realtek connectivity silicon, firmware enablement, cloud services, mobile app workflows, and operations tooling as one commercial IoT product path.</p>
+</section>
+
+<section class="section" id="services">
+  <div class="section-heading">
+    <p class="eyebrow">Core services</p>
+    <h2>RainMaker-aligned capabilities, packaged for Realtek products.</h2>
+  </div>
+  <div class="feature-grid">
+    {{range .Features}}
+    <a class="feature-card" href="/features/{{.Slug}}">
+      <span class="feature-icon" aria-hidden="true">{{slice .Title 0 1}}</span>
+      <h3>{{.Title}}</h3>
+      <p>{{.Summary}}</p>
+      <span class="text-link">View details</span>
+    </a>
+    {{end}}
+  </div>
+</section>
+
+<section class="section architecture" id="architecture">
+  <div class="section-heading">
+    <p class="eyebrow">Architecture</p>
+    <h2>A direct flow from device onboarding to fleet operations.</h2>
+  </div>
+  <div class="flow" aria-label="Platform architecture flow">
+    <div class="flow-node">
+      <span>01</span>
+      <strong>Realtek Device SDK</strong>
+      <p>Identity, provisioning, firmware services, and device signals.</p>
+    </div>
+    <div class="flow-line"></div>
+    <div class="flow-node">
+      <span>02</span>
+      <strong>Secure Cloud</strong>
+      <p>Registry, OTA campaigns, user-device association, APIs.</p>
+    </div>
+    <div class="flow-line"></div>
+    <div class="flow-node">
+      <span>03</span>
+      <strong>App SDK + Dashboard</strong>
+      <p>Mobile onboarding, product control, insights, support workflows.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section use-cases" id="use-cases">
+  <div class="section-heading">
+    <p class="eyebrow">Use cases</p>
+    <h2>Built for commercial connected-device teams.</h2>
+  </div>
+  <div class="use-case-list">
+    <article>
+      <h3>Smart Home</h3>
+      <p>App onboarding, sharing, push notifications, voice assistant paths, and OTA maintenance.</p>
+    </article>
+    <article>
+      <h3>Industrial IoT</h3>
+      <p>Fleet grouping, metadata, secure updates, private cloud, and operations visibility.</p>
+    </article>
+    <article>
+      <h3>Appliance Makers</h3>
+      <p>Long lifecycle firmware maintenance, activation data, branded apps, and support diagnostics.</p>
+    </article>
+  </div>
+</section>
+
+<section class="cta-band" id="contact">
+  <div>
+    <p class="eyebrow">Early access</p>
+    <h2>Plan a Realtek Connect+ product path.</h2>
+    <p>Register your interest in provisioning, OTA, private cloud, app SDK, or fleet operations.</p>
+  </div>
+  <a class="button primary" href="/contact">Contact Sales</a>
+</section>
+{{end}}

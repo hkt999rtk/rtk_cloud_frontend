@@ -1,0 +1,41 @@
+{{define "layout"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}}</title>
+  <meta name="description" content="Realtek Connect+ is an IoT cloud platform for provisioning, OTA, fleet management, app SDKs, insights, private cloud, and integrations.">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Realtek Connect+ home">
+      <span class="brand-mark">Realtek</span>
+      <span class="brand-divider"></span>
+      <span class="brand-product">Connect+</span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="/features">Features</a>
+      <a href="/#architecture">Architecture</a>
+      <a href="/contact" class="nav-cta">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    {{template "content" .}}
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>Realtek Connect+</strong>
+      <p>IoT cloud platform concept for Realtek-based connected products.</p>
+    </div>
+    <div class="footer-links">
+      <a href="/features">Features</a>
+      <a href="/contact">Contact Sales</a>
+    </div>
+  </footer>
+</body>
+</html>
+{{end}}
