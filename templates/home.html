@@ -8,11 +8,11 @@
       <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Contact Sales</a>
       <a class="button secondary" href="/features"><span class="button-icon">{{icon "grid"}}</span>Explore Services</a>
     </div>
-    <div class="hero-points" aria-label="Platform highlights">
+    <div class="hero-points capability-strip" aria-label="Platform highlights">
+      <span><span class="hero-chip-icon">{{icon "chip"}}</span>Silicon</span>
       <span><span class="hero-chip-icon">{{icon "device"}}</span>Device SDK</span>
-      <span><span class="hero-chip-icon">{{icon "cloud-lock"}}</span>Secure Cloud</span>
-      <span><span class="hero-chip-icon">{{icon "phone-code"}}</span>Mobile App</span>
-      <span><span class="hero-chip-icon">{{icon "fleet"}}</span>Operations</span>
+      <span><span class="hero-chip-icon">{{icon "cloud-lock"}}</span>Cloud</span>
+      <span><span class="hero-chip-icon">{{icon "dashboard"}}</span>Ops</span>
     </div>
   </div>
   <div class="hero-visual">
@@ -33,7 +33,7 @@
     <p class="eyebrow">Core services</p>
     <h2>RainMaker-aligned capabilities, packaged for Realtek products.</h2>
   </div>
-  <div class="feature-grid">
+  <div class="feature-grid home-feature-grid">
     {{range .Features}}
     <a class="feature-card" href="/features/{{.Slug}}">
       <span class="icon-box feature-icon">{{icon .Icon}}</span>
@@ -53,11 +53,16 @@
   <div class="flow" aria-label="Platform architecture flow">
     <div class="flow-node">
       <div class="flow-node-head">
-        <span class="icon-box flow-icon">{{icon "device"}}</span>
+        <span class="icon-box flow-icon">{{icon "chip"}}</span>
         <span class="flow-number">01</span>
       </div>
       <strong>Realtek Device SDK</strong>
       <p>Identity, provisioning, firmware services, and device signals.</p>
+      <div class="node-modules" aria-label="Device SDK modules">
+        <span><span class="module-icon">{{icon "wifi"}}</span>Provision</span>
+        <span><span class="module-icon">{{icon "certificate"}}</span>Identity</span>
+        <span><span class="module-icon">{{icon "telemetry"}}</span>Telemetry</span>
+      </div>
     </div>
     <div class="flow-line"></div>
     <div class="flow-node">
@@ -67,16 +72,31 @@
       </div>
       <strong>Secure Cloud</strong>
       <p>Registry, OTA campaigns, user-device association, APIs.</p>
+      <div class="node-modules" aria-label="Secure Cloud modules">
+        <span><span class="module-icon">{{icon "registry"}}</span>Registry</span>
+        <span><span class="module-icon">{{icon "ota"}}</span>OTA</span>
+        <span><span class="module-icon">{{icon "api"}}</span>API</span>
+      </div>
     </div>
     <div class="flow-line"></div>
     <div class="flow-node">
       <div class="flow-node-head">
-        <span class="icon-box flow-icon">{{icon "phone-code"}}</span>
+        <span class="icon-box flow-icon">{{icon "dashboard"}}</span>
         <span class="flow-number">03</span>
       </div>
       <strong>App SDK + Dashboard</strong>
       <p>Mobile onboarding, product control, insights, support workflows.</p>
+      <div class="node-modules" aria-label="App and dashboard modules">
+        <span><span class="module-icon">{{icon "phone-code"}}</span>App SDK</span>
+        <span><span class="module-icon">{{icon "chart"}}</span>Insights</span>
+        <span><span class="module-icon">{{icon "support"}}</span>Support</span>
+      </div>
     </div>
+  </div>
+  <div class="architecture-rails" aria-label="Architecture protocol paths">
+    <span><span class="module-icon">{{icon "route"}}</span>MQTT over TLS</span>
+    <span><span class="module-icon">{{icon "upload"}}</span>Signed firmware image</span>
+    <span><span class="module-icon">{{icon "nodes"}}</span>REST APIs and webhooks</span>
   </div>
 </section>
 
@@ -127,6 +147,11 @@
     <p class="eyebrow">Early access</p>
     <h2>Plan a Realtek Connect+ product path.</h2>
     <p>Register your interest in provisioning, OTA, private cloud, app SDK, or fleet operations.</p>
+    <div class="cta-interest-list" aria-label="Common early access interests">
+      <span><span class="module-icon">{{icon "provision"}}</span>Provision</span>
+      <span><span class="module-icon">{{icon "ota"}}</span>OTA</span>
+      <span><span class="module-icon">{{icon "cloud-lock"}}</span>Private Cloud</span>
+    </div>
   </div>
   <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Contact Sales</a>
 </section>

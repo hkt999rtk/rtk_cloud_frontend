@@ -64,7 +64,9 @@ UI system:
 - Cards: 6-8px radius, thin border, minimal shadow.
 - Hero: direct product positioning with a platform architecture poster image.
 - Iconography: repo-native inline SVG icons only; no npm, external icon package, React, or client-side build step. Icons use a 24px viewbox, rounded caps/joins, approximately 2px stroke, and navy/teal color treatment inside pale teal 8px containers where emphasis is needed.
-- Icon coverage: hero chips, primary CTAs, feature cards, architecture nodes, use cases, docs cards, contact/admin controls, and text links must use semantic icons rather than letter placeholders.
+- Icon coverage: hero chips, primary CTAs, feature cards, architecture nodes, architecture module chips, protocol rails, use cases, docs cards, contact/admin controls, and text links must use semantic icons rather than letter placeholders.
+- Feature hierarchy: homepage cards should separate primary product surfaces such as Provision, OTA, Fleet Management, and Private Cloud from secondary surfaces with stronger card scale, larger icons, and subtle platform-diagram styling.
+- Architecture visual language: the homepage architecture area should show device, cloud, and app/dashboard nodes with smaller semantic module chips for provisioning, identity, telemetry, registry, OTA, APIs, insights, and support workflows. Protocol labels such as MQTT over TLS, signed firmware image, REST APIs, and webhooks should appear as scannable rails where relevant.
 - Typography: keep the Inter/system stack for performance and operational familiarity, but use a clearer type scale. H1 is strong but restrained so product visuals stay visible; section H2 uses tighter hierarchy; card titles and body copy must be distinct enough for scanning. Eyebrow text should be used sparingly with modest letter spacing so pages do not read like a specification dump.
 
 Assets:
