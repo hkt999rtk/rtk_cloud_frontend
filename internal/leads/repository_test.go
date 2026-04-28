@@ -181,6 +181,38 @@ func TestRepositoryInsertRejectsInvalidLead(t *testing.T) {
 	}
 }
 
+func TestRepositoryInsertAcceptsUnicodeAtCharacterLimit(t *testing.T) {
+	db, err := sql.Open("sqlite", ":memory:")
+	if err != nil {
+		t.Fatalf("open sqlite: %v", err)
+	}
+	defer db.Close()
+
+	repo := NewRepository(db)
+	if err := repo.Init(); err != nil {
+		t.Fatalf("init schema: %v", err)
+	}
+
+	err = repo.Insert(context.Background(), Lead{
+		Name:     strings.Repeat("界", NameMaxLength),
+		Company:  strings.Repeat("公", CompanyMaxLength),
+		Email:    "unicode@example.com",
+		Interest: strings.Repeat("类", InterestMaxLength),
+		Message:  strings.Repeat("文", MessageMaxLength),
+	})
+	if err != nil {
+		t.Fatalf("insert unicode lead: %v", err)
+	}
+
+	count, err := repo.Count(context.Background(), ListFilter{})
+	if err != nil {
+		t.Fatalf("count leads: %v", err)
+	}
+	if count != 1 {
+		t.Fatalf("count = %d, want 1", count)
+	}
+}
+
 func TestRepositoryInitAddsSQLiteValidationGuards(t *testing.T) {
 	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {

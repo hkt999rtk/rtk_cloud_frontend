@@ -3,6 +3,7 @@ package leads
 import (
 	"sort"
 	"strings"
+	"unicode/utf8"
 )
 
 const (
@@ -43,27 +44,27 @@ func Validate(lead Lead) ValidationErrors {
 	errors := ValidationErrors{}
 	if lead.Name == "" {
 		errors["name"] = "Name is required."
-	} else if len(lead.Name) > NameMaxLength {
+	} else if fieldLength(lead.Name) > NameMaxLength {
 		errors["name"] = "Name must be 120 characters or fewer."
 	}
 
 	if lead.Email == "" {
 		errors["email"] = "Email is required."
-	} else if len(lead.Email) > EmailMaxLength {
+	} else if fieldLength(lead.Email) > EmailMaxLength {
 		errors["email"] = "Email must be 254 characters or fewer."
 	}
 
 	if lead.Interest == "" {
 		errors["interest"] = "Select an area of interest."
-	} else if len(lead.Interest) > InterestMaxLength {
+	} else if fieldLength(lead.Interest) > InterestMaxLength {
 		errors["interest"] = "Interest must be 120 characters or fewer."
 	}
 
-	if len(lead.Company) > CompanyMaxLength {
+	if fieldLength(lead.Company) > CompanyMaxLength {
 		errors["company"] = "Company must be 160 characters or fewer."
 	}
 
-	if len(lead.Message) > MessageMaxLength {
+	if fieldLength(lead.Message) > MessageMaxLength {
 		errors["message"] = "Message must be 2000 characters or fewer."
 	}
 
@@ -71,4 +72,8 @@ func Validate(lead Lead) ValidationErrors {
 		return nil
 	}
 	return errors
+}
+
+func fieldLength(value string) int {
+	return utf8.RuneCountInString(value)
 }
