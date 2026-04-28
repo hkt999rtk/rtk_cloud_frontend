@@ -74,6 +74,9 @@ Assets:
 - Generated hero/platform and feature imagery lives in `static/assets/`.
 - The generated image style must be clean B2B technology: white background, teal/blue accents, device-cloud-app-dashboard flow, no stock-photo people, no third-party marks.
 - Bitmap imagery supports platform context only; semantic navigation and feature recognition should come from the inline SVG icon system.
+- Current generated homepage assets:
+  - `static/assets/connectplus-hero-v2.jpg`: text-free chip-to-cloud-to-app/dashboard hero visual.
+  - `static/assets/connectplus-platform-surfaces.jpg`: platform surfaces visual showing onboarding, OTA rollout, and fleet health dashboard context.
 - Video is optional. If a ChatGPT video generation tool is available later, the site can add a short product loop with a poster image fallback. If no video tool is available, CSS motion or static generated imagery is sufficient.
 
 ## Feature Scope

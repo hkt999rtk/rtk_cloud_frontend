@@ -184,9 +184,10 @@ img {
 }
 
 .hero {
+  width: min(1240px, calc(100% - 40px));
   display: grid;
-  grid-template-columns: minmax(0, 0.88fr) minmax(360px, 1fr);
-  gap: clamp(28px, 5vw, 70px);
+  grid-template-columns: minmax(0, 0.72fr) minmax(420px, 1.18fr);
+  gap: clamp(30px, 5vw, 78px);
   align-items: center;
   min-height: 680px;
   padding: 70px 0 48px;
@@ -326,7 +327,7 @@ p {
 
 .hero-visual {
   min-width: 0;
-  padding: 14px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: linear-gradient(180deg, #fff, var(--bg-soft));
@@ -349,6 +350,61 @@ p {
   grid-template-columns: 0.86fr 1fr;
   gap: 40px;
   border-top: 1px solid var(--line);
+}
+
+.platform-showcase {
+  padding-top: 36px;
+}
+
+.platform-showcase-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.44fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+  margin-top: 30px;
+}
+
+.platform-showcase-copy,
+.platform-showcase-visual {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.platform-showcase-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 30px;
+}
+
+.platform-showcase-copy h3 {
+  max-width: 420px;
+  font-size: clamp(1.35rem, 2.1vw, 1.75rem);
+  line-height: 1.14;
+}
+
+.platform-showcase-copy p {
+  margin: 16px 0 0;
+}
+
+.platform-showcase-visual {
+  min-width: 0;
+  padding: 10px;
+  background:
+    radial-gradient(circle at top right, rgba(0, 111, 120, 0.1), transparent 42%),
+    linear-gradient(180deg, #fff, var(--bg-soft));
+  box-shadow: var(--shadow-soft);
+}
+
+.platform-showcase-visual img {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .section-heading {
@@ -530,7 +586,8 @@ p {
 
 .node-modules,
 .architecture-rails,
-.cta-interest-list {
+.cta-interest-list,
+.surface-strip {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -542,7 +599,8 @@ p {
 
 .node-modules > span,
 .architecture-rails > span,
-.cta-interest-list > span {
+.cta-interest-list > span,
+.surface-strip > span {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -627,6 +685,10 @@ p {
 
 .cta-interest-list > span {
   background: rgba(255, 255, 255, 0.74);
+}
+
+.surface-strip {
+  margin-top: 22px;
 }
 
 .page-hero {
@@ -1009,6 +1071,7 @@ td a {
 
   .hero,
   .intro,
+  .platform-showcase-shell,
   .contact-section,
   .feature-hero-grid {
     grid-template-columns: 1fr;
@@ -1017,6 +1080,10 @@ td a {
   .hero {
     min-height: 0;
     padding-top: 46px;
+  }
+
+  .platform-showcase-copy {
+    padding: 26px;
   }
 
   .feature-grid,
