@@ -13,6 +13,7 @@ The current project status is **v0.1 Marketing Foundation**. It is a working web
 Implemented today:
 
 - Go HTTP server using `net/http`.
+- Runtime entrypoint under `cmd/server` with request logging, graceful shutdown, and baseline read/write/idle timeouts.
 - Server-rendered pages using `html/template`.
 - Static CSS with a Realtek-style white, deep navy, and blue-green/teal visual system.
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
@@ -150,6 +151,12 @@ Environment:
 - `PORT`, default `8080`.
 - `DATABASE_PATH`, default `data/connectplus.db`.
 - `ADMIN_TOKEN`, optional. When set, enables protected lead review and CSV export.
+
+Operational behavior:
+
+- The runtime uses configured `http.Server` read, write, and idle timeouts.
+- Requests are logged with method, path, response status, and elapsed time.
+- `SIGINT` and `SIGTERM` trigger graceful shutdown with a bounded timeout.
 
 Commands:
 
