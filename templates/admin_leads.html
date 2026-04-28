@@ -89,8 +89,13 @@
   {{end}}
   {{else}}
   <div class="empty-state">
+    {{if .LeadFilters.HasActive}}
+    <h2>No leads match the current filters.</h2>
+    <p>Adjust the admin search filters or clear them to view all captured leads.</p>
+    {{else}}
     <h2>No leads yet.</h2>
     <p>Submitted contact requests will appear here after the form writes to SQLite.</p>
+    {{end}}
   </div>
   {{end}}
 </section>

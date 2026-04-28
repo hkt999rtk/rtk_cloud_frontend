@@ -635,3 +635,30 @@ func TestAdminLeadsFiltersAndCSVExportRespectActiveFilters(t *testing.T) {
 		t.Fatalf("csv contains unfiltered leads: %s", csvRec.Body.String())
 	}
 }
+
+func TestAdminLeadsNoMatchEmptyStateMentionsFilters(t *testing.T) {
+	handler := testServerWithAdminToken(t, &memoryLeadStore{leads: []leads.Lead{
+		{
+			Name:     "Alpha",
+			Company:  "Acme",
+			Email:    "alpha@example.com",
+			Interest: "Provision",
+		},
+	}}, "secret")
+
+	req := httptest.NewRequest(http.MethodGet, "/admin/leads?token=secret&email=missing", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	if !strings.Contains(body, "No leads match the current filters.") {
+		t.Fatalf("response does not contain filtered empty-state message: %s", body)
+	}
+	if strings.Contains(body, "No leads yet.") {
+		t.Fatalf("response unexpectedly contains generic empty-state message: %s", body)
+	}
+}
