@@ -209,11 +209,67 @@ func All() []Feature {
 			Slug:         "integrations",
 			Title:        "Integrations",
 			Kicker:       "Connect products to the wider IoT ecosystem.",
-			Summary:      "Alexa, Google Assistant, Matter, REST APIs, MQTT over TLS, and webhooks for product and platform integrations.",
-			Description:  "Integrations extend device data and control beyond the core cloud. The page presents smart home assistant connections, secure protocol access, and API/webhook paths for business systems.",
-			Highlights:   []string{"Voice assistant and Matter-ready positioning", "REST API and MQTT over TLS", "Webhooks for event-driven workflows"},
-			Capabilities: []string{"Smart home ecosystem touchpoints", "External operations and CRM hooks", "Secure cloud-to-cloud integration"},
-			Outcomes:     []string{"Meet ecosystem expectations", "Connect operations tools", "Support differentiated product experiences"},
+			Summary:      "Matter Fabric positioning, voice assistant paths, MQTT over TLS, REST APIs, and webhooks for product and platform integrations.",
+			Description:  "Integrations explains how Realtek Connect+ fits into smart home ecosystems and enterprise backends. It frames Matter Fabric participation, voice assistant connections, secure protocol access, and webhook delivery as supported integration patterns without claiming this website already operates every downstream service.",
+			Highlights:   []string{"Matter ecosystem positioning with Fabric-aware deployment planning", "Voice assistant, REST API, MQTT over TLS, and webhook integration paths", "Explicit ownership boundaries between product apps, cloud services, and customer systems"},
+			Capabilities: []string{"Matter bridge/controller planning, commissioning touchpoints, and ecosystem mapping", "Secure REST and MQTT interfaces for product, support, and operations systems", "Webhook-driven event handoff into CRM, ticketing, and analytics workflows"},
+			Outcomes:     []string{"Meet ecosystem interoperability expectations", "Connect business systems without custom one-off glue", "Keep integration scope credible for platform evaluations"},
+			Sections: []FeatureSection{
+				{
+					Eyebrow: "Matter Fabric",
+					Title:   "Position Realtek products inside the customer's chosen ecosystem",
+					Intro:   "The integrations page now explains Matter as an ecosystem contract with clear boundaries around who owns commissioning, controller roles, and long-term lifecycle UX.",
+					Items: []string{
+						"Describe how devices can participate in a Matter Fabric while still keeping Realtek app, cloud, and support flows in scope where products need them.",
+						"Frame bridge and controller roles as deployment decisions so teams can map product categories to the right ecosystem entry point without overclaiming current implementation depth.",
+						"Keep commissioning, credential ownership, and ecosystem-specific UX tied to the selected Matter platform instead of implying this marketing site is a live Matter control plane.",
+					},
+				},
+				{
+					Eyebrow: "Voice Assistants",
+					Title:   "Connect branded products to familiar consumer control surfaces",
+					Intro:   "Assistant integrations are positioned as cloud-to-cloud or skill/action patterns that extend a product's reach without replacing its own app and identity model.",
+					Items: []string{
+						"Cover Alexa and Google Assistant paths for products that need voice control, routine support, and ecosystem discovery alongside the branded app experience.",
+						"Explain that assistant platforms own the voice UX while product teams keep device traits, account linking, and support escalation flows aligned with their own roadmap.",
+						"Use the page to show interoperability intent for smart home buyers without copying ESP RainMaker wording or promising live assistant certification from this repo alone.",
+					},
+				},
+				{
+					Eyebrow: "Protocols",
+					Title:   "Offer direct data and control paths for external systems",
+					Intro:   "Business integrations are described as secure interfaces teams can expose around the platform rather than as ad hoc export buttons.",
+					Items: []string{
+						"Document REST APIs for authenticated product, support, and operations workflows that need request-response access to platform state.",
+						"Position MQTT over TLS for policy-scoped telemetry, near-real-time command paths, and event fan-out into downstream infrastructure.",
+						"Use webhooks for signed lifecycle, alert, and workflow events so CRM, ticketing, analytics, and fulfillment systems can react without polling.",
+					},
+				},
+				{
+					Eyebrow: "Ownership Boundaries",
+					Title:   "Keep trust, credentials, and responsibilities explicit",
+					Intro:   "The page stays careful about what Realtek Connect+ is describing versus what this repository actually implements today.",
+					Items: []string{
+						"Make authentication, topic policy, and receiving-system ownership part of the integration story so buyers can evaluate security posture early.",
+						"Separate product-facing APIs and events from the website's own contact/admin runtime to avoid implying that marketing pages are the production integration surface.",
+						"Preserve room for customer-specific deployment choices, event contracts, and certification work instead of claiming universal out-of-the-box availability.",
+					},
+					Accent: true,
+				},
+			},
+			Table: FeatureTable{
+				Eyebrow: "Integration Paths",
+				Title:   "Choose the ecosystem contract that fits the product",
+				Intro:   "Each path represents a different trust boundary. Realtek Connect+ uses this page to show design intent and deployment options without claiming every protocol surface is already live in this repository.",
+				Columns: []string{"Path", "Interaction model", "Ownership boundary", "Best fit"},
+				Rows: []FeatureTableRow{
+					{Cells: []string{"Matter Fabric", "Commission devices into a customer-selected Matter fabric while preserving Realtek app and cloud workflows where needed.", "Fabric credentials, controller role, and household UX stay aligned with the chosen Matter ecosystem.", "Products that need standards-based smart home interoperability across ecosystems."}},
+					{Cells: []string{"Voice assistants", "Use cloud-to-cloud or skill/action integrations to expose device traits to Alexa or Google Assistant.", "Assistant platforms own the voice UX while product teams keep device identity, support flows, and roadmap control.", "Consumer products that need branded apps plus familiar voice control."}},
+					{Cells: []string{"REST APIs", "Expose authenticated HTTPS endpoints for device, user, and operations workflows in external systems.", "API contracts, auth policy, and lifecycle governance stay under the product team's platform boundary.", "Partner portals, support tooling, ERP/CRM integration, and enterprise admin workflows."}},
+					{Cells: []string{"MQTT over TLS", "Publish telemetry and command streams over policy-scoped topics with TLS-protected client authentication.", "Broker policy, topic ownership, and retention rules stay inside the selected platform deployment model.", "Operational telemetry, event streaming, and near-real-time orchestration."}},
+					{Cells: []string{"Webhooks", "Push signed lifecycle and alert events into downstream SaaS or internal automation.", "Receiving systems own the follow-up workflow while Connect+ owns the event contract and delivery path.", "Ticketing, notifications, analytics ingestion, and fulfillment triggers."}},
+				},
+			},
 		},
 	}
 }

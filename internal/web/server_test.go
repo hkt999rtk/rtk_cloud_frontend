@@ -276,6 +276,39 @@ func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
 	}
 }
 
+func TestIntegrationsFeatureCoversMatterAndEcosystemPaths(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features/integrations", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"Position Realtek products inside the customer&#39;s chosen ecosystem",
+		"Describe how devices can participate in a Matter Fabric while still keeping Realtek app, cloud, and support flows in scope where products need them.",
+		"Cover Alexa and Google Assistant paths for products that need voice control, routine support, and ecosystem discovery alongside the branded app experience.",
+		"Document REST APIs for authenticated product, support, and operations workflows that need request-response access to platform state.",
+		"Position MQTT over TLS for policy-scoped telemetry, near-real-time command paths, and event fan-out into downstream infrastructure.",
+		"Use webhooks for signed lifecycle, alert, and workflow events so CRM, ticketing, analytics, and fulfillment systems can react without polling.",
+		"Choose the ecosystem contract that fits the product",
+		"<th scope=\"col\">Path</th>",
+		"Matter Fabric",
+		"Voice assistants",
+		"MQTT over TLS",
+		"Webhooks",
+		"without claiming every protocol surface is already live in this repository",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
 func TestRobotsTxtIncludesSitemap(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
