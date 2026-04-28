@@ -142,6 +142,28 @@ func TestHomeMetadataIncludesSocialTags(t *testing.T) {
 	}
 }
 
+func TestLayoutIncludesSkipLinkToMainContent(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		`<a class="skip-link" href="#main-content">Skip to main content</a>`,
+		`<main id="main-content" tabindex="-1">`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
 func TestFeatureMetadataUsesFeatureSummary(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
@@ -299,6 +321,48 @@ func TestInvalidContactPostDoesNotStoreLead(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "Name is required") {
 		t.Fatalf("response does not contain validation error: %s", rec.Body.String())
+	}
+}
+
+func TestInvalidContactPostUsesAccessibleErrorMarkup(t *testing.T) {
+	store := &memoryLeadStore{}
+	handler := testServer(t, store)
+
+	form := url.Values{
+		"name":     {""},
+		"company":  {"Realtek"},
+		"email":    {"not-an-email"},
+		"interest": {""},
+	}
+	req := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		`<div class="form-error-summary" role="alert" aria-labelledby="contact-errors-title" tabindex="-1">`,
+		`<a href="#contact-name">Name is required.</a>`,
+		`<a href="#contact-email">Enter a valid email address.</a>`,
+		`<a href="#contact-interest">Select an area of interest.</a>`,
+		`id="contact-name"`,
+		`aria-describedby="contact-name-error"`,
+		`id="contact-email"`,
+		`aria-describedby="contact-email-error"`,
+		`id="contact-interest"`,
+		`aria-describedby="contact-interest-error"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+	if strings.Count(body, `aria-invalid="true"`) != 3 {
+		t.Fatalf("response should flag three invalid fields: %s", body)
 	}
 }
 

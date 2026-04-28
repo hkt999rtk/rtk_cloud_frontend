@@ -1,4 +1,10 @@
 {{define "content"}}
+{{$formError := index .Errors "form"}}
+{{$nameError := index .Errors "name"}}
+{{$companyError := index .Errors "company"}}
+{{$emailError := index .Errors "email"}}
+{{$interestError := index .Errors "interest"}}
+{{$messageError := index .Errors "message"}}
 <section class="page-hero compact">
   <p class="eyebrow">Contact</p>
   <h1>Register interest in Realtek Connect+.</h1>
@@ -21,41 +27,63 @@
     </div>
     {{else}}
     <form method="post" action="/contact" novalidate>
-      {{with index .Errors "form"}}<p class="form-error" role="alert">{{.}}</p>{{end}}
+      {{if .Errors}}
+      <div class="form-error-summary" role="alert" aria-labelledby="contact-errors-title" tabindex="-1">
+        <p id="contact-errors-title">Please review the details below before submitting.</p>
+        <ul>
+          {{with $formError}}<li>{{.}}</li>{{end}}
+          {{with $nameError}}<li><a href="#contact-name">{{.}}</a></li>{{end}}
+          {{with $companyError}}<li><a href="#contact-company">{{.}}</a></li>{{end}}
+          {{with $emailError}}<li><a href="#contact-email">{{.}}</a></li>{{end}}
+          {{with $interestError}}<li><a href="#contact-interest">{{.}}</a></li>{{end}}
+          {{with $messageError}}<li><a href="#contact-message">{{.}}</a></li>{{end}}
+        </ul>
+      </div>
+      {{end}}
       <div class="honeypot-field" aria-hidden="true">
         <label for="contact-website">Website</label>
         <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off">
       </div>
-      <label>
-        <span>Name</span>
-        {{with index .Errors "name"}}<em>{{.}}</em>{{end}}
-        <input name="name" value="{{.Form.Name}}" autocomplete="name" maxlength="120" required>
-      </label>
-      <label>
-        <span>Company</span>
-        {{with index .Errors "company"}}<em>{{.}}</em>{{end}}
-        <input name="company" value="{{.Form.Company}}" autocomplete="organization" maxlength="160">
-      </label>
-      <label>
-        <span>Email</span>
-        {{with index .Errors "email"}}<em>{{.}}</em>{{end}}
-        <input name="email" value="{{.Form.Email}}" type="email" autocomplete="email" maxlength="254" required>
-      </label>
-      <label>
-        <span>Interest</span>
-        {{with index .Errors "interest"}}<em>{{.}}</em>{{end}}
-        <select name="interest" required>
+      <div class="form-field">
+        <label for="contact-name">
+          <span>Name</span>
+          {{with $nameError}}<em id="contact-name-error">{{.}}</em>{{end}}
+        </label>
+        <input id="contact-name" name="name" value="{{.Form.Name}}" autocomplete="name" maxlength="120" required {{if $nameError}}aria-invalid="true" aria-describedby="contact-name-error"{{end}}>
+      </div>
+      <div class="form-field">
+        <label for="contact-company">
+          <span>Company</span>
+          {{with $companyError}}<em id="contact-company-error">{{.}}</em>{{end}}
+        </label>
+        <input id="contact-company" name="company" value="{{.Form.Company}}" autocomplete="organization" maxlength="160" {{if $companyError}}aria-invalid="true" aria-describedby="contact-company-error"{{end}}>
+      </div>
+      <div class="form-field">
+        <label for="contact-email">
+          <span>Email</span>
+          {{with $emailError}}<em id="contact-email-error">{{.}}</em>{{end}}
+        </label>
+        <input id="contact-email" name="email" value="{{.Form.Email}}" type="email" autocomplete="email" maxlength="254" required {{if $emailError}}aria-invalid="true" aria-describedby="contact-email-error"{{end}}>
+      </div>
+      <div class="form-field">
+        <label for="contact-interest">
+          <span>Interest</span>
+          {{with $interestError}}<em id="contact-interest-error">{{.}}</em>{{end}}
+        </label>
+        <select id="contact-interest" name="interest" required {{if $interestError}}aria-invalid="true" aria-describedby="contact-interest-error"{{end}}>
           <option value="">Select a service</option>
           {{range .Features}}
           <option value="{{.Title}}" {{if eq $.Form.Interest .Title}}selected{{end}}>{{.Title}}</option>
           {{end}}
         </select>
-      </label>
-      <label>
-        <span>Message</span>
-        {{with index .Errors "message"}}<em>{{.}}</em>{{end}}
-        <textarea name="message" rows="5" maxlength="2000">{{.Form.Message}}</textarea>
-      </label>
+      </div>
+      <div class="form-field">
+        <label for="contact-message">
+          <span>Message</span>
+          {{with $messageError}}<em id="contact-message-error">{{.}}</em>{{end}}
+        </label>
+        <textarea id="contact-message" name="message" rows="5" maxlength="2000" {{if $messageError}}aria-invalid="true" aria-describedby="contact-message-error"{{end}}>{{.Form.Message}}</textarea>
+      </div>
       <button class="button primary" type="submit">Submit Request</button>
     </form>
     {{end}}
