@@ -19,7 +19,7 @@ Implemented today:
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
-- Feature overview and detail pages for Provision, OTA, Fleet Management, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail.
+- Feature overview and detail pages for Provision, OTA, Fleet Management, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail and a structured private deployment comparison story.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
@@ -80,7 +80,7 @@ Realtek Connect+ presents the following ESP RainMaker-aligned capabilities:
 - User Management: sign up, sign in, OTP verification, third-party login, password recovery/change, and account deletion framed as platform capabilities rather than current website authentication flows.
 - App SDK: iOS/Android SDK, sample app, rebrand/customize path, push notifications, app publishing path.
 - Insights: activation statistics, firmware distribution, logs, crash reports, reboot reasons, RSSI/memory metrics.
-- Private Cloud: enterprise deployment, data ownership, custom domain, cloud customization, commercial support.
+- Private Cloud: public evaluation versus private commercial deployment, data ownership, custom domain, regional placement, upgrade path, deployment FAQ, and commercial support positioning.
 - Integrations: Alexa, Google Assistant, Matter, REST API, MQTT over TLS, webhooks.
 
 ## RainMaker Parity Gap
@@ -102,7 +102,7 @@ Status values:
 | End-user Smart Home Features | Planned | Add remote control, local control, scheduling, scenes, grouping, node sharing, push notifications, alerts, and mobile user workflows. |
 | Mobile App SDK | Content Partial | Add iOS SDK, Android SDK, sample app, customization/rebrand, push notification, app store publishing, widgets/settings, and app developer roadmap. |
 | Insights | Content Partial | Add logs, crash reports, reboot reasons, custom metrics, RSSI/memory metrics, firmware distribution, support workflows, and dashboard visuals. |
-| Private Cloud / Deployment | Content Partial | Add public evaluation vs private commercial deployment, data ownership, custom domain, regional deployment, deployment FAQ, upgrade path, and production support story. |
+| Private Cloud / Deployment | Implemented | `/features/private-cloud` now compares public evaluation, managed private deployment, and customer-operated private regions with explicit coverage for data ownership, custom domains, regional placement, upgrade path, deployment FAQ, and production support boundaries. |
 | Matter / Ecosystem Integrations | Content Partial | Add Matter ecosystem positioning, Matter Fabric concept, voice assistants, MQTT over TLS, REST APIs, webhooks, cloud-to-cloud integration, and protocol diagrams. |
 | Developer Docs / APIs / SDKs / CLI | Content Partial | Docs portal structure now exists across Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes; deeper implementation detail and reference content still needs follow-on work. |
 | SEO / Launch Readiness | Content Partial | Metadata, sitemap, and robots now exist; remaining work includes accessibility pass, visual smoke checks, deployment packaging, and CI. |
