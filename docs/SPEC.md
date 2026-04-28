@@ -52,6 +52,9 @@ Routes:
 - `GET /features/{slug}`: feature detail pages.
 - `GET /contact`: contact / early access registration form.
 - `POST /contact`: validate and store a lead in SQLite.
+- `GET /healthz`: plain-text health check.
+- `GET /admin/leads`: protected lead review page, enabled only when `ADMIN_TOKEN` is set.
+- `GET /admin/leads.csv`: protected CSV export, enabled only when `ADMIN_TOKEN` is set.
 - `GET /static/...`: CSS and asset files.
 
 Feature slugs:
@@ -68,6 +71,7 @@ Environment:
 
 - `PORT`, default `8080`.
 - `DATABASE_PATH`, default `data/connectplus.db`.
+- `ADMIN_TOKEN`, optional. When set, enables protected lead review and CSV export.
 
 Commands:
 
@@ -114,6 +118,7 @@ Contact form fields:
 - Unknown feature slug returns 404.
 - Valid contact POST writes SQLite and shows success.
 - Invalid contact POST shows validation errors and does not write a lead.
+- Admin lead routes require `ADMIN_TOKEN`; unauthorized requests return 401, disabled admin routes return 404.
 - Manual browser checks verify desktop/mobile layout, Realtek-style white + teal palette, generated image loading, and no npm/React/Tailwind dependency.
 
 ## First-Version Limits

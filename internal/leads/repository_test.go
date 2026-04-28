@@ -37,4 +37,18 @@ func TestRepositoryInsert(t *testing.T) {
 	if count != 1 {
 		t.Fatalf("count = %d, want 1", count)
 	}
+
+	records, err := repo.List(context.Background(), 10)
+	if err != nil {
+		t.Fatalf("list leads: %v", err)
+	}
+	if len(records) != 1 {
+		t.Fatalf("records = %d, want 1", len(records))
+	}
+	if records[0].Email != "kevin@example.com" {
+		t.Fatalf("email = %q, want kevin@example.com", records[0].Email)
+	}
+	if records[0].CreatedAt.IsZero() {
+		t.Fatal("created_at was not parsed")
+	}
 }
