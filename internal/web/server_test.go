@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"realtek-connect/internal/docs"
 	"realtek-connect/internal/features"
 	"realtek-connect/internal/leads"
 )
@@ -57,7 +58,10 @@ func testServerWithAdminToken(t *testing.T, store LeadStore, adminToken string) 
 
 func TestRoutesReturnOK(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
-	paths := []string{"/", "/features", "/contact", "/healthz"}
+	paths := []string{"/", "/docs", "/features", "/contact", "/healthz"}
+	for _, section := range docs.All() {
+		paths = append(paths, "/docs/"+section.Slug)
+	}
 	for _, feature := range features.All() {
 		paths = append(paths, "/features/"+feature.Slug)
 	}
@@ -76,6 +80,18 @@ func TestUnknownFeatureReturnsNotFound(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/unknown", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404", rec.Code)
+	}
+}
+
+func TestUnknownDocReturnsNotFound(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/docs/unknown", nil)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 

@@ -16,6 +16,7 @@ Implemented today:
 - Server-rendered pages using `html/template`.
 - Static CSS with a Realtek-style white, deep navy, and blue-green/teal visual system.
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
+- Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
 - Feature overview and detail pages for Provision, OTA, Fleet Management, App SDK, Insights, Private Cloud, and Integrations.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
@@ -25,6 +26,8 @@ Implemented today:
 Current routes:
 
 - `GET /`
+- `GET /docs`
+- `GET /docs/{slug}`
 - `GET /features`
 - `GET /features/{slug}`
 - `GET /contact`
@@ -49,7 +52,7 @@ Color system:
 
 UI system:
 
-- Header: Realtek logo slot or text wordmark, Connect+ brand, Features, Architecture, Contact.
+- Header: Realtek logo slot or text wordmark, Connect+ brand, Docs, Features, Architecture, Contact.
 - Buttons: solid teal primary and restrained outline secondary.
 - Cards: 6-8px radius, thin border, minimal shadow.
 - Hero: direct product positioning with a platform architecture poster image.
@@ -94,7 +97,7 @@ Status values:
 | Insights | Content Partial | Add logs, crash reports, reboot reasons, custom metrics, RSSI/memory metrics, firmware distribution, support workflows, and dashboard visuals. |
 | Private Cloud / Deployment | Content Partial | Add public evaluation vs private commercial deployment, data ownership, custom domain, regional deployment, deployment FAQ, upgrade path, and production support story. |
 | Matter / Ecosystem Integrations | Content Partial | Add Matter ecosystem positioning, Matter Fabric concept, voice assistants, MQTT over TLS, REST APIs, webhooks, cloud-to-cloud integration, and protocol diagrams. |
-| Developer Docs / APIs / SDKs / CLI | Planned | Add docs portal structure covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes. |
+| Developer Docs / APIs / SDKs / CLI | Content Partial | Docs portal structure now exists across Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes; deeper implementation detail and reference content still needs follow-on work. |
 | SEO / Launch Readiness | Planned | Add metadata, sitemap, robots, accessibility pass, visual smoke checks, deployment packaging, and CI. |
 | Real IoT Cloud Operations | Out of Scope for website v1 | The public website will describe platform capabilities; it will not implement real device provisioning, OTA delivery, user auth, or telemetry ingestion in v1. |
 
@@ -110,6 +113,8 @@ Status values:
 Routes:
 
 - `GET /`: homepage.
+- `GET /docs`: developer/documentation portal landing page.
+- `GET /docs/{slug}`: developer/documentation section detail pages.
 - `GET /features`: feature overview.
 - `GET /features/{slug}`: feature detail pages.
 - `GET /contact`: contact / early access registration form.
@@ -128,6 +133,17 @@ Feature slugs:
 - `insights`
 - `private-cloud`
 - `integrations`
+
+Documentation slugs:
+
+- `product-overview`
+- `development`
+- `apis`
+- `sdks`
+- `firmware`
+- `cli`
+- `deployment`
+- `release-notes`
 
 Environment:
 
