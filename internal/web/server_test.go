@@ -664,11 +664,11 @@ func TestOversizedContactPostDoesNotStoreLead(t *testing.T) {
 	handler := testServer(t, store)
 
 	form := url.Values{
-		"name":     {strings.Repeat("N", contactNameMaxLength+1)},
-		"company":  {strings.Repeat("C", contactCompanyMaxLength+1)},
+		"name":     {strings.Repeat("N", leads.NameMaxLength+1)},
+		"company":  {strings.Repeat("C", leads.CompanyMaxLength+1)},
 		"email":    {"kevin@example.com"},
 		"interest": {"OTA"},
-		"message":  {strings.Repeat("M", contactMessageMaxLength+1)},
+		"message":  {strings.Repeat("M", leads.MessageMaxLength+1)},
 	}
 	req := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")

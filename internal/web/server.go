@@ -71,14 +71,7 @@ type contactForm struct {
 	Website  string
 }
 
-const (
-	contactNameMaxLength     = 120
-	contactCompanyMaxLength  = 160
-	contactEmailMaxLength    = 254
-	contactInterestMaxLength = 120
-	contactMessageMaxLength  = 2000
-	adminLeadPageSize        = 25
-)
+const adminLeadPageSize = 25
 
 type adminLeadFilters struct {
 	Email     string
@@ -475,29 +468,23 @@ func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func validateContact(form contactForm) map[string]string {
-	errors := map[string]string{}
-	if form.Name == "" {
-		errors["name"] = "Name is required."
-	} else if len(form.Name) > contactNameMaxLength {
-		errors["name"] = "Name must be 120 characters or fewer."
+	errors := make(map[string]string)
+	for field, message := range leads.Validate(leads.Lead{
+		Name:     form.Name,
+		Company:  form.Company,
+		Email:    form.Email,
+		Interest: form.Interest,
+		Message:  form.Message,
+	}) {
+		errors[field] = message
 	}
-	if form.Email == "" {
-		errors["email"] = "Email is required."
-	} else if !emailPattern.MatchString(form.Email) {
+
+	if form.Email != "" && !emailPattern.MatchString(form.Email) {
 		errors["email"] = "Enter a valid email address."
-	} else if len(form.Email) > contactEmailMaxLength {
-		errors["email"] = "Email must be 254 characters or fewer."
 	}
-	if form.Interest == "" {
-		errors["interest"] = "Select an area of interest."
-	} else if len(form.Interest) > contactInterestMaxLength {
-		errors["interest"] = "Interest must be 120 characters or fewer."
-	}
-	if len(form.Company) > contactCompanyMaxLength {
-		errors["company"] = "Company must be 160 characters or fewer."
-	}
-	if len(form.Message) > contactMessageMaxLength {
-		errors["message"] = "Message must be 2000 characters or fewer."
+
+	if len(errors) == 0 {
+		return nil
 	}
 	return errors
 }
