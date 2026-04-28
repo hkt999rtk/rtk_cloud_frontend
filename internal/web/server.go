@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/csv"
 	"html/template"
+	"net"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -34,6 +35,7 @@ type Server struct {
 	staticDir    string
 	leadStore    LeadStore
 	adminToken   string
+	contactLimit *submissionRateLimiter
 }
 
 type pageData struct {
@@ -63,7 +65,16 @@ type contactForm struct {
 	Email    string
 	Interest string
 	Message  string
+	Website  string
 }
+
+const (
+	contactNameMaxLength     = 120
+	contactCompanyMaxLength  = 160
+	contactEmailMaxLength    = 254
+	contactInterestMaxLength = 120
+	contactMessageMaxLength  = 2000
+)
 
 func NewServer(cfg Config) (*Server, error) {
 	if cfg.TemplatesDir == "" {
@@ -77,6 +88,7 @@ func NewServer(cfg Config) (*Server, error) {
 		staticDir:    cfg.StaticDir,
 		leadStore:    cfg.LeadStore,
 		adminToken:   cfg.AdminToken,
+		contactLimit: newSubmissionRateLimiter(5, 10*time.Minute),
 	}, nil
 }
 
@@ -344,6 +356,21 @@ func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
 		Email:    strings.TrimSpace(r.FormValue("email")),
 		Interest: strings.TrimSpace(r.FormValue("interest")),
 		Message:  strings.TrimSpace(r.FormValue("message")),
+		Website:  strings.TrimSpace(r.FormValue("website")),
+	}
+
+	if isSpamContact(form) {
+		data := s.basePageData(
+			r,
+			"Contact | Realtek Connect+",
+			"Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
+		)
+		data.Form = form
+		data.Errors = map[string]string{
+			"form": "Request could not be processed.",
+		}
+		s.render(w, http.StatusBadRequest, "contact.html", data)
+		return
 	}
 
 	errors := validateContact(form)
@@ -356,6 +383,20 @@ func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
 		data.Form = form
 		data.Errors = errors
 		s.render(w, http.StatusBadRequest, "contact.html", data)
+		return
+	}
+
+	if s.contactLimit != nil && !s.contactLimit.Allow(contactSubmissionKey(r)) {
+		data := s.basePageData(
+			r,
+			"Contact | Realtek Connect+",
+			"Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
+		)
+		data.Form = form
+		data.Errors = map[string]string{
+			"form": "Too many requests from this address. Please wait a few minutes and try again.",
+		}
+		s.render(w, http.StatusTooManyRequests, "contact.html", data)
 		return
 	}
 
@@ -389,19 +430,57 @@ func validateContact(form contactForm) map[string]string {
 	errors := map[string]string{}
 	if form.Name == "" {
 		errors["name"] = "Name is required."
+	} else if len(form.Name) > contactNameMaxLength {
+		errors["name"] = "Name must be 120 characters or fewer."
 	}
 	if form.Email == "" {
 		errors["email"] = "Email is required."
 	} else if !emailPattern.MatchString(form.Email) {
 		errors["email"] = "Enter a valid email address."
+	} else if len(form.Email) > contactEmailMaxLength {
+		errors["email"] = "Email must be 254 characters or fewer."
 	}
 	if form.Interest == "" {
 		errors["interest"] = "Select an area of interest."
+	} else if len(form.Interest) > contactInterestMaxLength {
+		errors["interest"] = "Interest must be 120 characters or fewer."
+	}
+	if len(form.Company) > contactCompanyMaxLength {
+		errors["company"] = "Company must be 160 characters or fewer."
+	}
+	if len(form.Message) > contactMessageMaxLength {
+		errors["message"] = "Message must be 2000 characters or fewer."
 	}
 	return errors
 }
 
 var emailPattern = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
+
+func isSpamContact(form contactForm) bool {
+	return form.Website != ""
+}
+
+func contactSubmissionKey(r *http.Request) string {
+	if forwardedFor := strings.TrimSpace(r.Header.Get("X-Forwarded-For")); forwardedFor != "" {
+		parts := strings.Split(forwardedFor, ",")
+		if len(parts) > 0 {
+			if value := strings.TrimSpace(parts[0]); value != "" {
+				return value
+			}
+		}
+	}
+	if realIP := strings.TrimSpace(r.Header.Get("X-Real-IP")); realIP != "" {
+		return realIP
+	}
+	host, _, err := net.SplitHostPort(strings.TrimSpace(r.RemoteAddr))
+	if err == nil && host != "" {
+		return host
+	}
+	if value := strings.TrimSpace(r.RemoteAddr); value != "" {
+		return value
+	}
+	return "unknown"
+}
 
 func (s *Server) render(w http.ResponseWriter, status int, name string, data pageData) {
 	files := []string{
