@@ -46,7 +46,7 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) Init() error {
-	_, err := r.db.Exec(`
+	if _, err := r.db.Exec(`
 CREATE TABLE IF NOT EXISTS leads (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -55,19 +55,36 @@ CREATE TABLE IF NOT EXISTS leads (
   interest TEXT NOT NULL,
   message TEXT,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);`)
-	return err
+);`); err != nil {
+		return err
+	}
+
+	for _, statement := range []string{
+		leadValidationTriggerSQL("leads_validate_insert", "INSERT"),
+		leadValidationTriggerSQL("leads_validate_update", "UPDATE"),
+	} {
+		if _, err := r.db.Exec(statement); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (r *Repository) Insert(ctx context.Context, lead Lead) error {
+	lead = Normalize(lead)
+	if validationErrs := Validate(lead); validationErrs != nil {
+		return validationErrs
+	}
+
 	_, err := r.db.ExecContext(ctx, `
 INSERT INTO leads (name, company, email, interest, message)
 VALUES (?, ?, ?, ?, ?)`,
-		strings.TrimSpace(lead.Name),
-		strings.TrimSpace(lead.Company),
-		strings.TrimSpace(lead.Email),
-		strings.TrimSpace(lead.Interest),
-		strings.TrimSpace(lead.Message),
+		lead.Name,
+		lead.Company,
+		lead.Email,
+		lead.Interest,
+		lead.Message,
 	)
 	return err
 }
@@ -182,4 +199,23 @@ func parseSQLiteTime(value string) time.Time {
 		}
 	}
 	return time.Time{}
+}
+
+func leadValidationTriggerSQL(name, operation string) string {
+	return `
+CREATE TRIGGER IF NOT EXISTS ` + name + `
+BEFORE ` + operation + ` ON leads
+FOR EACH ROW
+BEGIN
+  SELECT CASE
+    WHEN length(trim(COALESCE(NEW.name, ''))) = 0 THEN RAISE(ABORT, 'lead name is required')
+    WHEN length(trim(COALESCE(NEW.name, ''))) > 120 THEN RAISE(ABORT, 'lead name exceeds 120 characters')
+    WHEN length(trim(COALESCE(NEW.company, ''))) > 160 THEN RAISE(ABORT, 'lead company exceeds 160 characters')
+    WHEN length(trim(COALESCE(NEW.email, ''))) = 0 THEN RAISE(ABORT, 'lead email is required')
+    WHEN length(trim(COALESCE(NEW.email, ''))) > 254 THEN RAISE(ABORT, 'lead email exceeds 254 characters')
+    WHEN length(trim(COALESCE(NEW.interest, ''))) = 0 THEN RAISE(ABORT, 'lead interest is required')
+    WHEN length(trim(COALESCE(NEW.interest, ''))) > 120 THEN RAISE(ABORT, 'lead interest exceeds 120 characters')
+    WHEN length(trim(COALESCE(NEW.message, ''))) > 2000 THEN RAISE(ABORT, 'lead message exceeds 2000 characters')
+  END;
+END;`
 }
