@@ -106,7 +106,7 @@ Status values:
 | Private Cloud / Deployment | Implemented | `/features/private-cloud` now compares public evaluation, managed private deployment, and customer-operated private regions with explicit coverage for data ownership, custom domains, regional placement, upgrade path, deployment FAQ, and production support boundaries. |
 | Matter / Ecosystem Integrations | Implemented | `/features/integrations` now covers Matter Fabric positioning, voice assistants, MQTT over TLS, REST APIs, webhooks, and a structured integration-path comparison without promising unsupported live services. |
 | Developer Docs / APIs / SDKs / CLI | Content Partial | Docs portal structure now exists across Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes; deeper implementation detail and reference content still needs follow-on work. |
-| SEO / Launch Readiness | Content Partial | Metadata, sitemap, and robots now exist; remaining work includes accessibility pass, visual smoke checks, deployment packaging, and CI. |
+| SEO / Launch Readiness | Content Partial | Metadata, sitemap, robots, and homepage visual smoke checks now exist; remaining work is broader launch polish such as expanded product visuals plus final parity/documentation close-out. |
 | Real IoT Cloud Operations | Out of Scope for website v1 | The public website will describe platform capabilities; it will not implement real device provisioning, OTA delivery, user auth, or telemetry ingestion in v1. |
 
 ## Website Completion Roadmap
@@ -230,7 +230,8 @@ Contact form fields:
 - Valid contact POST writes SQLite and shows success.
 - Invalid contact POST shows validation errors and does not write a lead.
 - Admin lead routes require `ADMIN_TOKEN`; unauthorized requests return 401, disabled admin routes return 404.
-- Manual browser checks verify desktop/mobile layout, Realtek-style white + teal palette, generated image loading, and no npm/React/Tailwind dependency.
+- `go run ./cmd/visual-smoke`
+- The visual smoke command checks homepage desktop/mobile layout, verifies the hero image loads, and fails on horizontal overflow without adding npm dependencies.
 
 ## Definition of Done
 
@@ -471,6 +472,11 @@ Acceptance criteria:
 - Check homepage desktop and mobile widths.
 - Verify hero image loads and no horizontal overflow.
 - Avoid adding npm project dependencies.
+
+Implementation notes:
+
+- `go run ./cmd/visual-smoke` starts the existing Go-rendered server in-process by default and drives local Chrome headlessly for desktop/mobile homepage checks.
+- The command can also target an already running server with `-base-url`.
 
 ## First-Version Limits
 
