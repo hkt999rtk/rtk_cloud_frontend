@@ -9,6 +9,28 @@ type Feature struct {
 	Highlights   []string
 	Capabilities []string
 	Outcomes     []string
+	Sections     []FeatureSection
+	Table        FeatureTable
+}
+
+type FeatureSection struct {
+	Eyebrow string
+	Title   string
+	Intro   string
+	Items   []string
+	Accent  bool
+}
+
+type FeatureTable struct {
+	Eyebrow string
+	Title   string
+	Intro   string
+	Columns []string
+	Rows    []FeatureTableRow
+}
+
+type FeatureTableRow struct {
+	Cells []string
 }
 
 func All() []Feature {
@@ -27,11 +49,56 @@ func All() []Feature {
 			Slug:         "ota",
 			Title:        "OTA",
 			Kicker:       "Ship firmware updates with rollout control.",
-			Summary:      "Upload firmware, create rollout campaigns, monitor jobs, and protect devices with version validation.",
-			Description:  "OTA is presented as a full firmware lifecycle service: binaries are registered, campaigns are targeted to devices or groups, jobs can be monitored or cancelled, and firmware-side checks help prevent incorrect images from being applied.",
-			Highlights:   []string{"Immediate, scheduled, and user-controlled rollout modes", "Campaign status tracking and archive flow", "Project and version validation on device"},
-			Capabilities: []string{"Firmware binary registration", "Targeting by group, model, or firmware version", "Job progress, cancellation, and history"},
-			Outcomes:     []string{"Lower maintenance cost", "Safer staged rollouts", "Recover faster from firmware issues"},
+			Summary:      "Upload firmware, extract release metadata, target staged rollouts, and monitor dynamic OTA jobs with policy-level safeguards.",
+			Description:  "OTA is positioned as a production firmware operations surface rather than a simple update button. Teams register firmware packages, review extracted version and model metadata, define rollout policies, and watch job progress from pilot cohorts through archive-ready release history.",
+			Highlights:   []string{"Firmware upload pipeline with extracted version, model, and release metadata", "Version, model, region, and cohort targeting for staged campaigns", "Immediate, scheduled, user-controlled, and time-window rollout modes"},
+			Capabilities: []string{"Dynamic OTA policies for always-on or intermittently connected fleets", "Per-job status, device outcomes, cancellation, and archive history", "Compatibility validation and operator approvals before rollout"},
+			Outcomes:     []string{"Lower firmware support cost", "Reduce fleet-wide regression risk", "Coordinate releases across consumer and commercial deployments"},
+			Sections: []FeatureSection{
+				{
+					Eyebrow: "Workflow",
+					Title:   "From signed image upload to job execution",
+					Intro:   "The OTA page now describes the full release workflow product teams expect before a binary reaches devices.",
+					Items: []string{
+						"Upload signed firmware images and extract embedded project, version, model, checksum, and release-note metadata.",
+						"Attach rollout notes, mandatory or optional install policy, and maintenance-window guidance before approval.",
+						"Create job detail views that show pending, in-progress, succeeded, cancelled, and failed device outcomes by campaign wave.",
+					},
+				},
+				{
+					Eyebrow: "Targeting",
+					Title:   "Match each rollout to the right fleet slice",
+					Intro:   "Campaign definition is described as an operator workflow rather than a live cloud implementation promise.",
+					Items: []string{
+						"Target by product family, hardware model, current firmware version, customer tier, region, or support cohort.",
+						"Blend pilot cohorts with staged expansion so operators can start narrow, inspect telemetry, and widen safely.",
+						"Use dynamic OTA rules to keep offline devices eligible for the latest approved package when they reconnect.",
+					},
+				},
+				{
+					Eyebrow: "Controls",
+					Title:   "Safety checks and release operations",
+					Intro:   "Operational controls stay explicit about website scope while still showing a credible release-management story.",
+					Items: []string{
+						"Validate project and version compatibility before devices accept a package.",
+						"Cancel active waves and archive completed campaigns without losing audit history.",
+						"Retain operator-visible status, retry intent, and exception handling notes for support and QA teams.",
+					},
+					Accent: true,
+				},
+			},
+			Table: FeatureTable{
+				Eyebrow: "Rollout Strategies",
+				Title:   "Choose the delivery mode that fits the release",
+				Intro:   "Realtek Connect+ describes rollout modes as policy templates. Dynamic OTA keeps device eligibility aligned with the latest approved campaign even when endpoints reconnect later.",
+				Columns: []string{"Strategy", "Operator control", "Targeting pattern", "Best fit"},
+				Rows: []FeatureTableRow{
+					{Cells: []string{"Immediate", "Launch now and monitor wave status in real time.", "Urgent hotfixes across a narrow pilot or the whole eligible fleet.", "Critical security patches or rapid rollback replacements."}},
+					{Cells: []string{"Scheduled", "Approve once, then release during a defined maintenance window.", "Region- or customer-specific batches timed for low-support hours.", "Planned feature releases and coordinated commercial deployments."}},
+					{Cells: []string{"User-controlled", "Notify users, keep the job pending, and let the app or device owner choose install timing.", "Consumer devices that must respect end-user availability and local context.", "Appliances and smart-home products where UX matters more than immediacy."}},
+					{Cells: []string{"Time-window", "Allow installs only inside approved hours while preserving campaign eligibility outside the window.", "Always-on fleets, retail estates, or shared environments with operational blackout periods.", "Commercial fleets that need policy-driven upgrades without overnight surprises."}},
+				},
+			},
 		},
 		{
 			Slug:         "fleet-management",
