@@ -53,13 +53,13 @@ The site uses a modern, minimal, direct enterprise style aligned with Realtek's 
 Color system:
 
 - Base: white and near-white surfaces.
-- Text: deep navy and charcoal.
-- Accent: Realtek-style blue-green / teal for buttons, links, icons, and highlights.
+- Text: Realtek-style charcoal and deep blue-gray.
+- Accent: official-site Realtek blue `#0068b7`, deep navigation blue `#035390`, and cyan highlight `#6dcedd` for buttons, links, icons, and highlights.
 - Secondary: pale blue-gray panels for architecture, feature detail, and contact surfaces.
 
 UI system:
 
-- Header: Realtek logo slot or text wordmark, Connect+ brand, Docs, Features, Architecture, Contact.
+- Header: Realtek official logo asset from `static/assets/realtek-logo.png`, Connect+ wordmark, Docs, Features, Architecture, Contact.
 - Buttons: solid teal primary and restrained outline secondary.
 - Cards: 6-8px radius, thin border, minimal shadow.
 - Hero: direct product positioning with a platform architecture poster image.
