@@ -19,7 +19,7 @@ Color system:
 
 UI system:
 
-- Header: Realtek logo slot or text wordmark, Connect+ brand, Features, Architecture, Contact.
+- Header: Realtek logo slot or text wordmark, Connect+ brand, Docs, Features, Architecture, Contact.
 - Buttons: solid teal primary and restrained outline secondary.
 - Cards: 6-8px radius, thin border, minimal shadow.
 - Hero: direct product positioning with a platform architecture poster image.
@@ -48,6 +48,8 @@ Realtek Connect+ presents the following ESP RainMaker-aligned capabilities:
 Routes:
 
 - `GET /`: homepage.
+- `GET /docs`: developer/documentation portal landing page.
+- `GET /docs/{slug}`: developer/documentation section detail pages.
 - `GET /features`: feature overview.
 - `GET /features/{slug}`: feature detail pages.
 - `GET /contact`: contact / early access registration form.
@@ -63,6 +65,17 @@ Feature slugs:
 - `insights`
 - `private-cloud`
 - `integrations`
+
+Documentation slugs:
+
+- `product-overview`
+- `development`
+- `apis`
+- `sdks`
+- `firmware`
+- `cli`
+- `deployment`
+- `release-notes`
 
 Environment:
 

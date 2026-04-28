@@ -1,0 +1,57 @@
+{{define "content"}}
+<section class="page-hero feature-detail">
+  <p class="eyebrow">{{.Doc.Kicker}}</p>
+  <h1>{{.Doc.Title}}</h1>
+  <p>{{.Doc.Description}}</p>
+  <div class="hero-actions">
+    <a class="button primary" href="/docs">Back to docs</a>
+    <a class="button secondary" href="/contact">Discuss implementation</a>
+  </div>
+</section>
+
+<section class="section detail-grid">
+  <article class="detail-panel">
+    <p class="eyebrow">Coverage</p>
+    <h2>What this section explains</h2>
+    <ul class="check-list">
+      {{range .Doc.Highlights}}
+      <li>{{.}}</li>
+      {{end}}
+    </ul>
+  </article>
+  <article class="detail-panel">
+    <p class="eyebrow">Expected outputs</p>
+    <h2>What teams should be able to leave with</h2>
+    <ul class="check-list">
+      {{range .Doc.Deliverables}}
+      <li>{{.}}</li>
+      {{end}}
+    </ul>
+  </article>
+  <article class="detail-panel accent-panel">
+    <p class="eyebrow">Primary audience</p>
+    <h2>Who should start here</h2>
+    <ul class="check-list">
+      {{range .Doc.Audience}}
+      <li>{{.}}</li>
+      {{end}}
+    </ul>
+  </article>
+</section>
+
+<section class="section doc-navigation">
+  <div class="section-heading">
+    <p class="eyebrow">Next sections</p>
+    <h2>Continue through the developer portal.</h2>
+  </div>
+  <div class="docs-entry-grid">
+    {{range .Docs}}
+    <a class="feature-card docs-card" href="/docs/{{.Slug}}">
+      <h3>{{.Title}}</h3>
+      <p>{{.Summary}}</p>
+      <span class="text-link">View section</span>
+    </a>
+    {{end}}
+  </div>
+</section>
+{{end}}

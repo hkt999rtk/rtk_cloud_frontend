@@ -303,6 +303,10 @@ p {
   color: var(--muted);
 }
 
+.feature-card li + li {
+  margin-top: 8px;
+}
+
 .text-link {
   margin-top: auto;
   font-weight: 780;
@@ -445,6 +449,34 @@ p {
   background: var(--bg-panel);
 }
 
+.docs-entry-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.docs-card {
+  min-height: 0;
+}
+
+.docs-card h2,
+.docs-card h3 {
+  margin-top: 8px;
+}
+
+.docs-card p {
+  margin-bottom: 18px;
+}
+
+.docs-hero {
+  max-width: 920px;
+}
+
+.docs-structure {
+  border-top: 1px solid var(--line);
+}
+
 form {
   display: grid;
   gap: 16px;
@@ -525,6 +557,7 @@ textarea:focus {
   }
 
   .feature-grid,
+  .docs-entry-grid,
   .use-case-list,
   .detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -571,6 +604,7 @@ textarea:focus {
   }
 
   .feature-grid,
+  .docs-entry-grid,
   .use-case-list,
   .detail-grid {
     grid-template-columns: 1fr;

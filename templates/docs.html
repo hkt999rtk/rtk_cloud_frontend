@@ -1,0 +1,54 @@
+{{define "content"}}
+<section class="page-hero docs-hero">
+  <p class="eyebrow">Developer docs</p>
+  <h1>Documentation entry points for cloud, firmware, app, and deployment teams.</h1>
+  <p>Realtek Connect+ now includes a server-rendered documentation portal structure covering platform overview, development, APIs, SDKs, firmware, CLI workflows, deployment, and release notes.</p>
+  <div class="hero-actions">
+    <a class="button primary" href="/contact">Talk to the platform team</a>
+    <a class="button secondary" href="/features/app-sdk">See app platform context</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">Portal structure</p>
+    <h2>Choose the track that matches your workstream.</h2>
+  </div>
+  <div class="docs-entry-grid">
+    {{range .Docs}}
+    <a class="feature-card docs-card tall" href="/docs/{{.Slug}}">
+      <p class="card-kicker">{{.Kicker}}</p>
+      <h2>{{.Title}}</h2>
+      <p>{{.Summary}}</p>
+      <ul>
+        {{range .Highlights}}
+        <li>{{.}}</li>
+        {{end}}
+      </ul>
+      <span class="text-link">Open section</span>
+    </a>
+    {{end}}
+  </div>
+</section>
+
+<section class="section docs-structure">
+  <div class="section-heading">
+    <p class="eyebrow">Why this matters</p>
+    <h2>Mirror the documentation surfaces teams expect before product launch.</h2>
+  </div>
+  <div class="use-case-list">
+    <article>
+      <h3>Shared platform narrative</h3>
+      <p>Give product, sales, and engineering stakeholders one place to understand lifecycle scope before implementation deep-dives.</p>
+    </article>
+    <article>
+      <h3>Workstream-specific depth</h3>
+      <p>Separate firmware, API, mobile SDK, deployment, and release concerns so each team can navigate directly to its implementation surface.</p>
+    </article>
+    <article>
+      <h3>Static first version</h3>
+      <p>Keep the docs portal compatible with the current Go templates and server-rendered architecture while leaving space for deeper follow-on content.</p>
+    </article>
+  </div>
+</section>
+{{end}}

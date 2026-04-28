@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"realtek-connect/internal/docs"
 	"realtek-connect/internal/features"
 	"realtek-connect/internal/leads"
 )
@@ -32,6 +33,8 @@ type Server struct {
 type pageData struct {
 	Title        string
 	CurrentPath  string
+	Docs         []docs.Section
+	Doc          docs.Section
 	Features     []features.Feature
 	Feature      features.Feature
 	Form         contactForm
@@ -66,6 +69,8 @@ func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(s.staticDir))))
 	mux.HandleFunc("/", s.handleHome)
+	mux.HandleFunc("/docs", s.handleDocs)
+	mux.HandleFunc("/docs/", s.handleDocDetail)
 	mux.HandleFunc("/features", s.handleFeatures)
 	mux.HandleFunc("/features/", s.handleFeatureDetail)
 	mux.HandleFunc("/contact", s.handleContact)
@@ -84,6 +89,52 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	s.render(w, http.StatusOK, "home.html", pageData{
 		Title:       "Realtek Connect+ | IoT Cloud Platform",
 		CurrentPath: r.URL.Path,
+		Docs:        docs.All(),
+		Features:    features.All(),
+	})
+}
+
+func (s *Server) handleDocs(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/docs" {
+		http.NotFound(w, r)
+		return
+	}
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+	s.render(w, http.StatusOK, "docs.html", pageData{
+		Title:       "Developer Docs | Realtek Connect+",
+		CurrentPath: r.URL.Path,
+		Docs:        docs.All(),
+		Features:    features.All(),
+	})
+}
+
+func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+
+	slug := strings.TrimPrefix(r.URL.Path, "/docs/")
+	slug = strings.Trim(slug, "/")
+	if slug == "" {
+		http.Redirect(w, r, "/docs", http.StatusSeeOther)
+		return
+	}
+
+	doc, ok := docs.BySlug(slug)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	s.render(w, http.StatusOK, "doc.html", pageData{
+		Title:       doc.Title + " | Realtek Connect+ Docs",
+		CurrentPath: r.URL.Path,
+		Docs:        docs.All(),
+		Doc:         doc,
 		Features:    features.All(),
 	})
 }
@@ -100,6 +151,7 @@ func (s *Server) handleFeatures(w http.ResponseWriter, r *http.Request) {
 	s.render(w, http.StatusOK, "features.html", pageData{
 		Title:       "Features | Realtek Connect+",
 		CurrentPath: r.URL.Path,
+		Docs:        docs.All(),
 		Features:    features.All(),
 	})
 }
@@ -126,6 +178,7 @@ func (s *Server) handleFeatureDetail(w http.ResponseWriter, r *http.Request) {
 	s.render(w, http.StatusOK, "feature.html", pageData{
 		Title:       feature.Title + " | Realtek Connect+",
 		CurrentPath: r.URL.Path,
+		Docs:        docs.All(),
 		Feature:     feature,
 		Features:    features.All(),
 	})
@@ -137,6 +190,7 @@ func (s *Server) handleContact(w http.ResponseWriter, r *http.Request) {
 		s.render(w, http.StatusOK, "contact.html", pageData{
 			Title:       "Contact | Realtek Connect+",
 			CurrentPath: r.URL.Path,
+			Docs:        docs.All(),
 			Features:    features.All(),
 		})
 	case http.MethodPost:
@@ -165,6 +219,7 @@ func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
 		s.render(w, http.StatusBadRequest, "contact.html", pageData{
 			Title:       "Contact | Realtek Connect+",
 			CurrentPath: r.URL.Path,
+			Docs:        docs.All(),
 			Features:    features.All(),
 			Form:        form,
 			Errors:      errors,
@@ -191,6 +246,7 @@ func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
 	s.render(w, http.StatusOK, "contact.html", pageData{
 		Title:        "Contact | Realtek Connect+",
 		CurrentPath:  r.URL.Path,
+		Docs:         docs.All(),
 		Features:     features.All(),
 		Success:      true,
 		SubmittedFor: form.Name,

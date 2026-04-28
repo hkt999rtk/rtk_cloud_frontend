@@ -92,6 +92,23 @@
   </div>
 </section>
 
+<section class="section docs-entry" id="docs">
+  <div class="section-heading">
+    <p class="eyebrow">Developer portal</p>
+    <h2>Give product, firmware, app, and cloud teams one documentation spine.</h2>
+  </div>
+  <div class="docs-entry-grid">
+    {{range .Docs}}
+    <a class="feature-card docs-card" href="/docs/{{.Slug}}">
+      <p class="card-kicker">{{.Kicker}}</p>
+      <h3>{{.Title}}</h3>
+      <p>{{.Summary}}</p>
+      <span class="text-link">Open section</span>
+    </a>
+    {{end}}
+  </div>
+</section>
+
 <section class="cta-band" id="contact">
   <div>
     <p class="eyebrow">Early access</p>
