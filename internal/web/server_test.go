@@ -188,6 +188,33 @@ func TestFeatureMetadataUsesFeatureSummary(t *testing.T) {
 	}
 }
 
+func TestUserManagementFeatureClarifiesPlatformScope(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features/user-management", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"User Management",
+		"sign up and sign in",
+		"One-time password verification",
+		"Third-party login and account-linking paths",
+		"Forgot-password, change-password, and session-management controls",
+		"Account deletion and retention workflows",
+		"This website does not expose end-user sign-in or account management flows today.",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
 func TestRobotsTxtIncludesSitemap(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
