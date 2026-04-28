@@ -276,6 +276,37 @@ func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
 	}
 }
 
+func TestAppSDKFeatureCoversMobileDeliveryPaths(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features/app-sdk", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"Deliver branded mobile apps without rebuilding the connected product stack",
+		"Cover shared onboarding, authentication, device control, and account-linking primitives through iOS and Android SDK layers instead of promising a full client framework in this repo.",
+		"Use a sample app to accelerate white-label or branded launches while preserving room for custom navigation, design systems, and product-specific device flows.",
+		"Plan push notifications around onboarding completion, shared-device events, OTA prompts, alerts, and support workflows that need deep links back into the branded app.",
+		"Coordinate bundle identifiers, signing assets, store metadata, review checklists, and staged rollout plans for both the App Store and Google Play.",
+		"Discuss App SDK",
+		"Choose the mobile delivery path that fits launch speed and brand control",
+		"<th scope=\"col\">Delivery path</th>",
+		"Rebranded starter app",
+		"Custom app on shared SDK",
+		"not a shipped mobile framework",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
 func TestIntegrationsFeatureCoversMatterAndEcosystemPaths(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 

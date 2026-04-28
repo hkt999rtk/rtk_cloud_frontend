@@ -19,7 +19,7 @@ Implemented today:
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
-- Feature overview and detail pages for Provision, OTA, Fleet Management, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
+- Feature overview and detail pages for Provision, OTA, Fleet Management, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured mobile app delivery comparison story, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
@@ -78,7 +78,7 @@ Realtek Connect+ presents the following ESP RainMaker-aligned capabilities:
 - OTA: firmware upload, campaign rollout, job status, cancel/archive, version validation, and force/normal/scheduled/user-controlled/time-window rollout modes.
 - Fleet Management: device registry, groups, metadata/tags, batch operations, timezone, device sharing.
 - User Management: sign up, sign in, OTP verification, third-party login, password recovery/change, and account deletion framed as platform capabilities rather than current website authentication flows.
-- App SDK: iOS/Android SDK, sample app, rebrand/customize path, push notifications, app publishing path.
+- App SDK: iOS/Android SDK layers, sample app and rebrand path, push notifications, app publishing path, and launch-readiness ownership boundaries.
 - Insights: activation statistics, firmware distribution, logs, crash reports, reboot reasons, RSSI/memory metrics.
 - Private Cloud: public evaluation versus private commercial deployment, data ownership, custom domain, regional placement, upgrade path, deployment FAQ, and commercial support positioning.
 - Integrations: Matter Fabric positioning, Alexa/Google Assistant paths, REST APIs, MQTT over TLS, webhooks, and cloud-to-cloud integration boundaries.
@@ -100,7 +100,7 @@ Status values:
 | Fleet Management / Admin Operations | Content Partial | Add node registration, certificate flow, device registry, groups, metadata, batch operations, node summary widgets, activation statistics, and admin console concept. |
 | User Management | Content Partial | Feature content now covers sign up, sign in, OTP verification, third-party login, forgot/change password, account deletion, and account lifecycle boundaries; follow-on work can add deeper support models, session behavior, and visual diagrams. |
 | End-user Smart Home Features | Planned | Add remote control, local control, scheduling, scenes, grouping, node sharing, push notifications, alerts, and mobile user workflows. |
-| Mobile App SDK | Content Partial | Add iOS SDK, Android SDK, sample app, customization/rebrand, push notification, app store publishing, widgets/settings, and app developer roadmap. |
+| Mobile App SDK | Implemented | `/features/app-sdk` now covers iOS and Android SDK layers, sample app and rebrand paths, push notifications, App Store/Google Play publishing guidance, and a structured delivery-path comparison without introducing a client-side framework. |
 | Insights | Content Partial | Add logs, crash reports, reboot reasons, custom metrics, RSSI/memory metrics, firmware distribution, support workflows, and dashboard visuals. |
 | Private Cloud / Deployment | Implemented | `/features/private-cloud` now compares public evaluation, managed private deployment, and customer-operated private regions with explicit coverage for data ownership, custom domains, regional placement, upgrade path, deployment FAQ, and production support boundaries. |
 | Matter / Ecosystem Integrations | Implemented | `/features/integrations` now covers Matter Fabric positioning, voice assistants, MQTT over TLS, REST APIs, webhooks, and a structured integration-path comparison without promising unsupported live services. |
