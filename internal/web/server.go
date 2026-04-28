@@ -37,19 +37,24 @@ type Server struct {
 }
 
 type pageData struct {
-	Title        string
-	CurrentPath  string
-	Docs         []docs.Section
-	Doc          docs.Section
-	Features     []features.Feature
-	Feature      features.Feature
-	Form         contactForm
-	Errors       map[string]string
-	Success      bool
-	SubmittedFor string
-	Leads        []leads.LeadRecord
-	AdminEnabled bool
-	AdminCSVHref string
+	Title           string
+	MetaDescription string
+	CanonicalURL    string
+	SocialImageURL  string
+	SocialImageAlt  string
+	MetaRobots      string
+	CurrentPath     string
+	Docs            []docs.Section
+	Doc             docs.Section
+	Features        []features.Feature
+	Feature         features.Feature
+	Form            contactForm
+	Errors          map[string]string
+	Success         bool
+	SubmittedFor    string
+	Leads           []leads.LeadRecord
+	AdminEnabled    bool
+	AdminCSVHref    string
 }
 
 type contactForm struct {
@@ -78,6 +83,8 @@ func NewServer(cfg Config) (*Server, error) {
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(s.staticDir))))
+	mux.HandleFunc("/robots.txt", s.handleRobotsTxt)
+	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
 	mux.HandleFunc("/", s.handleHome)
 	mux.HandleFunc("/docs", s.handleDocs)
 	mux.HandleFunc("/docs/", s.handleDocDetail)
@@ -99,12 +106,11 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		methodNotAllowed(w)
 		return
 	}
-	s.render(w, http.StatusOK, "home.html", pageData{
-		Title:       "Realtek Connect+ | IoT Cloud Platform",
-		CurrentPath: r.URL.Path,
-		Docs:        docs.All(),
-		Features:    features.All(),
-	})
+	s.render(w, http.StatusOK, "home.html", s.basePageData(
+		r,
+		"Realtek Connect+ | IoT Cloud Platform",
+		"Realtek Connect+ is an IoT cloud platform for provisioning, OTA, fleet management, app SDKs, insights, private cloud, and integrations.",
+	))
 }
 
 func (s *Server) handleDocs(w http.ResponseWriter, r *http.Request) {
@@ -116,12 +122,11 @@ func (s *Server) handleDocs(w http.ResponseWriter, r *http.Request) {
 		methodNotAllowed(w)
 		return
 	}
-	s.render(w, http.StatusOK, "docs.html", pageData{
-		Title:       "Developer Docs | Realtek Connect+",
-		CurrentPath: r.URL.Path,
-		Docs:        docs.All(),
-		Features:    features.All(),
-	})
+	s.render(w, http.StatusOK, "docs.html", s.basePageData(
+		r,
+		"Developer Docs | Realtek Connect+",
+		"Browse Realtek Connect+ documentation entry points for product overview, development, APIs, SDKs, firmware, CLI, deployment, and release notes.",
+	))
 }
 
 func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request) {
@@ -143,13 +148,13 @@ func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.render(w, http.StatusOK, "doc.html", pageData{
-		Title:       doc.Title + " | Realtek Connect+ Docs",
-		CurrentPath: r.URL.Path,
-		Docs:        docs.All(),
-		Doc:         doc,
-		Features:    features.All(),
-	})
+	data := s.basePageData(
+		r,
+		doc.Title+" | Realtek Connect+ Docs",
+		doc.Summary,
+	)
+	data.Doc = doc
+	s.render(w, http.StatusOK, "doc.html", data)
 }
 
 func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
@@ -175,12 +180,11 @@ func (s *Server) handleFeatures(w http.ResponseWriter, r *http.Request) {
 		methodNotAllowed(w)
 		return
 	}
-	s.render(w, http.StatusOK, "features.html", pageData{
-		Title:       "Features | Realtek Connect+",
-		CurrentPath: r.URL.Path,
-		Docs:        docs.All(),
-		Features:    features.All(),
-	})
+	s.render(w, http.StatusOK, "features.html", s.basePageData(
+		r,
+		"Features | Realtek Connect+",
+		"Explore provisioning, OTA, fleet management, app SDK, insights, private cloud, and ecosystem integrations for Realtek-based IoT products.",
+	))
 }
 
 func (s *Server) handleAdminLeads(w http.ResponseWriter, r *http.Request) {
@@ -205,14 +209,15 @@ func (s *Server) handleAdminLeads(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.render(w, http.StatusOK, "admin_leads.html", pageData{
-		Title:        "Leads | Realtek Connect+",
-		CurrentPath:  r.URL.Path,
-		Features:     features.All(),
-		Leads:        records,
-		AdminEnabled: s.adminToken != "",
-		AdminCSVHref: s.adminCSVHref(r),
-	})
+	data := s.adminPageData(
+		r,
+		"Leads | Realtek Connect+",
+		"Protected Realtek Connect+ lead review interface.",
+	)
+	data.Leads = records
+	data.AdminEnabled = s.adminToken != ""
+	data.AdminCSVHref = s.adminCSVHref(r)
+	s.render(w, http.StatusOK, "admin_leads.html", data)
 }
 
 func (s *Server) handleAdminLeadsCSV(w http.ResponseWriter, r *http.Request) {
@@ -303,24 +308,23 @@ func (s *Server) handleFeatureDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.render(w, http.StatusOK, "feature.html", pageData{
-		Title:       feature.Title + " | Realtek Connect+",
-		CurrentPath: r.URL.Path,
-		Docs:        docs.All(),
-		Feature:     feature,
-		Features:    features.All(),
-	})
+	data := s.basePageData(
+		r,
+		feature.Title+" | Realtek Connect+",
+		feature.Summary,
+	)
+	data.Feature = feature
+	s.render(w, http.StatusOK, "feature.html", data)
 }
 
 func (s *Server) handleContact(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		s.render(w, http.StatusOK, "contact.html", pageData{
-			Title:       "Contact | Realtek Connect+",
-			CurrentPath: r.URL.Path,
-			Docs:        docs.All(),
-			Features:    features.All(),
-		})
+		s.render(w, http.StatusOK, "contact.html", s.basePageData(
+			r,
+			"Contact | Realtek Connect+",
+			"Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
+		))
 	case http.MethodPost:
 		s.submitContact(w, r)
 	default:
@@ -344,14 +348,14 @@ func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
 
 	errors := validateContact(form)
 	if len(errors) > 0 {
-		s.render(w, http.StatusBadRequest, "contact.html", pageData{
-			Title:       "Contact | Realtek Connect+",
-			CurrentPath: r.URL.Path,
-			Docs:        docs.All(),
-			Features:    features.All(),
-			Form:        form,
-			Errors:      errors,
-		})
+		data := s.basePageData(
+			r,
+			"Contact | Realtek Connect+",
+			"Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
+		)
+		data.Form = form
+		data.Errors = errors
+		s.render(w, http.StatusBadRequest, "contact.html", data)
 		return
 	}
 
@@ -371,14 +375,14 @@ func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	s.render(w, http.StatusOK, "contact.html", pageData{
-		Title:        "Contact | Realtek Connect+",
-		CurrentPath:  r.URL.Path,
-		Docs:         docs.All(),
-		Features:     features.All(),
-		Success:      true,
-		SubmittedFor: form.Name,
-	})
+	data := s.basePageData(
+		r,
+		"Contact | Realtek Connect+",
+		"Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
+	)
+	data.Success = true
+	data.SubmittedFor = form.Name
+	s.render(w, http.StatusOK, "contact.html", data)
 }
 
 func validateContact(form contactForm) map[string]string {

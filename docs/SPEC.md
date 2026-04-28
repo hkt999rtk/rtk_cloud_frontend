@@ -16,8 +16,10 @@ Implemented today:
 - Server-rendered pages using `html/template`.
 - Static CSS with a Realtek-style white, deep navy, and blue-green/teal visual system.
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
+- Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
 - Feature overview and detail pages for Provision, OTA, Fleet Management, App SDK, Insights, Private Cloud, and Integrations.
+- `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
 - Protected admin lead review and CSV export when `ADMIN_TOKEN` is set.
@@ -31,6 +33,8 @@ Current routes:
 - `GET /features`
 - `GET /features/{slug}`
 - `GET /contact`
+- `GET /robots.txt`
+- `GET /sitemap.xml`
 - `POST /contact`
 - `GET /healthz`
 - `GET /admin/leads`
@@ -98,7 +102,7 @@ Status values:
 | Private Cloud / Deployment | Content Partial | Add public evaluation vs private commercial deployment, data ownership, custom domain, regional deployment, deployment FAQ, upgrade path, and production support story. |
 | Matter / Ecosystem Integrations | Content Partial | Add Matter ecosystem positioning, Matter Fabric concept, voice assistants, MQTT over TLS, REST APIs, webhooks, cloud-to-cloud integration, and protocol diagrams. |
 | Developer Docs / APIs / SDKs / CLI | Content Partial | Docs portal structure now exists across Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes; deeper implementation detail and reference content still needs follow-on work. |
-| SEO / Launch Readiness | Planned | Add metadata, sitemap, robots, accessibility pass, visual smoke checks, deployment packaging, and CI. |
+| SEO / Launch Readiness | Content Partial | Metadata, sitemap, and robots now exist; remaining work includes accessibility pass, visual smoke checks, deployment packaging, and CI. |
 | Real IoT Cloud Operations | Out of Scope for website v1 | The public website will describe platform capabilities; it will not implement real device provisioning, OTA delivery, user auth, or telemetry ingestion in v1. |
 
 ## Website Completion Roadmap
@@ -118,6 +122,8 @@ Routes:
 - `GET /features`: feature overview.
 - `GET /features/{slug}`: feature detail pages.
 - `GET /contact`: contact / early access registration form.
+- `GET /robots.txt`: crawl directives for search bots.
+- `GET /sitemap.xml`: sitemap covering public marketing and docs pages.
 - `POST /contact`: validate and store a lead in SQLite.
 - `GET /healthz`: plain-text health check.
 - `GET /admin/leads`: protected lead review page, enabled only when `ADMIN_TOKEN` is set.
@@ -192,7 +198,7 @@ Contact form fields:
 ## Test Plan
 
 - `go test ./...`
-- HTTP route tests for `/`, `/features`, all feature detail pages, and `/contact`.
+- HTTP route tests for `/`, `/docs`, `/features`, feature/detail pages, `/contact`, `/robots.txt`, and `/sitemap.xml`.
 - Unknown feature slug returns 404.
 - Valid contact POST writes SQLite and shows success.
 - Invalid contact POST shows validation errors and does not write a lead.

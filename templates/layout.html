@@ -5,7 +5,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{.Title}}</title>
-  <meta name="description" content="Realtek Connect+ is an IoT cloud platform for provisioning, OTA, fleet management, app SDKs, insights, private cloud, and integrations.">
+  <meta name="description" content="{{.MetaDescription}}">
+  <link rel="canonical" href="{{.CanonicalURL}}">
+  <meta property="og:site_name" content="Realtek Connect+">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{.Title}}">
+  <meta property="og:description" content="{{.MetaDescription}}">
+  <meta property="og:url" content="{{.CanonicalURL}}">
+  <meta property="og:image" content="{{.SocialImageURL}}">
+  <meta property="og:image:alt" content="{{.SocialImageAlt}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{.Title}}">
+  <meta name="twitter:description" content="{{.MetaDescription}}">
+  <meta name="twitter:image" content="{{.SocialImageURL}}">
+  <meta name="twitter:image:alt" content="{{.SocialImageAlt}}">
+  {{if .MetaRobots}}<meta name="robots" content="{{.MetaRobots}}">{{end}}
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
