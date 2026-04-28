@@ -25,6 +25,18 @@ type LeadRecord struct {
 	CreatedAt time.Time
 }
 
+type ListFilter struct {
+	Email    string
+	Company  string
+	Interest string
+}
+
+type ListOptions struct {
+	Filter ListFilter
+	Limit  int
+	Offset int
+}
+
 type Repository struct {
 	db *sql.DB
 }
@@ -60,22 +72,19 @@ VALUES (?, ?, ?, ?, ?)`,
 	return err
 }
 
-func (r *Repository) Count(ctx context.Context) (int, error) {
+func (r *Repository) Count(ctx context.Context, filter ListFilter) (int, error) {
 	var count int
-	err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM leads`).Scan(&count)
+	query, args := leadListQuery(`SELECT COUNT(*) FROM leads`, filter, ListOptions{})
+	err := r.db.QueryRowContext(ctx, query, args...).Scan(&count)
 	return count, err
 }
 
-func (r *Repository) List(ctx context.Context, limit int) ([]LeadRecord, error) {
-	if limit <= 0 || limit > 500 {
-		limit = 100
-	}
-
-	rows, err := r.db.QueryContext(ctx, `
+func (r *Repository) List(ctx context.Context, opts ListOptions) ([]LeadRecord, error) {
+	opts = normalizeListOptions(opts)
+	query, args := leadListQuery(`
 SELECT id, name, company, email, interest, message, created_at
-FROM leads
-ORDER BY id DESC
-LIMIT ?`, limit)
+FROM leads`, opts.Filter, opts)
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -103,6 +112,61 @@ LIMIT ?`, limit)
 		return nil, err
 	}
 	return records, nil
+}
+
+func normalizeListOptions(opts ListOptions) ListOptions {
+	opts.Filter = ListFilter{
+		Email:    strings.TrimSpace(opts.Filter.Email),
+		Company:  strings.TrimSpace(opts.Filter.Company),
+		Interest: strings.TrimSpace(opts.Filter.Interest),
+	}
+	if opts.Limit < 0 {
+		opts.Limit = 100
+	}
+	if opts.Offset < 0 {
+		opts.Offset = 0
+	}
+	return opts
+}
+
+func leadListQuery(base string, filter ListFilter, opts ListOptions) (string, []any) {
+	clauses := make([]string, 0, 3)
+	args := make([]any, 0, 5)
+
+	appendLeadFilterClause(&clauses, &args, "email", filter.Email)
+	appendLeadFilterClause(&clauses, &args, "company", filter.Company)
+	appendLeadFilterClause(&clauses, &args, "interest", filter.Interest)
+
+	var builder strings.Builder
+	builder.WriteString(base)
+	if len(clauses) > 0 {
+		builder.WriteString("\nWHERE ")
+		builder.WriteString(strings.Join(clauses, " AND "))
+	}
+	if strings.HasPrefix(base, "\nSELECT") || strings.HasPrefix(base, "SELECT") {
+		builder.WriteString("\nORDER BY id DESC")
+		if opts.Limit > 0 {
+			builder.WriteString("\nLIMIT ? OFFSET ?")
+			args = append(args, opts.Limit, opts.Offset)
+		}
+	}
+
+	return builder.String(), args
+}
+
+func appendLeadFilterClause(clauses *[]string, args *[]any, column, value string) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return
+	}
+
+	*clauses = append(*clauses, "LOWER(COALESCE("+column+", '')) LIKE ? ESCAPE '\\'")
+	*args = append(*args, likePattern(value))
+}
+
+func likePattern(value string) string {
+	replacer := strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
+	return "%" + replacer.Replace(strings.ToLower(strings.TrimSpace(value))) + "%"
 }
 
 func parseSQLiteTime(value string) time.Time {

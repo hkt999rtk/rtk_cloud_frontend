@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -23,9 +24,40 @@ func (s *memoryLeadStore) Insert(_ context.Context, lead leads.Lead) error {
 	return nil
 }
 
-func (s *memoryLeadStore) List(_ context.Context, _ int) ([]leads.LeadRecord, error) {
+func (s *memoryLeadStore) Count(_ context.Context, filter leads.ListFilter) (int, error) {
+	return len(s.filteredRecords(filter)), nil
+}
+
+func (s *memoryLeadStore) List(_ context.Context, opts leads.ListOptions) ([]leads.LeadRecord, error) {
+	records := s.filteredRecords(opts.Filter)
+	if opts.Offset >= len(records) {
+		return []leads.LeadRecord{}, nil
+	}
+	if opts.Offset > 0 {
+		records = records[opts.Offset:]
+	}
+	if opts.Limit > 0 && opts.Limit < len(records) {
+		records = records[:opts.Limit]
+	}
+	return records, nil
+}
+
+func (s *memoryLeadStore) filteredRecords(filter leads.ListFilter) []leads.LeadRecord {
 	records := make([]leads.LeadRecord, 0, len(s.leads))
-	for index, lead := range s.leads {
+	email := strings.ToLower(strings.TrimSpace(filter.Email))
+	company := strings.ToLower(strings.TrimSpace(filter.Company))
+	interest := strings.ToLower(strings.TrimSpace(filter.Interest))
+	for index := len(s.leads) - 1; index >= 0; index-- {
+		lead := s.leads[index]
+		if email != "" && !strings.Contains(strings.ToLower(lead.Email), email) {
+			continue
+		}
+		if company != "" && !strings.Contains(strings.ToLower(lead.Company), company) {
+			continue
+		}
+		if interest != "" && !strings.Contains(strings.ToLower(lead.Interest), interest) {
+			continue
+		}
 		records = append(records, leads.LeadRecord{
 			ID:       int64(index + 1),
 			Name:     lead.Name,
@@ -35,7 +67,7 @@ func (s *memoryLeadStore) List(_ context.Context, _ int) ([]leads.LeadRecord, er
 			Message:  lead.Message,
 		})
 	}
-	return records, nil
+	return records
 }
 
 func testServer(t *testing.T, store LeadStore) http.Handler {
@@ -505,5 +537,128 @@ func TestAdminLeadsCSVWithHeaderToken(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "kevin@example.com") {
 		t.Fatalf("csv does not contain lead email: %s", rec.Body.String())
+	}
+}
+
+func TestAdminLeadsSupportsFilteringAndPagination(t *testing.T) {
+	seed := make([]leads.Lead, 0, 27)
+	for index := 1; index <= 27; index++ {
+		seed = append(seed, leads.Lead{
+			Name:     "Lead " + strconv.Itoa(index),
+			Company:  "Company " + strconv.Itoa(index),
+			Email:    "lead-" + strconv.Itoa(index) + "@example.com",
+			Interest: "Provision",
+			Message:  "seed",
+		})
+	}
+	handler := testServerWithAdminToken(t, &memoryLeadStore{leads: seed}, "secret")
+
+	req := httptest.NewRequest(http.MethodGet, "/admin/leads?token=secret&page=2", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	if !strings.Contains(body, "Page 2 of 2") {
+		t.Fatalf("response does not contain page summary: %s", body)
+	}
+	if !strings.Contains(body, "Showing 26-27 of 27 leads") {
+		t.Fatalf("response does not contain range summary: %s", body)
+	}
+	if !strings.Contains(body, "lead-2@example.com") {
+		t.Fatalf("response does not contain second page lead: %s", body)
+	}
+	if strings.Contains(body, "lead-27@example.com") {
+		t.Fatalf("response unexpectedly contains first page lead: %s", body)
+	}
+	if !strings.Contains(body, "/admin/leads?token=secret") {
+		t.Fatalf("response does not contain previous-page link: %s", body)
+	}
+}
+
+func TestAdminLeadsFiltersAndCSVExportRespectActiveFilters(t *testing.T) {
+	store := &memoryLeadStore{leads: []leads.Lead{
+		{
+			Name:     "Alpha",
+			Company:  "Acme",
+			Email:    "alpha@example.com",
+			Interest: "Provision",
+		},
+		{
+			Name:     "Beta",
+			Company:  "Acme Labs",
+			Email:    "beta@example.com",
+			Interest: "OTA",
+		},
+		{
+			Name:     "Gamma",
+			Company:  "Zenith",
+			Email:    "gamma@example.com",
+			Interest: "OTA",
+		},
+	}}
+	handler := testServerWithAdminToken(t, store, "secret")
+
+	req := httptest.NewRequest(http.MethodGet, "/admin/leads?token=secret&email=beta&company=acme&interest=ota", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	if !strings.Contains(body, "beta@example.com") {
+		t.Fatalf("response does not contain filtered lead: %s", body)
+	}
+	if strings.Contains(body, "alpha@example.com") || strings.Contains(body, "gamma@example.com") {
+		t.Fatalf("response contains unfiltered leads: %s", body)
+	}
+	if !strings.Contains(body, "/admin/leads.csv?company=acme&amp;email=beta&amp;interest=ota&amp;token=secret") {
+		t.Fatalf("response does not preserve filters in csv link: %s", body)
+	}
+
+	csvReq := httptest.NewRequest(http.MethodGet, "/admin/leads.csv?token=secret&email=beta&company=acme&interest=ota", nil)
+	csvRec := httptest.NewRecorder()
+	handler.ServeHTTP(csvRec, csvReq)
+
+	if csvRec.Code != http.StatusOK {
+		t.Fatalf("csv status = %d, want 200", csvRec.Code)
+	}
+	if !strings.Contains(csvRec.Body.String(), "beta@example.com") {
+		t.Fatalf("csv does not contain filtered lead: %s", csvRec.Body.String())
+	}
+	if strings.Contains(csvRec.Body.String(), "alpha@example.com") || strings.Contains(csvRec.Body.String(), "gamma@example.com") {
+		t.Fatalf("csv contains unfiltered leads: %s", csvRec.Body.String())
+	}
+}
+
+func TestAdminLeadsNoMatchEmptyStateMentionsFilters(t *testing.T) {
+	handler := testServerWithAdminToken(t, &memoryLeadStore{leads: []leads.Lead{
+		{
+			Name:     "Alpha",
+			Company:  "Acme",
+			Email:    "alpha@example.com",
+			Interest: "Provision",
+		},
+	}}, "secret")
+
+	req := httptest.NewRequest(http.MethodGet, "/admin/leads?token=secret&email=missing", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	if !strings.Contains(body, "No leads match the current filters.") {
+		t.Fatalf("response does not contain filtered empty-state message: %s", body)
+	}
+	if strings.Contains(body, "No leads yet.") {
+		t.Fatalf("response unexpectedly contains generic empty-state message: %s", body)
 	}
 }

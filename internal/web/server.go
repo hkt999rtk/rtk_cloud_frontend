@@ -20,7 +20,8 @@ import (
 
 type LeadStore interface {
 	Insert(context.Context, leads.Lead) error
-	List(context.Context, int) ([]leads.LeadRecord, error)
+	Count(context.Context, leads.ListFilter) (int, error)
+	List(context.Context, leads.ListOptions) ([]leads.LeadRecord, error)
 }
 
 type Config struct {
@@ -57,6 +58,8 @@ type pageData struct {
 	Leads           []leads.LeadRecord
 	AdminEnabled    bool
 	AdminCSVHref    string
+	LeadFilters     adminLeadFilters
+	LeadPagination  adminLeadPagination
 }
 
 type contactForm struct {
@@ -74,7 +77,28 @@ const (
 	contactEmailMaxLength    = 254
 	contactInterestMaxLength = 120
 	contactMessageMaxLength  = 2000
+	adminLeadPageSize        = 25
 )
+
+type adminLeadFilters struct {
+	Email     string
+	Company   string
+	Interest  string
+	Token     string
+	HasActive bool
+	ClearHref string
+}
+
+type adminLeadPagination struct {
+	Page         int
+	PageSize     int
+	TotalCount   int
+	TotalPages   int
+	Start        int
+	End          int
+	PreviousHref string
+	NextHref     string
+}
 
 func NewServer(cfg Config) (*Server, error) {
 	if cfg.TemplatesDir == "" {
@@ -213,9 +237,27 @@ func (s *Server) handleAdminLeads(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	filters := parseAdminLeadFilters(r)
 	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
 	defer cancel()
-	records, err := s.leadStore.List(ctx, 100)
+
+	totalCount, err := s.leadStore.Count(ctx, filters.listFilter())
+	if err != nil {
+		http.Error(w, "could not load leads", http.StatusInternalServerError)
+		return
+	}
+
+	page := parseAdminLeadPage(r.URL.Query().Get("page"))
+	totalPages := adminLeadTotalPages(totalCount, adminLeadPageSize)
+	if totalPages > 0 && page > totalPages {
+		page = totalPages
+	}
+
+	records, err := s.leadStore.List(ctx, leads.ListOptions{
+		Filter: filters.listFilter(),
+		Limit:  adminLeadPageSize,
+		Offset: (page - 1) * adminLeadPageSize,
+	})
 	if err != nil {
 		http.Error(w, "could not load leads", http.StatusInternalServerError)
 		return
@@ -228,7 +270,10 @@ func (s *Server) handleAdminLeads(w http.ResponseWriter, r *http.Request) {
 	)
 	data.Leads = records
 	data.AdminEnabled = s.adminToken != ""
-	data.AdminCSVHref = s.adminCSVHref(r)
+	data.AdminCSVHref = s.adminCSVHref(filters)
+	data.LeadFilters = filters
+	data.LeadFilters.ClearHref = s.adminLeadsHref(filters.Token, adminLeadFilters{})
+	data.LeadPagination = s.adminLeadPagination(filters, page, totalCount)
 	s.render(w, http.StatusOK, "admin_leads.html", data)
 }
 
@@ -246,9 +291,12 @@ func (s *Server) handleAdminLeadsCSV(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	filters := parseAdminLeadFilters(r)
 	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
 	defer cancel()
-	records, err := s.leadStore.List(ctx, 500)
+	records, err := s.leadStore.List(ctx, leads.ListOptions{
+		Filter: filters.listFilter(),
+	})
 	if err != nil {
 		http.Error(w, "could not load leads", http.StatusInternalServerError)
 		return
@@ -285,12 +333,12 @@ func (s *Server) authorized(r *http.Request) bool {
 	return token == s.adminToken
 }
 
-func (s *Server) adminCSVHref(r *http.Request) string {
-	token := r.URL.Query().Get("token")
-	if token == "" {
+func (s *Server) adminCSVHref(filters adminLeadFilters) string {
+	values := adminLeadQueryValues(filters, 0)
+	if len(values) == 0 {
 		return "/admin/leads.csv"
 	}
-	return "/admin/leads.csv?token=" + url.QueryEscape(token)
+	return "/admin/leads.csv?" + values.Encode()
 }
 
 func (s *Server) unauthorized(w http.ResponseWriter) {
@@ -502,6 +550,100 @@ func formatTime(value time.Time) string {
 func methodNotAllowed(w http.ResponseWriter) {
 	w.Header().Set("Allow", "GET, POST")
 	http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+}
+
+func parseAdminLeadFilters(r *http.Request) adminLeadFilters {
+	email := strings.TrimSpace(r.URL.Query().Get("email"))
+	company := strings.TrimSpace(r.URL.Query().Get("company"))
+	interest := strings.TrimSpace(r.URL.Query().Get("interest"))
+	return adminLeadFilters{
+		Email:     email,
+		Company:   company,
+		Interest:  interest,
+		Token:     strings.TrimSpace(r.URL.Query().Get("token")),
+		HasActive: email != "" || company != "" || interest != "",
+	}
+}
+
+func (filters adminLeadFilters) listFilter() leads.ListFilter {
+	return leads.ListFilter{
+		Email:    filters.Email,
+		Company:  filters.Company,
+		Interest: filters.Interest,
+	}
+}
+
+func parseAdminLeadPage(raw string) int {
+	page, err := strconv.Atoi(strings.TrimSpace(raw))
+	if err != nil || page < 1 {
+		return 1
+	}
+	return page
+}
+
+func adminLeadTotalPages(totalCount, pageSize int) int {
+	if totalCount == 0 || pageSize <= 0 {
+		return 0
+	}
+	return (totalCount + pageSize - 1) / pageSize
+}
+
+func adminLeadQueryValues(filters adminLeadFilters, page int) url.Values {
+	values := url.Values{}
+	if filters.Token != "" {
+		values.Set("token", filters.Token)
+	}
+	if filters.Email != "" {
+		values.Set("email", filters.Email)
+	}
+	if filters.Company != "" {
+		values.Set("company", filters.Company)
+	}
+	if filters.Interest != "" {
+		values.Set("interest", filters.Interest)
+	}
+	if page > 1 {
+		values.Set("page", strconv.Itoa(page))
+	}
+	return values
+}
+
+func (s *Server) adminLeadsHref(token string, filters adminLeadFilters) string {
+	values := adminLeadQueryValues(adminLeadFilters{
+		Email:    filters.Email,
+		Company:  filters.Company,
+		Interest: filters.Interest,
+		Token:    token,
+	}, 0)
+	if len(values) == 0 {
+		return "/admin/leads"
+	}
+	return "/admin/leads?" + values.Encode()
+}
+
+func (s *Server) adminLeadPagination(filters adminLeadFilters, page, totalCount int) adminLeadPagination {
+	pagination := adminLeadPagination{
+		Page:       page,
+		PageSize:   adminLeadPageSize,
+		TotalCount: totalCount,
+		TotalPages: adminLeadTotalPages(totalCount, adminLeadPageSize),
+	}
+	if totalCount == 0 {
+		return pagination
+	}
+
+	pagination.Start = (page-1)*adminLeadPageSize + 1
+	pagination.End = pagination.Start + adminLeadPageSize - 1
+	if pagination.End > totalCount {
+		pagination.End = totalCount
+	}
+	if page > 1 {
+		pagination.PreviousHref = "/admin/leads?" + adminLeadQueryValues(filters, page-1).Encode()
+	}
+	if page < pagination.TotalPages {
+		pagination.NextHref = "/admin/leads?" + adminLeadQueryValues(filters, page+1).Encode()
+	}
+	return pagination
 }
 
 func securityHeaders(next http.Handler) http.Handler {
