@@ -2,6 +2,14 @@
 
 Realtek Connect+ is a Go-rendered HTTP website for a Realtek-style IoT cloud platform concept. It uses `net/http`, `html/template`, SQLite, and static CSS. There is no npm, React, Tailwind, or frontend build step.
 
+## Project Status
+
+Current status: **v0.1 Marketing Foundation**.
+
+This repository currently contains a working marketing website foundation, contact lead capture, SQLite storage, admin lead review, CSV export, and health check. It is not yet a complete ESP RainMaker parity website, IoT console, user authentication service, real OTA service, device provisioning backend, or telemetry platform.
+
+The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.md).
+
 ## Run
 
 ```bash
@@ -33,6 +41,8 @@ Environment variables:
 - `GET /admin/leads`, requires `ADMIN_TOKEN`
 - `GET /admin/leads.csv`, requires `ADMIN_TOKEN`
 - `GET /static/...`
+
+New public routes should be documented here and in `docs/SPEC.md`.
 
 Admin requests can authenticate with either:
 
