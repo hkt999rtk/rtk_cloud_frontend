@@ -19,7 +19,7 @@ Implemented today:
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
-- Feature overview and detail pages for Provision, OTA, Fleet Management, App SDK, Insights, Private Cloud, and Integrations.
+- Feature overview and detail pages for Provision, OTA, Fleet Management, User Management, App SDK, Insights, Private Cloud, and Integrations.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
@@ -77,6 +77,7 @@ Realtek Connect+ presents the following ESP RainMaker-aligned capabilities:
 - Provision: Wi-Fi/BLE onboarding, device binding, activation, user-device association.
 - OTA: firmware upload, campaign rollout, job status, cancel/archive, version validation, and Immediate/Scheduled/User-controlled rollout modes.
 - Fleet Management: device registry, groups, metadata/tags, batch operations, timezone, device sharing.
+- User Management: sign up, sign in, OTP verification, third-party login, password recovery/change, and account deletion framed as platform capabilities rather than current website authentication flows.
 - App SDK: iOS/Android SDK, sample app, rebrand/customize path, push notifications, app publishing path.
 - Insights: activation statistics, firmware distribution, logs, crash reports, reboot reasons, RSSI/memory metrics.
 - Private Cloud: enterprise deployment, data ownership, custom domain, cloud customization, commercial support.
@@ -97,7 +98,7 @@ Status values:
 | Provision | Content Partial | Add QR code, SoftAP/BLE flow, device claiming, activation, user-node association, local setup failure states, and product onboarding diagrams. |
 | OTA | Content Partial | Add firmware upload, metadata extraction, model/version targeting, force/normal/user-controlled/time-window OTA, dynamic OTA, job detail, cancel/archive, and rollout strategy visuals. |
 | Fleet Management / Admin Operations | Content Partial | Add node registration, certificate flow, device registry, groups, metadata, batch operations, node summary widgets, activation statistics, and admin console concept. |
-| User Management | Planned | Add content for sign up, sign in, OTP verification, third-party login, forgot/change password, account deletion, session behavior, and user lifecycle. |
+| User Management | Content Partial | Feature content now covers sign up, sign in, OTP verification, third-party login, forgot/change password, account deletion, and account lifecycle boundaries; follow-on work can add deeper support models, session behavior, and visual diagrams. |
 | End-user Smart Home Features | Planned | Add remote control, local control, scheduling, scenes, grouping, node sharing, push notifications, alerts, and mobile user workflows. |
 | Mobile App SDK | Content Partial | Add iOS SDK, Android SDK, sample app, customization/rebrand, push notification, app store publishing, widgets/settings, and app developer roadmap. |
 | Insights | Content Partial | Add logs, crash reports, reboot reasons, custom metrics, RSSI/memory metrics, firmware distribution, support workflows, and dashboard visuals. |
@@ -137,6 +138,7 @@ Feature slugs:
 - `provision`
 - `ota`
 - `fleet-management`
+- `user-management`
 - `app-sdk`
 - `insights`
 - `private-cloud`
