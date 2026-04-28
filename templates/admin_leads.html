@@ -1,5 +1,6 @@
 {{define "content"}}
 <section class="page-hero compact">
+  <span class="icon-box page-hero-icon">{{icon "filter"}}</span>
   <p class="eyebrow">Admin</p>
   <h1>Lead registrations</h1>
   <p>Recent Realtek Connect+ contact and early access requests stored in SQLite.</p>
@@ -25,9 +26,9 @@
       </label>
     </div>
     <div class="filter-actions">
-      <button class="button" type="submit">Apply filters</button>
+      <button class="button" type="submit"><span class="button-icon">{{icon "filter"}}</span>Apply filters</button>
       {{if .LeadFilters.HasActive}}
-      <a class="button secondary" href="{{.LeadFilters.ClearHref}}">Clear filters</a>
+      <a class="button secondary" href="{{.LeadFilters.ClearHref}}"><span class="button-icon">{{icon "refresh"}}</span>Clear filters</a>
       {{end}}
     </div>
   </form>
@@ -43,7 +44,7 @@
       <p>No leads have been captured yet.</p>
       {{end}}
     </div>
-    <a class="button secondary" href="{{.AdminCSVHref}}">Export CSV</a>
+    <a class="button secondary" href="{{.AdminCSVHref}}"><span class="button-icon">{{icon "download"}}</span>Export CSV</a>
     <p>CSV export requires the same <code>X-Admin-Token</code> header, or a <code>?token=...</code> query parameter when using a browser.</p>
   </div>
 

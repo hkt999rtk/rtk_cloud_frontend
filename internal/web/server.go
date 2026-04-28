@@ -515,6 +515,7 @@ func (s *Server) render(w http.ResponseWriter, status int, name string, data pag
 	}
 	tmpl, err := template.New("layout.html").Funcs(template.FuncMap{
 		"formatTime": formatTime,
+		"icon":       icon,
 	}).ParseFiles(files...)
 	if err != nil {
 		http.Error(w, "template parse error", http.StatusInternalServerError)

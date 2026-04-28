@@ -3,6 +3,7 @@ package docs
 type Section struct {
 	Slug         string
 	Title        string
+	Icon         string
 	Kicker       string
 	Summary      string
 	Description  string
@@ -16,6 +17,7 @@ func All() []Section {
 		{
 			Slug:         "product-overview",
 			Title:        "Product Overview",
+			Icon:         "document",
 			Kicker:       "Position the platform before diving into implementation.",
 			Summary:      "Platform architecture, capability map, and commercial packaging guidance for Realtek Connect+ evaluations.",
 			Description:  "Product Overview is the landing space for teams comparing platform scope, architecture boundaries, and rollout priorities. It frames how device firmware, cloud services, apps, operations, and enterprise deployment fit together without implying the website itself runs those systems.",
@@ -26,6 +28,7 @@ func All() []Section {
 		{
 			Slug:         "development",
 			Title:        "Development",
+			Icon:         "grid",
 			Kicker:       "Organize firmware, cloud, and app workstreams around one delivery plan.",
 			Summary:      "Environment setup, team responsibilities, and implementation tracks for device, cloud, mobile, and operations teams.",
 			Description:  "Development outlines how engineering teams move from proof-of-concept into execution. It explains the expected workstreams, the handoffs between firmware and cloud teams, and the checkpoints needed before release and deployment readiness reviews.",
@@ -36,6 +39,7 @@ func All() []Section {
 		{
 			Slug:         "apis",
 			Title:        "APIs",
+			Icon:         "api",
 			Kicker:       "Expose cloud capabilities through structured integration surfaces.",
 			Summary:      "REST, MQTT over TLS, webhook, and service contract documentation entry points for external systems.",
 			Description:  "APIs describes the contract layer around Realtek Connect+. It positions cloud APIs as the integration surface for dashboards, support tooling, business systems, and device event workflows, while keeping the first implementation static and server-rendered.",
@@ -46,6 +50,7 @@ func All() []Section {
 		{
 			Slug:         "sdks",
 			Title:        "SDKs",
+			Icon:         "package",
 			Kicker:       "Document the developer surfaces used to build connected product experiences.",
 			Summary:      "Mobile SDK, firmware SDK, and reusable client components for branded product delivery.",
 			Description:  "SDKs serves as the catalog of implementation building blocks. It connects mobile, firmware, and service-side integration stories so product teams can understand which surfaces are reused, customized, or wrapped for their own connected product launch.",
@@ -56,6 +61,7 @@ func All() []Section {
 		{
 			Slug:         "firmware",
 			Title:        "Firmware",
+			Icon:         "device",
 			Kicker:       "Clarify what the device software stack must provide.",
 			Summary:      "Provisioning, identity, telemetry, OTA agent, and diagnostics expectations for device firmware teams.",
 			Description:  "Firmware documents the device-side responsibilities required to make cloud features credible. It maps the expected lifecycle hooks for onboarding, signal reporting, OTA safety, and device health so teams can scope implementation effort before integration begins.",
@@ -66,6 +72,7 @@ func All() []Section {
 		{
 			Slug:         "cli",
 			Title:        "CLI",
+			Icon:         "terminal",
 			Kicker:       "Support operators and developers with repeatable command-line workflows.",
 			Summary:      "Command-line entry points for local testing, release preparation, fleet actions, and support diagnostics.",
 			Description:  "CLI frames the operational workflows that often accompany a commercial IoT platform. It covers the kinds of scripted tasks operators and developers expect, from local environment setup to release packaging, diagnostics collection, and bulk maintenance actions.",
@@ -76,6 +83,7 @@ func All() []Section {
 		{
 			Slug:         "deployment",
 			Title:        "Deployment",
+			Icon:         "cloud-lock",
 			Kicker:       "Show how evaluation environments mature into commercial cloud footprints.",
 			Summary:      "Public evaluation, container packaging, persistent SQLite storage, reverse proxy TLS, and operations ownership guidance.",
 			Description:  "Deployment explains how teams move from a public evaluation story into controlled commercial environments. It now includes the packaging and storage assumptions for the current Go site so infrastructure teams can run the app with a persistent SQLite volume while keeping TLS and ingress at the platform edge.",
@@ -86,6 +94,7 @@ func All() []Section {
 		{
 			Slug:         "release-notes",
 			Title:        "Release Notes",
+			Icon:         "refresh",
 			Kicker:       "Track product evolution across firmware, cloud, app, and ops surfaces.",
 			Summary:      "Versioned change logs, upgrade notes, compatibility statements, and rollout communication patterns.",
 			Description:  "Release Notes defines the documentation structure teams expect once the platform is shipping updates regularly. It sets up a home for product version changes, upgrade implications, and compatibility notes across firmware, cloud, mobile app, and operational tooling.",

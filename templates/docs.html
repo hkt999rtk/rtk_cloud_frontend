@@ -4,8 +4,8 @@
   <h1>Documentation entry points for cloud, firmware, app, and deployment teams.</h1>
   <p>Realtek Connect+ now includes a server-rendered documentation portal structure covering platform overview, development, APIs, SDKs, firmware, CLI workflows, deployment, and release notes.</p>
   <div class="hero-actions">
-    <a class="button primary" href="/contact">Talk to the platform team</a>
-    <a class="button secondary" href="/features/app-sdk">See app platform context</a>
+    <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Talk to the platform team</a>
+    <a class="button secondary" href="/features/app-sdk"><span class="button-icon">{{icon "phone-code"}}</span>See app platform context</a>
   </div>
 </section>
 
@@ -17,6 +17,7 @@
   <div class="docs-entry-grid">
     {{range .Docs}}
     <a class="feature-card docs-card tall" href="/docs/{{.Slug}}">
+      <span class="icon-box feature-icon">{{icon .Icon}}</span>
       <p class="card-kicker">{{.Kicker}}</p>
       <h2>{{.Title}}</h2>
       <p>{{.Summary}}</p>
@@ -25,7 +26,7 @@
         <li>{{.}}</li>
         {{end}}
       </ul>
-      <span class="text-link">Open section</span>
+      <span class="text-link">Open section <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>
@@ -38,14 +39,17 @@
   </div>
   <div class="use-case-list">
     <article>
+      <span class="icon-box use-case-icon">{{icon "document"}}</span>
       <h3>Shared platform narrative</h3>
       <p>Give product, sales, and engineering stakeholders one place to understand lifecycle scope before implementation deep-dives.</p>
     </article>
     <article>
+      <span class="icon-box use-case-icon">{{icon "grid"}}</span>
       <h3>Workstream-specific depth</h3>
       <p>Separate firmware, API, mobile SDK, deployment, and release concerns so each team can navigate directly to its implementation surface.</p>
     </article>
     <article>
+      <span class="icon-box use-case-icon">{{icon "package"}}</span>
       <h3>Static first version</h3>
       <p>Keep the docs portal compatible with the current Go templates and server-rendered architecture while leaving space for deeper follow-on content.</p>
     </article>

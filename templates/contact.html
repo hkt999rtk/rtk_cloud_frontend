@@ -6,6 +6,7 @@
 {{$interestError := index .Errors "interest"}}
 {{$messageError := index .Errors "message"}}
 <section class="page-hero compact">
+  <span class="icon-box page-hero-icon">{{icon "mail"}}</span>
   <p class="eyebrow">Contact</p>
   <h1>Register interest in Realtek Connect+.</h1>
   <p>Tell us which service matters most for your product team. Requests are stored locally in SQLite for this first version.</p>
@@ -13,6 +14,7 @@
 
 <section class="contact-section">
   <div class="contact-context">
+    <span class="icon-box panel-icon">{{icon "cloud-lock"}}</span>
     <p class="eyebrow">Early access</p>
     <h2>For IoT product planning, firmware maintenance, and private cloud evaluation.</h2>
     <p>Use this form for provisioning, OTA, fleet management, app SDK, insights, private cloud, or integration discussions.</p>
@@ -84,7 +86,7 @@
         </label>
         <textarea id="contact-message" name="message" rows="5" maxlength="2000" {{if $messageError}}aria-invalid="true" aria-describedby="contact-message-error"{{end}}>{{.Form.Message}}</textarea>
       </div>
-      <button class="button primary" type="submit">Submit Request</button>
+      <button class="button primary" type="submit"><span class="button-icon">{{icon "arrow-right"}}</span>Submit Request</button>
     </form>
     {{end}}
   </div>

@@ -9,7 +9,7 @@
   <div class="feature-grid">
     {{range .Features}}
     <a class="feature-card tall" href="/features/{{.Slug}}">
-      <span class="feature-icon" aria-hidden="true">{{slice .Title 0 1}}</span>
+      <span class="icon-box feature-icon">{{icon .Icon}}</span>
       <p class="card-kicker">{{.Kicker}}</p>
       <h2>{{.Title}}</h2>
       <p>{{.Summary}}</p>
@@ -18,7 +18,7 @@
         <li>{{.}}</li>
         {{end}}
       </ul>
-      <span class="text-link">Open feature</span>
+      <span class="text-link">Open feature <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>

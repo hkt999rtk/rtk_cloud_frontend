@@ -63,11 +63,15 @@ UI system:
 - Buttons: solid teal primary and restrained outline secondary.
 - Cards: 6-8px radius, thin border, minimal shadow.
 - Hero: direct product positioning with a platform architecture poster image.
+- Iconography: repo-native inline SVG icons only; no npm, external icon package, React, or client-side build step. Icons use a 24px viewbox, rounded caps/joins, approximately 2px stroke, and navy/teal color treatment inside pale teal 8px containers where emphasis is needed.
+- Icon coverage: hero chips, primary CTAs, feature cards, architecture nodes, use cases, docs cards, contact/admin controls, and text links must use semantic icons rather than letter placeholders.
+- Typography: keep the Inter/system stack for performance and operational familiarity, but use a clearer type scale. H1 is strong but restrained so product visuals stay visible; section H2 uses tighter hierarchy; card titles and body copy must be distinct enough for scanning. Eyebrow text should be used sparingly with modest letter spacing so pages do not read like a specification dump.
 
 Assets:
 
 - Generated hero/platform and feature imagery lives in `static/assets/`.
 - The generated image style must be clean B2B technology: white background, teal/blue accents, device-cloud-app-dashboard flow, no stock-photo people, no third-party marks.
+- Bitmap imagery supports platform context only; semantic navigation and feature recognition should come from the inline SVG icon system.
 - Video is optional. If a ChatGPT video generation tool is available later, the site can add a short product loop with a poster image fallback. If no video tool is available, CSS motion or static generated imagery is sufficient.
 
 ## Feature Scope

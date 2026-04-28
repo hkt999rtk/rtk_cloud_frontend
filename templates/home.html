@@ -5,14 +5,14 @@
     <h1>Realtek Connect+</h1>
     <p class="hero-lede">Bring Realtek-based devices online with provisioning, OTA, fleet operations, app SDKs, insights, private cloud options, and ecosystem integrations.</p>
     <div class="hero-actions">
-      <a class="button primary" href="/contact">Contact Sales</a>
-      <a class="button secondary" href="/features">Explore Services</a>
+      <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Contact Sales</a>
+      <a class="button secondary" href="/features"><span class="button-icon">{{icon "grid"}}</span>Explore Services</a>
     </div>
     <div class="hero-points" aria-label="Platform highlights">
-      <span>Device SDK</span>
-      <span>Secure Cloud</span>
-      <span>Mobile App</span>
-      <span>Operations</span>
+      <span><span class="hero-chip-icon">{{icon "device"}}</span>Device SDK</span>
+      <span><span class="hero-chip-icon">{{icon "cloud-lock"}}</span>Secure Cloud</span>
+      <span><span class="hero-chip-icon">{{icon "phone-code"}}</span>Mobile App</span>
+      <span><span class="hero-chip-icon">{{icon "fleet"}}</span>Operations</span>
     </div>
   </div>
   <div class="hero-visual">
@@ -36,10 +36,10 @@
   <div class="feature-grid">
     {{range .Features}}
     <a class="feature-card" href="/features/{{.Slug}}">
-      <span class="feature-icon" aria-hidden="true">{{slice .Title 0 1}}</span>
+      <span class="icon-box feature-icon">{{icon .Icon}}</span>
       <h3>{{.Title}}</h3>
       <p>{{.Summary}}</p>
-      <span class="text-link">View details</span>
+      <span class="text-link">View details <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>
@@ -52,19 +52,28 @@
   </div>
   <div class="flow" aria-label="Platform architecture flow">
     <div class="flow-node">
-      <span>01</span>
+      <div class="flow-node-head">
+        <span class="icon-box flow-icon">{{icon "device"}}</span>
+        <span class="flow-number">01</span>
+      </div>
       <strong>Realtek Device SDK</strong>
       <p>Identity, provisioning, firmware services, and device signals.</p>
     </div>
     <div class="flow-line"></div>
     <div class="flow-node">
-      <span>02</span>
+      <div class="flow-node-head">
+        <span class="icon-box flow-icon">{{icon "cloud-lock"}}</span>
+        <span class="flow-number">02</span>
+      </div>
       <strong>Secure Cloud</strong>
       <p>Registry, OTA campaigns, user-device association, APIs.</p>
     </div>
     <div class="flow-line"></div>
     <div class="flow-node">
-      <span>03</span>
+      <div class="flow-node-head">
+        <span class="icon-box flow-icon">{{icon "phone-code"}}</span>
+        <span class="flow-number">03</span>
+      </div>
       <strong>App SDK + Dashboard</strong>
       <p>Mobile onboarding, product control, insights, support workflows.</p>
     </div>
@@ -78,14 +87,17 @@
   </div>
   <div class="use-case-list">
     <article>
+      <span class="icon-box use-case-icon">{{icon "home"}}</span>
       <h3>Smart Home</h3>
       <p>App onboarding, sharing, push notifications, voice assistant paths, and OTA maintenance.</p>
     </article>
     <article>
+      <span class="icon-box use-case-icon">{{icon "nodes"}}</span>
       <h3>Industrial IoT</h3>
       <p>Fleet grouping, metadata, secure updates, private cloud, and operations visibility.</p>
     </article>
     <article>
+      <span class="icon-box use-case-icon">{{icon "refresh"}}</span>
       <h3>Appliance Makers</h3>
       <p>Long lifecycle firmware maintenance, activation data, branded apps, and support diagnostics.</p>
     </article>
@@ -100,10 +112,11 @@
   <div class="docs-entry-grid">
     {{range .Docs}}
     <a class="feature-card docs-card" href="/docs/{{.Slug}}">
+      <span class="icon-box feature-icon">{{icon .Icon}}</span>
       <p class="card-kicker">{{.Kicker}}</p>
       <h3>{{.Title}}</h3>
       <p>{{.Summary}}</p>
-      <span class="text-link">Open section</span>
+      <span class="text-link">Open section <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>
@@ -115,6 +128,6 @@
     <h2>Plan a Realtek Connect+ product path.</h2>
     <p>Register your interest in provisioning, OTA, private cloud, app SDK, or fleet operations.</p>
   </div>
-  <a class="button primary" href="/contact">Contact Sales</a>
+  <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Contact Sales</a>
 </section>
 {{end}}

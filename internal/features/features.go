@@ -3,6 +3,7 @@ package features
 type Feature struct {
 	Slug         string
 	Title        string
+	Icon         string
 	Kicker       string
 	Summary      string
 	Description  string
@@ -40,6 +41,7 @@ func All() []Feature {
 		{
 			Slug:         "provision",
 			Title:        "Provision",
+			Icon:         "provision",
 			Kicker:       "Onboard devices with less product friction.",
 			Summary:      "Secure Wi-Fi/BLE onboarding, activation, and account binding for Realtek-based IoT products.",
 			Description:  "Provision gives product teams a repeatable path from factory-ready hardware to a user-owned connected device. It covers first-time activation, local onboarding, cloud registration, and user-device association.",
@@ -52,6 +54,7 @@ func All() []Feature {
 		{
 			Slug:         "ota",
 			Title:        "OTA",
+			Icon:         "ota",
 			Kicker:       "Ship firmware updates with rollout control.",
 			Summary:      "Upload firmware, extract release metadata, target staged rollouts, and manage dynamic OTA jobs with force, normal, and user-controlled policies.",
 			Description:  "OTA is positioned as a production firmware operations surface rather than a simple update button. Teams register firmware packages, review extracted version and model metadata, define rollout policies, and watch job progress from pilot cohorts through archive-ready release history.",
@@ -110,6 +113,7 @@ func All() []Feature {
 		{
 			Slug:         "fleet-management",
 			Title:        "Fleet Management",
+			Icon:         "fleet",
 			Kicker:       "Operate connected products after launch.",
 			Summary:      "Node registration, certificate provisioning, device registry, OTA job coordination, batch operations, and operator widgets for commercial fleets.",
 			Description:  "Fleet Management expands the public operations story beyond the website's sales-lead admin page. It describes how product teams register nodes, issue device identity material, organize the registry, coordinate firmware operations, and review fleet-wide operator widgets in a future IoT platform console.",
@@ -165,6 +169,7 @@ func All() []Feature {
 		{
 			Slug:         "smart-home",
 			Title:        "Smart Home Experience",
+			Icon:         "home",
 			Kicker:       "Give end users clear control after onboarding.",
 			Summary:      "Remote control, local control fallback, schedules, scenes, grouping, device sharing, push notifications, and alerts for connected home products.",
 			Description:  "Smart Home Experience describes the consumer-facing product surface that sits on top of Realtek Connect+ cloud and app foundations. It covers how households control devices, automate routines, share access, and stay informed without implying that this marketing website is the shipped mobile app runtime.",
@@ -221,6 +226,7 @@ func All() []Feature {
 		{
 			Slug:         "user-management",
 			Title:        "User Management",
+			Icon:         "user-shield",
 			Kicker:       "Handle the account lifecycle around connected products.",
 			Summary:      "Platform content for sign up, sign in, OTP verification, social login, password recovery, account changes, and account deletion.",
 			Description:  "User Management describes the account lifecycle capabilities product teams usually need around a Realtek-based connected product. It covers identity onboarding, recovery, and privacy operations for future product apps and services. This website does not expose end-user sign-in or account management flows today.",
@@ -231,6 +237,7 @@ func All() []Feature {
 		{
 			Slug:         "app-sdk",
 			Title:        "App SDK",
+			Icon:         "phone-code",
 			Kicker:       "Build branded mobile experiences faster.",
 			Summary:      "iOS and Android SDK modules, sample app baselines, push notifications, rebrand guidance, and app publishing paths for connected products.",
 			Description:  "App SDK now frames the mobile experience as a launch surface product teams can brand, extend, and publish without rebuilding every connected-app primitive from scratch. It covers iOS and Android SDK layers, sample app structure, push workflows, and release planning while staying explicit that this repo is a server-rendered website, not a shipped mobile framework.",
@@ -295,6 +302,7 @@ func All() []Feature {
 		{
 			Slug:         "insights",
 			Title:        "Insights",
+			Icon:         "chart",
 			Kicker:       "See the health of products in the field.",
 			Summary:      "Activation statistics, firmware distribution, crash reports, logs, reboot reasons, RSSI, and memory signals.",
 			Description:  "Insights gives engineering and support teams a view into fleet quality. It highlights operational statistics and device health signals that help teams prioritize fixes and understand real deployment behavior.",
@@ -307,6 +315,7 @@ func All() []Feature {
 		{
 			Slug:         "private-cloud",
 			Title:        "Private Cloud",
+			Icon:         "cloud-lock",
 			Kicker:       "Deploy with enterprise ownership and control.",
 			Summary:      "Compare public evaluation with private commercial deployment, regional hosting, custom domains, and enterprise upgrade planning.",
 			Description:  "Private Cloud explains how Realtek Connect+ moves from a shared evaluation story into dedicated commercial deployment. It positions data ownership, regional placement, custom domain control, and upgrade planning as enterprise buying criteria rather than unsupported promises about this website's own runtime.",
@@ -373,6 +382,7 @@ func All() []Feature {
 		{
 			Slug:         "integrations",
 			Title:        "Integrations",
+			Icon:         "nodes",
 			Kicker:       "Connect products to the wider IoT ecosystem.",
 			Summary:      "Matter Fabric positioning, voice assistant paths, MQTT over TLS, REST APIs, and webhooks for product and platform integrations.",
 			Description:  "Integrations explains how Realtek Connect+ fits into smart home ecosystems and enterprise backends. It frames Matter Fabric participation, voice assistant connections, secure protocol access, and webhook delivery as supported integration patterns without claiming this website already operates every downstream service.",
