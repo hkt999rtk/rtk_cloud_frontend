@@ -25,6 +25,7 @@ Implemented today:
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
 - Protected admin lead review and CSV export when `ADMIN_TOKEN` is set.
 - Plain-text `/healthz` endpoint.
+- Multi-stage Docker packaging that ships the server binary plus runtime templates/static assets and defaults SQLite storage to `/data/connectplus.db` inside the container.
 
 Current routes:
 
@@ -163,12 +164,15 @@ Operational behavior:
 - The runtime uses configured `http.Server` read, write, and idle timeouts.
 - Requests are logged with method, path, response status, and elapsed time.
 - `SIGINT` and `SIGTERM` trigger graceful shutdown with a bounded timeout.
+- Production TLS is expected to terminate at a reverse proxy, ingress controller, or hosting platform in front of the app.
 
 Commands:
 
 - `go run ./cmd/server`
 - `go test ./...`
 - `go build -o bin/realtek-connect ./cmd/server`
+- `docker build -t realtek-connect .`
+- `docker run --rm -p 8080:8080 -v "$(pwd)/data:/data" realtek-connect`
 
 ## SQLite
 
@@ -179,6 +183,18 @@ Default database path:
 ```text
 data/connectplus.db
 ```
+
+Container default database path:
+
+```text
+/data/connectplus.db
+```
+
+Container deployment notes:
+
+- `Dockerfile` copies the compiled server together with `templates/` and `static/`, which are runtime dependencies for page rendering and asset delivery.
+- `/data` is declared as the persistent volume for SQLite-backed lead storage.
+- HTTPS is intentionally out of process and should be handled by the reverse proxy or deployment platform instead of the Go app directly.
 
 Schema:
 
