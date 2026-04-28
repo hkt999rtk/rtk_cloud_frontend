@@ -4,6 +4,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -62,8 +64,47 @@ func LoggingMiddleware(logger *log.Logger) func(http.Handler) http.Handler {
 
 			next.ServeHTTP(recorder, r)
 
-			logger.Printf("%s %s %d %s", r.Method, r.URL.RequestURI(), recorder.status, time.Since(started).Round(time.Millisecond))
+			logger.Printf("%s %s %d %s", r.Method, sanitizedRequestURI(r.URL), recorder.status, time.Since(started).Round(time.Millisecond))
 		})
+	}
+}
+
+func sanitizedRequestURI(requestURL *url.URL) string {
+	if requestURL == nil {
+		return ""
+	}
+	if requestURL.RawQuery == "" {
+		return requestURL.RequestURI()
+	}
+
+	values, err := url.ParseQuery(requestURL.RawQuery)
+	if err != nil {
+		return requestURL.EscapedPath()
+	}
+
+	redacted := false
+	for key := range values {
+		if !isSensitiveQueryParam(key) {
+			continue
+		}
+		values.Set(key, "REDACTED")
+		redacted = true
+	}
+	if !redacted {
+		return requestURL.RequestURI()
+	}
+
+	sanitized := *requestURL
+	sanitized.RawQuery = values.Encode()
+	return sanitized.RequestURI()
+}
+
+func isSensitiveQueryParam(key string) bool {
+	switch strings.ToLower(key) {
+	case "token", "access_token", "api_key", "apikey":
+		return true
+	default:
+		return false
 	}
 }
 
