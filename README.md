@@ -6,7 +6,7 @@ Realtek Connect+ is a Go-rendered HTTP website for a Realtek-style IoT cloud pla
 
 Current status: **v0.1 Marketing Foundation**.
 
-This repository currently contains a working marketing website foundation, a developer docs portal structure, per-page SEO/social metadata, sitemap and robots endpoints, contact lead capture, SQLite storage, admin lead review, CSV export, and health check. It is not yet a complete ESP RainMaker parity website, IoT console, user authentication service, real OTA service, device provisioning backend, or telemetry platform.
+This repository currently contains a working marketing website foundation, a developer docs portal structure, per-page SEO/social metadata, sitemap and robots endpoints, contact lead capture, SQLite storage, admin lead review, CSV export, health check, and a container deployment recipe. It is not yet a complete ESP RainMaker parity website, IoT console, user authentication service, real OTA service, device provisioning backend, or telemetry platform.
 
 The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.md).
 
@@ -76,3 +76,26 @@ go test ./...
 ```bash
 go build -o bin/realtek-connect ./cmd/server
 ```
+
+## Deployment Packaging
+
+Build the container image:
+
+```bash
+docker build -t realtek-connect .
+```
+
+Run it with a persistent SQLite volume:
+
+```bash
+docker run --rm -p 8080:8080 \
+  -e ADMIN_TOKEN=change-me \
+  -v "$(pwd)/data:/data" \
+  realtek-connect
+```
+
+Deployment notes:
+
+- The image keeps application state only in SQLite under `/data/connectplus.db`; mount `/data` to persist leads across restarts.
+- The container serves HTTP on port `8080`. Production TLS termination should be handled by a reverse proxy, ingress, or deployment platform in front of the app.
+- Native builds remain supported for environments that prefer `go build` over containers.
