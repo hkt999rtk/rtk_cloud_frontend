@@ -253,6 +253,54 @@ func TestFleetManagementFeatureCoversAdminOperationsScope(t *testing.T) {
 	}
 }
 
+func TestHomeAndSmartHomeFeatureCoverEndUserWorkflow(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	homeReq := httptest.NewRequest(http.MethodGet, "/", nil)
+	homeRec := httptest.NewRecorder()
+	handler.ServeHTTP(homeRec, homeReq)
+
+	if homeRec.Code != http.StatusOK {
+		t.Fatalf("home status = %d, want 200", homeRec.Code)
+	}
+	if !strings.Contains(homeRec.Body.String(), `/features/smart-home`) {
+		t.Fatalf("home page does not link to smart-home feature: %s", homeRec.Body.String())
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/features/smart-home", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"Smart Home Experience",
+		"Remote control, local control fallback, schedules, scenes, grouping, device sharing, push notifications, and alerts for connected home products.",
+		"Use remote control for away-from-home power, mode, and status changes when devices stay connected through the Realtek Connect&#43; cloud path.",
+		"Keep local control available on the home network so core actions can stay responsive during WAN degradation or when products intentionally prioritize nearby control.",
+		"Create recurring schedules around daily routines, quiet hours, occupancy assumptions, or energy-saving windows.",
+		"Bundle scenes so users can trigger coordinated actions across lights, climate, appliances, or custom device categories from one tap.",
+		"Group devices by room, home, or product set so the app can present household-level control instead of one-node-at-a-time management.",
+		"Support node sharing so primary owners can invite family members, installers, or temporary guests with bounded access expectations.",
+		"Use push notifications for onboarding completion, automation results, offline alerts, abnormal events, and OTA prompts that need the user back in the app.",
+		"Map the home experience to the right control pattern",
+		"<th scope=\"col\">Workflow</th>",
+		"Remote control",
+		"Local control",
+		"Schedules and scenes",
+		"Grouping and sharing",
+		"Push notifications and alerts",
+		"this repo does not ship the native control client",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
 func TestUserManagementFeatureClarifiesPlatformScope(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 

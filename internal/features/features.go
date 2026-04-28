@@ -157,6 +157,62 @@ func All() []Feature {
 			},
 		},
 		{
+			Slug:         "smart-home",
+			Title:        "Smart Home Experience",
+			Kicker:       "Give end users clear control after onboarding.",
+			Summary:      "Remote control, local control fallback, schedules, scenes, grouping, device sharing, push notifications, and alerts for connected home products.",
+			Description:  "Smart Home Experience describes the consumer-facing product surface that sits on top of Realtek Connect+ cloud and app foundations. It covers how households control devices, automate routines, share access, and stay informed without implying that this marketing website is the shipped mobile app runtime.",
+			Highlights:   []string{"Remote and local control paths for everyday device actions", "Schedules, scenes, groups, and shared-home coordination", "Push notifications and alerts that bring users back into the branded app at the right moment"},
+			Capabilities: []string{"Device control surfaces for power, mode, status, and household context across mobile and local-network touchpoints", "Automation building blocks for recurring schedules, multi-device scenes, room or home grouping, and temporary or permanent node sharing", "Alert delivery for onboarding completion, offline state, abnormal events, maintenance reminders, and actionable support flows"},
+			Outcomes:     []string{"Make connected products feel useful after first setup", "Reduce support friction when households share devices or automate routines", "Show Realtek Connect+ as both an operator platform and an end-user product experience"},
+			Sections: []FeatureSection{
+				{
+					Eyebrow: "Control Modes",
+					Title:   "Support both cloud reach and at-home responsiveness",
+					Intro:   "The page frames control as a product experience with multiple paths instead of a single mobile button.",
+					Items: []string{
+						"Use remote control for away-from-home power, mode, and status changes when devices stay connected through the Realtek Connect+ cloud path.",
+						"Keep local control available on the home network so core actions can stay responsive during WAN degradation or when products intentionally prioritize nearby control.",
+						"Align these control surfaces with the branded app rather than implying that this Go website is the live smart-home client.",
+					},
+				},
+				{
+					Eyebrow: "Automation",
+					Title:   "Turn single devices into routines households can depend on",
+					Intro:   "Automation content focuses on the user workflows buyers expect once a product ships beyond basic provisioning.",
+					Items: []string{
+						"Create recurring schedules around daily routines, quiet hours, occupancy assumptions, or energy-saving windows.",
+						"Bundle scenes so users can trigger coordinated actions across lights, climate, appliances, or custom device categories from one tap.",
+						"Group devices by room, home, or product set so the app can present household-level control instead of one-node-at-a-time management.",
+					},
+				},
+				{
+					Eyebrow: "Household Sharing",
+					Title:   "Make multi-user homes manageable without losing accountability",
+					Intro:   "Sharing and notification flows are treated as part of the consumer product model, not as back-office admin tools.",
+					Items: []string{
+						"Support node sharing so primary owners can invite family members, installers, or temporary guests with bounded access expectations.",
+						"Use push notifications for onboarding completion, automation results, offline alerts, abnormal events, and OTA prompts that need the user back in the app.",
+						"Surface alerts with enough device and household context to help users act quickly without turning every product event into noise.",
+					},
+					Accent: true,
+				},
+			},
+			Table: FeatureTable{
+				Eyebrow: "End-user Workflows",
+				Title:   "Map the home experience to the right control pattern",
+				Intro:   "Realtek Connect+ uses this page to describe how households move between direct control, automation, and shared-home coordination while the website itself remains a product narrative.",
+				Columns: []string{"Workflow", "What the user does", "Why it matters", "Platform boundary"},
+				Rows: []FeatureTableRow{
+					{Cells: []string{"Remote control", "Open the branded app away from home to adjust power, mode, or device state through the cloud path.", "Keeps products useful when the user is not on the local network.", "Described as app and cloud capability scope; this repo does not ship the native control client."}},
+					{Cells: []string{"Local control", "Use home-network control paths for fast response and resilient fallback when internet conditions are poor.", "Improves perceived reliability for products that users expect to react immediately.", "Positioned as a product capability story layered on top of Realtek Connect+ device and app integration work."}},
+					{Cells: []string{"Schedules and scenes", "Set timed routines and multi-device actions that match household habits instead of manually repeating the same steps.", "Turns connected devices into repeatable home workflows instead of one-off remote commands.", "Automation behavior is described here without claiming a finished rules engine in this website runtime."}},
+					{Cells: []string{"Grouping and sharing", "Organize devices by room or home and invite additional household members into the right node set.", "Makes multi-device homes and multi-user access understandable at consumer scale.", "The marketing site explains the end-user model while leaving production identity and permissions to future app/platform implementations."}},
+					{Cells: []string{"Push notifications and alerts", "Receive actionable updates about onboarding, offline status, abnormal events, or pending actions that need attention.", "Brings users back into the app only when context matters and supports support-readiness planning.", "Notification delivery is presented as product capability scope, not as a promise that this website emits live device alerts today."}},
+				},
+			},
+		},
+		{
 			Slug:         "user-management",
 			Title:        "User Management",
 			Kicker:       "Handle the account lifecycle around connected products.",

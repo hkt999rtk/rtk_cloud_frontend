@@ -19,7 +19,7 @@ Implemented today:
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
-- Feature overview and detail pages for Provision, OTA, Fleet Management, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured mobile app delivery comparison story, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
+- Feature overview and detail pages for Provision, OTA, Fleet Management, Smart Home Experience, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured end-user smart-home workflow story, a structured mobile app delivery comparison story, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
@@ -77,6 +77,7 @@ Realtek Connect+ presents the following ESP RainMaker-aligned capabilities:
 - Provision: Wi-Fi/BLE onboarding, device binding, activation, user-device association.
 - OTA: firmware upload, campaign rollout, job status, cancel/archive, version validation, and force/normal/scheduled/user-controlled/time-window rollout modes.
 - Fleet Management: device registry, groups, metadata/tags, batch operations, timezone, device sharing.
+- Smart Home Experience: remote control, local control fallback, schedules, scenes, grouping, node sharing, push notifications, alerts, and household sharing flows framed as product capabilities rather than current website app behavior.
 - User Management: sign up, sign in, OTP verification, third-party login, password recovery/change, and account deletion framed as platform capabilities rather than current website authentication flows.
 - App SDK: iOS/Android SDK layers, sample app and rebrand path, push notifications, app publishing path, and launch-readiness ownership boundaries.
 - Insights: activation statistics, firmware distribution, logs, crash reports, reboot reasons, RSSI/memory metrics.
@@ -99,7 +100,7 @@ Status values:
 | OTA | Implemented | `/features/ota` now covers firmware upload, extracted release metadata, model/version targeting, force/normal/scheduled/user-controlled/time-window rollouts, dynamic OTA eligibility, job detail, cancellation, archive flow, and a structured rollout strategy table. |
 | Fleet Management / Admin Operations | Implemented | `/features/fleet-management` now covers node registration, bootstrap certificates, device registry, groups, metadata, OTA jobs, firmware images, batch operations, operator statistics widgets, and the boundary between website lead admin and a future IoT platform console. |
 | User Management | Content Partial | Feature content now covers sign up, sign in, OTP verification, third-party login, forgot/change password, account deletion, and account lifecycle boundaries; follow-on work can add deeper support models, session behavior, and visual diagrams. |
-| End-user Smart Home Features | Planned | Add remote control, local control, scheduling, scenes, grouping, node sharing, push notifications, alerts, and mobile user workflows. |
+| End-user Smart Home Features | Content Partial | `/features/smart-home` now covers remote control, local control fallback, scheduling, scenes, grouping, node sharing, push notifications, alerts, and household workflow boundaries; follow-on work can add deeper visuals, control-state models, and persona-specific mobile flows. |
 | Mobile App SDK | Implemented | `/features/app-sdk` now covers iOS and Android SDK layers, sample app and rebrand paths, push notifications, App Store/Google Play publishing guidance, and a structured delivery-path comparison without introducing a client-side framework. |
 | Insights | Content Partial | Add logs, crash reports, reboot reasons, custom metrics, RSSI/memory metrics, firmware distribution, support workflows, and dashboard visuals. |
 | Private Cloud / Deployment | Implemented | `/features/private-cloud` now compares public evaluation, managed private deployment, and customer-operated private regions with explicit coverage for data ownership, custom domains, regional placement, upgrade path, deployment FAQ, and production support boundaries. |
@@ -138,6 +139,7 @@ Feature slugs:
 - `provision`
 - `ota`
 - `fleet-management`
+- `smart-home`
 - `user-management`
 - `app-sdk`
 - `insights`
