@@ -382,6 +382,60 @@ func TestContactPostRateLimitsRepeatedSubmissions(t *testing.T) {
 	}
 }
 
+func TestContactPostRateLimitIgnoresSpoofedForwardingHeaders(t *testing.T) {
+	store := &memoryLeadStore{}
+	server := newTestServer(t, Config{
+		TemplatesDir: "../../templates",
+		StaticDir:    "../../static",
+		LeadStore:    store,
+	})
+
+	now := time.Date(2026, 4, 28, 0, 0, 0, 0, time.UTC)
+	server.contactLimit = &submissionRateLimiter{
+		limit:  1,
+		window: time.Minute,
+		now:    func() time.Time { return now },
+		hits:   make(map[string][]time.Time),
+	}
+	handler := server.Routes()
+
+	form := url.Values{
+		"name":     {"Kevin Huang"},
+		"email":    {"kevin@example.com"},
+		"interest": {"OTA"},
+	}
+
+	firstReq := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
+	firstReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	firstReq.Header.Set("X-Forwarded-For", "203.0.113.10")
+	firstReq.Header.Set("X-Real-IP", "203.0.113.20")
+	firstReq.RemoteAddr = "198.51.100.10:1234"
+	firstRec := httptest.NewRecorder()
+	handler.ServeHTTP(firstRec, firstReq)
+
+	if firstRec.Code != http.StatusOK {
+		t.Fatalf("first status = %d, want 200", firstRec.Code)
+	}
+
+	secondReq := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
+	secondReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	secondReq.Header.Set("X-Forwarded-For", "203.0.113.11")
+	secondReq.Header.Set("X-Real-IP", "203.0.113.21")
+	secondReq.RemoteAddr = "198.51.100.10:1234"
+	secondRec := httptest.NewRecorder()
+	handler.ServeHTTP(secondRec, secondReq)
+
+	if secondRec.Code != http.StatusTooManyRequests {
+		t.Fatalf("second status = %d, want 429", secondRec.Code)
+	}
+	if len(store.leads) != 1 {
+		t.Fatalf("stored leads = %d, want 1", len(store.leads))
+	}
+	if !strings.Contains(secondRec.Body.String(), "Too many requests from this address.") {
+		t.Fatalf("response does not contain rate limit error: %s", secondRec.Body.String())
+	}
+}
+
 func TestAdminLeadsRequiresToken(t *testing.T) {
 	handler := testServerWithAdminToken(t, &memoryLeadStore{}, "secret")
 

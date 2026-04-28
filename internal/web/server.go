@@ -461,17 +461,8 @@ func isSpamContact(form contactForm) bool {
 }
 
 func contactSubmissionKey(r *http.Request) string {
-	if forwardedFor := strings.TrimSpace(r.Header.Get("X-Forwarded-For")); forwardedFor != "" {
-		parts := strings.Split(forwardedFor, ",")
-		if len(parts) > 0 {
-			if value := strings.TrimSpace(parts[0]); value != "" {
-				return value
-			}
-		}
-	}
-	if realIP := strings.TrimSpace(r.Header.Get("X-Real-IP")); realIP != "" {
-		return realIP
-	}
+	// The app is not behind a trusted proxy chain, so client-supplied forwarding
+	// headers are ignored for abuse controls.
 	host, _, err := net.SplitHostPort(strings.TrimSpace(r.RemoteAddr))
 	if err == nil && host != "" {
 		return host
