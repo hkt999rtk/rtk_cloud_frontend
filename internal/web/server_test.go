@@ -219,6 +219,40 @@ func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
 	}
 }
 
+func TestFleetManagementFeatureCoversAdminOperationsScope(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features/fleet-management", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"Node registration, certificate provisioning, device registry, OTA job coordination, batch operations, and operator widgets for commercial fleets.",
+		"Record serial number, model, MAC, factory lot, and claim state when a node is first registered into the platform catalog.",
+		"Issue bootstrap certificates or device credentials, then support rotation or revocation workflows when products are repaired, replaced, or reworked.",
+		"Search the device registry by region, firmware, product family, installer, or customer account and save groups for repeat operations.",
+		"Coordinate firmware images and OTA jobs from the same operations surface so release managers can move from device search to rollout action without spreadsheet handoffs.",
+		"Summarize activation counts, firmware mix, online-versus-offline ratios, alert backlogs, and support escalations in operator-facing statistics widgets.",
+		"The existing /admin/leads page only covers website sales leads; the future IoT platform admin console described here remains a public product narrative rather than a shipped control plane in this repo.",
+		"Map each admin workflow to the right platform boundary",
+		"<th scope=\"col\">Workflow</th>",
+		"Node registration",
+		"Device registry",
+		"Release operations",
+		"Statistics widgets",
+		"the shipped admin endpoint remains /admin/leads for website sales workflow only.",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
 func TestUserManagementFeatureClarifiesPlatformScope(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
