@@ -21,19 +21,25 @@
     </div>
     {{else}}
     <form method="post" action="/contact" novalidate>
+      {{with index .Errors "form"}}<p class="form-error" role="alert">{{.}}</p>{{end}}
+      <div class="honeypot-field" aria-hidden="true">
+        <label for="contact-website">Website</label>
+        <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off">
+      </div>
       <label>
         <span>Name</span>
         {{with index .Errors "name"}}<em>{{.}}</em>{{end}}
-        <input name="name" value="{{.Form.Name}}" autocomplete="name" required>
+        <input name="name" value="{{.Form.Name}}" autocomplete="name" maxlength="120" required>
       </label>
       <label>
         <span>Company</span>
-        <input name="company" value="{{.Form.Company}}" autocomplete="organization">
+        {{with index .Errors "company"}}<em>{{.}}</em>{{end}}
+        <input name="company" value="{{.Form.Company}}" autocomplete="organization" maxlength="160">
       </label>
       <label>
         <span>Email</span>
         {{with index .Errors "email"}}<em>{{.}}</em>{{end}}
-        <input name="email" value="{{.Form.Email}}" type="email" autocomplete="email" required>
+        <input name="email" value="{{.Form.Email}}" type="email" autocomplete="email" maxlength="254" required>
       </label>
       <label>
         <span>Interest</span>
@@ -47,7 +53,8 @@
       </label>
       <label>
         <span>Message</span>
-        <textarea name="message" rows="5">{{.Form.Message}}</textarea>
+        {{with index .Errors "message"}}<em>{{.}}</em>{{end}}
+        <textarea name="message" rows="5" maxlength="2000">{{.Form.Message}}</textarea>
       </label>
       <button class="button primary" type="submit">Submit Request</button>
     </form>

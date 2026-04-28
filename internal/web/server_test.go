@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"realtek-connect/internal/docs"
 	"realtek-connect/internal/features"
@@ -44,16 +45,22 @@ func testServer(t *testing.T, store LeadStore) http.Handler {
 
 func testServerWithAdminToken(t *testing.T, store LeadStore, adminToken string) http.Handler {
 	t.Helper()
-	server, err := NewServer(Config{
+	server := newTestServer(t, Config{
 		TemplatesDir: "../../templates",
 		StaticDir:    "../../static",
 		LeadStore:    store,
 		AdminToken:   adminToken,
 	})
+	return server.Routes()
+}
+
+func newTestServer(t *testing.T, cfg Config) *Server {
+	t.Helper()
+	server, err := NewServer(cfg)
 	if err != nil {
 		t.Fatalf("new server: %v", err)
 	}
-	return server.Routes()
+	return server
 }
 
 func TestRoutesReturnOK(t *testing.T) {
@@ -260,6 +267,118 @@ func TestInvalidContactPostDoesNotStoreLead(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "Name is required") {
 		t.Fatalf("response does not contain validation error: %s", rec.Body.String())
+	}
+}
+
+func TestOversizedContactPostDoesNotStoreLead(t *testing.T) {
+	store := &memoryLeadStore{}
+	handler := testServer(t, store)
+
+	form := url.Values{
+		"name":     {strings.Repeat("N", contactNameMaxLength+1)},
+		"company":  {strings.Repeat("C", contactCompanyMaxLength+1)},
+		"email":    {"kevin@example.com"},
+		"interest": {"OTA"},
+		"message":  {strings.Repeat("M", contactMessageMaxLength+1)},
+	}
+	req := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400", rec.Code)
+	}
+	if len(store.leads) != 0 {
+		t.Fatalf("stored leads = %d, want 0", len(store.leads))
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "Name must be 120 characters or fewer.") {
+		t.Fatalf("response does not contain name limit error: %s", body)
+	}
+	if !strings.Contains(body, "Company must be 160 characters or fewer.") {
+		t.Fatalf("response does not contain company limit error: %s", body)
+	}
+	if !strings.Contains(body, "Message must be 2000 characters or fewer.") {
+		t.Fatalf("response does not contain message limit error: %s", body)
+	}
+}
+
+func TestSpamContactPostDoesNotStoreLead(t *testing.T) {
+	store := &memoryLeadStore{}
+	handler := testServer(t, store)
+
+	form := url.Values{
+		"name":     {"Kevin Huang"},
+		"email":    {"kevin@example.com"},
+		"interest": {"OTA"},
+		"website":  {"https://spam.example.com"},
+	}
+	req := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400", rec.Code)
+	}
+	if len(store.leads) != 0 {
+		t.Fatalf("stored leads = %d, want 0", len(store.leads))
+	}
+	if !strings.Contains(rec.Body.String(), "Request could not be processed.") {
+		t.Fatalf("response does not contain form error: %s", rec.Body.String())
+	}
+}
+
+func TestContactPostRateLimitsRepeatedSubmissions(t *testing.T) {
+	store := &memoryLeadStore{}
+	server := newTestServer(t, Config{
+		TemplatesDir: "../../templates",
+		StaticDir:    "../../static",
+		LeadStore:    store,
+	})
+
+	now := time.Date(2026, 4, 28, 0, 0, 0, 0, time.UTC)
+	server.contactLimit = &submissionRateLimiter{
+		limit:  1,
+		window: time.Minute,
+		now:    func() time.Time { return now },
+		hits:   make(map[string][]time.Time),
+	}
+	handler := server.Routes()
+
+	form := url.Values{
+		"name":     {"Kevin Huang"},
+		"email":    {"kevin@example.com"},
+		"interest": {"OTA"},
+	}
+
+	firstReq := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
+	firstReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	firstReq.RemoteAddr = "198.51.100.10:1234"
+	firstRec := httptest.NewRecorder()
+	handler.ServeHTTP(firstRec, firstReq)
+
+	if firstRec.Code != http.StatusOK {
+		t.Fatalf("first status = %d, want 200", firstRec.Code)
+	}
+
+	secondReq := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
+	secondReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	secondReq.RemoteAddr = "198.51.100.10:1234"
+	secondRec := httptest.NewRecorder()
+	handler.ServeHTTP(secondRec, secondReq)
+
+	if secondRec.Code != http.StatusTooManyRequests {
+		t.Fatalf("second status = %d, want 429", secondRec.Code)
+	}
+	if len(store.leads) != 1 {
+		t.Fatalf("stored leads = %d, want 1", len(store.leads))
+	}
+	if !strings.Contains(secondRec.Body.String(), "Too many requests from this address.") {
+		t.Fatalf("response does not contain rate limit error: %s", secondRec.Body.String())
 	}
 }
 
