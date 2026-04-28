@@ -71,6 +71,18 @@ curl "http://localhost:8080/admin/leads.csv?token=$ADMIN_TOKEN"
 go test ./...
 ```
 
+## Visual Smoke Check
+
+```bash
+go run ./cmd/visual-smoke
+```
+
+Notes:
+
+- The command starts the website in-process by default and checks the homepage at desktop and mobile widths.
+- A local Chrome install is required. Override detection with `CHROME_PATH=/path/to/chrome` or `go run ./cmd/visual-smoke -chrome-path /path/to/chrome`.
+- Use `go run ./cmd/visual-smoke -base-url http://localhost:8080` to target an already running server instead of the in-process test server.
+
 ## Build
 
 ```bash
