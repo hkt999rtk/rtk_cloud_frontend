@@ -433,6 +433,10 @@ p {
   min-height: 300px;
 }
 
+.detail-panel > p:not(.eyebrow) {
+  margin: 14px 0 0;
+}
+
 .accent-panel {
   background: var(--bg-panel);
 }

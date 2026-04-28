@@ -178,9 +178,40 @@ func TestFeatureMetadataUsesFeatureSummary(t *testing.T) {
 	body := rec.Body.String()
 	for _, want := range []string{
 		`<title>OTA | Realtek Connect&#43;</title>`,
-		`<meta name="description" content="Upload firmware, create rollout campaigns, monitor jobs, and protect devices with version validation.">`,
+		`<meta name="description" content="Upload firmware, extract release metadata, target staged rollouts, and manage dynamic OTA jobs with force, normal, and user-controlled policies.">`,
 		`<meta property="og:url" content="http://example.com/features/ota">`,
 		`<meta name="twitter:title" content="OTA | Realtek Connect&#43;">`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
+func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features/ota", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"Upload signed firmware images and extract embedded project, version, model, checksum, and release-note metadata.",
+		"Attach rollout notes, force, normal, or user-controlled install policy, and maintenance-window guidance before approval.",
+		"Target by product family, hardware model, current firmware version, customer tier, region, or support cohort.",
+		"Validate project and version compatibility before devices accept a package.",
+		"Choose the delivery mode that fits the release",
+		"<th scope=\"col\">Strategy</th>",
+		"Force, normal, scheduled, user-controlled, and time-window rollout modes",
+		"Dynamic OTA keeps device eligibility aligned with the latest approved campaign even when endpoints reconnect later.",
+		"Force",
+		"Normal",
+		"Cancel active waves and archive completed campaigns without losing audit history.",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)

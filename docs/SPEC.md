@@ -19,7 +19,7 @@ Implemented today:
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
-- Feature overview and detail pages for Provision, OTA, Fleet Management, User Management, App SDK, Insights, Private Cloud, and Integrations, including a structured private deployment comparison story.
+- Feature overview and detail pages for Provision, OTA, Fleet Management, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail and a structured private deployment comparison story.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
@@ -75,7 +75,7 @@ Realtek Connect+ presents the following ESP RainMaker-aligned capabilities:
 
 - Platform Overview: device firmware, cloud backend, mobile app, dashboard, and third-party integrations.
 - Provision: Wi-Fi/BLE onboarding, device binding, activation, user-device association.
-- OTA: firmware upload, campaign rollout, job status, cancel/archive, version validation, and Immediate/Scheduled/User-controlled rollout modes.
+- OTA: firmware upload, campaign rollout, job status, cancel/archive, version validation, and force/normal/scheduled/user-controlled/time-window rollout modes.
 - Fleet Management: device registry, groups, metadata/tags, batch operations, timezone, device sharing.
 - User Management: sign up, sign in, OTP verification, third-party login, password recovery/change, and account deletion framed as platform capabilities rather than current website authentication flows.
 - App SDK: iOS/Android SDK, sample app, rebrand/customize path, push notifications, app publishing path.
@@ -96,7 +96,7 @@ Status values:
 | --- | --- | --- |
 | Platform Overview | Content Partial | Add stronger end-to-end architecture story, developer entry points, security/scalability/cost positioning, and deployment model comparison. |
 | Provision | Content Partial | Add QR code, SoftAP/BLE flow, device claiming, activation, user-node association, local setup failure states, and product onboarding diagrams. |
-| OTA | Content Partial | Add firmware upload, metadata extraction, model/version targeting, force/normal/user-controlled/time-window OTA, dynamic OTA, job detail, cancel/archive, and rollout strategy visuals. |
+| OTA | Implemented | `/features/ota` now covers firmware upload, extracted release metadata, model/version targeting, force/normal/scheduled/user-controlled/time-window rollouts, dynamic OTA eligibility, job detail, cancellation, archive flow, and a structured rollout strategy table. |
 | Fleet Management / Admin Operations | Content Partial | Add node registration, certificate flow, device registry, groups, metadata, batch operations, node summary widgets, activation statistics, and admin console concept. |
 | User Management | Content Partial | Feature content now covers sign up, sign in, OTP verification, third-party login, forgot/change password, account deletion, and account lifecycle boundaries; follow-on work can add deeper support models, session behavior, and visual diagrams. |
 | End-user Smart Home Features | Planned | Add remote control, local control, scheduling, scenes, grouping, node sharing, push notifications, alerts, and mobile user workflows. |
@@ -111,7 +111,7 @@ Status values:
 ## Website Completion Roadmap
 
 - **v0.1 Marketing Foundation**: current state. Working Go site, product positioning, core feature pages, generated hero asset, contact lead capture, admin lead export.
-- **v0.2 RainMaker Parity Content**: expand content depth so Realtek Connect+ can credibly map to ESP RainMaker's feature set across user, admin, mobile SDK, deployment, Matter, and developer documentation areas.
+- **v0.2 RainMaker Parity Content**: expand remaining content depth so Realtek Connect+ can credibly map to ESP RainMaker's feature set across user, admin, mobile SDK, deployment, Matter, and developer documentation areas.
 - **v0.3 Launch Readiness**: improve SEO, accessibility, visual assets, deployment packaging, CI, form hardening, admin usability, and server operations.
 - **v1.0 Public Website Candidate**: polished public-facing site with complete parity content, Realtek brand assets, reliable contact/admin workflows, and deployment documentation.
 
