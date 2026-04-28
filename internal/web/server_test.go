@@ -219,6 +219,65 @@ func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
 	}
 }
 
+func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	tests := []struct {
+		path string
+		src  string
+		alt  string
+	}{
+		{
+			path: "/features/provision",
+			src:  `/static/assets/feature-provision-flow.jpg`,
+			alt:  `alt="Provisioning dashboard with mobile pairing steps, QR onboarding, and device activation status cards."`,
+		},
+		{
+			path: "/features/ota",
+			src:  `/static/assets/feature-ota-control-center.jpg`,
+			alt:  `alt="Firmware rollout control center with staged release timeline, device cohorts, and OTA job analytics."`,
+		},
+		{
+			path: "/features/insights",
+			src:  `/static/assets/feature-insights-dashboard.jpg`,
+			alt:  `alt="Operations insights dashboard with fleet health charts, alert cards, and device telemetry summaries."`,
+		},
+		{
+			path: "/features/private-cloud",
+			src:  `/static/assets/feature-private-cloud-architecture.jpg`,
+			alt:  `alt="Private cloud architecture showing dedicated regions, branded domain entry points, and enterprise control boundaries."`,
+		},
+	}
+
+	for _, tc := range tests {
+		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", tc.path, rec.Code)
+		}
+
+		body := rec.Body.String()
+		if !strings.Contains(body, `class="feature-visual"`) {
+			t.Fatalf("%s missing feature visual wrapper: %s", tc.path, body)
+		}
+		if !strings.Contains(body, `src="`+tc.src+`"`) {
+			t.Fatalf("%s missing local asset %q: %s", tc.path, tc.src, body)
+		}
+		if !strings.Contains(body, tc.alt) {
+			t.Fatalf("%s missing alt text %q: %s", tc.path, tc.alt, body)
+		}
+
+		assetReq := httptest.NewRequest(http.MethodGet, tc.src, nil)
+		assetRec := httptest.NewRecorder()
+		handler.ServeHTTP(assetRec, assetReq)
+		if assetRec.Code != http.StatusOK {
+			t.Fatalf("%s asset %s status = %d, want 200", tc.path, tc.src, assetRec.Code)
+		}
+	}
+}
+
 func TestFleetManagementFeatureCoversAdminOperationsScope(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 

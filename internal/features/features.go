@@ -6,6 +6,8 @@ type Feature struct {
 	Kicker       string
 	Summary      string
 	Description  string
+	ImagePath    string
+	ImageAlt     string
 	Highlights   []string
 	Capabilities []string
 	Outcomes     []string
@@ -41,6 +43,8 @@ func All() []Feature {
 			Kicker:       "Onboard devices with less product friction.",
 			Summary:      "Secure Wi-Fi/BLE onboarding, activation, and account binding for Realtek-based IoT products.",
 			Description:  "Provision gives product teams a repeatable path from factory-ready hardware to a user-owned connected device. It covers first-time activation, local onboarding, cloud registration, and user-device association.",
+			ImagePath:    "/static/assets/feature-provision-flow.jpg",
+			ImageAlt:     "Provisioning dashboard with mobile pairing steps, QR onboarding, and device activation status cards.",
 			Highlights:   []string{"Wi-Fi and BLE onboarding flows", "Device binding and ownership transfer", "Activation state and first-run telemetry"},
 			Capabilities: []string{"Claiming tokens and device identity handoff", "User-device association during app onboarding", "Timezone and metadata initialization"},
 			Outcomes:     []string{"Reduce setup failures", "Shorten app onboarding", "Prepare devices for fleet operations"},
@@ -51,6 +55,8 @@ func All() []Feature {
 			Kicker:       "Ship firmware updates with rollout control.",
 			Summary:      "Upload firmware, extract release metadata, target staged rollouts, and manage dynamic OTA jobs with force, normal, and user-controlled policies.",
 			Description:  "OTA is positioned as a production firmware operations surface rather than a simple update button. Teams register firmware packages, review extracted version and model metadata, define rollout policies, and watch job progress from pilot cohorts through archive-ready release history.",
+			ImagePath:    "/static/assets/feature-ota-control-center.jpg",
+			ImageAlt:     "Firmware rollout control center with staged release timeline, device cohorts, and OTA job analytics.",
 			Highlights:   []string{"Firmware upload pipeline with extracted version, model, and release metadata", "Version, model, region, and cohort targeting for staged campaigns", "Force, normal, scheduled, user-controlled, and time-window rollout modes"},
 			Capabilities: []string{"Dynamic OTA policies for always-on or intermittently connected fleets", "Per-job status, device outcomes, cancellation, and archive history", "Compatibility validation and operator approvals before rollout"},
 			Outcomes:     []string{"Lower firmware support cost", "Reduce fleet-wide regression risk", "Coordinate releases across consumer and commercial deployments"},
@@ -292,6 +298,8 @@ func All() []Feature {
 			Kicker:       "See the health of products in the field.",
 			Summary:      "Activation statistics, firmware distribution, crash reports, logs, reboot reasons, RSSI, and memory signals.",
 			Description:  "Insights gives engineering and support teams a view into fleet quality. It highlights operational statistics and device health signals that help teams prioritize fixes and understand real deployment behavior.",
+			ImagePath:    "/static/assets/feature-insights-dashboard.jpg",
+			ImageAlt:     "Operations insights dashboard with fleet health charts, alert cards, and device telemetry summaries.",
 			Highlights:   []string{"Activation and association statistics", "Crash, reboot, and log visibility", "Firmware distribution and device health metrics"},
 			Capabilities: []string{"RSSI, memory, uptime, and reboot reason signals", "Version adoption and rollout health", "Support-oriented device history"},
 			Outcomes:     []string{"Find field issues earlier", "Support customers with evidence", "Measure firmware quality"},
@@ -302,6 +310,8 @@ func All() []Feature {
 			Kicker:       "Deploy with enterprise ownership and control.",
 			Summary:      "Compare public evaluation with private commercial deployment, regional hosting, custom domains, and enterprise upgrade planning.",
 			Description:  "Private Cloud explains how Realtek Connect+ moves from a shared evaluation story into dedicated commercial deployment. It positions data ownership, regional placement, custom domain control, and upgrade planning as enterprise buying criteria rather than unsupported promises about this website's own runtime.",
+			ImagePath:    "/static/assets/feature-private-cloud-architecture.jpg",
+			ImageAlt:     "Private cloud architecture showing dedicated regions, branded domain entry points, and enterprise control boundaries.",
 			Highlights:   []string{"Public evaluation versus dedicated private commercial deployment", "Data ownership, regional hosting boundaries, and custom domain control", "Commercial onboarding, upgrade path, and deployment support expectations"},
 			Capabilities: []string{"Dedicated environment planning for customer-operated or managed private regions", "Reverse-proxy TLS termination, network policy alignment, and branded service endpoints", "Release promotion and maintenance-window planning across evaluation and production environments"},
 			Outcomes:     []string{"Match enterprise procurement requirements", "Keep ownership boundaries explicit", "Create a credible path from pilot to production"},

@@ -17,6 +17,7 @@ Implemented today:
 - Server-rendered pages using `html/template`.
 - Static CSS with a Realtek-style white, deep navy, and blue-green/teal visual system.
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
+- Generated feature visuals for Provision, OTA, Insights, and Private Cloud stored under `static/assets/` and rendered from workspace-local paths on their feature pages.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
 - Feature overview and detail pages for Provision, OTA, Fleet Management, Smart Home Experience, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured end-user smart-home workflow story, a structured mobile app delivery comparison story, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
@@ -65,7 +66,7 @@ UI system:
 
 Assets:
 
-- Generated hero/platform imagery lives in `static/assets/`.
+- Generated hero/platform and feature imagery lives in `static/assets/`.
 - The generated image style must be clean B2B technology: white background, teal/blue accents, device-cloud-app-dashboard flow, no stock-photo people, no third-party marks.
 - Video is optional. If a ChatGPT video generation tool is available later, the site can add a short product loop with a poster image fallback. If no video tool is available, CSS motion or static generated imagery is sufficient.
 
