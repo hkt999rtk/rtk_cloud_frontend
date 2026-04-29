@@ -14,12 +14,11 @@ env:
   GIT_CONFIG_COUNT: 1
   GIT_CONFIG_KEY_0: init.defaultBranch
   GIT_CONFIG_VALUE_0: main
-  DEPLOY_HOST: website-test.local
   PUBLIC_BASE_URL: https://webtest.mgmeet.io
 
 jobs:
   deploy:
-    runs-on: [self-hosted, rtk_cloud_frontend, go]
+    runs-on: [self-hosted, rtk_cloud_frontend, go, cd, website-test]
 
     steps:
       - name: Reset self-hosted workspace
@@ -50,6 +49,17 @@ jobs:
       - name: Run tests
         run: go test ./...
 
+      - name: Check public copy
+        shell: bash
+        run: |
+          if grep -R -n -E 'RainMaker|Rainmaker|rainmaker' . \
+            --exclude-dir=.git \
+            --exclude-dir=.github \
+            --exclude='*.db'; then
+            echo "Unexpected competitor name found in repository copy"
+            exit 1
+          fi
+
       - name: Build deployment bundle
         shell: bash
         run: |
@@ -59,14 +69,11 @@ jobs:
           cp -R templates static dist/
           test -x dist/bin/realtek-connect
 
-      - name: Deploy to website test host
+      - name: Deploy on website test host
         shell: bash
         run: |
-          ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "root@${DEPLOY_HOST}" \
-            'test -x /usr/local/sbin/deploy-realtek-connect'
-          tar -C dist -czf - bin templates static | \
-            ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "root@${DEPLOY_HOST}" \
-              /usr/local/sbin/deploy-realtek-connect
+          test -x /usr/local/sbin/deploy-realtek-connect
+          tar -C dist -czf - bin templates static | sudo /usr/local/sbin/deploy-realtek-connect
 
       - name: Verify public deployment
         shell: bash
