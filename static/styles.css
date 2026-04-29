@@ -917,6 +917,12 @@ p {
   background: var(--navy);
 }
 
+@media (max-width: 1280px) {
+  .brand-film-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
 .use-case-list,
 .detail-grid {
   display: grid;
