@@ -569,6 +569,7 @@ p {
 }
 
 .feature-preview {
+  display: block;
   order: -1;
   width: 100%;
   height: 168px;
@@ -581,10 +582,33 @@ p {
 }
 
 .feature-preview img {
+  display: block;
   width: 100%;
   height: 100%;
+  max-width: none;
   object-fit: cover;
   border-radius: 6px;
+  transform-origin: center;
+}
+
+.home-feature-grid .feature-card-fleet-management .feature-preview img {
+  transform: scale(1.06);
+}
+
+.home-feature-grid .feature-card-smart-home .feature-preview img {
+  transform: scale(1.34);
+}
+
+.home-feature-grid .feature-card-user-management .feature-preview img {
+  transform: scale(1.14);
+}
+
+.home-feature-grid .feature-card-app-sdk .feature-preview img {
+  transform: scale(1.08);
+}
+
+.home-feature-grid .feature-card-integrations .feature-preview img {
+  transform: scale(1.12);
 }
 
 .feature-card:hover {

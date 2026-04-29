@@ -89,7 +89,7 @@
   </div>
   <div class="feature-grid home-feature-grid">
     {{range .Features}}
-    <a class="feature-card" href="/features/{{.Slug}}">
+    <a class="feature-card feature-card-{{.Slug}}" href="/features/{{.Slug}}">
       <span class="icon-box feature-icon">{{icon .Icon}}</span>
       {{if .ImagePath}}
       <span class="feature-preview">
