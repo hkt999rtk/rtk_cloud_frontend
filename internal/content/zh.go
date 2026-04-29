@@ -66,6 +66,10 @@ func zhTWPages() map[string]PageMeta {
 			Title:       "聯絡我們 | Realtek Connect+",
 			Description: "聯絡 Realtek Connect+ 團隊，討論配網、OTA、裝置營運、App SDK、洞察或私有雲評估。",
 		},
+		"privacy": {
+			Title:       "隱私權聲明 | Realtek Connect+",
+			Description: "了解 Realtek Connect+ 如何處理網站詢問、聯絡表單資料、保存期限、資料請求與本站託管影片。",
+		},
 	}
 }
 
@@ -81,6 +85,7 @@ func zhTWText() map[string]string {
 		"footer.docs":                "開發者文件",
 		"footer.features":            "功能服務",
 		"footer.contact":             "聯絡我們",
+		"footer.privacy":             "隱私權",
 		"home.eyebrow":               "為產品團隊打造的物聯網雲端平台",
 		"home.lede":                  "透過配網、OTA、裝置營運、App SDK、洞察、私有雲與生態系整合，讓 Realtek 裝置更快進入可營運的連網產品生命週期。",
 		"home.cta.primary":           "聯絡我們",
@@ -126,6 +131,7 @@ func zhTWText() map[string]string {
 		"home.film.body":             "Realtek Connect+ 將半導體與連線技術基礎延伸為雲端平台敘事，協助產品團隊打造可商用規模化的連網裝置。",
 		"home.film.cta":              "觀看品牌影片",
 		"home.film.title.attr":       "Realtek 企業形象影片",
+		"home.film.fallback":         "你的瀏覽器不支援 video 標籤。",
 		"home.film.point.silicon":    "半導體技術基礎",
 		"home.film.point.ecosystem":  "連網產品生態系",
 		"home.film.point.enterprise": "企業部署信任",
@@ -210,6 +216,25 @@ func zhTWText() map[string]string {
 		"contact.select":             "選擇服務",
 		"contact.message":            "訊息",
 		"contact.submit":             "送出需求",
+		"contact.privacy":            "送出此表單即表示你理解我們會依 Realtek Connect+ 隱私權聲明處理你的詢問資料。",
+		"contact.privacy.link":       "隱私權聲明",
+		"privacy.eyebrow":            "隱私權",
+		"privacy.title":              "Realtek Connect+ 網站詢問隱私權聲明。",
+		"privacy.intro":              "第一版網站只收集回覆 Realtek Connect+ 商務詢問與早期評估請求所需的資訊。",
+		"privacy.data.title":         "我們收集的資料",
+		"privacy.data.body":          "聯絡表單可能收集姓名、公司、Email、關注服務與選填訊息。網站也會使用維運與疑難排解 HTTP 服務所需的基本伺服器紀錄。",
+		"privacy.use.title":          "資料使用方式",
+		"privacy.use.body":           "我們使用提交資料來回覆詢問、規劃產品討論、了解 Realtek Connect+ 服務需求，並保護網站免於 spam 或濫用。",
+		"privacy.retention.title":    "保存期限",
+		"privacy.retention.body":     "網站 leads 預期最多保存 24 個月，除非仍有進行中的商務討論或必要營運紀錄需要更長期間。",
+		"privacy.rights.title":       "查詢、更正或刪除請求",
+		"privacy.rights.body":        "如需查詢、更正或刪除已提交的詢問資料，請聯絡 privacy@example.com。正式公開前需將此 placeholder 信箱替換為正式隱私聯絡窗口。",
+		"privacy.video.title":        "本站託管品牌影片",
+		"privacy.video.body":         "首頁品牌影片以本站 local MP4 資產託管。影片播放器不會建立 YouTube iframe，也不會連線到 YouTube 服務。",
+		"privacy.admin.title":        "內部存取",
+		"privacy.admin.body":         "Lead review 以 admin token 保護。Admin 頁面不會放入 sitemap，並標示 noindex。",
+		"privacy.legal.title":        "法務審閱",
+		"privacy.legal.body":         "此聲明是網站 prototype 的 GDPR-lite 實作，不是完整法律合規套件，公開上線前應完成審閱。",
 	}
 }
 
@@ -467,7 +492,10 @@ func toSimplified(value string) string {
 		"絡", "络", "們", "们", "麼", "么", "蓋", "盖", "綁", "绑", "廠", "厂",
 		"擁", "拥", "錄", "录", "狀", "状", "遙", "遥", "測", "测", "時", "时",
 		"縮", "缩", "備", "备", "進", "进", "線", "线", "協", "协",
-		"業", "业", "術", "术",
+		"業", "业", "術", "术", "載", "载", "詢", "询", "問", "问", "聲", "声",
+		"單", "单", "聲明", "声明", "處理", "处理", "聯絡", "联络", "請求", "请求",
+		"預", "预", "期", "期", "個月", "个月", "訊息", "讯息", "嵌", "嵌",
+		"瀏", "浏",
 	)
 	return replacer.Replace(value)
 }

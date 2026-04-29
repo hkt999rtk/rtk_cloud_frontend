@@ -118,7 +118,7 @@ func newTestServer(t *testing.T, cfg Config) *Server {
 
 func TestRoutesReturnOK(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
-	paths := []string{"/", "/docs", "/features", "/contact", "/healthz", "/robots.txt", "/sitemap.xml"}
+	paths := []string{"/", "/docs", "/features", "/contact", "/privacy", "/healthz", "/robots.txt", "/sitemap.xml"}
 	for _, section := range docs.All() {
 		paths = append(paths, "/docs/"+section.Slug)
 	}
@@ -145,12 +145,14 @@ func TestLocalizedPublicRoutesReturnOK(t *testing.T) {
 		"/zh-tw/features",
 		"/zh-tw/features/provision",
 		"/zh-tw/contact",
+		"/zh-tw/privacy",
 		"/zh-cn",
 		"/zh-cn/docs",
 		"/zh-cn/docs/apis",
 		"/zh-cn/features",
 		"/zh-cn/features/provision",
 		"/zh-cn/contact",
+		"/zh-cn/privacy",
 	}
 
 	for _, path := range paths {
@@ -223,32 +225,36 @@ func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
 	tests := []struct {
-		path        string
-		title       string
-		body        string
-		point       string
-		iframeTitle string
+		path       string
+		title      string
+		body       string
+		point      string
+		videoTitle string
+		fallback   string
 	}{
 		{
-			path:        "/",
-			title:       "Built on Realtek&#39;s connected intelligence.",
-			body:        "Realtek Connect&#43; extends a semiconductor and connectivity foundation into a cloud platform story",
-			point:       "Semiconductor foundation",
-			iframeTitle: `title="Realtek corporate brand film"`,
+			path:       "/",
+			title:      "Built on Realtek&#39;s connected intelligence.",
+			body:       "Realtek Connect&#43; extends a semiconductor and connectivity foundation into a cloud platform story",
+			point:      "Semiconductor foundation",
+			videoTitle: `title="Realtek corporate brand film"`,
+			fallback:   "Your browser does not support the video tag.",
 		},
 		{
-			path:        "/zh-tw/",
-			title:       "建立在 Realtek 的連網智慧之上。",
-			body:        "Realtek Connect&#43; 將半導體與連線技術基礎延伸為雲端平台敘事",
-			point:       "半導體技術基礎",
-			iframeTitle: `title="Realtek 企業形象影片"`,
+			path:       "/zh-tw/",
+			title:      "建立在 Realtek 的連網智慧之上。",
+			body:       "Realtek Connect&#43; 將半導體與連線技術基礎延伸為雲端平台敘事",
+			point:      "半導體技術基礎",
+			videoTitle: `title="Realtek 企業形象影片"`,
+			fallback:   "你的瀏覽器不支援 video 標籤。",
 		},
 		{
-			path:        "/zh-cn/",
-			title:       "建立在 Realtek 的連网智慧之上。",
-			body:        "Realtek Connect&#43; 将半导体与連线技术基础延伸为云端平台敘事",
-			point:       "半导体技术基础",
-			iframeTitle: `title="Realtek 企业形象影片"`,
+			path:       "/zh-cn/",
+			title:      "建立在 Realtek 的連网智慧之上。",
+			body:       "Realtek Connect&#43; 将半导体与連线技术基础延伸为云端平台敘事",
+			point:      "半导体技术基础",
+			videoTitle: `title="Realtek 企业形象影片"`,
+			fallback:   "你的浏览器不支援 video 标签。",
 		},
 	}
 
@@ -264,17 +270,25 @@ func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
 		body := rec.Body.String()
 		for _, want := range []string{
 			`<section class="section brand-film">`,
-			`src="https://www.youtube-nocookie.com/embed/QqC06634wcI"`,
-			tc.iframeTitle,
-			`loading="lazy"`,
-			`allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"`,
-			`allowfullscreen`,
+			`<video controls preload="metadata" poster="/static/assets/realtek-brand-film-poster.jpg"`,
+			`<source src="/static/assets/realtek-brand-film.mp4" type="video/mp4">`,
+			tc.videoTitle,
 			tc.title,
 			tc.body,
 			tc.point,
+			tc.fallback,
 		} {
 			if !strings.Contains(body, want) {
 				t.Fatalf("%s response does not contain %q: %s", tc.path, want, body)
+			}
+		}
+		for _, unwanted := range []string{
+			`<iframe`,
+			`youtube-nocookie.com`,
+			`data-video-id="QqC06634wcI"`,
+		} {
+			if strings.Contains(body, unwanted) {
+				t.Fatalf("%s initial response should not contain %q: %s", tc.path, unwanted, body)
 			}
 		}
 
@@ -286,6 +300,65 @@ func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
 		}
 		if !(architectureIndex < filmIndex && filmIndex < deploymentIndex) {
 			t.Fatalf("%s brand film section should be between architecture and deployment", tc.path)
+		}
+	}
+}
+
+func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	tests := []struct {
+		path      string
+		lang      string
+		canonical string
+		title     string
+		body      string
+	}{
+		{
+			path:      "/privacy",
+			lang:      "en",
+			canonical: `http://example.com/privacy`,
+			title:     "Privacy notice for Realtek Connect&#43; website inquiries.",
+			body:      "Website leads are intended to be retained for up to 24 months",
+		},
+		{
+			path:      "/zh-tw/privacy",
+			lang:      "zh-Hant",
+			canonical: `http://example.com/zh-tw/privacy`,
+			title:     "Realtek Connect&#43; 網站詢問隱私權聲明。",
+			body:      "網站 leads 預期最多保存 24 個月",
+		},
+		{
+			path:      "/zh-cn/privacy",
+			lang:      "zh-Hans",
+			canonical: `http://example.com/zh-cn/privacy`,
+			title:     "Realtek Connect&#43; 网站询问隐私权声明。",
+			body:      "网站 leads 预期最多保存 24 个月",
+		},
+	}
+
+	for _, tc := range tests {
+		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", tc.path, rec.Code)
+		}
+		body := rec.Body.String()
+		for _, want := range []string{
+			`<html lang="` + tc.lang + `">`,
+			`<link rel="canonical" href="` + tc.canonical + `">`,
+			`hreflang="en" href="http://example.com/privacy"`,
+			`hreflang="zh-Hant" href="http://example.com/zh-tw/privacy"`,
+			`hreflang="zh-Hans" href="http://example.com/zh-cn/privacy"`,
+			tc.title,
+			tc.body,
+			"privacy@example.com",
+			"local MP4",
+		} {
+			if !strings.Contains(body, want) {
+				t.Fatalf("%s response does not contain %q: %s", tc.path, want, body)
+			}
 		}
 	}
 }
@@ -462,6 +535,7 @@ func TestLayoutIncludesSkipLinkToMainContent(t *testing.T) {
 	for _, want := range []string{
 		`<a class="skip-link" href="#main-content">Skip to main content</a>`,
 		`<main id="main-content" tabindex="-1">`,
+		`<a href="/privacy">Privacy</a>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
@@ -907,9 +981,12 @@ func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 		`<loc>http://example.com/docs/product-overview</loc>`,
 		`<loc>http://example.com/features/ota</loc>`,
 		`<loc>http://example.com/contact</loc>`,
+		`<loc>http://example.com/privacy</loc>`,
 		`<loc>http://example.com/zh-tw/features/ota</loc>`,
+		`<loc>http://example.com/zh-tw/privacy</loc>`,
 		`<loc>http://example.com/zh-cn/docs/apis</loc>`,
 		`<loc>http://example.com/zh-cn/contact</loc>`,
+		`<loc>http://example.com/zh-cn/privacy</loc>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("sitemap does not contain %q: %s", want, body)
@@ -1112,6 +1189,54 @@ func TestInvalidContactPostUsesAccessibleErrorMarkup(t *testing.T) {
 	}
 	if strings.Count(body, `aria-invalid="true"`) != 3 {
 		t.Fatalf("response should flag three invalid fields: %s", body)
+	}
+}
+
+func TestContactFormIncludesLocalizedPrivacyNotice(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	tests := []struct {
+		path string
+		href string
+		text string
+		link string
+	}{
+		{
+			path: "/contact",
+			href: `/privacy`,
+			text: "By submitting this form, you understand that your inquiry will be handled according to the Realtek Connect&#43; privacy notice.",
+			link: "Privacy notice",
+		},
+		{
+			path: "/zh-tw/contact",
+			href: `/zh-tw/privacy`,
+			text: "送出此表單即表示你理解我們會依 Realtek Connect&#43; 隱私權聲明處理你的詢問資料。",
+			link: "隱私權聲明",
+		},
+		{
+			path: "/zh-cn/contact",
+			href: `/zh-cn/privacy`,
+			text: "送出此表单即表示你理解我们会依 Realtek Connect&#43; 隐私权声明处理你的询问资料。",
+			link: "隐私权声明",
+		},
+	}
+
+	for _, tc := range tests {
+		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", tc.path, rec.Code)
+		}
+		body := rec.Body.String()
+		for _, want := range []string{
+			`<p class="privacy-note">` + tc.text,
+			`<a href="` + tc.href + `">` + tc.link + `</a>`,
+		} {
+			if !strings.Contains(body, want) {
+				t.Fatalf("%s response does not contain %q: %s", tc.path, want, body)
+			}
+		}
 	}
 }
 

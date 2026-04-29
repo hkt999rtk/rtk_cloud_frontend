@@ -150,7 +150,7 @@ func (s *Server) handleSitemapXML(w http.ResponseWriter, r *http.Request) {
 
 func publicSitemapPaths() []string {
 	catalog := content.CatalogFor(content.DefaultLocale())
-	basePaths := []string{"/", "/docs", "/features", "/contact"}
+	basePaths := []string{"/", "/docs", "/features", "/contact", "/privacy"}
 	for _, section := range catalog.Docs {
 		basePaths = append(basePaths, "/docs/"+section.Slug)
 	}

@@ -173,7 +173,10 @@
       </div>
     </div>
     <div class="brand-film-frame" aria-label="{{t . "home.film.cta"}}">
-      <iframe src="https://www.youtube-nocookie.com/embed/QqC06634wcI" title="{{t . "home.film.title.attr"}}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      <video controls preload="metadata" poster="{{asset "/static/assets/realtek-brand-film-poster.jpg"}}" title="{{t . "home.film.title.attr"}}">
+        <source src="{{asset "/static/assets/realtek-brand-film.mp4"}}" type="video/mp4">
+        {{t . "home.film.fallback"}}
+      </video>
     </div>
   </div>
 </section>

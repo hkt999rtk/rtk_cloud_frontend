@@ -1,0 +1,50 @@
+{{define "content"}}
+<section class="page-hero compact">
+  <span class="icon-box page-hero-icon">{{icon "shield-user"}}</span>
+  <p class="eyebrow">{{t . "privacy.eyebrow"}}</p>
+  <h1>{{t . "privacy.title"}}</h1>
+  <p>{{t . "privacy.intro"}}</p>
+</section>
+
+<section class="section privacy-section">
+  <div class="detail-grid privacy-grid">
+    <article class="detail-panel">
+      <span class="icon-box panel-icon">{{icon "document"}}</span>
+      <h2>{{t . "privacy.data.title"}}</h2>
+      <p>{{t . "privacy.data.body"}}</p>
+    </article>
+    <article class="detail-panel">
+      <span class="icon-box panel-icon">{{icon "nodes"}}</span>
+      <h2>{{t . "privacy.use.title"}}</h2>
+      <p>{{t . "privacy.use.body"}}</p>
+    </article>
+    <article class="detail-panel">
+      <span class="icon-box panel-icon">{{icon "refresh"}}</span>
+      <h2>{{t . "privacy.retention.title"}}</h2>
+      <p>{{t . "privacy.retention.body"}}</p>
+    </article>
+    <article class="detail-panel">
+      <span class="icon-box panel-icon">{{icon "mail"}}</span>
+      <h2>{{t . "privacy.rights.title"}}</h2>
+      <p>{{t . "privacy.rights.body"}}</p>
+    </article>
+    <article class="detail-panel">
+      <span class="icon-box panel-icon">{{icon "dashboard"}}</span>
+      <h2>{{t . "privacy.video.title"}}</h2>
+      <p>{{t . "privacy.video.body"}}</p>
+    </article>
+    <article class="detail-panel accent-panel">
+      <span class="icon-box panel-icon">{{icon "cloud-lock"}}</span>
+      <h2>{{t . "privacy.admin.title"}}</h2>
+      <p>{{t . "privacy.admin.body"}}</p>
+    </article>
+  </div>
+  <div class="privacy-legal-note">
+    <span class="icon-box panel-icon">{{icon "user-shield"}}</span>
+    <div>
+      <h2>{{t . "privacy.legal.title"}}</h2>
+      <p>{{t . "privacy.legal.body"}}</p>
+    </div>
+  </div>
+</section>
+{{end}}

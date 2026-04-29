@@ -153,6 +153,10 @@ func enPages() map[string]PageMeta {
 			Title:       "Contact | Realtek Connect+",
 			Description: "Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
 		},
+		"privacy": {
+			Title:       "Privacy Notice | Realtek Connect+",
+			Description: "Review how Realtek Connect+ handles website inquiries, contact form data, retention, data requests, and local video behavior.",
+		},
 	}
 }
 
@@ -168,6 +172,7 @@ func enText() map[string]string {
 		"footer.docs":                "Developer Docs",
 		"footer.features":            "Features",
 		"footer.contact":             "Contact Us",
+		"footer.privacy":             "Privacy",
 		"home.eyebrow":               "IoT cloud platform for product teams",
 		"home.lede":                  "Bring Realtek-based devices online with provisioning, OTA, fleet operations, app SDKs, insights, private cloud options, and ecosystem integrations.",
 		"home.cta.primary":           "Contact Us",
@@ -213,6 +218,7 @@ func enText() map[string]string {
 		"home.film.body":             "Realtek Connect+ extends a semiconductor and connectivity foundation into a cloud platform story for product teams building connected devices at commercial scale.",
 		"home.film.cta":              "Watch brand film",
 		"home.film.title.attr":       "Realtek corporate brand film",
+		"home.film.fallback":         "Your browser does not support the video tag.",
 		"home.film.point.silicon":    "Semiconductor foundation",
 		"home.film.point.ecosystem":  "Connected-product ecosystem",
 		"home.film.point.enterprise": "Enterprise deployment trust",
@@ -297,5 +303,24 @@ func enText() map[string]string {
 		"contact.select":             "Select a service",
 		"contact.message":            "Message",
 		"contact.submit":             "Submit Request",
+		"contact.privacy":            "By submitting this form, you understand that your inquiry will be handled according to the Realtek Connect+ privacy notice.",
+		"contact.privacy.link":       "Privacy notice",
+		"privacy.eyebrow":            "Privacy",
+		"privacy.title":              "Privacy notice for Realtek Connect+ website inquiries.",
+		"privacy.intro":              "This first-version website collects only the information needed to respond to Realtek Connect+ business inquiries and early access requests.",
+		"privacy.data.title":         "Data we collect",
+		"privacy.data.body":          "The contact form can collect name, company, email, area of interest, and an optional message. The site also uses basic server logs required to operate and troubleshoot the HTTP service.",
+		"privacy.use.title":          "How we use the data",
+		"privacy.use.body":           "We use submitted information to respond to inquiries, plan product discussions, understand interest in Realtek Connect+ services, and protect the website from spam or abuse.",
+		"privacy.retention.title":    "Retention",
+		"privacy.retention.body":     "Website leads are intended to be retained for up to 24 months unless a longer period is needed for an active business discussion or required operational record.",
+		"privacy.rights.title":       "Access, correction, or deletion requests",
+		"privacy.rights.body":        "To request access, correction, or deletion of submitted inquiry data, contact privacy@example.com. Replace this placeholder address with the official privacy contact before public launch.",
+		"privacy.video.title":        "Local brand video",
+		"privacy.video.body":         "The homepage brand film is hosted by this website as a local MP4 asset. The video player does not create a YouTube iframe or contact YouTube services.",
+		"privacy.admin.title":        "Internal access",
+		"privacy.admin.body":         "Lead review is protected by an admin token. Admin pages are excluded from the sitemap and are marked noindex.",
+		"privacy.legal.title":        "Legal review",
+		"privacy.legal.body":         "This notice is a GDPR-lite implementation for the website prototype. It is not a complete legal compliance package and should be reviewed before public launch.",
 	}
 }

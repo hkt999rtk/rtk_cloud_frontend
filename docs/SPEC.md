@@ -25,6 +25,7 @@ Implemented today:
 - Language switcher in the shared header that points to the same public page in each supported locale.
 - Localized public page metadata with canonical URLs, `hreflang` alternates, and localized sitemap entries.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
+- Localized privacy notice routes describing contact form data, retention intent, data request handling, admin protection, and local video behavior.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
 - Protected admin lead review with filtering, pagination, and filtered CSV export when `ADMIN_TOKEN` is set.
@@ -39,6 +40,7 @@ Current routes:
 - `GET /features`
 - `GET /features/{slug}`
 - `GET /contact`
+- `GET /privacy`
 - `GET /robots.txt`
 - `GET /sitemap.xml`
 - `POST /contact`
@@ -52,6 +54,7 @@ Current routes:
 - `GET /zh-tw/features`
 - `GET /zh-tw/features/{slug}`
 - `GET /zh-tw/contact`
+- `GET /zh-tw/privacy`
 - `POST /zh-tw/contact`
 - `GET /zh-cn`
 - `GET /zh-cn/docs`
@@ -59,6 +62,7 @@ Current routes:
 - `GET /zh-cn/features`
 - `GET /zh-cn/features/{slug}`
 - `GET /zh-cn/contact`
+- `GET /zh-cn/privacy`
 - `POST /zh-cn/contact`
 
 This implementation is enough to demonstrate the Realtek Connect+ direction and collect leads. It is not yet content-complete as a full public IoT cloud platform website and documentation surface.
@@ -97,10 +101,11 @@ Assets:
   - `static/assets/connectplus-platform-surfaces.jpg`: platform surfaces visual showing onboarding, OTA rollout, and fleet health dashboard context.
 - Homepage brand film:
   - The homepage may include the official Realtek corporate brand film as a trust-building section after Architecture and before Deployment.
-  - The first implementation uses the privacy-enhanced YouTube embed `https://www.youtube-nocookie.com/embed/QqC06634wcI`.
+  - The current implementation uses a local MP4 asset at `static/assets/realtek-brand-film.mp4`, tracked with Git LFS.
+  - The section uses a poster image at `static/assets/realtek-brand-film-poster.jpg`, native controls, and `preload="metadata"`.
   - The film must not replace the product hero, must not autoplay, and must keep Realtek Connect+ product CTAs as the primary conversion path.
-  - The iframe must be lazy-loaded, responsive at 16:9, and localized with accessible title text.
-  - This is the only planned third-party media embed in the first public website version.
+  - The video must remain responsive at 16:9 and localized with accessible title text.
+  - The first public website version does not need a third-party media iframe for the brand film.
 - Video is optional. If a ChatGPT video generation tool is available later, the site can add a short product loop with a poster image fallback. If no video tool is available, CSS motion or static generated imagery is sufficient.
 
 ## Multilingual Architecture
@@ -127,6 +132,18 @@ Content rules:
 - Static image assets are shared across locales; `alt` text is localized through the catalog.
 - Contact form service options display localized titles but submit canonical feature slugs to SQLite, avoiding mixed-language lead interest values.
 - Admin lead review remains English-only in v1.
+
+## Privacy / GDPR-Lite Handling
+
+The website applies privacy information globally instead of using EU-only IP detection.
+
+- Public routes include `/privacy`, `/zh-tw/privacy`, and `/zh-cn/privacy`.
+- The footer links to the localized privacy notice on every page.
+- The contact form includes a localized privacy note linking to the privacy notice.
+- The privacy notice explains contact form fields, inquiry handling purpose, 24-month lead retention intent, data access/correction/deletion request handling, admin token protection, and local video behavior.
+- The first implementation uses `privacy@example.com` as a placeholder privacy contact. This must be replaced with an official contact address before public launch.
+- The privacy notice is GDPR-lite readiness for the website prototype, not a complete legal compliance package.
+- The homepage brand film is served as a local MP4 asset and does not create a YouTube iframe.
 
 SEO rules:
 
@@ -205,6 +222,7 @@ Routes:
 - `GET /features`: feature overview.
 - `GET /features/{slug}`: feature detail pages.
 - `GET /contact`: contact / early access registration form.
+- `GET /privacy`: privacy notice.
 - `GET /robots.txt`: crawl directives for search bots.
 - `GET /sitemap.xml`: sitemap covering public marketing and docs pages.
 - `POST /contact`: validate and store a lead in SQLite.
@@ -218,6 +236,7 @@ Localized public route variants:
 - Traditional Chinese mirrors public routes under `/zh-tw`.
 - Simplified Chinese mirrors public routes under `/zh-cn`.
 - Examples: `/zh-tw/features/ota`, `/zh-cn/docs/apis`, `/zh-tw/contact`.
+- Privacy examples: `/zh-tw/privacy`, `/zh-cn/privacy`.
 - Localized `POST /contact` variants write to the same SQLite lead table.
 - Feature and documentation slugs remain English across all locales.
 
@@ -330,8 +349,8 @@ Contact form fields:
 ## Test Plan
 
 - `go test ./...`
-- HTTP route tests for `/`, `/docs`, `/features`, feature/detail pages, `/contact`, `/robots.txt`, and `/sitemap.xml`.
-- Localized HTTP route tests for `/zh-tw`, `/zh-tw/features/{slug}`, `/zh-tw/docs/{slug}`, `/zh-tw/contact`, `/zh-cn`, `/zh-cn/features/{slug}`, `/zh-cn/docs/{slug}`, and `/zh-cn/contact`.
+- HTTP route tests for `/`, `/docs`, `/features`, feature/detail pages, `/contact`, `/privacy`, `/robots.txt`, and `/sitemap.xml`.
+- Localized HTTP route tests for `/zh-tw`, `/zh-tw/features/{slug}`, `/zh-tw/docs/{slug}`, `/zh-tw/contact`, `/zh-tw/privacy`, `/zh-cn`, `/zh-cn/features/{slug}`, `/zh-cn/docs/{slug}`, `/zh-cn/contact`, and `/zh-cn/privacy`.
 - Localized metadata tests for `<html lang>`, canonical URL, `hreflang` alternates, and language switcher current-state links.
 - Unknown feature slug returns 404.
 - Unknown locale prefix and unknown localized feature/docs slugs return 404.
@@ -342,7 +361,8 @@ Contact form fields:
 - CDN readiness tests verify `PUBLIC_BASE_URL` affects canonical URLs, social image URLs, `hreflang`, robots sitemap references, and sitemap locations.
 - CDN readiness tests verify `ENABLE_ASSET_FINGERPRINTS=true` adds content hashes to rendered static asset URLs.
 - CDN readiness tests verify `ENABLE_CDN_CACHE_HEADERS=true` applies the expected static, public HTML, contact, admin, health, robots, and sitemap cache headers.
-- Homepage brand film tests verify the `youtube-nocookie.com` embed, lazy-loading iframe attributes, localized section copy, and placement between Architecture and Deployment.
+- Privacy tests verify localized privacy notice routes, footer links, contact form notice links, sitemap privacy URLs, and privacy metadata.
+- Homepage brand film tests verify the local MP4 source, poster image, native video metadata preload, no YouTube iframe, and localized section copy between Architecture and Deployment.
 - Admin lead routes require `ADMIN_TOKEN`; unauthorized requests return 401, disabled admin routes return 404.
 - `go run ./cmd/visual-smoke`
 - The visual smoke command checks English, Traditional Chinese, and Simplified Chinese public pages at desktop/mobile widths, verifies representative hero/feature images load, and fails on horizontal overflow without adding npm dependencies.

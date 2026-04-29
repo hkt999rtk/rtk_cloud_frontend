@@ -183,6 +183,8 @@ func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
 		s.handleFeatureDetail(w, r, locale, publicPath)
 	case publicPath == "/contact":
 		s.handleContact(w, r, locale, publicPath)
+	case publicPath == "/privacy":
+		s.handlePrivacy(w, r, locale, publicPath)
 	default:
 		http.NotFound(w, r)
 	}
@@ -206,6 +208,16 @@ func (s *Server) handleDocs(w http.ResponseWriter, r *http.Request, locale conte
 	catalog := content.CatalogFor(locale)
 	page := catalog.Page("docs")
 	s.render(w, http.StatusOK, "docs.html", s.basePageData(r, locale, publicPath, page.Title, page.Description))
+}
+
+func (s *Server) handlePrivacy(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+	catalog := content.CatalogFor(locale)
+	page := catalog.Page("privacy")
+	s.render(w, http.StatusOK, "privacy.html", s.basePageData(r, locale, publicPath, page.Title, page.Description))
 }
 
 func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
