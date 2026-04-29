@@ -28,6 +28,14 @@ jobs:
 
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      - name: Verify Git LFS assets
+        shell: bash
+        run: |
+          git lfs pull
+          test "$(wc -c < static/assets/realtek-brand-film.mp4)" -gt 1000000
 
       - name: Check Go toolchain
         run: go version
@@ -79,6 +87,9 @@ jobs:
           curl -k -fsS --max-time 20 "${PUBLIC_BASE_URL}/" > /tmp/realtek-connect-home.html
           grep -q "Realtek Connect" /tmp/realtek-connect-home.html
           grep -q "Contact Us" /tmp/realtek-connect-home.html
+          curl -k -fsSI --max-time 20 "${PUBLIC_BASE_URL}/static/assets/realtek-brand-film.mp4" > /tmp/realtek-connect-video.headers
+          grep -qi "content-type: video/mp4" /tmp/realtek-connect-video.headers
+          awk 'BEGIN { ok = 0 } tolower($1) == "content-length:" && $2 + 0 > 1000000 { ok = 1 } END { exit ok ? 0 : 1 }' /tmp/realtek-connect-video.headers
           if grep -q "Contact Sales" /tmp/realtek-connect-home.html; then
             echo "Unexpected stale Contact Sales copy found in deployed homepage"
             exit 1
