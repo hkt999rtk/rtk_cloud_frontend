@@ -238,6 +238,26 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 			alt:  `alt="Firmware rollout control center with staged release timeline, device cohorts, and OTA job analytics."`,
 		},
 		{
+			path: "/features/fleet-management",
+			src:  `/static/assets/feature-fleet-management.png`,
+			alt:  `alt="Fleet management dashboard with connected device groups, health status tiles, tags, and batch operation queue."`,
+		},
+		{
+			path: "/features/smart-home",
+			src:  `/static/assets/feature-smart-home-experience.png`,
+			alt:  `alt="Smart home app control surface with connected home devices, scenes, schedules, grouping, and notification cards."`,
+		},
+		{
+			path: "/features/user-management",
+			src:  `/static/assets/feature-user-management.png`,
+			alt:  `alt="User management console with profile cards, security verification, sharing permissions, and account lifecycle controls."`,
+		},
+		{
+			path: "/features/app-sdk",
+			src:  `/static/assets/feature-app-sdk.png`,
+			alt:  `alt="Mobile app SDK workspace with app screens, code modules, push notification blocks, and publishing checklist."`,
+		},
+		{
 			path: "/features/insights",
 			src:  `/static/assets/feature-insights-dashboard.jpg`,
 			alt:  `alt="Operations insights dashboard with fleet health charts, alert cards, and device telemetry summaries."`,
@@ -246,6 +266,11 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 			path: "/features/private-cloud",
 			src:  `/static/assets/feature-private-cloud-architecture.jpg`,
 			alt:  `alt="Private cloud architecture showing dedicated regions, branded domain entry points, and enterprise control boundaries."`,
+		},
+		{
+			path: "/features/integrations",
+			src:  `/static/assets/feature-integrations.png`,
+			alt:  `alt="Integration hub connecting generic Matter, voice assistant, REST API, MQTT over TLS, webhook, app, and enterprise system endpoints."`,
 		},
 	}
 
