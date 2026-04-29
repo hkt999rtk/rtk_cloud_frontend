@@ -29,11 +29,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-          cache: false
+      - name: Check Go toolchain
+        run: go version
 
       - name: Check Go formatting
         shell: bash
