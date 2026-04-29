@@ -8,6 +8,8 @@ Current status: **v0.1 Marketing Foundation**.
 
 This repository currently contains a working marketing website foundation, a developer docs portal structure, feature pages for provisioning, OTA, fleet management, smart home experience, user management, app SDK, insights, private cloud, and integrations, multilingual public routes for English, Traditional Chinese, and Simplified Chinese, per-page SEO/social metadata, sitemap and robots endpoints, contact lead capture, SQLite storage, admin lead review with filtering and pagination, filtered CSV export, health check, and a container deployment recipe. It is not yet a complete IoT console, user authentication service, real OTA service, device provisioning backend, or telemetry platform.
 
+The homepage includes a Realtek corporate brand film embed using YouTube's privacy-enhanced `youtube-nocookie.com` domain. The video supports brand trust after the platform architecture section and is not used as autoplay hero media.
+
 The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.md).
 
 ## Run

@@ -95,6 +95,12 @@ Assets:
 - Current generated homepage assets:
   - `static/assets/connectplus-hero-v2.jpg`: text-free chip-to-cloud-to-app/dashboard hero visual.
   - `static/assets/connectplus-platform-surfaces.jpg`: platform surfaces visual showing onboarding, OTA rollout, and fleet health dashboard context.
+- Homepage brand film:
+  - The homepage may include the official Realtek corporate brand film as a trust-building section after Architecture and before Deployment.
+  - The first implementation uses the privacy-enhanced YouTube embed `https://www.youtube-nocookie.com/embed/QqC06634wcI`.
+  - The film must not replace the product hero, must not autoplay, and must keep Realtek Connect+ product CTAs as the primary conversion path.
+  - The iframe must be lazy-loaded, responsive at 16:9, and localized with accessible title text.
+  - This is the only planned third-party media embed in the first public website version.
 - Video is optional. If a ChatGPT video generation tool is available later, the site can add a short product loop with a poster image fallback. If no video tool is available, CSS motion or static generated imagery is sufficient.
 
 ## Multilingual Architecture
@@ -336,6 +342,7 @@ Contact form fields:
 - CDN readiness tests verify `PUBLIC_BASE_URL` affects canonical URLs, social image URLs, `hreflang`, robots sitemap references, and sitemap locations.
 - CDN readiness tests verify `ENABLE_ASSET_FINGERPRINTS=true` adds content hashes to rendered static asset URLs.
 - CDN readiness tests verify `ENABLE_CDN_CACHE_HEADERS=true` applies the expected static, public HTML, contact, admin, health, robots, and sitemap cache headers.
+- Homepage brand film tests verify the `youtube-nocookie.com` embed, lazy-loading iframe attributes, localized section copy, and placement between Architecture and Deployment.
 - Admin lead routes require `ADMIN_TOKEN`; unauthorized requests return 401, disabled admin routes return 404.
 - `go run ./cmd/visual-smoke`
 - The visual smoke command checks English, Traditional Chinese, and Simplified Chinese public pages at desktop/mobile widths, verifies representative hero/feature images load, and fails on horizontal overflow without adding npm dependencies.

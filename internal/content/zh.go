@@ -121,6 +121,14 @@ func zhTWText() map[string]string {
 		"home.arch.cloud.body":       "裝置登錄、OTA 活動、使用者裝置關聯與 API。",
 		"home.arch.app.title":        "App SDK 與儀表板",
 		"home.arch.app.body":         "行動配網、產品控制、洞察與支援流程。",
+		"home.film.eyebrow":          "品牌基礎",
+		"home.film.title":            "建立在 Realtek 的連網智慧之上。",
+		"home.film.body":             "Realtek Connect+ 將半導體與連線技術基礎延伸為雲端平台敘事，協助產品團隊打造可商用規模化的連網裝置。",
+		"home.film.cta":              "觀看品牌影片",
+		"home.film.title.attr":       "Realtek 企業形象影片",
+		"home.film.point.silicon":    "半導體技術基礎",
+		"home.film.point.ecosystem":  "連網產品生態系",
+		"home.film.point.enterprise": "企業部署信任",
 		"home.deploy.eyebrow":        "公有評估與私有雲",
 		"home.deploy.title":          "從評估開始，逐步走向受控部署。",
 		"home.deploy.public":         "公有評估",
@@ -459,6 +467,7 @@ func toSimplified(value string) string {
 		"絡", "络", "們", "们", "麼", "么", "蓋", "盖", "綁", "绑", "廠", "厂",
 		"擁", "拥", "錄", "录", "狀", "状", "遙", "遥", "測", "测", "時", "时",
 		"縮", "缩", "備", "备", "進", "进", "線", "线", "協", "协",
+		"業", "业", "術", "术",
 	)
 	return replacer.Replace(value)
 }

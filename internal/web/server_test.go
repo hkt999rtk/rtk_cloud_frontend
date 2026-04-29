@@ -219,6 +219,77 @@ func TestHomeMetadataIncludesSocialTags(t *testing.T) {
 	}
 }
 
+func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	tests := []struct {
+		path        string
+		title       string
+		body        string
+		point       string
+		iframeTitle string
+	}{
+		{
+			path:        "/",
+			title:       "Built on Realtek&#39;s connected intelligence.",
+			body:        "Realtek Connect&#43; extends a semiconductor and connectivity foundation into a cloud platform story",
+			point:       "Semiconductor foundation",
+			iframeTitle: `title="Realtek corporate brand film"`,
+		},
+		{
+			path:        "/zh-tw/",
+			title:       "建立在 Realtek 的連網智慧之上。",
+			body:        "Realtek Connect&#43; 將半導體與連線技術基礎延伸為雲端平台敘事",
+			point:       "半導體技術基礎",
+			iframeTitle: `title="Realtek 企業形象影片"`,
+		},
+		{
+			path:        "/zh-cn/",
+			title:       "建立在 Realtek 的連网智慧之上。",
+			body:        "Realtek Connect&#43; 将半导体与連线技术基础延伸为云端平台敘事",
+			point:       "半导体技术基础",
+			iframeTitle: `title="Realtek 企业形象影片"`,
+		},
+	}
+
+	for _, tc := range tests {
+		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", tc.path, rec.Code)
+		}
+
+		body := rec.Body.String()
+		for _, want := range []string{
+			`<section class="section brand-film">`,
+			`src="https://www.youtube-nocookie.com/embed/QqC06634wcI"`,
+			tc.iframeTitle,
+			`loading="lazy"`,
+			`allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"`,
+			`allowfullscreen`,
+			tc.title,
+			tc.body,
+			tc.point,
+		} {
+			if !strings.Contains(body, want) {
+				t.Fatalf("%s response does not contain %q: %s", tc.path, want, body)
+			}
+		}
+
+		architectureIndex := strings.Index(body, `<section class="section architecture"`)
+		filmIndex := strings.Index(body, `<section class="section brand-film">`)
+		deploymentIndex := strings.Index(body, `<section class="section deployment-section">`)
+		if architectureIndex == -1 || filmIndex == -1 || deploymentIndex == -1 {
+			t.Fatalf("%s missing expected home sections", tc.path)
+		}
+		if !(architectureIndex < filmIndex && filmIndex < deploymentIndex) {
+			t.Fatalf("%s brand film section should be between architecture and deployment", tc.path)
+		}
+	}
+}
+
 func TestPublicBaseURLOverridesGeneratedAbsoluteURLs(t *testing.T) {
 	handler := testServerWithConfig(t, Config{
 		LeadStore:     &memoryLeadStore{},
