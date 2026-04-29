@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"realtek-connect/internal/content"
 	"realtek-connect/internal/docs"
 	"realtek-connect/internal/features"
 	"realtek-connect/internal/leads"
@@ -49,6 +50,12 @@ type pageData struct {
 	SocialImageAlt  string
 	MetaRobots      string
 	CurrentPath     string
+	PublicPath      string
+	Lang            string
+	Locale          content.Locale
+	LocalePrefix    string
+	Text            map[string]string
+	AlternateLinks  []content.AlternateLink
 	Docs            []docs.Section
 	Doc             docs.Section
 	Features        []features.Feature
@@ -117,64 +124,72 @@ func (s *Server) Routes() http.Handler {
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(s.staticDir))))
 	mux.HandleFunc("/robots.txt", s.handleRobotsTxt)
 	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
-	mux.HandleFunc("/", s.handleHome)
-	mux.HandleFunc("/docs", s.handleDocs)
-	mux.HandleFunc("/docs/", s.handleDocDetail)
-	mux.HandleFunc("/features", s.handleFeatures)
-	mux.HandleFunc("/features/", s.handleFeatureDetail)
-	mux.HandleFunc("/contact", s.handleContact)
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
 	mux.HandleFunc("/admin/leads.csv", s.handleAdminLeadsCSV)
 	mux.HandleFunc("/healthz", s.handleHealthz)
+	mux.HandleFunc("/", s.handlePublic)
 	return securityHeaders(s.searchIndexingHeaders(mux))
 }
 
-func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
+func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
+	locale, publicPath, ok := content.LocaleFromPath(r.URL.Path)
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}
-	if r.Method != http.MethodGet {
-		methodNotAllowed(w)
-		return
-	}
-	s.render(w, http.StatusOK, "home.html", s.basePageData(
-		r,
-		"Realtek Connect+ | IoT Cloud Platform",
-		"Realtek Connect+ is an IoT cloud platform for provisioning, OTA, fleet management, app SDKs, insights, private cloud, and integrations.",
-	))
-}
-
-func (s *Server) handleDocs(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/docs" {
+	switch {
+	case publicPath == "/":
+		s.handleHome(w, r, locale, publicPath)
+	case publicPath == "/docs":
+		s.handleDocs(w, r, locale, publicPath)
+	case strings.HasPrefix(publicPath, "/docs/"):
+		s.handleDocDetail(w, r, locale, publicPath)
+	case publicPath == "/features":
+		s.handleFeatures(w, r, locale, publicPath)
+	case strings.HasPrefix(publicPath, "/features/"):
+		s.handleFeatureDetail(w, r, locale, publicPath)
+	case publicPath == "/contact":
+		s.handleContact(w, r, locale, publicPath)
+	default:
 		http.NotFound(w, r)
-		return
 	}
-	if r.Method != http.MethodGet {
-		methodNotAllowed(w)
-		return
-	}
-	s.render(w, http.StatusOK, "docs.html", s.basePageData(
-		r,
-		"Developer Docs | Realtek Connect+",
-		"Browse Realtek Connect+ documentation entry points for product overview, development, APIs, SDKs, firmware, CLI, deployment, and release notes.",
-	))
 }
 
-func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleHome(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+	catalog := content.CatalogFor(locale)
+	page := catalog.Page("home")
+	s.render(w, http.StatusOK, "home.html", s.basePageData(r, locale, publicPath, page.Title, page.Description))
+}
+
+func (s *Server) handleDocs(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+	catalog := content.CatalogFor(locale)
+	page := catalog.Page("docs")
+	s.render(w, http.StatusOK, "docs.html", s.basePageData(r, locale, publicPath, page.Title, page.Description))
+}
+
+func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
 	if r.Method != http.MethodGet {
 		methodNotAllowed(w)
 		return
 	}
 
-	slug := strings.TrimPrefix(r.URL.Path, "/docs/")
+	slug := strings.TrimPrefix(publicPath, "/docs/")
 	slug = strings.Trim(slug, "/")
 	if slug == "" {
-		http.Redirect(w, r, "/docs", http.StatusSeeOther)
+		http.Redirect(w, r, content.PathForLocale(locale, "/docs"), http.StatusSeeOther)
 		return
 	}
 
-	doc, ok := docs.BySlug(slug)
+	catalog := content.CatalogFor(locale)
+	doc, ok := catalog.DocBySlug(slug)
 	if !ok {
 		http.NotFound(w, r)
 		return
@@ -182,6 +197,8 @@ func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request) {
 
 	data := s.basePageData(
 		r,
+		locale,
+		publicPath,
 		doc.Title+" | Realtek Connect+ Docs",
 		doc.Summary,
 	)
@@ -203,20 +220,14 @@ func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("ok\n"))
 }
 
-func (s *Server) handleFeatures(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/features" {
-		http.NotFound(w, r)
-		return
-	}
+func (s *Server) handleFeatures(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
 	if r.Method != http.MethodGet {
 		methodNotAllowed(w)
 		return
 	}
-	s.render(w, http.StatusOK, "features.html", s.basePageData(
-		r,
-		"Features | Realtek Connect+",
-		"Explore provisioning, OTA, fleet management, app SDK, insights, private cloud, and ecosystem integrations for Realtek-based IoT products.",
-	))
+	catalog := content.CatalogFor(locale)
+	page := catalog.Page("features")
+	s.render(w, http.StatusOK, "features.html", s.basePageData(r, locale, publicPath, page.Title, page.Description))
 }
 
 func (s *Server) handleAdminLeads(w http.ResponseWriter, r *http.Request) {
@@ -345,20 +356,21 @@ func (s *Server) unauthorized(w http.ResponseWriter) {
 	http.Error(w, "unauthorized", http.StatusUnauthorized)
 }
 
-func (s *Server) handleFeatureDetail(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleFeatureDetail(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
 	if r.Method != http.MethodGet {
 		methodNotAllowed(w)
 		return
 	}
 
-	slug := strings.TrimPrefix(r.URL.Path, "/features/")
+	slug := strings.TrimPrefix(publicPath, "/features/")
 	slug = strings.Trim(slug, "/")
 	if slug == "" {
-		http.Redirect(w, r, "/features", http.StatusSeeOther)
+		http.Redirect(w, r, content.PathForLocale(locale, "/features"), http.StatusSeeOther)
 		return
 	}
 
-	feature, ok := features.BySlug(slug)
+	catalog := content.CatalogFor(locale)
+	feature, ok := catalog.FeatureBySlug(slug)
 	if !ok {
 		http.NotFound(w, r)
 		return
@@ -366,6 +378,8 @@ func (s *Server) handleFeatureDetail(w http.ResponseWriter, r *http.Request) {
 
 	data := s.basePageData(
 		r,
+		locale,
+		publicPath,
 		feature.Title+" | Realtek Connect+",
 		feature.Summary,
 	)
@@ -373,22 +387,20 @@ func (s *Server) handleFeatureDetail(w http.ResponseWriter, r *http.Request) {
 	s.render(w, http.StatusOK, "feature.html", data)
 }
 
-func (s *Server) handleContact(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleContact(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
 	switch r.Method {
 	case http.MethodGet:
-		s.render(w, http.StatusOK, "contact.html", s.basePageData(
-			r,
-			"Contact | Realtek Connect+",
-			"Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
-		))
+		catalog := content.CatalogFor(locale)
+		page := catalog.Page("contact")
+		s.render(w, http.StatusOK, "contact.html", s.basePageData(r, locale, publicPath, page.Title, page.Description))
 	case http.MethodPost:
-		s.submitContact(w, r)
+		s.submitContact(w, r, locale, publicPath)
 	default:
 		methodNotAllowed(w)
 	}
 }
 
-func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
+func (s *Server) submitContact(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "invalid form payload", http.StatusBadRequest)
 		return
@@ -404,26 +416,22 @@ func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isSpamContact(form) {
-		data := s.basePageData(
-			r,
-			"Contact | Realtek Connect+",
-			"Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
-		)
+		catalog := content.CatalogFor(locale)
+		page := catalog.Page("contact")
+		data := s.basePageData(r, locale, publicPath, page.Title, page.Description)
 		data.Form = form
 		data.Errors = map[string]string{
-			"form": "Request could not be processed.",
+			"form": localizeError("Request could not be processed.", catalog),
 		}
 		s.render(w, http.StatusBadRequest, "contact.html", data)
 		return
 	}
 
-	errors := validateContact(form)
+	catalog := content.CatalogFor(locale)
+	errors := validateContact(form, catalog)
 	if len(errors) > 0 {
-		data := s.basePageData(
-			r,
-			"Contact | Realtek Connect+",
-			"Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
-		)
+		page := catalog.Page("contact")
+		data := s.basePageData(r, locale, publicPath, page.Title, page.Description)
 		data.Form = form
 		data.Errors = errors
 		s.render(w, http.StatusBadRequest, "contact.html", data)
@@ -431,14 +439,11 @@ func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if s.contactLimit != nil && !s.contactLimit.Allow(contactSubmissionKey(r)) {
-		data := s.basePageData(
-			r,
-			"Contact | Realtek Connect+",
-			"Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
-		)
+		page := catalog.Page("contact")
+		data := s.basePageData(r, locale, publicPath, page.Title, page.Description)
 		data.Form = form
 		data.Errors = map[string]string{
-			"form": "Too many requests from this address. Please wait a few minutes and try again.",
+			"form": localizeError("Too many requests from this address. Please wait a few minutes and try again.", catalog),
 		}
 		s.render(w, http.StatusTooManyRequests, "contact.html", data)
 		return
@@ -460,17 +465,14 @@ func (s *Server) submitContact(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data := s.basePageData(
-		r,
-		"Contact | Realtek Connect+",
-		"Contact the Realtek Connect+ team about provisioning, OTA, fleet operations, app SDKs, insights, or private cloud evaluation.",
-	)
+	page := catalog.Page("contact")
+	data := s.basePageData(r, locale, publicPath, page.Title, page.Description)
 	data.Success = true
 	data.SubmittedFor = form.Name
 	s.render(w, http.StatusOK, "contact.html", data)
 }
 
-func validateContact(form contactForm) map[string]string {
+func validateContact(form contactForm, catalog content.Catalog) map[string]string {
 	errors := make(map[string]string)
 	for field, message := range leads.Validate(leads.Lead{
 		Name:     form.Name,
@@ -479,11 +481,11 @@ func validateContact(form contactForm) map[string]string {
 		Interest: form.Interest,
 		Message:  form.Message,
 	}) {
-		errors[field] = message
+		errors[field] = localizeError(message, catalog)
 	}
 
 	if form.Email != "" && !emailPattern.MatchString(form.Email) {
-		errors["email"] = "Enter a valid email address."
+		errors["email"] = localizeError("Enter a valid email address.", catalog)
 	}
 
 	if len(errors) == 0 {
@@ -517,8 +519,10 @@ func (s *Server) render(w http.ResponseWriter, status int, name string, data pag
 		filepath.Join(s.templatesDir, name),
 	}
 	tmpl, err := template.New("layout.html").Funcs(template.FuncMap{
-		"formatTime": formatTime,
-		"icon":       icon,
+		"formatTime":    formatTime,
+		"icon":          icon,
+		"t":             templateText,
+		"localizedPath": localizedPath,
 	}).ParseFiles(files...)
 	if err != nil {
 		http.Error(w, "template parse error", http.StatusInternalServerError)
@@ -529,6 +533,48 @@ func (s *Server) render(w http.ResponseWriter, status int, name string, data pag
 	if err := tmpl.ExecuteTemplate(w, "layout", data); err != nil {
 		http.Error(w, "template render error", http.StatusInternalServerError)
 	}
+}
+
+func templateText(data pageData, key string) string {
+	if value, ok := data.Text[key]; ok {
+		return value
+	}
+	return key
+}
+
+func localizedPath(data pageData, publicPath string) string {
+	return content.PathForLocale(data.Locale, publicPath)
+}
+
+func localizeError(message string, catalog content.Catalog) string {
+	if catalog.Locale.Code == "en" {
+		return message
+	}
+	localized := message
+	switch {
+	case message == "Name is required.":
+		localized = catalog.T("contact.name") + "為必填欄位。"
+	case message == "Email is required.":
+		localized = catalog.T("contact.email") + "為必填欄位。"
+	case message == "Enter a valid email address.":
+		localized = "請輸入有效的 Email。"
+	case message == "Select an area of interest.":
+		localized = "請選擇關注服務。"
+	case message == "Request could not be processed.":
+		localized = "無法處理此請求。"
+	case strings.HasPrefix(message, "Too many requests"):
+		localized = "此來源送出太多請求，請稍候再試。"
+	case strings.HasPrefix(message, "Name must be"):
+		localized = catalog.T("contact.name") + "最多 120 個字元。"
+	case strings.HasPrefix(message, "Company must be"):
+		localized = catalog.T("contact.company") + "最多 160 個字元。"
+	case strings.HasPrefix(message, "Message must be"):
+		localized = catalog.T("contact.message") + "最多 2000 個字元。"
+	}
+	if catalog.Locale.Code == "zh-CN" {
+		return content.ToSimplified(localized)
+	}
+	return localized
 }
 
 func formatTime(value time.Time) string {

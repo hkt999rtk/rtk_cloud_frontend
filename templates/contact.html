@@ -7,31 +7,31 @@
 {{$messageError := index .Errors "message"}}
 <section class="page-hero compact">
   <span class="icon-box page-hero-icon">{{icon "mail"}}</span>
-  <p class="eyebrow">Contact</p>
-  <h1>Register interest in Realtek Connect+.</h1>
-  <p>Tell us which service matters most for your product team. Requests are stored locally in SQLite for this first version.</p>
+  <p class="eyebrow">{{t . "contact.eyebrow"}}</p>
+  <h1>{{t . "contact.title"}}</h1>
+  <p>{{t . "contact.body"}}</p>
 </section>
 
 <section class="contact-section">
   <div class="contact-context">
     <span class="icon-box panel-icon">{{icon "cloud-lock"}}</span>
-    <p class="eyebrow">Early access</p>
-    <h2>For IoT product planning, firmware maintenance, and private cloud evaluation.</h2>
-    <p>Use this form for provisioning, OTA, fleet management, app SDK, insights, private cloud, or integration discussions.</p>
+    <p class="eyebrow">{{t . "contact.context.eyebrow"}}</p>
+    <h2>{{t . "contact.context.title"}}</h2>
+    <p>{{t . "contact.context.body"}}</p>
   </div>
 
   <div class="form-card">
     {{if .Success}}
     <div class="success-message" role="status">
-      <h2>Thanks, {{.SubmittedFor}}.</h2>
-      <p>Your Realtek Connect+ request has been recorded.</p>
-      <a class="button secondary" href="/features">Review features</a>
+      <h2>{{t . "contact.thanks"}}, {{.SubmittedFor}}.</h2>
+      <p>{{t . "contact.recorded"}}</p>
+      <a class="button secondary" href="{{localizedPath . "/features"}}">{{t . "contact.review"}}</a>
     </div>
     {{else}}
-    <form method="post" action="/contact" novalidate>
+    <form method="post" action="{{localizedPath . "/contact"}}" novalidate>
       {{if .Errors}}
       <div class="form-error-summary" role="alert" aria-labelledby="contact-errors-title" tabindex="-1">
-        <p id="contact-errors-title">Please review the details below before submitting.</p>
+        <p id="contact-errors-title">{{t . "contact.error.summary"}}</p>
         <ul>
           {{with $formError}}<li>{{.}}</li>{{end}}
           {{with $nameError}}<li><a href="#contact-name">{{.}}</a></li>{{end}}
@@ -43,50 +43,50 @@
       </div>
       {{end}}
       <div class="honeypot-field" aria-hidden="true">
-        <label for="contact-website">Website</label>
+        <label for="contact-website">{{t . "contact.website"}}</label>
         <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off">
       </div>
       <div class="form-field">
         <label for="contact-name">
-          <span>Name</span>
+          <span>{{t . "contact.name"}}</span>
           {{with $nameError}}<em id="contact-name-error">{{.}}</em>{{end}}
         </label>
         <input id="contact-name" name="name" value="{{.Form.Name}}" autocomplete="name" maxlength="120" required {{if $nameError}}aria-invalid="true" aria-describedby="contact-name-error"{{end}}>
       </div>
       <div class="form-field">
         <label for="contact-company">
-          <span>Company</span>
+          <span>{{t . "contact.company"}}</span>
           {{with $companyError}}<em id="contact-company-error">{{.}}</em>{{end}}
         </label>
         <input id="contact-company" name="company" value="{{.Form.Company}}" autocomplete="organization" maxlength="160" {{if $companyError}}aria-invalid="true" aria-describedby="contact-company-error"{{end}}>
       </div>
       <div class="form-field">
         <label for="contact-email">
-          <span>Email</span>
+          <span>{{t . "contact.email"}}</span>
           {{with $emailError}}<em id="contact-email-error">{{.}}</em>{{end}}
         </label>
         <input id="contact-email" name="email" value="{{.Form.Email}}" type="email" autocomplete="email" maxlength="254" required {{if $emailError}}aria-invalid="true" aria-describedby="contact-email-error"{{end}}>
       </div>
       <div class="form-field">
         <label for="contact-interest">
-          <span>Interest</span>
+          <span>{{t . "contact.interest"}}</span>
           {{with $interestError}}<em id="contact-interest-error">{{.}}</em>{{end}}
         </label>
         <select id="contact-interest" name="interest" required {{if $interestError}}aria-invalid="true" aria-describedby="contact-interest-error"{{end}}>
-          <option value="">Select a service</option>
+          <option value="">{{t . "contact.select"}}</option>
           {{range .Features}}
-          <option value="{{.Title}}" {{if eq $.Form.Interest .Title}}selected{{end}}>{{.Title}}</option>
+          <option value="{{.Slug}}" {{if or (eq $.Form.Interest .Slug) (eq $.Form.Interest .Title)}}selected{{end}}>{{.Title}}</option>
           {{end}}
         </select>
       </div>
       <div class="form-field">
         <label for="contact-message">
-          <span>Message</span>
+          <span>{{t . "contact.message"}}</span>
           {{with $messageError}}<em id="contact-message-error">{{.}}</em>{{end}}
         </label>
         <textarea id="contact-message" name="message" rows="5" maxlength="2000" {{if $messageError}}aria-invalid="true" aria-describedby="contact-message-error"{{end}}>{{.Form.Message}}</textarea>
       </div>
-      <button class="button primary" type="submit"><span class="button-icon">{{icon "arrow-right"}}</span>Submit Request</button>
+      <button class="button primary" type="submit"><span class="button-icon">{{icon "arrow-right"}}</span>{{t . "contact.submit"}}</button>
     </form>
     {{end}}
   </div>

@@ -1,6 +1,6 @@
 {{define "layout"}}
 <!doctype html>
-<html lang="en">
+<html lang="{{.Lang}}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,23 +19,28 @@
   <meta name="twitter:description" content="{{.MetaDescription}}">
   <meta name="twitter:image" content="{{.SocialImageURL}}">
   <meta name="twitter:image:alt" content="{{.SocialImageAlt}}">
+  {{range .AlternateLinks}}<link rel="alternate" hreflang="{{.HrefLang}}" href="{{.Href}}">
+  {{end}}
   {{if .MetaRobots}}<meta name="robots" content="{{.MetaRobots}}">{{end}}
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a class="skip-link" href="#main-content">{{t . "skip.main"}}</a>
   <header class="site-header">
-    <a class="brand" href="/" aria-label="Realtek Connect+ home">
+    <a class="brand" href="{{localizedPath . "/"}}" aria-label="{{t . "brand.home"}}">
       <img class="brand-logo" src="/static/assets/realtek-logo.png" alt="Realtek">
       <span class="brand-divider"></span>
       <span class="brand-product">Connect+</span>
     </a>
     <nav class="main-nav" aria-label="Main navigation">
-      <a href="/docs">Docs</a>
-      <a href="/features">Features</a>
-      <a href="/#architecture">Architecture</a>
-      <a href="/contact" class="nav-cta">Contact</a>
+      <a href="{{localizedPath . "/docs"}}">{{t . "nav.docs"}}</a>
+      <a href="{{localizedPath . "/features"}}">{{t . "nav.features"}}</a>
+      <a href="{{localizedPath . "/"}}#architecture">{{t . "nav.architecture"}}</a>
+      <a href="{{localizedPath . "/contact"}}" class="nav-cta">{{t . "nav.contact"}}</a>
     </nav>
+    {{if .AlternateLinks}}<nav class="language-nav" aria-label="Language">
+      {{range .AlternateLinks}}{{if ne .HrefLang "x-default"}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}
+    </nav>{{end}}
   </header>
 
   <main id="main-content" tabindex="-1">
@@ -45,12 +50,12 @@
   <footer class="site-footer">
     <div>
       <strong>Realtek Connect+</strong>
-      <p>IoT cloud platform concept for Realtek-based connected products.</p>
+      <p>{{t . "footer.tagline"}}</p>
     </div>
     <div class="footer-links">
-      <a href="/docs">Developer Docs</a>
-      <a href="/features">Features</a>
-      <a href="/contact">Contact Us</a>
+      <a href="{{localizedPath . "/docs"}}">{{t . "footer.docs"}}</a>
+      <a href="{{localizedPath . "/features"}}">{{t . "footer.features"}}</a>
+      <a href="{{localizedPath . "/contact"}}">{{t . "footer.contact"}}</a>
     </div>
   </footer>
 </body>

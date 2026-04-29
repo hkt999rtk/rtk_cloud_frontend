@@ -21,6 +21,9 @@ Implemented today:
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
 - Feature overview and detail pages for Provision, OTA, Fleet Management, Smart Home Experience, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured end-user smart-home workflow story, a structured mobile app delivery comparison story, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
+- Locale-aware public site support for English, Traditional Chinese, and Simplified Chinese. English keeps the existing unprefixed URL structure; Traditional Chinese uses `/zh-tw/...`; Simplified Chinese uses `/zh-cn/...`.
+- Language switcher in the shared header that points to the same public page in each supported locale.
+- Localized public page metadata with canonical URLs, `hreflang` alternates, and localized sitemap entries.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
@@ -43,6 +46,20 @@ Current routes:
 - `GET /admin/leads`
 - `GET /admin/leads.csv`
 - `GET /static/...`
+- `GET /zh-tw`
+- `GET /zh-tw/docs`
+- `GET /zh-tw/docs/{slug}`
+- `GET /zh-tw/features`
+- `GET /zh-tw/features/{slug}`
+- `GET /zh-tw/contact`
+- `POST /zh-tw/contact`
+- `GET /zh-cn`
+- `GET /zh-cn/docs`
+- `GET /zh-cn/docs/{slug}`
+- `GET /zh-cn/features`
+- `GET /zh-cn/features/{slug}`
+- `GET /zh-cn/contact`
+- `POST /zh-cn/contact`
 
 This implementation is enough to demonstrate the Realtek Connect+ direction and collect leads. It is not yet content-complete as a full public IoT cloud platform website and documentation surface.
 
@@ -79,6 +96,45 @@ Assets:
   - `static/assets/connectplus-hero-v2.jpg`: text-free chip-to-cloud-to-app/dashboard hero visual.
   - `static/assets/connectplus-platform-surfaces.jpg`: platform surfaces visual showing onboarding, OTA rollout, and fleet health dashboard context.
 - Video is optional. If a ChatGPT video generation tool is available later, the site can add a short product loop with a poster image fallback. If no video tool is available, CSS motion or static generated imagery is sufficient.
+
+## Multilingual Architecture
+
+Supported locales:
+
+- `en`: default locale, unprefixed URLs such as `/`, `/features`, `/docs/apis`, and `/contact`.
+- `zh-TW`: Traditional Chinese public URLs under `/zh-tw`, such as `/zh-tw/features/ota`.
+- `zh-CN`: Simplified Chinese public URLs under `/zh-cn`, such as `/zh-cn/features/ota`.
+
+Routing rules:
+
+- Locale is resolved from the path prefix only.
+- English routes remain unprefixed for backwards compatibility.
+- No cookie, session, or automatic `Accept-Language` redirect is used in v1.
+- Unknown locale prefixes such as `/fr/...` return 404.
+- `/admin/*`, `/healthz`, `/robots.txt`, `/sitemap.xml`, and `/static/...` are global routes and are not localized.
+
+Content rules:
+
+- Public copy is provided through the internal content catalog.
+- Feature and documentation slugs remain English and stable across all locales.
+- Localized feature and docs catalogs must preserve the same slug set and ordering as English.
+- Static image assets are shared across locales; `alt` text is localized through the catalog.
+- Contact form service options display localized titles but submit canonical feature slugs to SQLite, avoiding mixed-language lead interest values.
+- Admin lead review remains English-only in v1.
+
+SEO rules:
+
+- Public pages emit localized `<html lang>`, title, description, canonical URL, Open Graph, Twitter card metadata, and `hreflang` alternates.
+- `hreflang` values are `en`, `zh-Hant`, `zh-Hans`, and `x-default`.
+- `/sitemap.xml` includes all public locale variants when indexing is enabled.
+- `DISABLE_SEARCH_INDEXING=true` still disables sitemap exposure and emits noindex signals for all localized public pages.
+
+Translation maintenance:
+
+- English remains the source content baseline.
+- Traditional Chinese is maintained as authored localized content.
+- Simplified Chinese is currently generated from the Traditional Chinese catalog using a local character conversion map and should be reviewed before public launch.
+- Any new public page, feature, docs section, form label, validation message, or metadata string must be added to all supported locales in the same change.
 
 ## Feature Scope
 
@@ -123,7 +179,7 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 | APIs | Content Partial | `/docs/apis`, `/features/integrations` | API positioning exists, but website v1 still lacks reference-grade endpoint coverage, auth flows, webhook payload examples, and error-model detail. |
 | SDK Reference | Content Partial | `/docs/sdks`, `/features/app-sdk` | The docs and feature surfaces position the mobile SDK layers, but they do not yet provide install guides, versioned reference material, or language-specific sample code depth. |
 | CLI | Content Partial | `/docs/cli` | The CLI section exists as part of the docs portal, but website v1 still needs command catalogs, auth/session examples, and operator workflow walkthroughs. |
-| SEO / Launch Readiness | Content Partial | Shared layout metadata, `/robots.txt`, `/sitemap.xml`, `go run ./cmd/visual-smoke` | Metadata, sitemap, robots, CI, deployment packaging, and homepage visual smoke checks now exist; remaining work is broader launch polish such as expanded product visuals plus final parity and documentation close-out. |
+| SEO / Launch Readiness | Content Partial | Shared layout metadata, `/robots.txt`, `/sitemap.xml`, `go run ./cmd/visual-smoke` | Metadata, sitemap, robots, CI, deployment packaging, and desktop/mobile visual smoke checks for English, Traditional Chinese, and Simplified Chinese public pages now exist; remaining work is broader launch polish such as expanded product visuals plus final parity and documentation close-out. |
 | Real IoT Cloud Operations | Out of Scope for website v1 | Public marketing and docs copy only | The public website will describe platform capabilities, but it will not implement real device provisioning, OTA delivery, user auth, telemetry ingestion, or a production device-operations control plane in v1. |
 
 ## Website Completion Roadmap
@@ -150,6 +206,14 @@ Routes:
 - `GET /admin/leads`: protected lead review page, enabled only when `ADMIN_TOKEN` is set.
 - `GET /admin/leads.csv`: protected CSV export, enabled only when `ADMIN_TOKEN` is set.
 - `GET /static/...`: CSS and asset files.
+
+Localized public route variants:
+
+- Traditional Chinese mirrors public routes under `/zh-tw`.
+- Simplified Chinese mirrors public routes under `/zh-cn`.
+- Examples: `/zh-tw/features/ota`, `/zh-cn/docs/apis`, `/zh-tw/contact`.
+- Localized `POST /contact` variants write to the same SQLite lead table.
+- Feature and documentation slugs remain English across all locales.
 
 Feature slugs:
 
@@ -245,12 +309,16 @@ Contact form fields:
 
 - `go test ./...`
 - HTTP route tests for `/`, `/docs`, `/features`, feature/detail pages, `/contact`, `/robots.txt`, and `/sitemap.xml`.
+- Localized HTTP route tests for `/zh-tw`, `/zh-tw/features/{slug}`, `/zh-tw/docs/{slug}`, `/zh-tw/contact`, `/zh-cn`, `/zh-cn/features/{slug}`, `/zh-cn/docs/{slug}`, and `/zh-cn/contact`.
+- Localized metadata tests for `<html lang>`, canonical URL, `hreflang` alternates, and language switcher current-state links.
 - Unknown feature slug returns 404.
+- Unknown locale prefix and unknown localized feature/docs slugs return 404.
 - Valid contact POST writes SQLite and shows success.
 - Invalid contact POST shows validation errors and does not write a lead.
+- Localized contact POSTs show localized success/error messaging and store canonical service slugs in SQLite.
 - Admin lead routes require `ADMIN_TOKEN`; unauthorized requests return 401, disabled admin routes return 404.
 - `go run ./cmd/visual-smoke`
-- The visual smoke command checks homepage desktop/mobile layout, verifies the hero image loads, and fails on horizontal overflow without adding npm dependencies.
+- The visual smoke command checks English, Traditional Chinese, and Simplified Chinese public pages at desktop/mobile widths, verifies representative hero/feature images load, and fails on horizontal overflow without adding npm dependencies.
 
 ## Definition of Done
 
@@ -259,9 +327,11 @@ For any future issue that changes website behavior or public content:
 - `go test ./...` passes.
 - `go build ./cmd/server` passes.
 - Go source is formatted with `gofmt`.
-- Desktop and mobile visual smoke checks confirm no blank page, missing hero asset, or horizontal overflow.
+- Desktop and mobile visual smoke checks confirm no blank page, missing representative image asset, localized route regression, or horizontal overflow.
 - No npm, React, Tailwind, or frontend build step is introduced.
 - Any new public route is documented in both `docs/SPEC.md` and `README.md`.
+- Any new public page or public text string is added to every supported locale.
+- Any new feature or docs item keeps stable English slugs across locales and is covered by catalog parity tests.
 - Runtime SQLite files are not committed.
 - Generated website assets are stored under `static/assets/` if referenced by templates or CSS.
 
@@ -494,7 +564,7 @@ Acceptance criteria:
 
 Implementation notes:
 
-- `go run ./cmd/visual-smoke` starts the existing Go-rendered server in-process by default and drives local Chrome headlessly for desktop/mobile homepage checks.
+- `go run ./cmd/visual-smoke` starts the existing Go-rendered server in-process by default and drives local Chrome headlessly for desktop/mobile checks across English, Traditional Chinese, and Simplified Chinese public pages.
 - The command can also target an already running server with `-base-url`.
 
 ## First-Version Limits

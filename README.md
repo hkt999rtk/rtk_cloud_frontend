@@ -6,7 +6,7 @@ Realtek Connect+ is a Go-rendered HTTP website for a Realtek-style IoT cloud pla
 
 Current status: **v0.1 Marketing Foundation**.
 
-This repository currently contains a working marketing website foundation, a developer docs portal structure, feature pages for provisioning, OTA, fleet management, smart home experience, user management, app SDK, insights, private cloud, and integrations, per-page SEO/social metadata, sitemap and robots endpoints, contact lead capture, SQLite storage, admin lead review with filtering and pagination, filtered CSV export, health check, and a container deployment recipe. It is not yet a complete IoT console, user authentication service, real OTA service, device provisioning backend, or telemetry platform.
+This repository currently contains a working marketing website foundation, a developer docs portal structure, feature pages for provisioning, OTA, fleet management, smart home experience, user management, app SDK, insights, private cloud, and integrations, multilingual public routes for English, Traditional Chinese, and Simplified Chinese, per-page SEO/social metadata, sitemap and robots endpoints, contact lead capture, SQLite storage, admin lead review with filtering and pagination, filtered CSV export, health check, and a container deployment recipe. It is not yet a complete IoT console, user authentication service, real OTA service, device provisioning backend, or telemetry platform.
 
 The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.md).
 
@@ -20,6 +20,14 @@ Open:
 
 ```text
 http://localhost:8080
+```
+
+Localized public entry points:
+
+```text
+http://localhost:8080/
+http://localhost:8080/zh-tw/
+http://localhost:8080/zh-cn/
 ```
 
 ## Configuration
@@ -59,6 +67,18 @@ Search indexing:
 
 New public routes should be documented here and in `docs/SPEC.md`.
 
+## Multilingual Public Site
+
+The public website supports:
+
+- English: unprefixed canonical URLs, for example `/features/ota`.
+- Traditional Chinese: `/zh-tw/...`, for example `/zh-tw/features/ota`.
+- Simplified Chinese: `/zh-cn/...`, for example `/zh-cn/features/ota`.
+
+Feature and docs slugs stay in English across all locales. This keeps links stable and avoids translating route identifiers. Public pages emit canonical URLs plus `hreflang` alternates for `en`, `zh-Hant`, `zh-Hans`, and `x-default`. `/sitemap.xml` includes all localized public URLs when search indexing is enabled.
+
+The admin, health, and static routes are not localized.
+
 Admin requests can authenticate with either:
 
 ```bash
@@ -85,7 +105,8 @@ go run ./cmd/visual-smoke
 
 Notes:
 
-- The command starts the website in-process by default and checks the homepage at desktop and mobile widths.
+- The command starts the website in-process by default and checks English, Traditional Chinese, and Simplified Chinese public pages at desktop and mobile widths.
+- The check covers localized homepages plus representative localized feature detail pages, verifies key images load, and fails on horizontal overflow.
 - A local Chrome install is required. Override detection with `CHROME_PATH=/path/to/chrome` or `go run ./cmd/visual-smoke -chrome-path /path/to/chrome`.
 - Use `go run ./cmd/visual-smoke -base-url http://localhost:8080` to target an already running server instead of the in-process test server.
 

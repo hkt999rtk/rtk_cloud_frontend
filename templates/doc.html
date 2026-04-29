@@ -5,16 +5,16 @@
   <h1>{{.Doc.Title}}</h1>
   <p>{{.Doc.Description}}</p>
   <div class="hero-actions">
-    <a class="button primary" href="/docs"><span class="button-icon">{{icon "document"}}</span>Back to docs</a>
-    <a class="button secondary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Discuss implementation</a>
+    <a class="button primary" href="{{localizedPath . "/docs"}}"><span class="button-icon">{{icon "document"}}</span>{{t . "doc.back"}}</a>
+    <a class="button secondary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "doc.discuss"}}</a>
   </div>
 </section>
 
 <section class="section detail-grid">
   <article class="detail-panel">
     <span class="icon-box panel-icon">{{icon .Doc.Icon}}</span>
-    <p class="eyebrow">Coverage</p>
-    <h2>What this section explains</h2>
+    <p class="eyebrow">{{t . "doc.coverage"}}</p>
+    <h2>{{t . "doc.coverage.title"}}</h2>
     <ul class="check-list">
       {{range .Doc.Highlights}}
       <li>{{.}}</li>
@@ -23,8 +23,8 @@
   </article>
   <article class="detail-panel">
     <span class="icon-box panel-icon">{{icon "package"}}</span>
-    <p class="eyebrow">Expected outputs</p>
-    <h2>What teams should be able to leave with</h2>
+    <p class="eyebrow">{{t . "doc.outputs"}}</p>
+    <h2>{{t . "doc.outputs.title"}}</h2>
     <ul class="check-list">
       {{range .Doc.Deliverables}}
       <li>{{.}}</li>
@@ -33,8 +33,8 @@
   </article>
   <article class="detail-panel accent-panel">
     <span class="icon-box panel-icon">{{icon "user-shield"}}</span>
-    <p class="eyebrow">Primary audience</p>
-    <h2>Who should start here</h2>
+    <p class="eyebrow">{{t . "doc.audience"}}</p>
+    <h2>{{t . "doc.audience.title"}}</h2>
     <ul class="check-list">
       {{range .Doc.Audience}}
       <li>{{.}}</li>
@@ -45,16 +45,16 @@
 
 <section class="section doc-navigation">
   <div class="section-heading">
-    <p class="eyebrow">Next sections</p>
-    <h2>Continue through the developer portal.</h2>
+    <p class="eyebrow">{{t . "doc.next"}}</p>
+    <h2>{{t . "doc.next.title"}}</h2>
   </div>
   <div class="docs-entry-grid">
     {{range .Docs}}
-    <a class="feature-card docs-card" href="/docs/{{.Slug}}">
+    <a class="feature-card docs-card" href="{{localizedPath $ (printf "/docs/%s" .Slug)}}">
       <span class="icon-box feature-icon">{{icon .Icon}}</span>
       <h3>{{.Title}}</h3>
       <p>{{.Summary}}</p>
-      <span class="text-link">View section <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
+      <span class="text-link">{{t $ "doc.view"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>

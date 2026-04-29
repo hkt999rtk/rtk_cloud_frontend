@@ -1,14 +1,14 @@
 {{define "content"}}
 <section class="page-hero compact">
-  <p class="eyebrow">Features</p>
-  <h1>Cloud services for the full IoT product lifecycle.</h1>
-  <p>Realtek Connect+ presents the core capabilities product teams expect from a commercial connected-device platform.</p>
+  <p class="eyebrow">{{t . "features.eyebrow"}}</p>
+  <h1>{{t . "features.title"}}</h1>
+  <p>{{t . "features.body"}}</p>
 </section>
 
 <section class="section">
   <div class="feature-grid">
     {{range .Features}}
-    <a class="feature-card tall" href="/features/{{.Slug}}">
+    <a class="feature-card tall" href="{{localizedPath $ (printf "/features/%s" .Slug)}}">
       <span class="icon-box feature-icon">{{icon .Icon}}</span>
       <p class="card-kicker">{{.Kicker}}</p>
       <h2>{{.Title}}</h2>
@@ -18,7 +18,7 @@
         <li>{{.}}</li>
         {{end}}
       </ul>
-      <span class="text-link">Open feature <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
+      <span class="text-link">{{t $ "features.open"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>

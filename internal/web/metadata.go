@@ -5,8 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"realtek-connect/internal/docs"
-	"realtek-connect/internal/features"
+	"realtek-connect/internal/content"
 )
 
 const (
@@ -24,16 +23,23 @@ type sitemapURL struct {
 	Loc string `xml:"loc"`
 }
 
-func (s *Server) basePageData(r *http.Request, title, description string) pageData {
+func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath, title, description string) pageData {
+	catalog := content.CatalogFor(locale)
 	data := pageData{
 		Title:           title,
 		MetaDescription: description,
-		CanonicalURL:    absoluteURL(r, r.URL.Path),
+		CanonicalURL:    absoluteURL(r, content.PathForLocale(locale, publicPath)),
 		SocialImageURL:  absoluteURL(r, heroImagePath),
 		SocialImageAlt:  heroImageAlt,
 		CurrentPath:     r.URL.Path,
-		Docs:            docs.All(),
-		Features:        features.All(),
+		PublicPath:      publicPath,
+		Lang:            locale.Lang,
+		Locale:          locale,
+		LocalePrefix:    locale.Prefix,
+		Text:            catalog.Text,
+		AlternateLinks:  alternateLinks(r, publicPath, locale),
+		Docs:            catalog.Docs,
+		Features:        catalog.Features,
 	}
 	if s.disableSearchIndexing {
 		data.MetaRobots = "noindex, nofollow, noarchive"
@@ -42,9 +48,30 @@ func (s *Server) basePageData(r *http.Request, title, description string) pageDa
 }
 
 func (s *Server) adminPageData(r *http.Request, title, description string) pageData {
-	data := s.basePageData(r, title, description)
+	data := s.basePageData(r, content.DefaultLocale(), r.URL.Path, title, description)
 	data.MetaRobots = "noindex, nofollow"
+	data.AlternateLinks = nil
 	return data
+}
+
+func alternateLinks(r *http.Request, publicPath string, current content.Locale) []content.AlternateLink {
+	locales := content.SupportedLocales()
+	links := make([]content.AlternateLink, 0, len(locales)+1)
+	for _, locale := range locales {
+		links = append(links, content.AlternateLink{
+			HrefLang: locale.Lang,
+			Label:    locale.Label,
+			Href:     absoluteURL(r, content.PathForLocale(locale, publicPath)),
+			Current:  locale.Code == current.Code,
+		})
+	}
+	links = append(links, content.AlternateLink{
+		HrefLang: "x-default",
+		Label:    "Default",
+		Href:     absoluteURL(r, content.PathForLocale(content.DefaultLocale(), publicPath)),
+		Current:  false,
+	})
+	return links
 }
 
 func (s *Server) handleRobotsTxt(w http.ResponseWriter, r *http.Request) {
@@ -98,13 +125,7 @@ func (s *Server) handleSitemapXML(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	paths := []string{"/", "/docs", "/features", "/contact"}
-	for _, section := range docs.All() {
-		paths = append(paths, "/docs/"+section.Slug)
-	}
-	for _, feature := range features.All() {
-		paths = append(paths, "/features/"+feature.Slug)
-	}
+	paths := publicSitemapPaths()
 
 	payload := sitemapURLSet{
 		XMLNS: "http://www.sitemaps.org/schemas/sitemap/0.9",
@@ -125,6 +146,25 @@ func (s *Server) handleSitemapXML(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(xml.Header))
 	_, _ = w.Write(body)
 	_, _ = w.Write([]byte("\n"))
+}
+
+func publicSitemapPaths() []string {
+	catalog := content.CatalogFor(content.DefaultLocale())
+	basePaths := []string{"/", "/docs", "/features", "/contact"}
+	for _, section := range catalog.Docs {
+		basePaths = append(basePaths, "/docs/"+section.Slug)
+	}
+	for _, feature := range catalog.Features {
+		basePaths = append(basePaths, "/features/"+feature.Slug)
+	}
+
+	paths := make([]string, 0, len(basePaths)*len(content.SupportedLocales()))
+	for _, locale := range content.SupportedLocales() {
+		for _, path := range basePaths {
+			paths = append(paths, content.PathForLocale(locale, path))
+		}
+	}
+	return paths
 }
 
 func absoluteURL(r *http.Request, path string) string {

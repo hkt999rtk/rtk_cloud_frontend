@@ -1,18 +1,18 @@
 {{define "content"}}
 <section class="hero">
   <div class="hero-copy">
-    <p class="eyebrow">IoT cloud platform for product teams</p>
+    <p class="eyebrow">{{t . "home.eyebrow"}}</p>
     <h1>Realtek Connect+</h1>
-    <p class="hero-lede">Bring Realtek-based devices online with provisioning, OTA, fleet operations, app SDKs, insights, private cloud options, and ecosystem integrations.</p>
+    <p class="hero-lede">{{t . "home.lede"}}</p>
     <div class="hero-actions">
-      <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Contact Us</a>
-      <a class="button secondary" href="/features"><span class="button-icon">{{icon "grid"}}</span>Explore Services</a>
+      <a class="button primary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "home.cta.primary"}}</a>
+      <a class="button secondary" href="{{localizedPath . "/features"}}"><span class="button-icon">{{icon "grid"}}</span>{{t . "home.cta.secondary"}}</a>
     </div>
     <div class="hero-points capability-strip" aria-label="Platform highlights">
-      <span><span class="hero-chip-icon">{{icon "chip"}}</span>Silicon</span>
-      <span><span class="hero-chip-icon">{{icon "device"}}</span>Device SDK</span>
-      <span><span class="hero-chip-icon">{{icon "cloud-lock"}}</span>Cloud</span>
-      <span><span class="hero-chip-icon">{{icon "dashboard"}}</span>Ops</span>
+      <span><span class="hero-chip-icon">{{icon "chip"}}</span>{{t . "home.chip.silicon"}}</span>
+      <span><span class="hero-chip-icon">{{icon "device"}}</span>{{t . "home.chip.sdk"}}</span>
+      <span><span class="hero-chip-icon">{{icon "cloud-lock"}}</span>{{t . "home.chip.cloud"}}</span>
+      <span><span class="hero-chip-icon">{{icon "dashboard"}}</span>{{t . "home.chip.ops"}}</span>
     </div>
   </div>
   <div class="hero-visual">
@@ -22,27 +22,27 @@
 
 <section class="section intro">
   <div class="section-heading">
-    <p class="eyebrow">Platform overview</p>
-    <h2>From chipset to connected product lifecycle.</h2>
+    <p class="eyebrow">{{t . "home.overview.eyebrow"}}</p>
+    <h2>{{t . "home.overview.title"}}</h2>
   </div>
-  <p class="section-lede">Connect+ frames Realtek connectivity silicon, firmware enablement, cloud services, mobile app workflows, and operations tooling as one commercial IoT product path.</p>
+  <p class="section-lede">{{t . "home.overview.lede"}}</p>
 </section>
 
 <section class="section platform-showcase">
   <div class="section-heading">
-    <p class="eyebrow">Platform surfaces</p>
-    <h2>Show the product system, not only the feature list.</h2>
+    <p class="eyebrow">{{t . "home.surfaces.eyebrow"}}</p>
+    <h2>{{t . "home.surfaces.title"}}</h2>
   </div>
   <div class="platform-showcase-shell">
     <div class="platform-showcase-copy">
       <span class="icon-box panel-icon">{{icon "dashboard"}}</span>
-      <h3>Provisioning, OTA, and fleet health share one visual language.</h3>
-      <p>The public site now anchors the cloud story with product surfaces that connect devices, secure cloud operations, and dashboard workflows.</p>
+      <h3>{{t . "home.surfaces.card.title"}}</h3>
+      <p>{{t . "home.surfaces.card.body"}}</p>
       <div class="surface-strip" aria-label="Platform surface highlights">
-        <span><span class="module-icon">{{icon "provision"}}</span>Onboarding</span>
-        <span><span class="module-icon">{{icon "ota"}}</span>Rollouts</span>
-        <span><span class="module-icon">{{icon "chart"}}</span>Insights</span>
-        <span><span class="module-icon">{{icon "cloud-lock"}}</span>Security</span>
+        <span><span class="module-icon">{{icon "provision"}}</span>{{t . "home.surface.onboarding"}}</span>
+        <span><span class="module-icon">{{icon "ota"}}</span>{{t . "home.surface.rollouts"}}</span>
+        <span><span class="module-icon">{{icon "chart"}}</span>{{t . "home.surface.insights"}}</span>
+        <span><span class="module-icon">{{icon "cloud-lock"}}</span>{{t . "home.surface.security"}}</span>
       </div>
     </div>
     <div class="platform-showcase-visual">
@@ -53,24 +53,24 @@
 
 <section class="section principles-section">
   <div class="section-heading centered">
-    <p class="eyebrow">Design principles</p>
-    <h2>Built for enterprise connected-product programs.</h2>
+    <p class="eyebrow">{{t . "home.principles.eyebrow"}}</p>
+    <h2>{{t . "home.principles.title"}}</h2>
   </div>
   <div class="principles-shell">
     <div class="principle-tabs" aria-label="Realtek Connect+ design principles">
-      <span class="active"><span class="module-icon">{{icon "dashboard"}}</span>Manageability</span>
-      <span><span class="module-icon">{{icon "fleet"}}</span>Scalability</span>
-      <span><span class="module-icon">{{icon "cloud-lock"}}</span>Security</span>
-      <span><span class="module-icon">{{icon "shield-user"}}</span>Privacy</span>
-      <span><span class="module-icon">{{icon "route"}}</span>Cost control</span>
-      <span><span class="module-icon">{{icon "package"}}</span>Customizability</span>
+      <span class="active"><span class="module-icon">{{icon "dashboard"}}</span>{{t . "home.principle.active"}}</span>
+      <span><span class="module-icon">{{icon "fleet"}}</span>{{t . "home.principle.scale"}}</span>
+      <span><span class="module-icon">{{icon "cloud-lock"}}</span>{{t . "home.principle.security"}}</span>
+      <span><span class="module-icon">{{icon "shield-user"}}</span>{{t . "home.principle.privacy"}}</span>
+      <span><span class="module-icon">{{icon "route"}}</span>{{t . "home.principle.cost"}}</span>
+      <span><span class="module-icon">{{icon "package"}}</span>{{t . "home.principle.custom"}}</span>
     </div>
     <article class="principle-panel">
       <div>
         <span class="icon-box page-hero-icon">{{icon "dashboard"}}</span>
-        <p class="eyebrow">Manageability</p>
-        <h3>Operate firmware, users, fleets, and support workflows from one platform story.</h3>
-        <p>Realtek Connect+ is presented as a lifecycle system: onboarding, cloud identity, OTA, app SDKs, metrics, and enterprise deployment work together instead of living as disconnected product pages.</p>
+        <p class="eyebrow">{{t . "home.principle.active"}}</p>
+        <h3>{{t . "home.principle.panel"}}</h3>
+        <p>{{t . "home.principle.body"}}</p>
       </div>
       <div class="principle-metrics" aria-label="Platform management surfaces">
         <span><strong>OTA</strong><small>campaigns</small></span>
@@ -84,12 +84,12 @@
 
 <section class="section" id="services">
   <div class="section-heading">
-    <p class="eyebrow">Core services</p>
-    <h2>Realtek cloud capabilities, packaged for connected-product teams.</h2>
+    <p class="eyebrow">{{t . "home.services.eyebrow"}}</p>
+    <h2>{{t . "home.services.title"}}</h2>
   </div>
   <div class="feature-grid home-feature-grid">
     {{range .Features}}
-    <a class="feature-card feature-card-{{.Slug}}" href="/features/{{.Slug}}">
+    <a class="feature-card feature-card-{{.Slug}}" href="{{localizedPath $ (printf "/features/%s" .Slug)}}">
       <span class="icon-box feature-icon">{{icon .Icon}}</span>
       {{if .ImagePath}}
       <span class="feature-preview">
@@ -98,7 +98,7 @@
       {{end}}
       <h3>{{.Title}}</h3>
       <p>{{.Summary}}</p>
-      <span class="text-link">View details <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
+      <span class="text-link">{{t $ "home.feature.details"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>
@@ -106,8 +106,8 @@
 
 <section class="section architecture" id="architecture">
   <div class="section-heading">
-    <p class="eyebrow">Architecture</p>
-    <h2>A direct flow from device onboarding to fleet operations.</h2>
+    <p class="eyebrow">{{t . "home.arch.eyebrow"}}</p>
+    <h2>{{t . "home.arch.title"}}</h2>
   </div>
   <div class="flow" aria-label="Platform architecture flow">
     <div class="flow-node">
@@ -115,8 +115,8 @@
         <span class="icon-box flow-icon">{{icon "chip"}}</span>
         <span class="flow-number">01</span>
       </div>
-      <strong>Realtek Device SDK</strong>
-      <p>Identity, provisioning, firmware services, and device signals.</p>
+      <strong>{{t . "home.arch.device.title"}}</strong>
+      <p>{{t . "home.arch.device.body"}}</p>
       <div class="node-modules" aria-label="Device SDK modules">
         <span><span class="module-icon">{{icon "wifi"}}</span>Provision</span>
         <span><span class="module-icon">{{icon "certificate"}}</span>Identity</span>
@@ -129,8 +129,8 @@
         <span class="icon-box flow-icon">{{icon "cloud-lock"}}</span>
         <span class="flow-number">02</span>
       </div>
-      <strong>Secure Cloud</strong>
-      <p>Registry, OTA campaigns, user-device association, APIs.</p>
+      <strong>{{t . "home.arch.cloud.title"}}</strong>
+      <p>{{t . "home.arch.cloud.body"}}</p>
       <div class="node-modules" aria-label="Secure Cloud modules">
         <span><span class="module-icon">{{icon "registry"}}</span>Registry</span>
         <span><span class="module-icon">{{icon "ota"}}</span>OTA</span>
@@ -143,8 +143,8 @@
         <span class="icon-box flow-icon">{{icon "dashboard"}}</span>
         <span class="flow-number">03</span>
       </div>
-      <strong>App SDK + Dashboard</strong>
-      <p>Mobile onboarding, product control, insights, support workflows.</p>
+      <strong>{{t . "home.arch.app.title"}}</strong>
+      <p>{{t . "home.arch.app.body"}}</p>
       <div class="node-modules" aria-label="App and dashboard modules">
         <span><span class="module-icon">{{icon "phone-code"}}</span>App SDK</span>
         <span><span class="module-icon">{{icon "chart"}}</span>Insights</span>
@@ -161,64 +161,64 @@
 
 <section class="section deployment-section">
   <div class="section-heading centered">
-    <p class="eyebrow">Public vs private cloud</p>
-    <h2>Start with evaluation, mature into controlled deployment.</h2>
+    <p class="eyebrow">{{t . "home.deploy.eyebrow"}}</p>
+    <h2>{{t . "home.deploy.title"}}</h2>
   </div>
   <div class="deployment-grid">
     <article>
       <span class="icon-box panel-icon">{{icon "cloud-lock"}}</span>
-      <p class="card-kicker">Public evaluation</p>
-      <h3>Validate product fit before committing to a private footprint.</h3>
-      <p>Use the public-facing website and documentation structure to align firmware, mobile, cloud, and product stakeholders before commercial deployment planning.</p>
-      <a class="button secondary" href="/docs/deployment"><span class="button-icon">{{icon "document"}}</span>Deployment Docs</a>
+      <p class="card-kicker">{{t . "home.deploy.public"}}</p>
+      <h3>{{t . "home.deploy.public.title"}}</h3>
+      <p>{{t . "home.deploy.public.body"}}</p>
+      <a class="button secondary" href="{{localizedPath . "/docs/deployment"}}"><span class="button-icon">{{icon "document"}}</span>{{t . "home.deploy.docs"}}</a>
     </article>
     <article>
       <span class="icon-box panel-icon">{{icon "certificate"}}</span>
-      <p class="card-kicker">Private commercial cloud</p>
-      <h3>Plan data ownership, custom domains, regional placement, and support boundaries.</h3>
-      <p>The private cloud narrative gives enterprise buyers a clear path from concept validation to branded, controlled, commercially supported operation.</p>
-      <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Discuss Private Cloud</a>
+      <p class="card-kicker">{{t . "home.deploy.private"}}</p>
+      <h3>{{t . "home.deploy.private.title"}}</h3>
+      <p>{{t . "home.deploy.private.body"}}</p>
+      <a class="button primary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "home.deploy.discuss"}}</a>
     </article>
   </div>
 </section>
 
 <section class="section use-cases" id="use-cases">
   <div class="section-heading">
-    <p class="eyebrow">Use cases</p>
-    <h2>Built for commercial connected-device teams.</h2>
+    <p class="eyebrow">{{t . "home.use.eyebrow"}}</p>
+    <h2>{{t . "home.use.title"}}</h2>
   </div>
   <div class="use-case-list">
     <article>
       <span class="icon-box use-case-icon">{{icon "home"}}</span>
       <h3>Smart Home</h3>
-      <p>App onboarding, sharing, push notifications, voice assistant paths, and OTA maintenance.</p>
+      <p>{{t . "home.use.smart.body"}}</p>
     </article>
     <article>
       <span class="icon-box use-case-icon">{{icon "nodes"}}</span>
       <h3>Industrial IoT</h3>
-      <p>Fleet grouping, metadata, secure updates, private cloud, and operations visibility.</p>
+      <p>{{t . "home.use.industrial.body"}}</p>
     </article>
     <article>
       <span class="icon-box use-case-icon">{{icon "refresh"}}</span>
       <h3>Appliance Makers</h3>
-      <p>Long lifecycle firmware maintenance, activation data, branded apps, and support diagnostics.</p>
+      <p>{{t . "home.use.appliance.body"}}</p>
     </article>
   </div>
 </section>
 
 <section class="section docs-entry" id="docs">
   <div class="section-heading">
-    <p class="eyebrow">Developer portal</p>
-    <h2>Give product, firmware, app, and cloud teams one documentation spine.</h2>
+    <p class="eyebrow">{{t . "home.docs.eyebrow"}}</p>
+    <h2>{{t . "home.docs.title"}}</h2>
   </div>
   <div class="docs-entry-grid">
     {{range .Docs}}
-    <a class="feature-card docs-card" href="/docs/{{.Slug}}">
+    <a class="feature-card docs-card" href="{{localizedPath $ (printf "/docs/%s" .Slug)}}">
       <span class="icon-box feature-icon">{{icon .Icon}}</span>
       <p class="card-kicker">{{.Kicker}}</p>
       <h3>{{.Title}}</h3>
       <p>{{.Summary}}</p>
-      <span class="text-link">Open section <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
+      <span class="text-link">{{t $ "home.docs.open"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>
@@ -226,15 +226,15 @@
 
 <section class="cta-band" id="contact">
   <div>
-    <p class="eyebrow">Early access</p>
-    <h2>Plan a Realtek Connect+ product path.</h2>
-    <p>Register your interest in provisioning, OTA, private cloud, app SDK, or fleet operations.</p>
+    <p class="eyebrow">{{t . "home.cta.eyebrow"}}</p>
+    <h2>{{t . "home.cta.title"}}</h2>
+    <p>{{t . "home.cta.body"}}</p>
     <div class="cta-interest-list" aria-label="Common early access interests">
       <span><span class="module-icon">{{icon "provision"}}</span>Provision</span>
       <span><span class="module-icon">{{icon "ota"}}</span>OTA</span>
       <span><span class="module-icon">{{icon "cloud-lock"}}</span>Private Cloud</span>
     </div>
   </div>
-  <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Contact Us</a>
+  <a class="button primary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "home.cta.primary"}}</a>
 </section>
 {{end}}

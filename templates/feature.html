@@ -7,8 +7,8 @@
       <h1>{{.Feature.Title}}</h1>
       <p>{{.Feature.Description}}</p>
       <div class="hero-actions">
-        <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Discuss {{.Feature.Title}}</a>
-        <a class="button secondary" href="/features"><span class="button-icon">{{icon "grid"}}</span>All Features</a>
+        <a class="button primary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "feature.discuss.prefix"}} {{.Feature.Title}}</a>
+        <a class="button secondary" href="{{localizedPath . "/features"}}"><span class="button-icon">{{icon "grid"}}</span>{{t . "feature.all"}}</a>
       </div>
     </div>
     {{if .Feature.ImagePath}}
@@ -22,8 +22,8 @@
 <section class="section detail-grid">
   <article class="detail-panel">
     <span class="icon-box panel-icon">{{icon .Feature.Icon}}</span>
-    <p class="eyebrow">Highlights</p>
-    <h2>What this service covers</h2>
+    <p class="eyebrow">{{t . "feature.highlights"}}</p>
+    <h2>{{t . "feature.highlights.title"}}</h2>
     <ul class="check-list">
       {{range .Feature.Highlights}}
       <li>{{.}}</li>
@@ -32,8 +32,8 @@
   </article>
   <article class="detail-panel">
     <span class="icon-box panel-icon">{{icon "package"}}</span>
-    <p class="eyebrow">Capabilities</p>
-    <h2>Platform building blocks</h2>
+    <p class="eyebrow">{{t . "feature.capabilities"}}</p>
+    <h2>{{t . "feature.capabilities.title"}}</h2>
     <ul class="check-list">
       {{range .Feature.Capabilities}}
       <li>{{.}}</li>
@@ -42,8 +42,8 @@
   </article>
   <article class="detail-panel accent-panel">
     <span class="icon-box panel-icon">{{icon "chart"}}</span>
-    <p class="eyebrow">Outcomes</p>
-    <h2>Why product teams use it</h2>
+    <p class="eyebrow">{{t . "feature.outcomes"}}</p>
+    <h2>{{t . "feature.outcomes.title"}}</h2>
     <ul class="check-list">
       {{range .Feature.Outcomes}}
       <li>{{.}}</li>
@@ -106,10 +106,10 @@
 
 <section class="cta-band">
   <div>
-    <p class="eyebrow">Next step</p>
-    <h2>Evaluate {{.Feature.Title}} for your product roadmap.</h2>
-    <p>Share your product category, target deployment, and cloud requirements with the Realtek Connect+ team.</p>
+    <p class="eyebrow">{{t . "feature.next"}}</p>
+    <h2>{{t . "feature.cta.prefix"}} {{.Feature.Title}} {{t . "feature.cta.suffix"}}</h2>
+    <p>{{t . "feature.cta.body"}}</p>
   </div>
-  <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Contact Us</a>
+  <a class="button primary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "home.cta.primary"}}</a>
 </section>
 {{end}}

@@ -1,22 +1,22 @@
 {{define "content"}}
 <section class="page-hero docs-hero">
-  <p class="eyebrow">Developer docs</p>
-  <h1>Documentation entry points for cloud, firmware, app, and deployment teams.</h1>
-  <p>Realtek Connect+ now includes a server-rendered documentation portal structure covering platform overview, development, APIs, SDKs, firmware, CLI workflows, deployment, and release notes.</p>
+  <p class="eyebrow">{{t . "docs.eyebrow"}}</p>
+  <h1>{{t . "docs.title"}}</h1>
+  <p>{{t . "docs.body"}}</p>
   <div class="hero-actions">
-    <a class="button primary" href="/contact"><span class="button-icon">{{icon "mail"}}</span>Talk to the platform team</a>
-    <a class="button secondary" href="/features/app-sdk"><span class="button-icon">{{icon "phone-code"}}</span>See app platform context</a>
+    <a class="button primary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "docs.cta.primary"}}</a>
+    <a class="button secondary" href="{{localizedPath . "/features/app-sdk"}}"><span class="button-icon">{{icon "phone-code"}}</span>{{t . "docs.cta.secondary"}}</a>
   </div>
 </section>
 
 <section class="section">
   <div class="section-heading">
-    <p class="eyebrow">Portal structure</p>
-    <h2>Choose the track that matches your workstream.</h2>
+    <p class="eyebrow">{{t . "docs.portal.eyebrow"}}</p>
+    <h2>{{t . "docs.portal.title"}}</h2>
   </div>
   <div class="docs-entry-grid">
     {{range .Docs}}
-    <a class="feature-card docs-card tall" href="/docs/{{.Slug}}">
+    <a class="feature-card docs-card tall" href="{{localizedPath $ (printf "/docs/%s" .Slug)}}">
       <span class="icon-box feature-icon">{{icon .Icon}}</span>
       <p class="card-kicker">{{.Kicker}}</p>
       <h2>{{.Title}}</h2>
@@ -26,7 +26,7 @@
         <li>{{.}}</li>
         {{end}}
       </ul>
-      <span class="text-link">Open section <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
+      <span class="text-link">{{t $ "home.docs.open"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>
@@ -34,24 +34,24 @@
 
 <section class="section docs-structure">
   <div class="section-heading">
-    <p class="eyebrow">Why this matters</p>
-    <h2>Mirror the documentation surfaces teams expect before product launch.</h2>
+    <p class="eyebrow">{{t . "docs.why.eyebrow"}}</p>
+    <h2>{{t . "docs.why.title"}}</h2>
   </div>
   <div class="use-case-list">
     <article>
       <span class="icon-box use-case-icon">{{icon "document"}}</span>
-      <h3>Shared platform narrative</h3>
-      <p>Give product, sales, and engineering stakeholders one place to understand lifecycle scope before implementation deep-dives.</p>
+      <h3>{{t . "docs.shared.title"}}</h3>
+      <p>{{t . "docs.shared.body"}}</p>
     </article>
     <article>
       <span class="icon-box use-case-icon">{{icon "grid"}}</span>
-      <h3>Workstream-specific depth</h3>
-      <p>Separate firmware, API, mobile SDK, deployment, and release concerns so each team can navigate directly to its implementation surface.</p>
+      <h3>{{t . "docs.depth.title"}}</h3>
+      <p>{{t . "docs.depth.body"}}</p>
     </article>
     <article>
       <span class="icon-box use-case-icon">{{icon "package"}}</span>
-      <h3>Static first version</h3>
-      <p>Keep the docs portal compatible with the current Go templates and server-rendered architecture while leaving space for deeper follow-on content.</p>
+      <h3>{{t . "docs.static.title"}}</h3>
+      <p>{{t . "docs.static.body"}}</p>
     </article>
   </div>
 </section>

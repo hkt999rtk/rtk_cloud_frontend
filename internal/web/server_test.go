@@ -115,6 +115,62 @@ func TestRoutesReturnOK(t *testing.T) {
 	}
 }
 
+func TestLocalizedPublicRoutesReturnOK(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	paths := []string{
+		"/zh-tw",
+		"/zh-tw/docs",
+		"/zh-tw/docs/apis",
+		"/zh-tw/features",
+		"/zh-tw/features/provision",
+		"/zh-tw/contact",
+		"/zh-cn",
+		"/zh-cn/docs",
+		"/zh-cn/docs/apis",
+		"/zh-cn/features",
+		"/zh-cn/features/provision",
+		"/zh-cn/contact",
+	}
+
+	for _, path := range paths {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s returned %d, want 200", path, rec.Code)
+		}
+	}
+}
+
+func TestLocalizedHomeIncludesLangSwitcherAndAlternates(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/zh-tw/features/provision", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		`<html lang="zh-Hant">`,
+		`<link rel="canonical" href="http://example.com/zh-tw/features/provision">`,
+		`hreflang="en" href="http://example.com/features/provision"`,
+		`hreflang="zh-Hant" href="http://example.com/zh-tw/features/provision"`,
+		`hreflang="zh-Hans" href="http://example.com/zh-cn/features/provision"`,
+		`hreflang="x-default" href="http://example.com/features/provision"`,
+		`href="http://example.com/zh-tw/features/provision" aria-current="true">繁體中文</a>`,
+		"Provision 配網",
+		"降低裝置導入與綁定摩擦。",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
 func TestHomeMetadataIncludesSocialTags(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
@@ -602,6 +658,9 @@ func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 		`<loc>http://example.com/docs/product-overview</loc>`,
 		`<loc>http://example.com/features/ota</loc>`,
 		`<loc>http://example.com/contact</loc>`,
+		`<loc>http://example.com/zh-tw/features/ota</loc>`,
+		`<loc>http://example.com/zh-cn/docs/apis</loc>`,
+		`<loc>http://example.com/zh-cn/contact</loc>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("sitemap does not contain %q: %s", want, body)
@@ -636,6 +695,20 @@ func TestUnknownDocReturnsNotFound(t *testing.T) {
 	}
 }
 
+func TestUnknownLocalizedRoutesReturnNotFound(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	paths := []string{"/fr/features", "/zh-tw/features/not-found", "/zh-cn/docs/not-found"}
+
+	for _, path := range paths {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusNotFound {
+			t.Fatalf("%s status = %d, want 404", path, rec.Code)
+		}
+	}
+}
+
 func TestValidContactPostStoresLead(t *testing.T) {
 	store := &memoryLeadStore{}
 	handler := testServer(t, store)
@@ -661,6 +734,66 @@ func TestValidContactPostStoresLead(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "Thanks, Kevin Huang") {
 		t.Fatalf("response does not contain success message: %s", rec.Body.String())
+	}
+}
+
+func TestLocalizedContactPostStoresCanonicalInterest(t *testing.T) {
+	store := &memoryLeadStore{}
+	handler := testServer(t, store)
+
+	form := url.Values{
+		"name":     {"Kevin Huang"},
+		"company":  {"Realtek"},
+		"email":    {"kevin@example.com"},
+		"interest": {"ota"},
+		"message":  {"需要排程更新支援。"},
+	}
+	req := httptest.NewRequest(http.MethodPost, "/zh-tw/contact", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	if len(store.leads) != 1 {
+		t.Fatalf("stored leads = %d, want 1", len(store.leads))
+	}
+	if got := store.leads[0].Interest; got != "ota" {
+		t.Fatalf("interest = %q, want canonical slug", got)
+	}
+	if !strings.Contains(rec.Body.String(), "你的 Realtek Connect&#43; 請求已記錄。") {
+		t.Fatalf("response does not contain localized success message: %s", rec.Body.String())
+	}
+}
+
+func TestLocalizedInvalidContactPostUsesLocalizedErrors(t *testing.T) {
+	store := &memoryLeadStore{}
+	handler := testServer(t, store)
+
+	form := url.Values{
+		"name":     {""},
+		"email":    {"not-an-email"},
+		"interest": {""},
+	}
+	req := httptest.NewRequest(http.MethodPost, "/zh-cn/contact", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400", rec.Code)
+	}
+	if len(store.leads) != 0 {
+		t.Fatalf("stored leads = %d, want 0", len(store.leads))
+	}
+	body := rec.Body.String()
+	for _, want := range []string{"姓名为必填栏位。", "请输入有效的 Email。", "请选择关注服务。"} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
 	}
 }
 
