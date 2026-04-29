@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -77,12 +78,32 @@ func testServer(t *testing.T, store LeadStore) http.Handler {
 
 func testServerWithAdminToken(t *testing.T, store LeadStore, adminToken string) http.Handler {
 	t.Helper()
-	server := newTestServer(t, Config{
+	cfg := testConfig(store)
+	cfg.AdminToken = adminToken
+	server := newTestServer(t, cfg)
+	return server.Routes()
+}
+
+func testConfig(store LeadStore) Config {
+	return Config{
 		TemplatesDir: "../../templates",
 		StaticDir:    "../../static",
 		LeadStore:    store,
-		AdminToken:   adminToken,
-	})
+	}
+}
+
+func testServerWithConfig(t *testing.T, cfg Config) http.Handler {
+	t.Helper()
+	if cfg.TemplatesDir == "" {
+		cfg.TemplatesDir = "../../templates"
+	}
+	if cfg.StaticDir == "" {
+		cfg.StaticDir = "../../static"
+	}
+	if cfg.LeadStore == nil {
+		cfg.LeadStore = &memoryLeadStore{}
+	}
+	server := newTestServer(t, cfg)
 	return server.Routes()
 }
 
@@ -194,6 +215,163 @@ func TestHomeMetadataIncludesSocialTags(t *testing.T) {
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
+func TestPublicBaseURLOverridesGeneratedAbsoluteURLs(t *testing.T) {
+	handler := testServerWithConfig(t, Config{
+		LeadStore:     &memoryLeadStore{},
+		PublicBaseURL: "https://webtest.mgmeet.io/",
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/zh-tw/features/provision", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		`<link rel="canonical" href="https://webtest.mgmeet.io/zh-tw/features/provision">`,
+		`hreflang="en" href="https://webtest.mgmeet.io/features/provision"`,
+		`hreflang="zh-Hant" href="https://webtest.mgmeet.io/zh-tw/features/provision"`,
+		`hreflang="zh-Hans" href="https://webtest.mgmeet.io/zh-cn/features/provision"`,
+		`<meta property="og:url" content="https://webtest.mgmeet.io/zh-tw/features/provision">`,
+		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/connectplus-hero.png">`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/robots.txt", nil)
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("robots status = %d, want 200", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "Sitemap: https://webtest.mgmeet.io/sitemap.xml") {
+		t.Fatalf("robots does not use public base URL: %s", rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/sitemap.xml", nil)
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("sitemap status = %d, want 200", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), `<loc>https://webtest.mgmeet.io/zh-cn/contact</loc>`) {
+		t.Fatalf("sitemap does not use public base URL: %s", rec.Body.String())
+	}
+}
+
+func TestAssetFingerprintsAreOptional(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, `href="/static/styles.css"`) {
+		t.Fatalf("default stylesheet path changed: %s", body)
+	}
+	if strings.Contains(body, `/static/styles.css?v=`) {
+		t.Fatalf("default response should not fingerprint assets: %s", body)
+	}
+
+	handler = testServerWithConfig(t, Config{
+		LeadStore:               &memoryLeadStore{},
+		EnableAssetFingerprints: true,
+		EnableCDNCacheHeaders:   false,
+		DisableSearchIndexing:   false,
+		PublicBaseURL:           "https://webtest.mgmeet.io",
+	})
+
+	req = httptest.NewRequest(http.MethodGet, "/", nil)
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("fingerprinted status = %d, want 200", rec.Code)
+	}
+	body = rec.Body.String()
+	for _, want := range []string{
+		`href="/static/styles.css?v=`,
+		`src="/static/assets/realtek-logo.png?v=`,
+		`src="/static/assets/connectplus-hero-v2.jpg?v=`,
+		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/connectplus-hero.png?v=`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("fingerprinted response does not contain %q: %s", want, body)
+		}
+	}
+}
+
+func TestCDNCacheHeadersAreOptional(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if got := rec.Header().Get("Cache-Control"); got != "" {
+		t.Fatalf("default home Cache-Control = %q, want empty", got)
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/static/styles.css", nil)
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if got := rec.Header().Get("Cache-Control"); got != "" {
+		t.Fatalf("default static Cache-Control = %q, want empty", got)
+	}
+
+	handler = testServerWithConfig(t, Config{
+		LeadStore:               &memoryLeadStore{},
+		AdminToken:              "secret",
+		EnableCDNCacheHeaders:   true,
+		DisableSearchIndexing:   false,
+		EnableAssetFingerprints: false,
+	})
+
+	tests := []struct {
+		method string
+		path   string
+		want   string
+	}{
+		{method: http.MethodGet, path: "/", want: "no-store"},
+		{method: http.MethodGet, path: "/zh-tw/contact", want: "no-store"},
+		{method: http.MethodPost, path: "/contact", want: "no-store"},
+		{method: http.MethodGet, path: "/admin/leads", want: "no-store"},
+		{method: http.MethodGet, path: "/healthz", want: "no-store"},
+		{method: http.MethodGet, path: "/robots.txt", want: "public, max-age=300"},
+		{method: http.MethodGet, path: "/sitemap.xml", want: "public, max-age=300"},
+		{method: http.MethodGet, path: "/static/styles.css", want: "public, max-age=31536000, immutable"},
+	}
+
+	for _, tc := range tests {
+		var body io.Reader
+		if tc.method == http.MethodPost {
+			form := url.Values{
+				"name":     {"Kevin Huang"},
+				"email":    {"kevin@example.com"},
+				"interest": {"ota"},
+			}
+			body = strings.NewReader(form.Encode())
+		}
+		req := httptest.NewRequest(tc.method, tc.path, body)
+		if tc.method == http.MethodPost {
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		}
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if got := rec.Header().Get("Cache-Control"); got != tc.want {
+			t.Fatalf("%s %s Cache-Control = %q, want %q", tc.method, tc.path, got, tc.want)
 		}
 	}
 }

@@ -57,9 +57,12 @@ func run(ctx context.Context, logger *log.Logger) error {
 	}
 
 	application, err := web.NewServer(web.Config{
-		LeadStore:             repository,
-		AdminToken:            os.Getenv("ADMIN_TOKEN"),
-		DisableSearchIndexing: truthyEnv("DISABLE_SEARCH_INDEXING"),
+		LeadStore:               repository,
+		AdminToken:              os.Getenv("ADMIN_TOKEN"),
+		DisableSearchIndexing:   truthyEnv("DISABLE_SEARCH_INDEXING"),
+		PublicBaseURL:           os.Getenv("PUBLIC_BASE_URL"),
+		EnableAssetFingerprints: truthyEnv("ENABLE_ASSET_FINGERPRINTS"),
+		EnableCDNCacheHeaders:   truthyEnv("ENABLE_CDN_CACHE_HEADERS"),
 	})
 	if err != nil {
 		return err

@@ -244,6 +244,9 @@ Environment:
 - `DATABASE_PATH`, default `data/connectplus.db`.
 - `ADMIN_TOKEN`, optional. When set, enables protected lead review and CSV export.
 - `DISABLE_SEARCH_INDEXING`, optional. When truthy, marks the site as non-indexable with HTTP `X-Robots-Tag`, page-level robots meta tags, `/robots.txt` `Disallow: /`, and a disabled `/sitemap.xml`.
+- `PUBLIC_BASE_URL`, optional. When empty, canonical URLs, social image URLs, `hreflang` alternates, robots sitemap references, and sitemap locations are generated from the incoming request host and forwarded headers. When set, generated public absolute URLs use this fixed base URL.
+- `ENABLE_ASSET_FINGERPRINTS`, optional and disabled by default. When truthy, template-rendered `/static/...` URLs receive a `?v=<content-hash>` query string based on file contents.
+- `ENABLE_CDN_CACHE_HEADERS`, optional and disabled by default. When truthy, the app emits provider-neutral CDN cache headers.
 
 Operational behavior:
 
@@ -252,6 +255,19 @@ Operational behavior:
 - `SIGINT` and `SIGTERM` trigger graceful shutdown with a bounded timeout.
 - Production TLS is expected to terminate at a reverse proxy, ingress controller, or hosting platform in front of the app.
 - Preview and test deployments should set `DISABLE_SEARCH_INDEXING=true` until the site is approved for public search indexing.
+
+CDN-ready behavior:
+
+- The runtime is provider-neutral and does not assume Cloudflare, CloudFront, Fastly, or any other CDN.
+- With default configuration, CDN-specific behavior is off and current deployment behavior is preserved.
+- `PUBLIC_BASE_URL` should be set only when the public CDN/reverse-proxy origin is known, such as `https://webtest.mgmeet.io`.
+- `ENABLE_ASSET_FINGERPRINTS=true` appends content hashes to existing static asset URLs without changing the underlying `/static/...` route.
+- `ENABLE_CDN_CACHE_HEADERS=true` applies:
+  - `/static/*`: `Cache-Control: public, max-age=31536000, immutable` for existing static files.
+  - Public GET HTML pages: `Cache-Control: no-store`.
+  - `POST /contact`, localized contact POST variants, `/admin/*`, and `/healthz`: `Cache-Control: no-store`.
+  - `/robots.txt` and `/sitemap.xml`: `Cache-Control: public, max-age=300`.
+- The CD workflow intentionally does not enable the CDN env vars yet. CDN provider selection, DNS cutover, cache rules, purge strategy, compression, and TLS settings should be completed as a deployment decision.
 
 Commands:
 
@@ -316,6 +332,10 @@ Contact form fields:
 - Valid contact POST writes SQLite and shows success.
 - Invalid contact POST shows validation errors and does not write a lead.
 - Localized contact POSTs show localized success/error messaging and store canonical service slugs in SQLite.
+- CDN readiness tests verify default behavior remains unfingerprinted and cache-neutral when CDN env vars are unset.
+- CDN readiness tests verify `PUBLIC_BASE_URL` affects canonical URLs, social image URLs, `hreflang`, robots sitemap references, and sitemap locations.
+- CDN readiness tests verify `ENABLE_ASSET_FINGERPRINTS=true` adds content hashes to rendered static asset URLs.
+- CDN readiness tests verify `ENABLE_CDN_CACHE_HEADERS=true` applies the expected static, public HTML, contact, admin, health, robots, and sitemap cache headers.
 - Admin lead routes require `ADMIN_TOKEN`; unauthorized requests return 401, disabled admin routes return 404.
 - `go run ./cmd/visual-smoke`
 - The visual smoke command checks English, Traditional Chinese, and Simplified Chinese public pages at desktop/mobile widths, verifies representative hero/feature images load, and fails on horizontal overflow without adding npm dependencies.

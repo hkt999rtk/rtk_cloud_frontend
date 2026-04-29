@@ -16,7 +16,7 @@
     </div>
   </div>
   <div class="hero-visual">
-    <img src="/static/assets/connectplus-hero-v2.jpg" alt="Realtek Connect+ chip, device, secure cloud, mobile app, and operations dashboard flow">
+    <img src="{{asset "/static/assets/connectplus-hero-v2.jpg"}}" alt="Realtek Connect+ chip, device, secure cloud, mobile app, and operations dashboard flow">
   </div>
 </section>
 
@@ -46,7 +46,7 @@
       </div>
     </div>
     <div class="platform-showcase-visual">
-      <img src="/static/assets/connectplus-platform-surfaces.jpg" alt="Realtek Connect+ platform surfaces showing device onboarding, OTA rollout, and fleet insights dashboards">
+      <img src="{{asset "/static/assets/connectplus-platform-surfaces.jpg"}}" alt="Realtek Connect+ platform surfaces showing device onboarding, OTA rollout, and fleet insights dashboards">
     </div>
   </div>
 </section>
@@ -93,7 +93,7 @@
       <span class="icon-box feature-icon">{{icon .Icon}}</span>
       {{if .ImagePath}}
       <span class="feature-preview">
-        <img src="{{.ImagePath}}" alt="">
+        <img src="{{asset .ImagePath}}" alt="">
       </span>
       {{end}}
       <h3>{{.Title}}</h3>

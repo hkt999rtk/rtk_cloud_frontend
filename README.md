@@ -38,6 +38,9 @@ Environment variables:
 - `DATABASE_PATH`: SQLite database path, default `data/connectplus.db`.
 - `ADMIN_TOKEN`: enables protected lead viewing and CSV export.
 - `DISABLE_SEARCH_INDEXING`: set to `true` on private/test deployments to emit `X-Robots-Tag: noindex, nofollow, noarchive`, add page-level `robots` meta tags, disallow all crawling in `/robots.txt`, and hide `/sitemap.xml`.
+- `PUBLIC_BASE_URL`: optional public origin such as `https://webtest.mgmeet.io`. When empty, canonical URLs, social image URLs, `hreflang`, robots sitemap references, and sitemap locations are built from the incoming request host and forwarded headers.
+- `ENABLE_ASSET_FINGERPRINTS`: optional. Set to `true` to append content hashes to template-rendered static URLs, for example `/static/styles.css?v=<hash>`.
+- `ENABLE_CDN_CACHE_HEADERS`: optional. Set to `true` to emit CDN-friendly cache headers for static assets, public HTML, admin/contact POST responses, health, robots, and sitemap.
 
 Runtime behavior:
 
@@ -48,6 +51,13 @@ Search indexing:
 
 - Test and preview deployments should run with `DISABLE_SEARCH_INDEXING=true`.
 - Public launch deployments can omit it when the site is approved for indexing.
+
+CDN readiness:
+
+- CDN-specific behavior is implemented but disabled by default.
+- Keep `PUBLIC_BASE_URL`, `ENABLE_ASSET_FINGERPRINTS`, and `ENABLE_CDN_CACHE_HEADERS` unset until a CDN is ready to sit in front of the site.
+- When enabling a CDN later, set `PUBLIC_BASE_URL` to the public HTTPS origin, enable asset fingerprints, enable CDN cache headers, and configure the CDN to cache `/static/*` aggressively while leaving HTML, `/contact`, `/admin/*`, and `/healthz` uncacheable.
+- This project does not assume a specific CDN provider. Configure TLS, cache rules, purge behavior, compression, and origin forwarding in the chosen CDN or reverse proxy.
 
 ## Routes
 

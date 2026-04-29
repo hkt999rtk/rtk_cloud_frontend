@@ -2,11 +2,16 @@ package web
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/csv"
+	"encoding/hex"
 	"html/template"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -26,20 +31,27 @@ type LeadStore interface {
 }
 
 type Config struct {
-	TemplatesDir          string
-	StaticDir             string
-	LeadStore             LeadStore
-	AdminToken            string
-	DisableSearchIndexing bool
+	TemplatesDir            string
+	StaticDir               string
+	LeadStore               LeadStore
+	AdminToken              string
+	DisableSearchIndexing   bool
+	PublicBaseURL           string
+	EnableAssetFingerprints bool
+	EnableCDNCacheHeaders   bool
 }
 
 type Server struct {
-	templatesDir          string
-	staticDir             string
-	leadStore             LeadStore
-	adminToken            string
-	disableSearchIndexing bool
-	contactLimit          *submissionRateLimiter
+	templatesDir            string
+	staticDir               string
+	leadStore               LeadStore
+	adminToken              string
+	disableSearchIndexing   bool
+	publicBaseURL           string
+	enableAssetFingerprints bool
+	enableCDNCacheHeaders   bool
+	assetVersions           map[string]string
+	contactLimit            *submissionRateLimiter
 }
 
 type pageData struct {
@@ -109,26 +121,47 @@ func NewServer(cfg Config) (*Server, error) {
 	if cfg.StaticDir == "" {
 		cfg.StaticDir = "static"
 	}
+	assetVersions := map[string]string{}
+	if cfg.EnableAssetFingerprints {
+		assetVersions = buildAssetVersions(cfg.StaticDir)
+	}
 	return &Server{
-		templatesDir:          cfg.TemplatesDir,
-		staticDir:             cfg.StaticDir,
-		leadStore:             cfg.LeadStore,
-		adminToken:            cfg.AdminToken,
-		disableSearchIndexing: cfg.DisableSearchIndexing,
-		contactLimit:          newSubmissionRateLimiter(5, 10*time.Minute),
+		templatesDir:            cfg.TemplatesDir,
+		staticDir:               cfg.StaticDir,
+		leadStore:               cfg.LeadStore,
+		adminToken:              cfg.AdminToken,
+		disableSearchIndexing:   cfg.DisableSearchIndexing,
+		publicBaseURL:           normalizePublicBaseURL(cfg.PublicBaseURL),
+		enableAssetFingerprints: cfg.EnableAssetFingerprints,
+		enableCDNCacheHeaders:   cfg.EnableCDNCacheHeaders,
+		assetVersions:           assetVersions,
+		contactLimit:            newSubmissionRateLimiter(5, 10*time.Minute),
 	}, nil
 }
 
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(s.staticDir))))
+	mux.Handle("/static/", http.StripPrefix("/static/", s.staticHandler()))
 	mux.HandleFunc("/robots.txt", s.handleRobotsTxt)
 	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
 	mux.HandleFunc("/admin/leads.csv", s.handleAdminLeadsCSV)
 	mux.HandleFunc("/healthz", s.handleHealthz)
 	mux.HandleFunc("/", s.handlePublic)
-	return securityHeaders(s.searchIndexingHeaders(mux))
+	return securityHeaders(s.searchIndexingHeaders(s.cacheHeaders(mux)))
+}
+
+func (s *Server) staticHandler() http.Handler {
+	fileServer := http.FileServer(http.Dir(s.staticDir))
+	if !s.enableCDNCacheHeaders {
+		return fileServer
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if staticPathExists(s.staticDir, r.URL.Path) {
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		}
+		fileServer.ServeHTTP(w, r)
+	})
 }
 
 func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
@@ -523,6 +556,7 @@ func (s *Server) render(w http.ResponseWriter, status int, name string, data pag
 		"icon":          icon,
 		"t":             templateText,
 		"localizedPath": localizedPath,
+		"asset":         s.assetPath,
 	}).ParseFiles(files...)
 	if err != nil {
 		http.Error(w, "template parse error", http.StatusInternalServerError)
@@ -544,6 +578,20 @@ func templateText(data pageData, key string) string {
 
 func localizedPath(data pageData, publicPath string) string {
 	return content.PathForLocale(data.Locale, publicPath)
+}
+
+func (s *Server) assetPath(rawPath string) string {
+	cleanPath := cleanAssetPath(rawPath)
+	if !s.enableAssetFingerprints {
+		return cleanPath
+	}
+	version := s.assetVersions[cleanPath]
+	if version == "" {
+		return cleanPath
+	}
+	values := url.Values{}
+	values.Set("v", version)
+	return cleanPath + "?" + values.Encode()
 }
 
 func localizeError(message string, catalog content.Catalog) string {
@@ -691,6 +739,27 @@ func securityHeaders(next http.Handler) http.Handler {
 	})
 }
 
+func (s *Server) cacheHeaders(next http.Handler) http.Handler {
+	if !s.enableCDNCacheHeaders {
+		return next
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasPrefix(r.URL.Path, "/static/"):
+			// Static cache headers are applied by staticHandler only when the file exists.
+		case r.URL.Path == "/robots.txt" || r.URL.Path == "/sitemap.xml":
+			w.Header().Set("Cache-Control", "public, max-age=300")
+		case r.URL.Path == "/healthz" || strings.HasPrefix(r.URL.Path, "/admin/"):
+			w.Header().Set("Cache-Control", "no-store")
+		case r.Method == http.MethodPost && contentPublicPath(r.URL.Path) == "/contact":
+			w.Header().Set("Cache-Control", "no-store")
+		case r.Method == http.MethodGet && isPublicHTMLPath(r.URL.Path):
+			w.Header().Set("Cache-Control", "no-store")
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (s *Server) searchIndexingHeaders(next http.Handler) http.Handler {
 	if !s.disableSearchIndexing {
 		return next
@@ -700,4 +769,87 @@ func (s *Server) searchIndexingHeaders(next http.Handler) http.Handler {
 		w.Header().Set("X-Robots-Tag", "noindex, nofollow, noarchive")
 		next.ServeHTTP(w, r)
 	})
+}
+
+func contentPublicPath(requestPath string) string {
+	_, publicPath, ok := content.LocaleFromPath(requestPath)
+	if !ok {
+		return requestPath
+	}
+	return publicPath
+}
+
+func isPublicHTMLPath(requestPath string) bool {
+	if strings.HasPrefix(requestPath, "/static/") ||
+		strings.HasPrefix(requestPath, "/admin/") ||
+		requestPath == "/healthz" ||
+		requestPath == "/robots.txt" ||
+		requestPath == "/sitemap.xml" {
+		return false
+	}
+	_, _, ok := content.LocaleFromPath(requestPath)
+	return ok
+}
+
+func buildAssetVersions(staticDir string) map[string]string {
+	versions := make(map[string]string)
+	_ = filepath.WalkDir(staticDir, func(filePath string, entry os.DirEntry, err error) error {
+		if err != nil || entry.IsDir() {
+			return nil
+		}
+		relative, err := filepath.Rel(staticDir, filePath)
+		if err != nil {
+			return nil
+		}
+		version, err := fileHash(filePath)
+		if err != nil {
+			return nil
+		}
+		assetPath := "/static/" + filepath.ToSlash(relative)
+		versions[assetPath] = version
+		return nil
+	})
+	return versions
+}
+
+func fileHash(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(hash.Sum(nil))[:12], nil
+}
+
+func cleanAssetPath(rawPath string) string {
+	if rawPath == "" {
+		return ""
+	}
+	parsed, err := url.Parse(rawPath)
+	if err == nil && parsed.Path != "" {
+		rawPath = parsed.Path
+	}
+	if !strings.HasPrefix(rawPath, "/static/") {
+		return rawPath
+	}
+	return path.Clean(rawPath)
+}
+
+func staticPathExists(staticDir, requestPath string) bool {
+	cleanPath := path.Clean("/" + strings.TrimLeft(requestPath, "/"))
+	filePath := filepath.Join(staticDir, filepath.FromSlash(strings.TrimPrefix(cleanPath, "/")))
+	info, err := os.Stat(filePath)
+	return err == nil && !info.IsDir()
+}
+
+func normalizePublicBaseURL(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return ""
+	}
+	return strings.TrimRight(value, "/")
 }

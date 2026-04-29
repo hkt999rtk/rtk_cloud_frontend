@@ -28,8 +28,8 @@ func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath
 	data := pageData{
 		Title:           title,
 		MetaDescription: description,
-		CanonicalURL:    absoluteURL(r, content.PathForLocale(locale, publicPath)),
-		SocialImageURL:  absoluteURL(r, heroImagePath),
+		CanonicalURL:    s.absoluteURL(r, content.PathForLocale(locale, publicPath)),
+		SocialImageURL:  s.absoluteURL(r, s.assetPath(heroImagePath)),
 		SocialImageAlt:  heroImageAlt,
 		CurrentPath:     r.URL.Path,
 		PublicPath:      publicPath,
@@ -37,7 +37,7 @@ func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath
 		Locale:          locale,
 		LocalePrefix:    locale.Prefix,
 		Text:            catalog.Text,
-		AlternateLinks:  alternateLinks(r, publicPath, locale),
+		AlternateLinks:  s.alternateLinks(r, publicPath, locale),
 		Docs:            catalog.Docs,
 		Features:        catalog.Features,
 	}
@@ -54,21 +54,21 @@ func (s *Server) adminPageData(r *http.Request, title, description string) pageD
 	return data
 }
 
-func alternateLinks(r *http.Request, publicPath string, current content.Locale) []content.AlternateLink {
+func (s *Server) alternateLinks(r *http.Request, publicPath string, current content.Locale) []content.AlternateLink {
 	locales := content.SupportedLocales()
 	links := make([]content.AlternateLink, 0, len(locales)+1)
 	for _, locale := range locales {
 		links = append(links, content.AlternateLink{
 			HrefLang: locale.Lang,
 			Label:    locale.Label,
-			Href:     absoluteURL(r, content.PathForLocale(locale, publicPath)),
+			Href:     s.absoluteURL(r, content.PathForLocale(locale, publicPath)),
 			Current:  locale.Code == current.Code,
 		})
 	}
 	links = append(links, content.AlternateLink{
 		HrefLang: "x-default",
 		Label:    "Default",
-		Href:     absoluteURL(r, content.PathForLocale(content.DefaultLocale(), publicPath)),
+		Href:     s.absoluteURL(r, content.PathForLocale(content.DefaultLocale(), publicPath)),
 		Current:  false,
 	})
 	return links
@@ -102,7 +102,7 @@ func (s *Server) handleRobotsTxt(w http.ResponseWriter, r *http.Request) {
 		"Allow: /",
 		"Disallow: /admin/",
 		"Disallow: /healthz",
-		"Sitemap: " + absoluteURL(r, "/sitemap.xml"),
+		"Sitemap: " + s.absoluteURL(r, "/sitemap.xml"),
 		"",
 	}, "\n")
 
@@ -132,7 +132,7 @@ func (s *Server) handleSitemapXML(w http.ResponseWriter, r *http.Request) {
 		URLs:  make([]sitemapURL, 0, len(paths)),
 	}
 	for _, path := range paths {
-		payload.URLs = append(payload.URLs, sitemapURL{Loc: absoluteURL(r, path)})
+		payload.URLs = append(payload.URLs, sitemapURL{Loc: s.absoluteURL(r, path)})
 	}
 
 	body, err := xml.MarshalIndent(payload, "", "  ")
@@ -165,6 +165,13 @@ func publicSitemapPaths() []string {
 		}
 	}
 	return paths
+}
+
+func (s *Server) absoluteURL(r *http.Request, path string) string {
+	if s.publicBaseURL != "" {
+		return s.publicBaseURL + path
+	}
+	return absoluteURL(r, path)
 }
 
 func absoluteURL(r *http.Request, path string) string {

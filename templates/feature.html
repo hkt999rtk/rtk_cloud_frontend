@@ -13,7 +13,7 @@
     </div>
     {{if .Feature.ImagePath}}
     <div class="feature-visual">
-      <img src="{{.Feature.ImagePath}}" alt="{{.Feature.ImageAlt}}">
+      <img src="{{asset .Feature.ImagePath}}" alt="{{.Feature.ImageAlt}}">
     </div>
     {{end}}
   </div>

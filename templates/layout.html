@@ -22,13 +22,13 @@
   {{range .AlternateLinks}}<link rel="alternate" hreflang="{{.HrefLang}}" href="{{.Href}}">
   {{end}}
   {{if .MetaRobots}}<meta name="robots" content="{{.MetaRobots}}">{{end}}
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="{{asset "/static/styles.css"}}">
 </head>
 <body>
   <a class="skip-link" href="#main-content">{{t . "skip.main"}}</a>
   <header class="site-header">
     <a class="brand" href="{{localizedPath . "/"}}" aria-label="{{t . "brand.home"}}">
-      <img class="brand-logo" src="/static/assets/realtek-logo.png" alt="Realtek">
+      <img class="brand-logo" src="{{asset "/static/assets/realtek-logo.png"}}" alt="Realtek">
       <span class="brand-divider"></span>
       <span class="brand-product">Connect+</span>
     </a>
