@@ -407,7 +407,7 @@ func All() []Feature {
 					Items: []string{
 						"Cover Alexa and Google Assistant paths for products that need voice control, routine support, and ecosystem discovery alongside the branded app experience.",
 						"Explain that assistant platforms own the voice UX while product teams keep device traits, account linking, and support escalation flows aligned with their own roadmap.",
-						"Use the page to show interoperability intent for smart home buyers without copying ESP RainMaker wording or promising live assistant certification from this repo alone.",
+						"Use the page to show Realtek Connect+ interoperability intent for smart home buyers without implying this website alone ships live assistant certification.",
 					},
 				},
 				{

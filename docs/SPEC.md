@@ -6,7 +6,7 @@ Realtek Connect+ is an English-first B2B website for an end-to-end IoT cloud pla
 
 The first version is implemented as an HTTP-only Go application using `net/http`, `html/template`, and SQLite. It does not use npm, React, Tailwind, or any frontend build step.
 
-The current project status is **v0.1 Marketing Foundation**. It is a working website foundation and lead-capture backend, not a complete ESP RainMaker parity website, IoT console, authentication system, or real device cloud implementation.
+The current project status is **v0.1 Marketing Foundation**. It is a working website foundation and lead-capture backend, not a complete IoT console, authentication system, or real device cloud implementation.
 
 ## Current Implementation
 
@@ -44,7 +44,7 @@ Current routes:
 - `GET /admin/leads.csv`
 - `GET /static/...`
 
-This implementation is enough to demonstrate the Realtek Connect+ direction and collect leads. It is not yet content-complete against ESP RainMaker's public website and documentation surface.
+This implementation is enough to demonstrate the Realtek Connect+ direction and collect leads. It is not yet content-complete as a full public IoT cloud platform website and documentation surface.
 
 ## Visual Direction
 
@@ -82,7 +82,7 @@ Assets:
 
 ## Feature Scope
 
-Realtek Connect+ presents the following ESP RainMaker-aligned capabilities:
+Realtek Connect+ presents the following Realtek IoT cloud platform capabilities:
 
 - Platform Overview: device firmware, cloud backend, mobile app, dashboard, and third-party integrations.
 - Provision: Wi-Fi/BLE onboarding, device binding, activation, user-device association.
@@ -95,13 +95,13 @@ Realtek Connect+ presents the following ESP RainMaker-aligned capabilities:
 - Private Cloud: public evaluation versus private commercial deployment, data ownership, custom domain, regional placement, upgrade path, deployment FAQ, and commercial support positioning.
 - Integrations: Matter Fabric positioning, Alexa/Google Assistant paths, REST APIs, MQTT over TLS, webhooks, and cloud-to-cloud integration boundaries.
 
-## RainMaker Parity Gap
+## Platform Completion Gap
 
 Status values:
 
 - `Implemented`: working website/backend behavior exists.
 - `Content Partial`: page or section exists, but parity depth is incomplete.
-- `Planned`: required for RainMaker parity, not yet represented deeply enough.
+- `Planned`: required for a complete Realtek Connect+ public website, not yet represented deeply enough.
 - `Out of Scope for website v1`: acknowledged capability, but not intended as a working implementation in the public website.
 
 The matrix below tracks website v1 representation, not live cloud-service implementation. `Implemented` means the public site content or first-party backend behavior exists; it does not mean the marketing site ships a working device cloud, mobile app, or operator console for that domain.
@@ -112,7 +112,7 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 | Provision | Content Partial | `/features/provision` | Provisioning copy covers Wi-Fi/BLE onboarding, activation, binding, and account association, but it still needs QR/SoftAP diagrams, failure-state coverage, and deeper claiming workflow detail. |
 | OTA | Implemented | `/features/ota` | The OTA page now covers firmware upload, extracted release metadata, model/version targeting, force/normal/scheduled/user-controlled/time-window rollouts, dynamic OTA eligibility, job detail, cancellation, archive flow, and a rollout strategy table. |
 | Fleet Management | Implemented | `/features/fleet-management` | The fleet page covers node registration, bootstrap certificates, registry, groups, metadata, OTA jobs, firmware images, batch operations, and operator statistics widgets as website content without claiming a live console implementation. |
-| Admin Operations | Content Partial | `/features/fleet-management`, `/admin/leads`, `/admin/leads.csv` | Website v1 ships lead-review tooling plus admin-operations product copy, but it does not ship the full RainMaker-style fleet console described by the marketing content. |
+| Admin Operations | Content Partial | `/features/fleet-management`, `/admin/leads`, `/admin/leads.csv` | Website v1 ships lead-review tooling plus admin-operations product copy, but it does not ship the full fleet console described by the marketing content. |
 | User Management | Content Partial | `/features/user-management` | The feature page covers sign up, sign in, OTP verification, third-party login, forgot/change password, delete account, and account lifecycle boundaries; follow-on work can add deeper session behavior, support workflows, and visuals. |
 | End-user Smart Home Features | Content Partial | `/features/smart-home` | The smart-home page now covers remote control, local fallback, scheduling, scenes, grouping, node sharing, push notifications, alerts, and household workflow boundaries, with room for richer mobile personas and control-state diagrams. |
 | Mobile App SDK | Implemented | `/features/app-sdk` | The app SDK page covers iOS and Android SDK layers, sample app and rebrand paths, push notifications, and App Store/Google Play publishing guidance without introducing a client-side framework into the website itself. |
@@ -129,7 +129,7 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 ## Website Completion Roadmap
 
 - **v0.1 Marketing Foundation**: current state. Working Go site, product positioning, core feature pages, generated hero asset, contact lead capture, admin lead export.
-- **v0.2 RainMaker Parity Content**: expand remaining content depth so Realtek Connect+ can credibly map to ESP RainMaker's feature set across user, admin, mobile SDK, deployment, Matter, and developer documentation areas.
+- **v0.2 Platform Content Depth**: expand remaining content depth so Realtek Connect+ can credibly present its user, admin, mobile SDK, deployment, Matter, and developer documentation areas.
 - **v0.3 Launch Readiness**: improve SEO, accessibility, visual assets, deployment packaging, CI, form hardening, admin usability, and server operations.
 - **v1.0 Public Website Candidate**: polished public-facing site with complete parity content, Realtek brand assets, reliable contact/admin workflows, and deployment documentation.
 
@@ -267,11 +267,11 @@ For any future issue that changes website behavior or public content:
 
 The following GitHub issues are the source-of-truth backlog for moving from v0.1 to v1.0.
 
-### 1. Expand RainMaker parity feature matrix
+### 1. Expand Realtek Connect+ feature matrix
 
 Labels: `documentation`, `enhancement`
 
-Goal: Complete the Realtek Connect+ vs ESP RainMaker parity matrix.
+Goal: Complete the Realtek Connect+ public capability matrix.
 
 Acceptance criteria:
 
@@ -283,7 +283,7 @@ Acceptance criteria:
 
 Labels: `documentation`, `enhancement`
 
-Goal: Add a developer/docs section similar to RainMaker documentation entry points.
+Goal: Add a developer/docs section with clear product, engineering, API, SDK, and deployment entry points.
 
 Acceptance criteria:
 
@@ -313,7 +313,7 @@ Acceptance criteria:
 
 - Content covers remote control, local control, scheduling, scenes, grouping, node sharing, push notifications, and alerts.
 - Homepage or feature overview links to these capabilities.
-- Copy uses Realtek Connect+ naming and does not copy ESP RainMaker wording.
+- Copy uses Realtek Connect+ naming and reinforces Realtek product ownership.
 
 ### 5. Add admin and device operations content
 
@@ -331,7 +331,7 @@ Acceptance criteria:
 
 Labels: `enhancement`
 
-Goal: Make OTA parity stronger and more credible.
+Goal: Make the OTA story stronger and more credible.
 
 Acceptance criteria:
 
@@ -343,7 +343,7 @@ Acceptance criteria:
 
 Labels: `documentation`, `enhancement`
 
-Goal: Match RainMaker's mobile app development story.
+Goal: Present a complete Realtek Connect+ mobile app development story.
 
 Acceptance criteria:
 
