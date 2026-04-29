@@ -1,0 +1,81 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: realtek-connect-cd
+  cancel-in-progress: false
+
+env:
+  GIT_CONFIG_COUNT: 1
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+  DEPLOY_HOST: website-test.local
+  PUBLIC_BASE_URL: https://webtest.mgmeet.io
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, rtk_cloud_frontend, go]
+
+    steps:
+      - name: Reset self-hosted workspace
+        shell: bash
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Check Go formatting
+        shell: bash
+        run: |
+          files="$(git ls-files '*.go')"
+          unformatted="$(gofmt -l $files)"
+          if [ -n "$unformatted" ]; then
+            echo "Unformatted Go files:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Build deployment bundle
+        shell: bash
+        run: |
+          rm -rf dist
+          mkdir -p dist/bin
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o dist/bin/realtek-connect ./cmd/server
+          cp -R templates static dist/
+          test -x dist/bin/realtek-connect
+
+      - name: Deploy to website test host
+        shell: bash
+        run: |
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "root@${DEPLOY_HOST}" \
+            'test -x /usr/local/sbin/deploy-realtek-connect'
+          tar -C dist -czf - bin templates static | \
+            ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new "root@${DEPLOY_HOST}" \
+              /usr/local/sbin/deploy-realtek-connect
+
+      - name: Verify public deployment
+        shell: bash
+        run: |
+          curl -k -fsS --max-time 20 "${PUBLIC_BASE_URL}/healthz" | grep -qx "ok"
+          curl -k -fsS --max-time 20 "${PUBLIC_BASE_URL}/" > /tmp/realtek-connect-home.html
+          grep -q "Realtek Connect" /tmp/realtek-connect-home.html
+          grep -q "Contact Us" /tmp/realtek-connect-home.html
+          if grep -q "Contact Sales" /tmp/realtek-connect-home.html; then
+            echo "Unexpected stale Contact Sales copy found in deployed homepage"
+            exit 1
+          fi
