@@ -25,7 +25,7 @@ type sitemapURL struct {
 }
 
 func (s *Server) basePageData(r *http.Request, title, description string) pageData {
-	return pageData{
+	data := pageData{
 		Title:           title,
 		MetaDescription: description,
 		CanonicalURL:    absoluteURL(r, r.URL.Path),
@@ -35,6 +35,10 @@ func (s *Server) basePageData(r *http.Request, title, description string) pageDa
 		Docs:            docs.All(),
 		Features:        features.All(),
 	}
+	if s.disableSearchIndexing {
+		data.MetaRobots = "noindex, nofollow, noarchive"
+	}
+	return data
 }
 
 func (s *Server) adminPageData(r *http.Request, title, description string) pageData {
@@ -50,6 +54,19 @@ func (s *Server) handleRobotsTxt(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method != http.MethodGet {
 		methodNotAllowed(w)
+		return
+	}
+
+	if s.disableSearchIndexing {
+		body := strings.Join([]string{
+			"User-agent: *",
+			"Disallow: /",
+			"",
+		}, "\n")
+
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(body))
 		return
 	}
 
@@ -74,6 +91,10 @@ func (s *Server) handleSitemapXML(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method != http.MethodGet {
 		methodNotAllowed(w)
+		return
+	}
+	if s.disableSearchIndexing {
+		http.NotFound(w, r)
 		return
 	}
 

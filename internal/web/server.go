@@ -25,18 +25,20 @@ type LeadStore interface {
 }
 
 type Config struct {
-	TemplatesDir string
-	StaticDir    string
-	LeadStore    LeadStore
-	AdminToken   string
+	TemplatesDir          string
+	StaticDir             string
+	LeadStore             LeadStore
+	AdminToken            string
+	DisableSearchIndexing bool
 }
 
 type Server struct {
-	templatesDir string
-	staticDir    string
-	leadStore    LeadStore
-	adminToken   string
-	contactLimit *submissionRateLimiter
+	templatesDir          string
+	staticDir             string
+	leadStore             LeadStore
+	adminToken            string
+	disableSearchIndexing bool
+	contactLimit          *submissionRateLimiter
 }
 
 type pageData struct {
@@ -101,11 +103,12 @@ func NewServer(cfg Config) (*Server, error) {
 		cfg.StaticDir = "static"
 	}
 	return &Server{
-		templatesDir: cfg.TemplatesDir,
-		staticDir:    cfg.StaticDir,
-		leadStore:    cfg.LeadStore,
-		adminToken:   cfg.AdminToken,
-		contactLimit: newSubmissionRateLimiter(5, 10*time.Minute),
+		templatesDir:          cfg.TemplatesDir,
+		staticDir:             cfg.StaticDir,
+		leadStore:             cfg.LeadStore,
+		adminToken:            cfg.AdminToken,
+		disableSearchIndexing: cfg.DisableSearchIndexing,
+		contactLimit:          newSubmissionRateLimiter(5, 10*time.Minute),
 	}, nil
 }
 
@@ -123,7 +126,7 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
 	mux.HandleFunc("/admin/leads.csv", s.handleAdminLeadsCSV)
 	mux.HandleFunc("/healthz", s.handleHealthz)
-	return securityHeaders(mux)
+	return securityHeaders(s.searchIndexingHeaders(mux))
 }
 
 func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -638,6 +641,17 @@ func securityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) searchIndexingHeaders(next http.Handler) http.Handler {
+	if !s.disableSearchIndexing {
+		return next
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Robots-Tag", "noindex, nofollow, noarchive")
 		next.ServeHTTP(w, r)
 	})
 }

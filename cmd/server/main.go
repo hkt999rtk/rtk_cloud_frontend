@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -56,8 +57,9 @@ func run(ctx context.Context, logger *log.Logger) error {
 	}
 
 	application, err := web.NewServer(web.Config{
-		LeadStore:  repository,
-		AdminToken: os.Getenv("ADMIN_TOKEN"),
+		LeadStore:             repository,
+		AdminToken:            os.Getenv("ADMIN_TOKEN"),
+		DisableSearchIndexing: truthyEnv("DISABLE_SEARCH_INDEXING"),
 	})
 	if err != nil {
 		return err
@@ -120,4 +122,13 @@ func envOrDefault(key, fallback string) string {
 		return fallback
 	}
 	return value
+}
+
+func truthyEnv(key string) bool {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv(key))) {
+	case "1", "true", "yes", "on":
+		return true
+	default:
+		return false
+	}
 }

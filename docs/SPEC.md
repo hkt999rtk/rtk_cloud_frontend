@@ -179,6 +179,7 @@ Environment:
 - `PORT`, default `8080`.
 - `DATABASE_PATH`, default `data/connectplus.db`.
 - `ADMIN_TOKEN`, optional. When set, enables protected lead review and CSV export.
+- `DISABLE_SEARCH_INDEXING`, optional. When truthy, marks the site as non-indexable with HTTP `X-Robots-Tag`, page-level robots meta tags, `/robots.txt` `Disallow: /`, and a disabled `/sitemap.xml`.
 
 Operational behavior:
 
@@ -186,6 +187,7 @@ Operational behavior:
 - Requests are logged with method, path, response status, and elapsed time.
 - `SIGINT` and `SIGTERM` trigger graceful shutdown with a bounded timeout.
 - Production TLS is expected to terminate at a reverse proxy, ingress controller, or hosting platform in front of the app.
+- Preview and test deployments should set `DISABLE_SEARCH_INDEXING=true` until the site is approved for public search indexing.
 
 Commands:
 

@@ -507,6 +507,55 @@ func TestRobotsTxtIncludesSitemap(t *testing.T) {
 	}
 }
 
+func TestSearchIndexingDisabledAddsNoIndexSignals(t *testing.T) {
+	server := newTestServer(t, Config{
+		TemplatesDir:          "../../templates",
+		StaticDir:             "../../static",
+		LeadStore:             &memoryLeadStore{},
+		DisableSearchIndexing: true,
+	})
+	handler := server.Routes()
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	if got := rec.Header().Get("X-Robots-Tag"); got != "noindex, nofollow, noarchive" {
+		t.Fatalf("X-Robots-Tag = %q, want noindex", got)
+	}
+	if !strings.Contains(rec.Body.String(), `<meta name="robots" content="noindex, nofollow, noarchive">`) {
+		t.Fatalf("homepage does not contain noindex meta: %s", rec.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/robots.txt", nil)
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("robots status = %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	for _, want := range []string{"User-agent: *", "Disallow: /"} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("robots.txt does not contain %q: %s", want, body)
+		}
+	}
+	if strings.Contains(body, "Sitemap:") {
+		t.Fatalf("disabled robots.txt should not advertise sitemap: %s", body)
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/sitemap.xml", nil)
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("sitemap status = %d, want 404", rec.Code)
+	}
+}
+
 func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 

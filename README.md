@@ -29,11 +29,17 @@ Environment variables:
 - `PORT`: HTTP port, default `8080`.
 - `DATABASE_PATH`: SQLite database path, default `data/connectplus.db`.
 - `ADMIN_TOKEN`: enables protected lead viewing and CSV export.
+- `DISABLE_SEARCH_INDEXING`: set to `true` on private/test deployments to emit `X-Robots-Tag: noindex, nofollow, noarchive`, add page-level `robots` meta tags, disallow all crawling in `/robots.txt`, and hide `/sitemap.xml`.
 
 Runtime behavior:
 
 - HTTP server uses read, write, and idle timeouts for a safer default operational baseline.
 - `SIGINT` and `SIGTERM` trigger graceful shutdown with a bounded drain window before exit.
+
+Search indexing:
+
+- Test and preview deployments should run with `DISABLE_SEARCH_INDEXING=true`.
+- Public launch deployments can omit it when the site is approved for indexing.
 
 ## Routes
 
