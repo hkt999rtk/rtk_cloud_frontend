@@ -601,6 +601,36 @@ func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
 	}
 }
 
+func TestOTAFeaturePageDoesNotPromoteCampaignPolicyScope(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features/ota", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	assertTableRowStatus(t, body, "Scheduled policy", "Integration-ready contract")
+	assertTableRowStatus(t, body, "Time-window policy", "Integration-ready contract")
+	assertTableRowStatus(t, body, "User-consent policy", "Integration-ready contract")
+	assertTableRowStatus(t, body, "Archive", "Roadmap campaign management")
+
+	for _, tc := range []struct {
+		concept string
+		status  string
+	}{
+		{concept: "Scheduled policy", status: "Available foundation"},
+		{concept: "Time-window policy", status: "Available foundation"},
+		{concept: "User-consent policy", status: "Available foundation"},
+		{concept: "Archive", status: "Available foundation"},
+	} {
+		assertTableRowDoesNotHaveStatus(t, body, tc.concept, tc.status)
+	}
+}
+
 func TestProvisionFeatureAlignsPublicCopyWithContractStatus(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
@@ -632,6 +662,42 @@ func TestProvisionFeatureAlignsPublicCopyWithContractStatus(t *testing.T) {
 			t.Fatalf("response does not contain %q: %s", want, body)
 		}
 	}
+}
+
+func assertTableRowStatus(t *testing.T, body, concept, status string) {
+	t.Helper()
+
+	row := tableRowForConcept(t, body, concept)
+	want := "<td>" + status + "</td>"
+	if !strings.Contains(row, want) {
+		t.Fatalf("table row for %q does not contain status %q: %s", concept, status, row)
+	}
+}
+
+func assertTableRowDoesNotHaveStatus(t *testing.T, body, concept, status string) {
+	t.Helper()
+
+	row := tableRowForConcept(t, body, concept)
+	forbidden := "<td>" + status + "</td>"
+	if strings.Contains(row, forbidden) {
+		t.Fatalf("table row for %q unexpectedly contains status %q: %s", concept, status, row)
+	}
+}
+
+func tableRowForConcept(t *testing.T, body, concept string) string {
+	t.Helper()
+
+	cell := "<td>" + concept + "</td>"
+	index := strings.Index(body, cell)
+	if index < 0 {
+		t.Fatalf("response does not contain table concept %q: %s", concept, body)
+	}
+	start := strings.LastIndex(body[:index], "<tr>")
+	end := strings.Index(body[index:], "</tr>")
+	if start < 0 || end < 0 {
+		t.Fatalf("response does not contain a complete table row for %q: %s", concept, body)
+	}
+	return body[start : index+end+len("</tr>")]
 }
 
 func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
