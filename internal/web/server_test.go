@@ -557,7 +557,7 @@ func TestFeatureMetadataUsesFeatureSummary(t *testing.T) {
 	body := rec.Body.String()
 	for _, want := range []string{
 		`<title>OTA | Realtek Connect&#43;</title>`,
-		`<meta name="description" content="Upload firmware, extract release metadata, target staged rollouts, and manage dynamic OTA jobs with force, normal, and user-controlled policies.">`,
+		`<meta name="description" content="Firmware upload, catalog, target enablement, rollout status, report, cancel, and download are available foundations; advanced campaign policy remains contract-defined follow-up work.">`,
 		`<meta property="og:url" content="http://example.com/features/ota">`,
 		`<meta name="twitter:title" content="OTA | Realtek Connect&#43;">`,
 	} {
@@ -580,17 +580,20 @@ func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
 
 	body := rec.Body.String()
 	for _, want := range []string{
-		"Upload signed firmware images and extract embedded project, version, model, checksum, and release-note metadata.",
-		"Attach rollout notes, force, normal, or user-controlled install policy, and maintenance-window guidance before approval.",
-		"Target by product family, hardware model, current firmware version, customer tier, region, or support cohort.",
-		"Validate project and version compatibility before devices accept a package.",
-		"Choose the delivery mode that fits the release",
-		"<th scope=\"col\">Strategy</th>",
-		"Force, normal, scheduled, user-controlled, and time-window rollout modes",
-		"Dynamic OTA keeps device eligibility aligned with the latest approved campaign even when endpoints reconnect later.",
-		"Force",
-		"Normal",
-		"Cancel active waves and archive completed campaigns without losing audit history.",
+		"Firmware upload, catalog, target enablement, rollout status, report, cancel, and download are available foundations; advanced campaign policy remains contract-defined follow-up work.",
+		"Firmware campaign interface contract",
+		`href="https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/FIRMWARE_CAMPAIGN.md"`,
+		"Use the current firmware lifecycle as the implementation boundary",
+		"Describe publish, enablement, whitelist, rollout query/report, cancel, and download behavior as the available firmware lifecycle foundation.",
+		"Scheduled and time-window OTA are contract-defined policy concepts until backend enforcement and SDK handling are documented as available.",
+		"User-consent-required OTA is a policy flag in phase one, not a shipped mobile UX or app-side consent flow.",
+		"Approval workflow, operator dashboards, analytics, and success-rate reporting are roadmap capabilities, not phase-one availability claims.",
+		"Map each OTA concept to the right implementation status",
+		"<th scope=\"col\">Status</th>",
+		"Available foundation",
+		"Integration-ready contract",
+		"Roadmap campaign management",
+		"Staged percentage rollout and automatic cohort ramping stay out of the available feature list until a campaign engine implements them.",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
@@ -647,7 +650,7 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 		{
 			path: "/features/ota",
 			src:  `/static/assets/feature-ota-control-center.jpg`,
-			alt:  `alt="Firmware rollout control center with staged release timeline, device cohorts, and OTA job analytics."`,
+			alt:  `alt="Firmware rollout control center with staged release timeline, device cohorts, and OTA job status cards."`,
 		},
 		{
 			path: "/features/fleet-management",

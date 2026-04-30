@@ -165,7 +165,7 @@ Realtek Connect+ presents the following Realtek IoT cloud platform capabilities:
 
 - Platform Overview: device firmware, cloud backend, mobile app, dashboard, and third-party integrations.
 - Provision: Wi-Fi/BLE onboarding, device binding, activation, user-device association.
-- OTA: firmware upload, campaign rollout, job status, cancel/archive, version validation, and force/normal/scheduled/user-controlled/time-window rollout modes.
+- OTA: firmware lifecycle foundation for upload/catalog, target enablement, rollout status, report, cancel, and download; campaign policy vocabulary for scheduled, time-window, user-consent, archive, and advanced rollout operations is contract-defined or roadmap scope until implementation lands.
 - Fleet Management: device registry, groups, metadata/tags, batch operations, timezone, device sharing.
 - Smart Home Experience: remote control, local control fallback, schedules, scenes, grouping, node sharing, push notifications, alerts, and household sharing flows framed as product capabilities rather than current website app behavior.
 - User Management: sign up, sign in, OTP verification, third-party login, password recovery/change, and account deletion framed as platform capabilities rather than current website authentication flows.
@@ -189,7 +189,7 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 | --- | --- | --- | --- |
 | Platform Overview | Content Partial | Homepage, `/features`, docs landing page | The site now explains the device-cloud-app-dashboard story, but follow-on work can deepen security, scalability, cost, and deployment comparison narratives. |
 | Provision | Content Partial | `/features/provision`, [`PRODUCT_ONBOARDING.md`](https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/PRODUCT_ONBOARDING.md) | Provisioning copy now distinguishes the contract-backed cloud registry, cross-service activation, scoped-token, and transport-readiness foundation from integration-ready claim material interfaces and roadmap local onboarding work. Local Wi-Fi/BLE setup, QR/SoftAP UX, ownership transfer, factory reset policy, and aggregate product readiness are not described as generally available until the owner repositories land those implementations. |
-| OTA | Implemented | `/features/ota` | The OTA page now covers firmware upload, extracted release metadata, model/version targeting, force/normal/scheduled/user-controlled/time-window rollouts, dynamic OTA eligibility, job detail, cancellation, archive flow, and a rollout strategy table. |
+| OTA | Content Partial | `/features/ota`, [`FIRMWARE_CAMPAIGN.md`](https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/FIRMWARE_CAMPAIGN.md) | OTA copy now distinguishes the available firmware lifecycle foundation for upload, catalog, target enablement, rollout status, report, cancel, and download from the planned campaign policy engine. Scheduled/time-window/user-consent policy, archive management, approval workflow, dashboards, analytics, and staged percentage rollout are contract-defined or roadmap scope rather than generally available phase-one implementation. |
 | Fleet Management | Implemented | `/features/fleet-management` | The fleet page covers node registration, bootstrap certificates, registry, groups, metadata, OTA jobs, firmware images, batch operations, and operator statistics widgets as website content without claiming a live console implementation. |
 | Admin Operations | Content Partial | `/features/fleet-management`, `/admin/leads`, `/admin/leads.csv` | Website v1 ships lead-review tooling plus admin-operations product copy, but it does not ship the full fleet console described by the marketing content. |
 | User Management | Content Partial | `/features/user-management` | The feature page covers sign up, sign in, OTP verification, third-party login, forgot/change password, delete account, and account lifecycle boundaries; follow-on work can add deeper session behavior, support workflows, and visuals. |
@@ -243,7 +243,7 @@ Localized public route variants:
 Feature slugs:
 
 - `provision`: aligns public provisioning availability wording with the product onboarding interface contract, separating the cloud-side activation foundation from integration-ready claim material and roadmap local onboarding/readiness work.
-- `ota`
+- `ota`: aligns public OTA availability wording with the firmware campaign interface contract, separating the available firmware lifecycle foundation from planned campaign policy and roadmap operations.
 - `fleet-management`
 - `smart-home`
 - `user-management`
@@ -454,8 +454,8 @@ Goal: Make the OTA story stronger and more credible.
 
 Acceptance criteria:
 
-- Covers firmware upload, metadata extraction, version/model targeting, force/normal/user-controlled/time-window OTA, dynamic OTA, job details, cancel, and archive.
-- Includes a visual, table, or structured explanation of rollout strategies.
+- Covers firmware upload, metadata extraction, version/model targeting, rollout status, report, cancel, and download as the available firmware lifecycle foundation.
+- Includes a visual, table, or structured explanation that labels scheduled, time-window, user-consent, archive, approval workflow, analytics, dashboards, and staged percentage rollout according to implementation status.
 - `/features/ota` remains the canonical OTA page.
 
 ### 7. Add mobile SDK and app publishing content
