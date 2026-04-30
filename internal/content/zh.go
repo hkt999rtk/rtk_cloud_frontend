@@ -13,6 +13,8 @@ type localizedFeature struct {
 	Summary      string
 	Description  string
 	ImageAlt     string
+	SourceLabel  string
+	SourceURL    string
 	Highlights   []string
 	Capabilities []string
 	Outcomes     []string
@@ -252,13 +254,14 @@ func zhTWFeatures() map[string]localizedFeature {
 		},
 		"ota": {
 			Title:        "OTA 韌體更新",
-			Kicker:       "以可控節奏發布韌體更新。",
-			Summary:      "上傳韌體、擷取版本資料、指定分批發布目標，並管理強制、一般、排程與使用者控制的 OTA 工作。",
-			Description:  "OTA 被定位為正式韌體營運介面，而不是單一更新按鈕。團隊可註冊韌體包、檢查版本與型號資料、設定發布政策並觀察活動狀態。",
-			ImageAlt:     "顯示分階段發布時間軸、裝置群組與 OTA 分析的韌體發布控制中心。",
-			Highlights:   []string{"韌體上傳與版本、型號、checksum、release note 擷取", "依版本、型號、區域與 cohort 進行分批發布", "支援強制、一般、排程、使用者控制與時間窗策略"},
-			Capabilities: []string{"為常連線或間歇連線裝置設計動態 OTA 規則", "查看每個工作狀態、裝置結果、取消與封存紀錄", "發布前進行相容性驗證與操作核准"},
-			Outcomes:     []string{"降低韌體支援成本", "降低全裝置群回歸風險", "協調消費與商用部署更新"},
+			Kicker:       "區分韌體生命週期基礎與 campaign roadmap。",
+			Summary:      "韌體上傳、catalog、target enablement、rollout 狀態、report、cancel 與 download 屬於現有基礎；進階 campaign policy 仍是合約定義的後續工作。",
+			Description:  "OTA 以 interface-first 韌體 campaign 路徑呈現。現階段公開文案可描述 upload、enablement、rollout query/report、cancel 與 download route 代表的韌體生命週期基礎；排程、時間窗、使用者同意、封存語意、審核流程、dashboard、analytics 與分階段百分比 rollout 需標示為規劃中的 campaign policy 工作。",
+			ImageAlt:     "顯示分階段發布時間軸、裝置群組與 OTA 工作狀態卡片的韌體發布控制中心。",
+			SourceLabel:  "韌體 campaign 介面合約",
+			Highlights:   []string{"韌體上傳、catalog、target enablement、rollout 狀態、report、cancel 與 download 的現有基礎", "排程、時間窗與使用者同意 policy 屬於合約定義的 campaign vocabulary", "審核流程、dashboard、analytics、分階段百分比 rollout 與封存 UX 維持 roadmap 標示"},
+			Capabilities: []string{"以既有 firmware route 作為可用實作邊界，而非暗示完整 campaign engine 已完成", "在 backend、SDK 與 App 支援落地前，將 scheduled、time-window 與 user-consent 行為標示為 integration-ready policy vocabulary", "cancel 保持為生命週期基礎；archive 則標示為 campaign-management roadmap 範圍"},
+			Outcomes:     []string{"保留 OTA campaign 願景且不誇大第一階段實作", "讓 firmware、SDK、backend 與產品團隊共用 availability 詞彙", "讓評估討論清楚區分目前可用、合約定義與 roadmap"},
 		},
 		"fleet-management": {
 			Title:        "裝置群管理",
@@ -384,6 +387,12 @@ func localizedFeatures(overrides map[string]localizedFeature) []features.Feature
 			feature.Summary = item.Summary
 			feature.Description = item.Description
 			feature.ImageAlt = item.ImageAlt
+			if item.SourceLabel != "" {
+				feature.SourceLabel = item.SourceLabel
+			}
+			if item.SourceURL != "" {
+				feature.SourceURL = item.SourceURL
+			}
 			feature.Highlights = item.Highlights
 			feature.Capabilities = item.Capabilities
 			feature.Outcomes = item.Outcomes
@@ -439,6 +448,7 @@ func simplifiedFeatures(input []features.Feature) []features.Feature {
 		feature.Summary = toSimplified(feature.Summary)
 		feature.Description = toSimplified(feature.Description)
 		feature.ImageAlt = toSimplified(feature.ImageAlt)
+		feature.SourceLabel = toSimplified(feature.SourceLabel)
 		feature.Highlights = simplifiedSlice(feature.Highlights)
 		feature.Capabilities = simplifiedSlice(feature.Capabilities)
 		feature.Outcomes = simplifiedSlice(feature.Outcomes)
