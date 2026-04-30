@@ -188,7 +188,7 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 | Capability | Website v1 Status | Current Surface | Website v1 Notes |
 | --- | --- | --- | --- |
 | Platform Overview | Content Partial | Homepage, `/features`, docs landing page | The site now explains the device-cloud-app-dashboard story, but follow-on work can deepen security, scalability, cost, and deployment comparison narratives. |
-| Provision | Content Partial | `/features/provision` | Provisioning copy covers Wi-Fi/BLE onboarding, activation, binding, and account association, but it still needs QR/SoftAP diagrams, failure-state coverage, and deeper claiming workflow detail. |
+| Provision | Content Partial | `/features/provision`, [`PRODUCT_ONBOARDING.md`](https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/PRODUCT_ONBOARDING.md) | Provisioning copy now distinguishes the contract-backed cloud registry, cross-service activation, scoped-token, and transport-readiness foundation from integration-ready claim material interfaces and roadmap local onboarding work. Local Wi-Fi/BLE setup, QR/SoftAP UX, ownership transfer, factory reset policy, and aggregate product readiness are not described as generally available until the owner repositories land those implementations. |
 | OTA | Implemented | `/features/ota` | The OTA page now covers firmware upload, extracted release metadata, model/version targeting, force/normal/scheduled/user-controlled/time-window rollouts, dynamic OTA eligibility, job detail, cancellation, archive flow, and a rollout strategy table. |
 | Fleet Management | Implemented | `/features/fleet-management` | The fleet page covers node registration, bootstrap certificates, registry, groups, metadata, OTA jobs, firmware images, batch operations, and operator statistics widgets as website content without claiming a live console implementation. |
 | Admin Operations | Content Partial | `/features/fleet-management`, `/admin/leads`, `/admin/leads.csv` | Website v1 ships lead-review tooling plus admin-operations product copy, but it does not ship the full fleet console described by the marketing content. |
@@ -242,7 +242,7 @@ Localized public route variants:
 
 Feature slugs:
 
-- `provision`
+- `provision`: aligns public provisioning availability wording with the product onboarding interface contract, separating the cloud-side activation foundation from integration-ready claim material and roadmap local onboarding/readiness work.
 - `ota`
 - `fleet-management`
 - `smart-home`

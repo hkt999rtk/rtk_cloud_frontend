@@ -21,6 +21,7 @@ var iconPaths = map[string]string{
 	"device":      `<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10 17h4"/><path d="M10 7h4"/>`,
 	"document":    `<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h5"/><path d="M10 12h6"/><path d="M10 16h6"/>`,
 	"download":    `<path d="M12 4v10"/><path d="m8 10 4 4 4-4"/><path d="M5 20h14"/>`,
+	"external":    `<path d="M14 4h6v6"/><path d="m10 14 10-10"/><path d="M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5"/>`,
 	"filter":      `<path d="M4 6h16"/><path d="M7 12h10"/><path d="M10 18h4"/>`,
 	"fleet":       `<rect x="4" y="4" width="5" height="5" rx="1"/><rect x="15" y="4" width="5" height="5" rx="1"/><rect x="4" y="15" width="5" height="5" rx="1"/><rect x="15" y="15" width="5" height="5" rx="1"/><path d="M9 6.5h6"/><path d="M6.5 9v6"/><path d="M17.5 9v6"/><path d="M9 17.5h6"/>`,
 	"grid":        `<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>`,

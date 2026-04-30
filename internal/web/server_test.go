@@ -186,7 +186,7 @@ func TestLocalizedHomeIncludesLangSwitcherAndAlternates(t *testing.T) {
 		`hreflang="x-default" href="http://example.com/features/provision"`,
 		`href="http://example.com/zh-tw/features/provision" aria-current="true">繁體中文</a>`,
 		"Provision 配網",
-		"降低裝置導入與綁定摩擦。",
+		"以合約支撐的基礎來描述裝置導入。",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
@@ -598,6 +598,39 @@ func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
 	}
 }
 
+func TestProvisionFeatureAlignsPublicCopyWithContractStatus(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features/provision", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"Cloud registry and activation foundations are contract-backed; local Wi-Fi/BLE onboarding, claim UX, transfer/reset policy, and product readiness remain integration or roadmap scope.",
+		"Product onboarding interface contract",
+		`href="https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/PRODUCT_ONBOARDING.md"`,
+		"Cloud-side provisioning is the implemented contract boundary",
+		"Account-side device registration, cross-service provisioning requests, video activation results, scoped token issuance, and owner transport readiness are the public cloud-side behaviors to discuss today.",
+		"Claim material has a defined interface, not final ownership policy",
+		"BLE provisioning, SoftAP provisioning, local Wi-Fi credential transport, QR onboarding UX, ECDH or challenge-response handshakes, and manufacturing CA policy are not yet stable website-available implementation claims.",
+		"Separate what is available, integration-ready, and roadmap",
+		"<th scope=\"col\">Public status</th>",
+		"Available foundation",
+		"Integration-ready",
+		"Roadmap",
+		"Transfer, reset, and product readiness",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
 func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
@@ -609,7 +642,7 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 		{
 			path: "/features/provision",
 			src:  `/static/assets/feature-provision-flow.jpg`,
-			alt:  `alt="Provisioning dashboard with mobile pairing steps, QR onboarding, and device activation status cards."`,
+			alt:  `alt="Provisioning dashboard concept with mobile pairing steps, QR onboarding, and device activation status cards."`,
 		},
 		{
 			path: "/features/ota",
