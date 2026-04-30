@@ -9,6 +9,8 @@ type Feature struct {
 	Description  string
 	ImagePath    string
 	ImageAlt     string
+	SourceLabel  string
+	SourceURL    string
 	Highlights   []string
 	Capabilities []string
 	Outcomes     []string
@@ -42,14 +44,61 @@ func All() []Feature {
 			Slug:         "provision",
 			Title:        "Provision",
 			Icon:         "provision",
-			Kicker:       "Onboard devices with less product friction.",
-			Summary:      "Secure Wi-Fi/BLE onboarding, activation, and account binding for Realtek-based IoT products.",
-			Description:  "Provision gives product teams a repeatable path from factory-ready hardware to a user-owned connected device. It covers first-time activation, local onboarding, cloud registration, and user-device association.",
+			Kicker:       "Frame onboarding around the contract-backed foundation.",
+			Summary:      "Cloud registry and activation foundations are contract-backed; local Wi-Fi/BLE onboarding, claim UX, transfer/reset policy, and product readiness remain integration or roadmap scope.",
+			Description:  "Provision presents Realtek Connect+ onboarding as a layered path from registry entry to activated cloud device. The current foundation is the account registry, cross-service provisioning command flow, video-cloud activation boundary, scoped tokens, and transport readiness contract; local Wi-Fi/BLE setup, QR/SoftAP UX, ownership transfer, factory reset policy, and aggregate product readiness are not presented as generally available implementation until those owner repositories land them.",
 			ImagePath:    "/static/assets/feature-provision-flow.jpg",
-			ImageAlt:     "Provisioning dashboard with mobile pairing steps, QR onboarding, and device activation status cards.",
-			Highlights:   []string{"Wi-Fi and BLE onboarding flows", "Device binding and ownership transfer", "Activation state and first-run telemetry"},
-			Capabilities: []string{"Claiming tokens and device identity handoff", "User-device association during app onboarding", "Timezone and metadata initialization"},
-			Outcomes:     []string{"Reduce setup failures", "Shorten app onboarding", "Prepare devices for fleet operations"},
+			ImageAlt:     "Provisioning dashboard concept with mobile pairing steps, QR onboarding, and device activation status cards.",
+			SourceLabel:  "Product onboarding interface contract",
+			SourceURL:    "https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/PRODUCT_ONBOARDING.md",
+			Highlights:   []string{"Contract-backed cloud registry, activation, token, and transport readiness boundaries", "Integration-ready claim material concepts for QR, serial, activation code, and future factory identity", "Roadmap treatment for local Wi-Fi/BLE setup, SoftAP UX, transfer/reset policy, and aggregate readiness"},
+			Capabilities: []string{"Use account-side registry APIs plus cross-service DeviceProvisionRequested and DeviceProvisionSucceeded or DeviceProvisionFailed events for the cloud activation foundation", "Keep SDK claim parsing separate from account-side ownership and binding decisions", "Describe local onboarding and product readiness as planned owner-repository work instead of broadly available website functionality"},
+			Outcomes:     []string{"Preserve the product onboarding vision without overclaiming implementation status", "Give firmware, app, SDK, account, and video-cloud teams one shared availability vocabulary", "Make evaluation conversations explicit about what is available now, integration-ready, or roadmap"},
+			Sections: []FeatureSection{
+				{
+					Eyebrow: "Available foundation",
+					Title:   "Cloud-side provisioning is the implemented contract boundary",
+					Intro:   "The stable story starts with account registry records and the cross-service activation flow rather than a single all-in-one provisioning endpoint.",
+					Items: []string{
+						"Account-side device registration, cross-service provisioning requests, video activation results, scoped token issuance, and owner transport readiness are the public cloud-side behaviors to discuss today.",
+						"Provisioning remains multi-service orchestration across account manager, the cross-service channel, video cloud, device credentials, and transport state.",
+						"Video activation alone is not full product readiness; the product state must distinguish registry, claim, local setup, activation, online, failure, and deactivation stages.",
+					},
+				},
+				{
+					Eyebrow: "Integration-ready",
+					Title:   "Claim material has a defined interface, not final ownership policy",
+					Intro:   "The product onboarding contract gives SDK and app teams common vocabulary for claim input while leaving authorization decisions with account-side policy.",
+					Items: []string{
+						"Claim material may represent QR payloads, serial numbers, activation codes, MAC addresses, or future factory identity inputs.",
+						"SDK parsers should normalize supported claim material and return stable errors for malformed or unsupported inputs.",
+						"Account-side follow-up work still owns reuse rules, already-claimed rejection, transfer behavior, factory reset semantics, and delete-versus-deactivate policy.",
+					},
+				},
+				{
+					Eyebrow: "Roadmap",
+					Title:   "Local onboarding remains owner-repository implementation work",
+					Intro:   "The public page keeps the product vision visible while avoiding a general-availability claim for local setup UX.",
+					Items: []string{
+						"BLE provisioning, SoftAP provisioning, local Wi-Fi credential transport, QR onboarding UX, ECDH or challenge-response handshakes, and manufacturing CA policy are not yet stable website-available implementation claims.",
+						"Android and iOS are the primary targets for real local onboarding implementations; native and JavaScript/TypeScript packages should report explicit unsupported capability where needed.",
+						"Full product readiness should wait for local setup results, claim/bind policy, cloud activation, and transport online state to be joined by an owner repository or integration service.",
+					},
+					Accent: true,
+				},
+			},
+			Table: FeatureTable{
+				Eyebrow: "Availability",
+				Title:   "Separate what is available, integration-ready, and roadmap",
+				Intro:   "Realtek Connect+ provisioning is presented as a layered product path. The cloud-side foundation is contract-backed now; local onboarding UX and final ownership policy stay clearly marked until implementation lands.",
+				Columns: []string{"Layer", "Public status", "Customer-facing boundary"},
+				Rows: []FeatureTableRow{
+					{Cells: []string{"Cloud registry and activation foundation", "Available foundation", "Account registry, cross-service provisioning commands and events, video activation, scoped credentials, and transport readiness define the current cloud-side path."}},
+					{Cells: []string{"Claim material parsing", "Integration-ready", "QR, serial, activation code, MAC, and future factory identity inputs have shared interface vocabulary, but ownership policy is account-side follow-up work."}},
+					{Cells: []string{"Local Wi-Fi/BLE and SoftAP onboarding", "Roadmap", "Local discovery, credential handoff, QR onboarding UX, and mobile setup sessions are not described as generally available implementation in this website."}},
+					{Cells: []string{"Transfer, reset, and product readiness", "Roadmap", "Already-claimed handling, ownership transfer, factory reset, delete/deactivate separation, and aggregate readiness projection require follow-up policy and service work."}},
+				},
+			},
 		},
 		{
 			Slug:         "ota",

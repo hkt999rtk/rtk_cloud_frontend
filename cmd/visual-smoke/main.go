@@ -133,7 +133,7 @@ func main() {
 			imageSelector:    ".feature-visual img",
 			expectedHeading:  "Provision 配網",
 			expectedTitle:    "Provision 配網 | Realtek Connect+",
-			expectedBodyText: "降低裝置導入與綁定摩擦",
+			expectedBodyText: "合約支撐的基礎",
 		},
 		{
 			name:             "feature-zh-cn",
@@ -142,7 +142,7 @@ func main() {
 			imageSelector:    ".feature-visual img",
 			expectedHeading:  "Provision 配网",
 			expectedTitle:    "Provision 配网 | Realtek Connect+",
-			expectedBodyText: "降低装置导入与绑定摩擦",
+			expectedBodyText: "合约支撑的基础",
 		},
 	}
 

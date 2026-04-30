@@ -1045,6 +1045,23 @@ p {
   min-width: 0;
 }
 
+.source-link {
+  margin: 18px 0 0;
+}
+
+.source-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.source-link .icon {
+  width: 18px;
+  height: 18px;
+}
+
 .feature-visual {
   min-width: 0;
   padding: 14px;

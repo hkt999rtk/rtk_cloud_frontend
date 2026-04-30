@@ -242,13 +242,13 @@ func zhTWFeatures() map[string]localizedFeature {
 	return map[string]localizedFeature{
 		"provision": {
 			Title:        "Provision 配網",
-			Kicker:       "降低裝置導入與綁定摩擦。",
-			Summary:      "為 Realtek 物聯網產品提供安全 Wi-Fi/BLE 配網、啟用與帳號綁定流程。",
-			Description:  "Provision 讓產品團隊能從出廠硬體一路走到使用者擁有的連網裝置，涵蓋首次啟用、本地配網、雲端登錄與使用者裝置關聯。",
-			ImageAlt:     "顯示手機配對、QR 導入與裝置啟用狀態卡片的配網儀表板。",
-			Highlights:   []string{"Wi-Fi 與 BLE 配網流程", "裝置綁定與所有權轉移", "啟用狀態與首次遙測"},
-			Capabilities: []string{"Claim token 與裝置身分交接", "App 導入流程中的使用者裝置關聯", "時區與中繼資料初始化"},
-			Outcomes:     []string{"降低設定失敗率", "縮短 App 導入時間", "讓裝置準備進入營運管理"},
+			Kicker:       "以合約支撐的基礎來描述裝置導入。",
+			Summary:      "雲端 registry 與啟用基礎已有合約邊界；本地 Wi-Fi/BLE 配網、claim UX、轉移/重設政策與完整產品就緒狀態仍屬整合或 roadmap 範圍。",
+			Description:  "Provision 將 Realtek Connect+ 導入描述為從 registry 到雲端啟用裝置的分層流程。現階段可對外說明的是帳號 registry、跨服務 provision command、video cloud 啟用邊界、scoped token 與 transport readiness 合約；本地 Wi-Fi/BLE 設定、QR/SoftAP UX、所有權轉移、factory reset 政策與彙整產品就緒狀態，在負責 repo 完成前不描述為全面可用實作。",
+			ImageAlt:     "顯示手機配對、QR 導入與裝置啟用狀態卡片的配網概念儀表板。",
+			Highlights:   []string{"雲端 registry、啟用、token 與 transport readiness 的合約邊界", "QR、序號、activation code 與未來 factory identity 的 claim material 概念", "本地 Wi-Fi/BLE、SoftAP UX、轉移/重設政策與彙整 readiness 維持 roadmap 標示"},
+			Capabilities: []string{"以帳號 registry API 與跨服務 DeviceProvisionRequested、DeviceProvisionSucceeded 或 DeviceProvisionFailed 事件描述雲端啟用基礎", "將 SDK claim parsing 與帳號端所有權及綁定政策分開", "把本地配網與產品就緒狀態描述為規劃中的 owner-repo 工作，而非網站已全面提供的功能"},
+			Outcomes:     []string{"保留產品導入願景且不誇大實作狀態", "讓 firmware、App、SDK、account 與 video cloud 團隊共用 availability 詞彙", "讓評估討論清楚區分目前可用、整合就緒與 roadmap"},
 		},
 		"ota": {
 			Title:        "OTA 韌體更新",
@@ -495,7 +495,7 @@ func toSimplified(value string) string {
 		"業", "业", "術", "术", "載", "载", "詢", "询", "問", "问", "聲", "声",
 		"單", "单", "聲明", "声明", "處理", "处理", "聯絡", "联络", "請求", "请求",
 		"預", "预", "期", "期", "個月", "个月", "訊息", "讯息", "嵌", "嵌",
-		"瀏", "浏",
+		"瀏", "浏", "約", "约", "撐", "撑",
 	)
 	return replacer.Replace(value)
 }

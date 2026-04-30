@@ -57,3 +57,11 @@ func TestLocaleFromPath(t *testing.T) {
 		}
 	}
 }
+
+func TestToSimplifiedCoversProvisioningContractTerms(t *testing.T) {
+	got := ToSimplified("合約支撐的基礎")
+	want := "合约支撑的基础"
+	if got != want {
+		t.Fatalf("ToSimplified() = %q, want %q", got, want)
+	}
+}
