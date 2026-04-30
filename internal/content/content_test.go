@@ -1,6 +1,11 @@
 package content
 
-import "testing"
+import (
+	"strings"
+	"testing"
+
+	"realtek-connect/internal/features"
+)
 
 func TestLocalizedCatalogsKeepFeatureAndDocSlugs(t *testing.T) {
 	en := CatalogFor(DefaultLocale())
@@ -29,6 +34,100 @@ func TestLocalizedCatalogsKeepFeatureAndDocSlugs(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestOTACopyKeepsCampaignPoliciesUnpromoted(t *testing.T) {
+	catalog := CatalogFor(DefaultLocale())
+	ota, ok := catalog.FeatureBySlug("ota")
+	if !ok {
+		t.Fatal("default catalog missing ota feature")
+	}
+
+	assertOTATableStatus(t, ota, "Scheduled policy", "Integration-ready contract")
+	assertOTATableStatus(t, ota, "Time-window policy", "Integration-ready contract")
+	assertOTATableStatus(t, ota, "User-consent policy", "Integration-ready contract")
+	assertOTATableStatus(t, ota, "Archive", "Roadmap campaign management")
+
+	copy := strings.Join([]string{
+		ota.Summary,
+		ota.Description,
+		strings.Join(ota.Highlights, " "),
+		strings.Join(ota.Capabilities, " "),
+	}, " ")
+	for _, want := range []string{
+		"available foundations",
+		"contract-defined follow-up work",
+		"integration-ready policy vocabulary",
+		"roadmap scope",
+	} {
+		if !strings.Contains(copy, want) {
+			t.Fatalf("OTA copy does not contain availability boundary %q: %s", want, copy)
+		}
+	}
+}
+
+func TestLocalizedOTACopyKeepsCampaignPoliciesUnpromoted(t *testing.T) {
+	tests := []struct {
+		localeCode string
+		wants      []string
+	}{
+		{
+			localeCode: "zh-TW",
+			wants:      []string{"現有基礎", "合約定義", "integration-ready policy vocabulary", "roadmap 範圍"},
+		},
+		{
+			localeCode: "zh-CN",
+			wants:      []string{"现有基础", "合约定義", "integration-ready policy vocabulary", "roadmap 範圍"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.localeCode, func(t *testing.T) {
+			catalog := CatalogFor(localeByCode(t, tc.localeCode))
+			ota, ok := catalog.FeatureBySlug("ota")
+			if !ok {
+				t.Fatal("localized catalog missing ota feature")
+			}
+			copy := strings.Join([]string{
+				ota.Summary,
+				ota.Description,
+				strings.Join(ota.Highlights, " "),
+				strings.Join(ota.Capabilities, " "),
+			}, " ")
+			for _, want := range tc.wants {
+				if !strings.Contains(copy, want) {
+					t.Fatalf("%s OTA copy does not contain availability boundary %q: %s", tc.localeCode, want, copy)
+				}
+			}
+		})
+	}
+}
+
+func assertOTATableStatus(t *testing.T, feature features.Feature, concept, status string) {
+	t.Helper()
+
+	for _, row := range feature.Table.Rows {
+		if len(row.Cells) < 2 || row.Cells[0] != concept {
+			continue
+		}
+		if row.Cells[1] != status {
+			t.Fatalf("OTA table status for %q = %q, want %q", concept, row.Cells[1], status)
+		}
+		return
+	}
+	t.Fatalf("OTA table missing concept %q", concept)
+}
+
+func localeByCode(t *testing.T, code string) Locale {
+	t.Helper()
+
+	for _, locale := range SupportedLocales() {
+		if locale.Code == code {
+			return locale
+		}
+	}
+	t.Fatalf("missing supported locale %q", code)
+	return Locale{}
 }
 
 func TestLocaleFromPath(t *testing.T) {
