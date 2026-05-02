@@ -2,12 +2,13 @@ package analytics
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
 
 const (
-	DefaultDatabasePath  = "data/analytics.db"
+	DefaultDatabasePath  = "/var/lib/realtek-connect/analytics.db"
 	DefaultRetentionDays = 90
 )
 
@@ -33,6 +34,9 @@ func ConfigFromEnv() Config {
 	}
 
 	if value := strings.TrimSpace(os.Getenv("ANALYTICS_DATABASE_PATH")); value != "" {
+		if !filepath.IsAbs(value) {
+			value = filepath.Join("/var/lib/realtek-connect", value)
+		}
 		cfg.DatabasePath = value
 	}
 

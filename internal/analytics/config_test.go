@@ -26,8 +26,8 @@ func TestConfigFromEnvAppliesOverrides(t *testing.T) {
 	if cfg.Enabled {
 		t.Fatal("enabled = true, want false")
 	}
-	if cfg.DatabasePath != "tmp/analytics.db" {
-		t.Fatalf("database path = %q, want tmp/analytics.db", cfg.DatabasePath)
+	if cfg.DatabasePath != "/var/lib/realtek-connect/tmp/analytics.db" {
+		t.Fatalf("database path = %q, want /var/lib/realtek-connect/tmp/analytics.db", cfg.DatabasePath)
 	}
 	if cfg.RetentionDays != 14 {
 		t.Fatalf("retention days = %d, want 14", cfg.RetentionDays)

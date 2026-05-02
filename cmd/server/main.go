@@ -37,7 +37,10 @@ func run(ctx context.Context, logger *log.Logger) error {
 		logger = log.New(os.Stdout, "", log.LstdFlags)
 	}
 
-	databasePath := envOrDefault("DATABASE_PATH", "data/connectplus.db")
+	databasePath := envOrDefault("DATABASE_PATH", "/var/lib/realtek-connect/connectplus.db")
+	if !filepath.IsAbs(databasePath) {
+		databasePath = filepath.Clean(filepath.Join("/var/lib/realtek-connect", databasePath))
+	}
 	if err := os.MkdirAll(filepath.Dir(databasePath), 0o755); err != nil {
 		return err
 	}
