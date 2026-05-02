@@ -313,6 +313,7 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 		canonical string
 		title     string
 		body      string
+		snippets  []string
 	}{
 		{
 			path:      "/privacy",
@@ -320,6 +321,19 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 			canonical: `http://example.com/privacy`,
 			title:     "Privacy notice for Realtek Connect&#43; website inquiries.",
 			body:      "Website leads are intended to be retained for up to 24 months",
+			snippets: []string{
+				"first-party SQLite analytics",
+				"page_view",
+				"click_cta",
+				"scroll",
+				"engaged",
+				"referrer origin only",
+				"ephemeral session id",
+				"Raw analytics event rows are retained for 90 days",
+				"third-party analytics services",
+				"advertising pixels",
+				"fingerprinting scripts",
+			},
 		},
 		{
 			path:      "/zh-tw/privacy",
@@ -327,6 +341,19 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 			canonical: `http://example.com/zh-tw/privacy`,
 			title:     "Realtek Connect&#43; 網站詢問隱私權聲明。",
 			body:      "網站 leads 預期最多保存 24 個月",
+			snippets: []string{
+				"第一方 SQLite analytics",
+				"page_view",
+				"click_cta",
+				"scroll",
+				"engaged events",
+				"referrer origin only",
+				"ephemeral session id",
+				"保存 90 天",
+				"第三方 analytics services",
+				"advertising pixels",
+				"fingerprinting scripts",
+			},
 		},
 		{
 			path:      "/zh-cn/privacy",
@@ -334,6 +361,19 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 			canonical: `http://example.com/zh-cn/privacy`,
 			title:     "Realtek Connect&#43; 网站询问隐私权声明。",
 			body:      "网站 leads 预期最多保存 24 个月",
+			snippets: []string{
+				"第一方 SQLite analytics",
+				"page_view",
+				"click_cta",
+				"scroll",
+				"engaged events",
+				"referrer origin only",
+				"ephemeral session id",
+				"保存 90 天",
+				"第三方 analytics services",
+				"advertising pixels",
+				"fingerprinting scripts",
+			},
 		},
 	}
 
@@ -358,6 +398,11 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 		} {
 			if !strings.Contains(body, want) {
 				t.Fatalf("%s response does not contain %q: %s", tc.path, want, body)
+			}
+		}
+		for _, want := range tc.snippets {
+			if !strings.Contains(body, want) {
+				t.Fatalf("%s response does not contain analytics privacy snippet %q: %s", tc.path, want, body)
 			}
 		}
 	}
