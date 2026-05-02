@@ -25,7 +25,7 @@ Implemented today:
 - Language switcher in the shared header that points to the same public page in each supported locale.
 - Localized public page metadata with canonical URLs, `hreflang` alternates, and localized sitemap entries.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
-- Localized privacy notice routes describing contact form data, retention intent, data request handling, admin protection, and local video behavior.
+- Localized privacy notice routes describing contact form data, first-party SQLite analytics, analytics event types, referrer-origin-only handling, ephemeral session ids, retention intent, data request handling, admin protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
 - Protected admin lead review with filtering, pagination, and filtered CSV export when `ADMIN_TOKEN` is set.
@@ -140,7 +140,7 @@ The website applies privacy information globally instead of using EU-only IP det
 - Public routes include `/privacy`, `/zh-tw/privacy`, and `/zh-cn/privacy`.
 - The footer links to the localized privacy notice on every page.
 - The contact form includes a localized privacy note linking to the privacy notice.
-- The privacy notice explains contact form fields, inquiry handling purpose, 24-month lead retention intent, data access/correction/deletion request handling, admin token protection, and local video behavior.
+- The privacy notice explains contact form fields, inquiry handling purpose, first-party SQLite analytics when `ANALYTICS_ENABLED=true`, collected analytics event types, referrer-origin-only handling, ephemeral session id behavior, 90-day raw analytics event retention through `ANALYTICS_RETENTION_DAYS`, 24-month lead retention intent, data access/correction/deletion request handling, admin token protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior.
 - The first implementation uses `privacy@example.com` as a placeholder privacy contact. This must be replaced with an official contact address before public launch.
 - The privacy notice is GDPR-lite readiness for the website prototype, not a complete legal compliance package.
 - The homepage brand film is served as a local MP4 asset and does not create a YouTube iframe.

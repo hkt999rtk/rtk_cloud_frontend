@@ -10,7 +10,7 @@ This repository currently contains a working marketing website foundation, a dev
 
 The homepage includes a locally hosted Realtek corporate brand film at `static/assets/realtek-brand-film.mp4`, with a generated poster image and `preload="metadata"`. The video supports brand trust after the platform architecture section and is not used as autoplay hero media.
 
-Privacy readiness is intentionally lightweight for this prototype: `/privacy` describes contact form data, the 24-month lead retention intent, data request handling, admin protection, and local video behavior. Replace the placeholder `privacy@example.com` contact before public launch and complete legal review.
+Privacy readiness is intentionally lightweight for this prototype: `/privacy` describes contact form data, first-party SQLite analytics when `ANALYTICS_ENABLED=true`, the analytics event types collected, referrer-origin-only handling, ephemeral session ids, 90-day raw analytics event retention, the 24-month lead retention intent, data request handling, admin protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior. Replace the placeholder `privacy@example.com` contact before public launch and complete legal review.
 
 The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.md).
 
