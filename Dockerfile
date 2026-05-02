@@ -26,6 +26,7 @@ COPY --from=builder /src/static /app/static
 
 ENV PORT=8080
 ENV DATABASE_PATH=/data/connectplus.db
+ENV ANALYTICS_DATABASE_PATH=/data/analytics.db
 
 VOLUME ["/data"]
 EXPOSE 8080

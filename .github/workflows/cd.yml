@@ -78,7 +78,43 @@ jobs:
         shell: bash
         run: |
           test -x /usr/local/sbin/deploy-realtek-connect
+          set +e
           tar -C dist -czf - bin templates static data | sudo /usr/local/sbin/deploy-realtek-connect
+          deploy_status=$?
+          set -e
+
+          if [ "$deploy_status" -eq 0 ]; then
+            exit 0
+          fi
+
+          service_name="realtek-connect.service"
+          recent_logs="$(sudo journalctl -u "$service_name" -n 80 --no-pager || true)"
+          echo "$recent_logs"
+          if ! grep -E "mkdir data: permission denied|unable to open database file" <<<"$recent_logs"; then
+            exit "$deploy_status"
+          fi
+
+          working_dir="$(systemctl show "$service_name" --property=WorkingDirectory --value)"
+          service_user="$(systemctl show "$service_name" --property=User --value)"
+          service_group="$(systemctl show "$service_name" --property=Group --value)"
+
+          if [ -n "$working_dir" ] && [ "$working_dir" != "/" ] && [ -n "$service_user" ]; then
+            if [ -z "$service_group" ]; then
+              service_group="$service_user"
+            fi
+
+            sudo install -d -o "$service_user" -g "$service_group" -m 0750 "$working_dir/data"
+            sudo systemctl restart "$service_name"
+
+            for _ in $(seq 1 20); do
+              if curl -k -fsS --max-time 5 http://127.0.0.1/healthz; then
+                exit 0
+              fi
+              sleep 0.5
+            done
+          fi
+
+          exit "$deploy_status"
 
       - name: Verify public deployment
         shell: bash

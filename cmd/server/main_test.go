@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -83,5 +85,22 @@ func TestServeWithGracefulShutdownReturnsListenErrors(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("serveWithGracefulShutdown did not return")
+	}
+}
+
+func TestDockerfileUsesPersistentSQLitePaths(t *testing.T) {
+	contents, err := os.ReadFile("../../Dockerfile")
+	if err != nil {
+		t.Fatalf("read Dockerfile: %v", err)
+	}
+
+	text := string(contents)
+	for _, expected := range []string{
+		"ENV DATABASE_PATH=/data/connectplus.db",
+		"ENV ANALYTICS_DATABASE_PATH=/data/analytics.db",
+	} {
+		if !strings.Contains(text, expected) {
+			t.Fatalf("Dockerfile missing %q", expected)
+		}
 	}
 }
