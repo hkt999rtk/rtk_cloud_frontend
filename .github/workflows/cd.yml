@@ -66,16 +66,19 @@ jobs:
         shell: bash
         run: |
           rm -rf dist
-          mkdir -p dist/bin
+          mkdir -p dist/bin dist/data
+          chmod 0777 dist/data
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o dist/bin/realtek-connect ./cmd/server
           cp -R templates static dist/
           test -x dist/bin/realtek-connect
+          test -d dist/data
+          test -w dist/data
 
       - name: Deploy on website test host
         shell: bash
         run: |
           test -x /usr/local/sbin/deploy-realtek-connect
-          tar -C dist -czf - bin templates static | sudo /usr/local/sbin/deploy-realtek-connect
+          tar -C dist -czf - bin templates static data | sudo /usr/local/sbin/deploy-realtek-connect
 
       - name: Verify public deployment
         shell: bash

@@ -155,5 +155,6 @@ Deployment notes:
 
 - The image keeps application state only in SQLite under `/data/connectplus.db`; mount `/data` to persist leads across restarts.
 - When analytics is enabled, the app also keeps first-party event data in `/data/analytics.db`.
+- The native CD bundle includes a writable `data/` directory for test-host defaults. Production native deployments should still set `DATABASE_PATH` and `ANALYTICS_DATABASE_PATH` to a persistent service-owned directory.
 - The container serves HTTP on port `8080`. Production TLS termination should be handled by a reverse proxy, ingress, or deployment platform in front of the app.
 - Native builds remain supported for environments that prefer `go build` over containers.
