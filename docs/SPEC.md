@@ -338,6 +338,7 @@ Container default analytics database path:
 Container deployment notes:
 
 - `Dockerfile` copies the compiled server together with `templates/` and `static/`, which are runtime dependencies for page rendering and asset delivery.
+- The native CD bundle includes an empty writable `data/` directory so default `data/connectplus.db` and `data/analytics.db` paths can initialize on the website test host. Production native hosts should set `DATABASE_PATH` and `ANALYTICS_DATABASE_PATH` to persistent service-owned storage.
 - `/data` is declared as the persistent volume for SQLite-backed lead storage.
 - HTTPS is intentionally out of process and should be handled by the reverse proxy or deployment platform instead of the Go app directly.
 
