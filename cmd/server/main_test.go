@@ -117,7 +117,7 @@ func TestCDWorkflowPackagesDataForServiceUser(t *testing.T) {
 		`service_group="$(systemctl show "$service_name" --property=Group --value)"`,
 		`--owner="$service_user"`,
 		`--group="$service_group"`,
-		`--mode=u+rwX,go-rwx`,
+		`--mode=u+rwX,go+rX`,
 		`tar "${tar_owner_args[@]}" -C dist -czf - bin templates static data | sudo /usr/local/sbin/deploy-realtek-connect`,
 	} {
 		if !strings.Contains(text, expected) {
