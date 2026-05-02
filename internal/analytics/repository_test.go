@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	_ "modernc.org/sqlite"
+	"realtek-connect/internal/leads"
 )
 
 func TestOpenInitializesSQLiteSchema(t *testing.T) {
@@ -74,4 +74,78 @@ func TestOpenDisabledSkipsStorageInitialization(t *testing.T) {
 	if _, err := os.Stat(dbPath); !os.IsNotExist(err) {
 		t.Fatalf("analytics database file exists when disabled: %v", err)
 	}
+}
+
+func TestAnalyticsStorageIsSeparateFromLeadStorage(t *testing.T) {
+	dir := t.TempDir()
+	leadPath := filepath.Join(dir, "connectplus.db")
+	analyticsPath := filepath.Join(dir, "analytics.db")
+
+	leadDB, err := sql.Open("sqlite", leadPath)
+	if err != nil {
+		t.Fatalf("open lead sqlite: %v", err)
+	}
+	defer leadDB.Close()
+
+	leadRepository := leads.NewRepository(leadDB)
+	if err := leadRepository.Init(); err != nil {
+		t.Fatalf("initialize lead schema: %v", err)
+	}
+	if err := leadRepository.Insert(context.Background(), leads.Lead{
+		Name:     "Ada",
+		Company:  "Example",
+		Email:    "ada@example.com",
+		Interest: "ota",
+		Message:  "Please follow up.",
+	}); err != nil {
+		t.Fatalf("insert lead: %v", err)
+	}
+
+	analyticsRepository, err := Open(context.Background(), Config{
+		Enabled:      true,
+		DatabasePath: analyticsPath,
+	})
+	if err != nil {
+		t.Fatalf("open analytics store: %v", err)
+	}
+	defer analyticsRepository.Close()
+
+	assertSQLiteObjectExists(t, leadDB, "leads")
+	assertSQLiteObjectMissing(t, leadDB, "analytics_events")
+
+	analyticsDB, err := sql.Open("sqlite", analyticsPath)
+	if err != nil {
+		t.Fatalf("open analytics sqlite: %v", err)
+	}
+	defer analyticsDB.Close()
+
+	assertSQLiteObjectExists(t, analyticsDB, "analytics_events")
+	assertSQLiteObjectMissing(t, analyticsDB, "leads")
+}
+
+func assertSQLiteObjectExists(t *testing.T, db *sql.DB, name string) {
+	t.Helper()
+	if countSQLiteObjects(t, db, name) != 1 {
+		t.Fatalf("sqlite object %q not initialized", name)
+	}
+}
+
+func assertSQLiteObjectMissing(t *testing.T, db *sql.DB, name string) {
+	t.Helper()
+	if countSQLiteObjects(t, db, name) != 0 {
+		t.Fatalf("sqlite object %q should not exist", name)
+	}
+}
+
+func countSQLiteObjects(t *testing.T, db *sql.DB, name string) int {
+	t.Helper()
+
+	var count int
+	if err := db.QueryRowContext(context.Background(), `
+SELECT COUNT(*)
+FROM sqlite_master
+WHERE name = ?`, name).Scan(&count); err != nil {
+		t.Fatalf("lookup %s: %v", name, err)
+	}
+	return count
 }

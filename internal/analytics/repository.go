@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"os"
 	"path/filepath"
+
+	_ "modernc.org/sqlite"
 )
 
 type Repository struct {
