@@ -89,7 +89,7 @@ jobs:
             tar_owner_args=(
               --owner="$service_user"
               --group="$service_group"
-              --mode=u+rwX,go-rwx
+              --mode=u+rwX,go+rX
             )
           fi
 
