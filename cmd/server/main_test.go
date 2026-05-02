@@ -104,3 +104,24 @@ func TestDockerfileUsesPersistentSQLitePaths(t *testing.T) {
 		}
 	}
 }
+
+func TestCDWorkflowPackagesDataForServiceUser(t *testing.T) {
+	contents, err := os.ReadFile("../../.github/workflows/cd.yml")
+	if err != nil {
+		t.Fatalf("read cd workflow: %v", err)
+	}
+
+	text := string(contents)
+	for _, expected := range []string{
+		`service_user="$(systemctl show "$service_name" --property=User --value)"`,
+		`service_group="$(systemctl show "$service_name" --property=Group --value)"`,
+		`--owner="$service_user"`,
+		`--group="$service_group"`,
+		`--mode=u+rwX,go-rwx`,
+		`tar "${tar_owner_args[@]}" -C dist -czf - bin templates static data | sudo /usr/local/sbin/deploy-realtek-connect`,
+	} {
+		if !strings.Contains(text, expected) {
+			t.Fatalf("cd workflow missing %q", expected)
+		}
+	}
+}
