@@ -40,6 +40,9 @@ Environment variables:
 
 - `PORT`: HTTP port, default `8080`.
 - `DATABASE_PATH`: SQLite database path, default `data/connectplus.db`.
+- `ANALYTICS_ENABLED`: analytics toggle, default `true`.
+- `ANALYTICS_DATABASE_PATH`: SQLite analytics database path, default `data/analytics.db`.
+- `ANALYTICS_RETENTION_DAYS`: raw analytics retention window, default `90`.
 - `ADMIN_TOKEN`: enables protected lead viewing and CSV export.
 - `DISABLE_SEARCH_INDEXING`: set to `true` on private/test deployments to emit `X-Robots-Tag: noindex, nofollow, noarchive`, add page-level `robots` meta tags, disallow all crawling in `/robots.txt`, and hide `/sitemap.xml`.
 - `PUBLIC_BASE_URL`: optional public origin such as `https://webtest.mgmeet.io`. When empty, canonical URLs, social image URLs, `hreflang`, robots sitemap references, and sitemap locations are built from the incoming request host and forwarded headers.
@@ -151,5 +154,6 @@ docker run --rm -p 8080:8080 \
 Deployment notes:
 
 - The image keeps application state only in SQLite under `/data/connectplus.db`; mount `/data` to persist leads across restarts.
+- When analytics is enabled, the app also keeps first-party event data in `/data/analytics.db`.
 - The container serves HTTP on port `8080`. Production TLS termination should be handled by a reverse proxy, ingress, or deployment platform in front of the app.
 - Native builds remain supported for environments that prefer `go build` over containers.

@@ -2,4 +2,6 @@ bin/
 /server
 data/*.db
 data/*.db-*
+data/analytics.db
+data/analytics.db-*
 .DS_Store

@@ -267,6 +267,9 @@ Environment:
 
 - `PORT`, default `8080`.
 - `DATABASE_PATH`, default `data/connectplus.db`.
+- `ANALYTICS_ENABLED`, optional and enabled by default. When false-like, analytics database setup is skipped until the later event-ingestion work lands.
+- `ANALYTICS_DATABASE_PATH`, optional and default `data/analytics.db`.
+- `ANALYTICS_RETENTION_DAYS`, optional and default `90`.
 - `ADMIN_TOKEN`, optional. When set, enables protected lead review and CSV export.
 - `DISABLE_SEARCH_INDEXING`, optional. When truthy, marks the site as non-indexable with HTTP `X-Robots-Tag`, page-level robots meta tags, `/robots.txt` `Disallow: /`, and a disabled `/sitemap.xml`.
 - `PUBLIC_BASE_URL`, optional. When empty, canonical URLs, social image URLs, `hreflang` alternates, robots sitemap references, and sitemap locations are generated from the incoming request host and forwarded headers. When set, generated public absolute URLs use this fixed base URL.
@@ -306,6 +309,8 @@ Commands:
 
 SQLite stores website leads only. It does not store real IoT telemetry or device state.
 
+When analytics is enabled, first-party event telemetry uses a separate SQLite database so raw analytics data stays isolated from lead data.
+
 Default database path:
 
 ```text
@@ -316,6 +321,18 @@ Container default database path:
 
 ```text
 /data/connectplus.db
+```
+
+Default analytics database path:
+
+```text
+data/analytics.db
+```
+
+Container default analytics database path:
+
+```text
+/data/analytics.db
 ```
 
 Container deployment notes:
@@ -336,6 +353,30 @@ CREATE TABLE IF NOT EXISTS leads (
   message TEXT,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+```
+
+Analytics schema:
+
+```sql
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ts INTEGER NOT NULL,
+  event TEXT NOT NULL,
+  page TEXT NOT NULL,
+  cta TEXT,
+  percent INTEGER,
+  duration INTEGER,
+  variant TEXT,
+  referrer_origin TEXT,
+  session_id TEXT,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_analytics_events_ts
+  ON analytics_events(ts);
+
+CREATE INDEX IF NOT EXISTS idx_analytics_events_event_page
+  ON analytics_events(event, page);
 ```
 
 Contact form fields:

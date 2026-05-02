@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"realtek-connect/internal/analytics"
 	"realtek-connect/internal/leads"
 	"realtek-connect/internal/web"
 
@@ -54,6 +55,14 @@ func run(ctx context.Context, logger *log.Logger) error {
 	repository := leads.NewRepository(db)
 	if err := repository.Init(); err != nil {
 		return err
+	}
+
+	analyticsStore, err := analytics.Open(ctx, analytics.ConfigFromEnv())
+	if err != nil {
+		return err
+	}
+	if analyticsStore != nil {
+		defer analyticsStore.Close()
 	}
 
 	application, err := web.NewServer(web.Config{
