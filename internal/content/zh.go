@@ -334,12 +334,12 @@ func zhTWFeatures() map[string]localizedFeature {
 			Outcomes:     []string{"符合互通性期待", "連接業務系統而不需一次性 glue code", "為平台評估保留可信整合範圍"},
 		},
 		"security": {
-			Title:        "安全性與 PKI",
-			Kicker:       "以 X.509 憑證與 PKI 階層建立裝置身分與雲端信任。",
-			Summary:      "裝置憑證、雙層 CA 架構、雙向 TLS 驗證、憑證生命週期管理，以及 OCSP/CRL 撤銷基礎設施。",
-			Description:  "安全性與 PKI 說明 Realtek Connect+ 如何以 X.509 為基礎的公鑰基礎設施建立可驗證的裝置身分、保護雲端通訊，並透過標準工具支援大規模憑證撤銷。每台裝置在配網時由平台 CA 階層簽發唯一憑證，雙向 TLS 在每次雲端連線時以此憑證驗證硬體身分，讓平台能執行存取政策並在整個裝置群進行憑證輪換或撤銷。",
-			ImageAlt:     "PKI 階層示意圖，顯示根 CA、中間 CA、裝置憑證與雙向 TLS 雲端連線。",
-			SourceLabel:  "平台安全合約",
+			Title:       "安全性與 PKI",
+			Kicker:      "以 X.509 憑證與 PKI 階層建立裝置身分與雲端信任。",
+			Summary:     "裝置憑證、雙層 CA 架構、雙向 TLS 驗證、憑證生命週期管理，以及 OCSP/CRL 撤銷基礎設施。",
+			Description: "安全性與 PKI 說明 Realtek Connect+ 如何以 X.509 為基礎的公鑰基礎設施建立可驗證的裝置身分、保護雲端通訊，並透過標準工具支援大規模憑證撤銷。每台裝置在配網時由平台 CA 階層簽發唯一憑證，雙向 TLS 在每次雲端連線時以此憑證驗證硬體身分，讓平台能執行存取政策並在整個裝置群進行憑證輪換或撤銷。",
+			ImageAlt:    "PKI 階層示意圖，顯示根 CA、中間 CA、裝置憑證與雙向 TLS 雲端連線。",
+			SourceLabel: "平台安全合約",
 			Highlights: []string{
 				"雙層 X.509 CA 架構：離線根 CA 與線上簽發 CA 負責裝置憑證簽發",
 				"於製造或首次啟用時簽發並綁定硬體身分的每裝置憑證",
