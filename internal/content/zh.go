@@ -333,6 +333,34 @@ func zhTWFeatures() map[string]localizedFeature {
 			Capabilities: []string{"Matter bridge/controller 規劃與 commissioning touchpoint", "供產品、支援與營運系統使用的安全 REST/MQTT 介面", "把事件交付到 CRM、ticketing 與 analytics 的 webhook"},
 			Outcomes:     []string{"符合互通性期待", "連接業務系統而不需一次性 glue code", "為平台評估保留可信整合範圍"},
 		},
+		"security": {
+			Title:       "安全性與 PKI",
+			Kicker:      "以 X.509 憑證與 PKI 階層建立裝置身分與雲端信任。",
+			Summary:     "裝置憑證、雙層 CA 架構、雙向 TLS 驗證、憑證生命週期管理，以及 OCSP/CRL 撤銷基礎設施。",
+			Description: "安全性與 PKI 說明 Realtek Connect+ 如何以 X.509 為基礎的公鑰基礎設施建立可驗證的裝置身分、保護雲端通訊，並透過標準工具支援大規模憑證撤銷。每台裝置在配網時由平台 CA 階層簽發唯一憑證，雙向 TLS 在每次雲端連線時以此憑證驗證硬體身分，讓平台能執行存取政策並在整個裝置群進行憑證輪換或撤銷。",
+			ImageAlt:    "PKI 階層示意圖，顯示根 CA、中間 CA、裝置憑證與雙向 TLS 雲端連線。",
+			SourceLabel: "平台安全合約",
+			Highlights: []string{
+				"雙層 X.509 CA 架構：離線根 CA 與線上簽發 CA 負責裝置憑證簽發",
+				"於製造或首次啟用時簽發並綁定硬體身分的每裝置憑證",
+				"所有裝置與雲端連線均啟用雙向 TLS（mTLS）—— 雙方均出示並驗證 X.509 憑證",
+				"憑證生命週期操作：簽發、續期、輪換與支援 OCSP 和 CRL 的撤銷機制",
+			},
+			Capabilities: []string{
+				"建立雙層 CA 架構，根 CA 保持離線，簽發 CA 在配網流程中即時簽發裝置憑證",
+				"將每張裝置憑證與序號、MAC 位址及型號綁定，讓雲端無需共用密鑰即可驗證硬體身分",
+				"在 MQTT 與 HTTPS 端點強制執行雙向 TLS，未經授權裝置無法存取平台 API 或訊息代理",
+				"支援依到期排程或安全事件觸發的憑證續期與輪換，無需完整重新配網",
+				"發布 CRL 端點並執行 OCSP 回應器，讓依賴方能即時查詢憑證有效性",
+				"透過裝置群管理主控台撤銷單一裝置憑證，或批次撤銷遭入侵的製造批次",
+			},
+			Outcomes: []string{
+				"以個別 X.509 憑證取代共用密鑰，消除憑證共享帶來的安全風險",
+				"以標準 PKI 工件（憑證鏈、CRL 發布點、OCSP 端點）通過企業與營運商安全審查",
+				"使撤銷快速且精準：單一裝置憑證遭入侵不影響整個裝置群",
+				"為稽核團隊提供與硬體製造紀錄連結的可追溯簽發與撤銷日誌",
+			},
+		},
 	}
 }
 
