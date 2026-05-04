@@ -518,7 +518,6 @@ func All() []Feature {
 			ImagePath:   "/static/assets/feature-private-cloud-architecture.jpg",
 			ImageAlt:    "PKI hierarchy diagram showing root CA, intermediate CA, device certificates, and mutual TLS cloud connections.",
 			SourceLabel: "Platform security contract",
-			SourceURL:   "https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/SECURITY.md",
 			Highlights: []string{
 				"Two-tier X.509 CA hierarchy: offline root CA and online issuing CA for device certificate issuance",
 				"Per-device certificates provisioned at manufacture or first activation and bound to hardware identity",
