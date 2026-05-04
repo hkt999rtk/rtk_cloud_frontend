@@ -74,8 +74,8 @@
         </label>
         <select id="contact-interest" name="interest" required {{if $interestError}}aria-invalid="true" aria-describedby="contact-interest-error"{{end}}>
           <option value="">{{t . "contact.select"}}</option>
-          {{range .Features}}
-          <option value="{{.Slug}}" {{if or (eq $.Form.Interest .Slug) (eq $.Form.Interest .Title)}}selected{{end}}>{{.Title}}</option>
+          {{range .InterestOptions}}
+          <option value="{{.Slug}}" {{if eq $.Form.Interest .Slug}}selected{{end}}>{{.Label}}</option>
           {{end}}
         </select>
       </div>

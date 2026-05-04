@@ -14,6 +14,29 @@ const (
 	MessageMaxLength  = 2000
 )
 
+// AllowedInterests lists the canonical inquiry-type slugs the contact form
+// accepts. These replace the earlier free-text / feature-slug interest values
+// so leads can be routed by intent (eval access, commercial, partnership,
+// technical question, other) rather than by which feature page the visitor
+// happened to be on. Stored as a stable slug; display labels live in the
+// content catalog.
+var AllowedInterests = []string{
+	"evaluation-access",
+	"commercial-deployment",
+	"partnership",
+	"technical-question",
+	"other",
+}
+
+func isAllowedInterest(value string) bool {
+	for _, allowed := range AllowedInterests {
+		if value == allowed {
+			return true
+		}
+	}
+	return false
+}
+
 type ValidationErrors map[string]string
 
 func (e ValidationErrors) Error() string {
@@ -58,6 +81,8 @@ func Validate(lead Lead) ValidationErrors {
 		errors["interest"] = "Select an area of interest."
 	} else if fieldLength(lead.Interest) > InterestMaxLength {
 		errors["interest"] = "Interest must be 120 characters or fewer."
+	} else if !isAllowedInterest(lead.Interest) {
+		errors["interest"] = "Select an area of interest."
 	}
 
 	if fieldLength(lead.Company) > CompanyMaxLength {

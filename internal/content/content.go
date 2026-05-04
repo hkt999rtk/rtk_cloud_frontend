@@ -26,6 +26,14 @@ type PageMeta struct {
 	Description string
 }
 
+// ContactInterestOption pairs a stable interest slug (stored in the leads
+// table and validated against leads.AllowedInterests) with the locale-aware
+// label shown in the contact form dropdown.
+type ContactInterestOption struct {
+	Slug  string
+	Label string
+}
+
 type Catalog struct {
 	Locale   Locale
 	Text     map[string]string
@@ -107,6 +115,35 @@ func (c Catalog) Page(key string) PageMeta {
 	return enPages()[key]
 }
 
+// ContactInterestOptions returns the inquiry-type dropdown options for the
+// contact form in the catalog's locale. Each option carries the stable slug
+// stored in the leads table plus the locale-specific label shown to visitors.
+// Order is stable so the dropdown stays predictable across renders.
+func (c Catalog) ContactInterestOptions() []ContactInterestOption {
+	keys := []string{
+		"contact.interest.option.evaluation-access",
+		"contact.interest.option.commercial-deployment",
+		"contact.interest.option.partnership",
+		"contact.interest.option.technical-question",
+		"contact.interest.option.other",
+	}
+	slugs := []string{
+		"evaluation-access",
+		"commercial-deployment",
+		"partnership",
+		"technical-question",
+		"other",
+	}
+	options := make([]ContactInterestOption, 0, len(slugs))
+	for i, slug := range slugs {
+		options = append(options, ContactInterestOption{
+			Slug:  slug,
+			Label: c.T(keys[i]),
+		})
+	}
+	return options
+}
+
 func (c Catalog) FeatureBySlug(slug string) (features.Feature, bool) {
 	for _, feature := range c.Features {
 		if feature.Slug == slug {
@@ -175,8 +212,8 @@ func enText() map[string]string {
 		"footer.privacy":             "Privacy",
 		"home.eyebrow":               "IoT cloud platform for product teams",
 		"home.lede":                  "Bring Realtek-based devices online with provisioning, OTA, fleet operations, app SDKs, insights, private cloud options, and ecosystem integrations.",
-		"home.cta.primary":           "Contact Us",
-		"home.cta.secondary":         "Explore Services",
+		"home.cta.primary":           "Talk to sales",
+		"home.cta.secondary":         "See plans & limits",
 		"home.chip.silicon":          "Silicon",
 		"home.chip.sdk":              "Device SDK",
 		"home.chip.cloud":            "Cloud",
@@ -226,7 +263,7 @@ func enText() map[string]string {
 		"home.deploy.title":          "Start with evaluation, deploy anywhere — any cloud or on-premises.",
 		"home.deploy.public":         "Public evaluation",
 		"home.deploy.public.title":   "Validate product fit before committing to a private footprint.",
-		"home.deploy.public.body":    "Use the shared evaluation environment to align firmware, mobile, cloud, and product stakeholders before commercial deployment planning.",
+		"home.deploy.public.body":    "Free evaluation tier — start with 5 devices by default, raise up to 200 on request. No expiry. Use it to align firmware, mobile, cloud, and product stakeholders before commercial deployment planning.",
 		"home.deploy.docs":           "Deployment Docs",
 		"home.deploy.private":        "Private commercial cloud",
 		"home.deploy.private.title":  "Run on GCP, Azure, AWS, or your own data center. No cloud lock-in.",
@@ -300,7 +337,12 @@ func enText() map[string]string {
 		"contact.company":            "Company",
 		"contact.email":              "Email",
 		"contact.interest":           "Interest",
-		"contact.select":             "Select a service",
+		"contact.select":             "Select an inquiry type",
+		"contact.interest.option.evaluation-access":     "Evaluation access (free tier signup or quota raise)",
+		"contact.interest.option.commercial-deployment": "Commercial deployment (private cloud, pricing, contract)",
+		"contact.interest.option.partnership":           "Partnership or business development",
+		"contact.interest.option.technical-question":    "Technical question (existing customer or evaluator)",
+		"contact.interest.option.other":                 "Other",
 		"contact.message":            "Message",
 		"contact.submit":             "Submit Request",
 		"contact.privacy":            "By submitting this form, you understand that your inquiry will be handled according to the Realtek Connect+ privacy notice.",

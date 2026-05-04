@@ -381,7 +381,7 @@ func All() []Feature {
 			Description:  "Private Cloud explains the two deployment tiers and Realtek Connect+'s infrastructure model. The platform runs as a standard container or VM workload, giving customers full choice of cloud provider or on-premises infrastructure. This is explicitly different from serverless-native IoT platforms that tie private deployment to a single cloud account.",
 			ImagePath:    "/static/assets/feature-private-cloud-architecture.jpg",
 			ImageAlt:     "Private cloud architecture showing container and VM workloads running across multiple cloud providers and on-premises data centers.",
-			Highlights:   []string{"VM/container deployment on GCP, Azure, AWS, or on-premises — no cloud lock-in", "Free evaluation up to 200 devices — twice the typical evaluation ceiling in this category", "Commercial tier with one-time license plus annual maintenance and no minimum scale"},
+			Highlights:   []string{"VM/container deployment on GCP, Azure, AWS, or on-premises — no cloud lock-in", "Free evaluation tier with up to 200 devices on request and no expiry", "Commercial tier with one-time license plus annual maintenance and no minimum scale"},
 			Capabilities: []string{"Container or VM workload deployment on any major cloud provider or on-premises data center", "Reverse-proxy TLS termination, network policy alignment, and branded service endpoints", "Release promotion and maintenance-window planning across evaluation and production environments"},
 			Outcomes:     []string{"Avoid cloud vendor lock-in for IoT infrastructure", "Keep ownership and residency boundaries explicit", "Create a credible path from pilot to production on your own terms"},
 			Sections: []FeatureSection{
@@ -408,24 +408,45 @@ func All() []Feature {
 				{
 					Eyebrow: "Plans & Limits",
 					Title:   "Evaluation tier limits and the path to commercial scale",
-					Intro:   "Concrete numbers so developer teams can plan a pilot without surprises, and a clear handoff into the commercial conversation when the pilot grows.",
+					Intro:   "Concrete limits so developer teams can plan a pilot without surprises, and a clear handoff into the commercial conversation when the pilot grows.",
 					Items: []string{
-						"Evaluation accounts start with a 5-device default quota and can be raised up to 200 devices on request — a higher ceiling than typical evaluation tiers in this category.",
+						"Evaluation accounts start with a 5-device default quota and can be raised up to 200 devices on request.",
+						"Evaluation access does not expire — request a quota raise or a commercial conversation when your fleet grows; we do not auto-cancel evaluation accounts.",
 						"Evaluation use is limited to development, proof-of-concept, and internal validation; commercial product shipments and customer-facing fleets require a private commercial agreement.",
 						"Self-service signup with email verification is on the roadmap; pre-launch evaluation accounts are issued by the Realtek Connect+ team via the contact form.",
-						"Commercial pricing follows a one-time platform license fee plus annual maintenance — sized to your fleet, deployment scope, and support expectations. Specific figures are quoted by the sales team, not published on this site.",
 						"There is no minimum scale for the commercial tier; small fleets can move out of evaluation as soon as commercial use begins, even before they reach the 200-device evaluation ceiling.",
 					},
 				},
 				{
-					Eyebrow: "SDK & Support",
-					Title:   "What you can build with, and what support looks like",
-					Intro:   "The SDK and support story is intentionally split across the two tiers so evaluation users get a fast lane and commercial customers get contracted accountability.",
+					Eyebrow: "Pricing Factors",
+					Title:   "How commercial pricing is shaped",
+					Intro:   "We do not publish a price list — every commercial deployment is sized to the customer's actual scope. The factors below are the inputs the sales team uses when preparing a quote, so buyers can frame the conversation before getting on the phone.",
 					Items: []string{
-						"Realtek Connect+ device SDK packages (Native C, Android, iOS, JavaScript/TypeScript, Go) are currently distributed under evaluation terms; an open-source SDK release is planned at general availability so commercial customers and the wider community can integrate without bespoke license negotiation.",
+						"Fleet size — total addressable device count for the deployment, including planned expansion within the contract term.",
+						"Deployment topology — single-region managed deployment, multi-region, or fully customer-operated infrastructure across one or more clouds or on-premises sites.",
+						"Support coverage — the response-time, escalation, and on-call expectations the customer needs in their support agreement.",
+						"Customization scope — branding/white-label, custom domain handling, and any product-specific platform extensions beyond the standard release.",
+						"Term length — typical contract structure is a one-time platform license fee plus annual maintenance; multi-year terms are quoted separately.",
+					},
+				},
+				{
+					Eyebrow: "SDK Licensing",
+					Title:   "What you can build with",
+					Intro:   "SDK distribution today and the planned posture at general availability.",
+					Items: []string{
+						"Realtek Connect+ device SDK packages (Native C, Android, iOS, JavaScript/TypeScript, Go) are currently distributed under evaluation terms.",
+						"An open-source SDK release is planned at general availability, so commercial customers and the wider community can integrate without bespoke license negotiation.",
 						"The platform backend stays a proprietary commercial product; private deployments install signed builds rather than building from source.",
+					},
+				},
+				{
+					Eyebrow: "Support",
+					Title:   "What support looks like at each tier",
+					Intro:   "Support coverage is intentionally tiered: evaluation gets a self-serve community lane, commercial gets contracted accountability.",
+					Items: []string{
 						"Evaluation support is community-tier: documentation, integration guides, and the public issue tracker for the SDK once it is open. There is no response-time commitment on the evaluation tier.",
 						"Commercial support is contract-defined: response-time, uptime, and escalation paths live in the customer agreement rather than a published tier matrix.",
+						"Customers needing a specific SLA structure should raise it during the commercial conversation so it can be priced and committed inside the agreement.",
 					},
 				},
 				{
