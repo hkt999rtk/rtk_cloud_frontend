@@ -69,8 +69,9 @@ jobs:
           mkdir -p dist/bin dist/data
           chmod 0777 dist/data
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o dist/bin/realtek-connect ./cmd/server
-          cp -R templates static dist/
+          cp -R content templates static dist/
           test -x dist/bin/realtek-connect
+          test -f dist/content/docs/en/docs.yaml
           test -d dist/data
           test -w dist/data
 
@@ -94,7 +95,7 @@ jobs:
           fi
 
           set +e
-          tar "${tar_owner_args[@]}" -C dist -czf - bin templates static data | sudo /usr/local/sbin/deploy-realtek-connect
+          tar "${tar_owner_args[@]}" -C dist -czf - bin content templates static data | sudo /usr/local/sbin/deploy-realtek-connect
           deploy_status=$?
           set -e
 

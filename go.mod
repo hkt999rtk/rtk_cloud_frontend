@@ -6,6 +6,7 @@ toolchain go1.24.4
 
 require (
 	github.com/chromedp/chromedp v0.14.2
+	gopkg.in/yaml.v3 v3.0.1
 	modernc.org/sqlite v1.39.1
 )
 

@@ -1,0 +1,25 @@
+---
+title: "Documentation"
+subtitle: "A file-backed docs landing page for product, firmware, app, cloud, and operations teams."
+hero_image: "/static/assets/connectplus-platform-surfaces.jpg"
+hero_image_alt: "Realtek Connect+ platform surfaces across device, cloud, app, and operations teams"
+sections:
+  - title: "File-owned landing content"
+    icon: "document"
+    body: "The landing page title, summary, narrative, and metadata now load from content/docs/en/docs.yaml."
+  - title: "Locale-ready source files"
+    icon: "grid"
+    body: "Traditional Chinese and Simplified Chinese files live beside the English source and can be refreshed without changing templates."
+  - title: "Refreshable at runtime"
+    icon: "refresh"
+    body: "Operators can reload the in-memory content cache through the protected admin refresh endpoint."
+seo:
+  meta_title: "Developer Documentation | Realtek Connect+"
+  meta_description: "Explore Realtek Connect+ documentation entry points for product, firmware, app, cloud, and operations teams."
+  social_image: "/static/assets/connectplus-platform-surfaces.jpg"
+---
+Realtek Connect+ keeps the first documentation landing page intentionally small while the deeper docs sections remain server-rendered from the existing catalog.
+
+![Documentation architecture preview](/static/assets/connectplus-platform-surfaces.jpg)
+
+This source-backed page gives the team a place to iterate on docs landing content without migrating feature pages or detail docs in the same release.
