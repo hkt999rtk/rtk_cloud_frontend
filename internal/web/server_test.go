@@ -791,7 +791,7 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 		{
 			path: "/features/private-cloud",
 			src:  `/static/assets/feature-private-cloud-architecture.jpg`,
-			alt:  `alt="Private cloud architecture showing dedicated regions, branded domain entry points, and enterprise control boundaries."`,
+			alt:  `alt="Private cloud architecture showing container and VM workloads running across multiple cloud providers and on-premises data centers."`,
 		},
 		{
 			path: "/features/integrations",
@@ -952,12 +952,14 @@ func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
 	body := rec.Body.String()
 	for _, want := range []string{
 		"Compare evaluation and private commercial operating models",
-		"Public evaluation versus dedicated private commercial deployment",
-		"Transition to a dedicated deployment once product teams need tenant isolation, formal support processes, and customer-specific change windows.",
-		"Offer custom domains and branded entry points so the deployment can align with the customer&#39;s DNS, certificate, and support model.",
-		"Choose regional placement around residency, latency, and operational coverage requirements instead of forcing every product through one public region.",
+		"VM/container deployment on GCP, Azure, AWS, or on-premises",
+		"Standard container and VM workloads",
+		"no serverless runtime requirement",
+		"Transition to a dedicated private deployment once product teams need tenant isolation, formal support processes, and customer-specific change windows.",
+		"Custom domains and branded entry points let the deployment align with the customer&#39;s DNS, certificate, and support model.",
+		"Choose regional placement around residency, latency, and operational coverage requirements",
 		"Use release promotion, maintenance windows, and rollback checkpoints to move from pilot tenants into production operations safely.",
-		"Production TLS still terminates at a reverse proxy, ingress, or deployment platform in front of the Go website runtime.",
+		"Is there a cloud vendor requirement? No.",
 		"<th scope=\"col\">Model</th>",
 		"Managed private deployment",
 		"Customer-operated private region",
