@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/csv"
 	"encoding/hex"
+	"fmt"
 	"html/template"
 	"io"
 	"net"
@@ -16,6 +17,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"realtek-connect/internal/content"
@@ -33,6 +35,7 @@ type LeadStore interface {
 type Config struct {
 	TemplatesDir            string
 	StaticDir               string
+	ContentDir              string
 	LeadStore               LeadStore
 	AdminToken              string
 	DisableSearchIndexing   bool
@@ -44,6 +47,7 @@ type Config struct {
 type Server struct {
 	templatesDir            string
 	staticDir               string
+	contentDir              string
 	leadStore               LeadStore
 	adminToken              string
 	disableSearchIndexing   bool
@@ -52,6 +56,8 @@ type Server struct {
 	enableCDNCacheHeaders   bool
 	assetVersions           map[string]string
 	contactLimit            *submissionRateLimiter
+	docsContentMu           sync.RWMutex
+	docsContent             map[string]docs.ContentPage
 }
 
 type pageData struct {
@@ -69,6 +75,7 @@ type pageData struct {
 	Text            map[string]string
 	AlternateLinks  []content.AlternateLink
 	Docs            []docs.Section
+	DocsPage        docs.ContentPage
 	Doc             docs.Section
 	Features        []features.Feature
 	Feature         features.Feature
@@ -121,6 +128,13 @@ func NewServer(cfg Config) (*Server, error) {
 	if cfg.StaticDir == "" {
 		cfg.StaticDir = "static"
 	}
+	if cfg.ContentDir == "" {
+		cfg.ContentDir = "content/docs"
+	}
+	docsContent, err := docs.NewContentSource(cfg.ContentDir).Load()
+	if err != nil {
+		return nil, err
+	}
 	assetVersions := map[string]string{}
 	if cfg.EnableAssetFingerprints {
 		assetVersions = buildAssetVersions(cfg.StaticDir)
@@ -128,6 +142,7 @@ func NewServer(cfg Config) (*Server, error) {
 	return &Server{
 		templatesDir:            cfg.TemplatesDir,
 		staticDir:               cfg.StaticDir,
+		contentDir:              cfg.ContentDir,
 		leadStore:               cfg.LeadStore,
 		adminToken:              cfg.AdminToken,
 		disableSearchIndexing:   cfg.DisableSearchIndexing,
@@ -136,6 +151,7 @@ func NewServer(cfg Config) (*Server, error) {
 		enableCDNCacheHeaders:   cfg.EnableCDNCacheHeaders,
 		assetVersions:           assetVersions,
 		contactLimit:            newSubmissionRateLimiter(5, 10*time.Minute),
+		docsContent:             docsContent,
 	}, nil
 }
 
@@ -146,6 +162,7 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
 	mux.HandleFunc("/admin/leads.csv", s.handleAdminLeadsCSV)
+	mux.HandleFunc("/admin/reload-content", s.handleAdminReloadContent)
 	mux.HandleFunc("/healthz", s.handleHealthz)
 	mux.HandleFunc("/", s.handlePublic)
 	return securityHeaders(s.searchIndexingHeaders(s.cacheHeaders(mux)))
@@ -206,8 +223,28 @@ func (s *Server) handleDocs(w http.ResponseWriter, r *http.Request, locale conte
 		return
 	}
 	catalog := content.CatalogFor(locale)
-	page := catalog.Page("docs")
-	s.render(w, http.StatusOK, "docs.html", s.basePageData(r, locale, publicPath, page.Title, page.Description))
+	docsPage := s.docsPageFor(locale)
+	title := docsPage.Title + " | Realtek Connect+"
+	if docsPage.SEO.MetaTitle != "" {
+		title = docsPage.SEO.MetaTitle
+	}
+	description := docsPage.Subtitle
+	if docsPage.SEO.MetaDescription != "" {
+		description = docsPage.SEO.MetaDescription
+	}
+	data := s.basePageData(r, locale, publicPath, title, description)
+	data.DocsPage = docsPage
+	if docsPage.SEO.SocialImage != "" {
+		data.SocialImageURL = s.absoluteURL(r, s.assetPath(docsPage.SEO.SocialImage))
+	}
+	if docsPage.HeroImageAlt != "" {
+		data.SocialImageAlt = docsPage.HeroImageAlt
+	}
+	if docsPage.Title == "" {
+		page := catalog.Page("docs")
+		data = s.basePageData(r, locale, publicPath, page.Title, page.Description)
+	}
+	s.render(w, http.StatusOK, "docs.html", data)
 }
 
 func (s *Server) handlePrivacy(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
@@ -372,6 +409,44 @@ func (s *Server) handleAdminLeadsCSV(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	writer.Flush()
+}
+
+func (s *Server) handleAdminReloadContent(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/admin/reload-content" {
+		http.NotFound(w, r)
+		return
+	}
+	if r.Method != http.MethodPost {
+		methodNotAllowed(w)
+		return
+	}
+	if !s.authorized(r) {
+		s.unauthorized(w)
+		return
+	}
+
+	loaded, err := docs.NewContentSource(s.contentDir).Load()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("could not reload content: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	s.docsContentMu.Lock()
+	s.docsContent = loaded
+	s.docsContentMu.Unlock()
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("content reloaded\n"))
+}
+
+func (s *Server) docsPageFor(locale content.Locale) docs.ContentPage {
+	s.docsContentMu.RLock()
+	defer s.docsContentMu.RUnlock()
+	if page, ok := s.docsContent[locale.Code]; ok {
+		return page
+	}
+	return s.docsContent["en"]
 }
 
 func (s *Server) authorized(r *http.Request) bool {

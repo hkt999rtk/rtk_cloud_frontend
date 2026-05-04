@@ -98,7 +98,7 @@ Feature and docs slugs stay in English across all locales. This keeps links stab
 
 The admin, health, and static routes are not localized.
 
-## Content Authoring (Docs Placeholder, Issue #52)
+## Content Authoring (Docs Placeholder, Issue #75)
 
 This project is adding a lightweight docs content source in two phases:
 

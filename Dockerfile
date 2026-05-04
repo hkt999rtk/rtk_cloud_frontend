@@ -7,6 +7,7 @@ RUN go mod download
 
 COPY cmd ./cmd
 COPY internal ./internal
+COPY content ./content
 COPY templates ./templates
 COPY static ./static
 
@@ -21,6 +22,7 @@ RUN addgroup -S app && adduser -S -G app app \
     && chown -R app:app /app /data
 
 COPY --from=builder /out/realtek-connect /app/realtek-connect
+COPY --from=builder /src/content /app/content
 COPY --from=builder /src/templates /app/templates
 COPY --from=builder /src/static /app/static
 

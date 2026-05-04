@@ -133,7 +133,7 @@ Content rules:
 - Contact form service options display localized titles but submit canonical feature slugs to SQLite, avoiding mixed-language lead interest values.
 - Admin lead review remains English-only in v1.
 
-## Lightweight YAML/Markdown Content Source (Issue #52)
+## Lightweight YAML/Markdown Content Source (Issue #75)
 
 ### Scope
 
@@ -178,7 +178,7 @@ Content rules:
 - Place content under repository root `content/docs/...` for non-technical editing.
 - Keep templates in `templates/` and media assets in `static/`.
 
-### Acceptance (Issue #52)
+### Acceptance (Issue #75)
 
 - `GET /docs` reads from `content/docs/<locale>/docs.yaml`.
 - Missing locale file falls back to English correctly.
