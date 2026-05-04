@@ -960,6 +960,16 @@ func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
 		"Choose regional placement around residency, latency, and operational coverage requirements",
 		"Use release promotion, maintenance windows, and rollback checkpoints to move from pilot tenants into production operations safely.",
 		"Is there a cloud vendor requirement? No.",
+		// Plans & Limits disclosure
+		"5-device default quota",
+		"up to 200 devices on request",
+		"one-time platform license fee plus annual maintenance",
+		"no minimum scale for the commercial tier",
+		// SDK & Support disclosure
+		"open-source SDK release is planned at general availability",
+		"platform backend stays a proprietary commercial product",
+		"Evaluation support is community-tier",
+		"Commercial support is contract-defined",
 		"<th scope=\"col\">Model</th>",
 		"Managed private deployment",
 		"Customer-operated private region",
