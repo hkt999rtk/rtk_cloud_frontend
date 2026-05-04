@@ -81,6 +81,7 @@ CDN readiness:
 - `GET /healthz`
 - `GET /admin/leads`, requires `ADMIN_TOKEN`
 - `GET /admin/leads.csv`, requires `ADMIN_TOKEN`
+- `POST /admin/reload-content`, requires `ADMIN_TOKEN`
 - `GET /static/...`
 
 New public routes should be documented here and in `docs/SPEC.md`.
@@ -96,6 +97,25 @@ The public website supports:
 Feature and docs slugs stay in English across all locales. This keeps links stable and avoids translating route identifiers. Public pages emit canonical URLs plus `hreflang` alternates for `en`, `zh-Hant`, `zh-Hans`, and `x-default`. `/sitemap.xml` includes all localized public URLs when search indexing is enabled.
 
 The admin, health, and static routes are not localized.
+
+## Content Authoring (Docs Placeholder, Issue #52)
+
+This project is adding a lightweight docs content source in two phases:
+
+- Phase 1 (this issue): `/docs` uses content files only, as a layout/rendering preview.
+- Phase 2 (later issues): expand the same model to other docs pages and features.
+
+Phase 1 conventions:
+
+- Content format: YAML frontmatter + Markdown body.
+- File location: `content/docs/<locale>/docs.yaml` (locale examples: `en`, `zh-TW`, `zh-CN`).
+- The Markdown body supports embedded media links, for example `![alt text](/static/assets/...)`.
+- Reload behavior: content is cached at startup, with a manual admin reload endpoint.
+
+Admin helper for development/test refresh:
+
+- `POST /admin/reload-content` (requires `ADMIN_TOKEN`) clears cached content and reloads from files.
+- Existing routes and locales remain unchanged for all other pages in this issue.
 
 Admin requests can authenticate with either:
 
