@@ -133,6 +133,59 @@ Content rules:
 - Contact form service options display localized titles but submit canonical feature slugs to SQLite, avoiding mixed-language lead interest values.
 - Admin lead review remains English-only in v1.
 
+## Lightweight YAML/Markdown Content Source (Issue #75)
+
+### Scope
+
+- For this issue, introduce a lightweight content source only for the `/docs` page as a placeholder.
+- Do **not** migrate existing content from Go literals or current `docs`/`features` in this step.
+- Keep current `/docs/{slug}` and feature rendering paths untouched for now.
+- `/docs` is the first demo target for the new content system (layout and rendering only).
+
+### File Format
+
+- Use locale-separated files with YAML frontmatter + Markdown body.
+- File path proposal:
+  - `content/docs/en/docs.yaml`
+  - `content/docs/zh-TW/docs.yaml`
+  - `content/docs/zh-CN/docs.yaml`
+- Keep frontmatter schema aligned and minimal:
+  - `title`, `subtitle`
+  - `seo.meta_title`, `seo.meta_description`, `seo.social_image`
+  - `hero_image` (optional), with optional `hero_image_alt`
+  - `sections[]` for structured block rendering
+- Markdown body is required for narrative content and can embed images:
+  - `![alt text](/static/assets/...)`
+
+### i18n and fallback
+
+- English is source-of-truth for this phase (`content/docs/en/docs.yaml`).
+- Missing locale file falls back to English.
+- Locale file parity (fields, slug order, section keys) must be maintained when content exists.
+- i18n routing remains path-prefix based.
+
+### Reload strategy
+
+- Content is loaded into memory at process start.
+- Add manual cache refresh endpoint:
+  - `POST /admin/reload-content`
+- Requires valid `ADMIN_TOKEN`.
+- On success, clear and rebuild cached docs content from `content/docs`.
+- This supports iterative changes without restart during development/review while preserving production behavior.
+
+### Placement
+
+- Place content under repository root `content/docs/...` for non-technical editing.
+- Keep templates in `templates/` and media assets in `static/`.
+
+### Acceptance (Issue #75)
+
+- `GET /docs` reads from `content/docs/<locale>/docs.yaml`.
+- Missing locale file falls back to English correctly.
+- Markdown body is rendered and image embeds are passed through to HTML safely.
+- `POST /admin/reload-content` is token-gated and refreshes cache.
+- Add tests for parser, render path, fallback, and reload auth behavior.
+
 ## Privacy / GDPR-Lite Handling
 
 The website applies privacy information globally instead of using EU-only IP detection.

@@ -98,6 +98,7 @@ func TestDockerfileUsesPersistentSQLitePaths(t *testing.T) {
 	for _, expected := range []string{
 		"ENV DATABASE_PATH=/data/connectplus.db",
 		"ENV ANALYTICS_DATABASE_PATH=/data/analytics.db",
+		"COPY --from=builder /src/content /app/content",
 	} {
 		if !strings.Contains(text, expected) {
 			t.Fatalf("Dockerfile missing %q", expected)
@@ -118,7 +119,9 @@ func TestCDWorkflowPackagesDataForServiceUser(t *testing.T) {
 		`--owner="$service_user"`,
 		`--group="$service_group"`,
 		`--mode=u+rwX,go+rX`,
-		`tar "${tar_owner_args[@]}" -C dist -czf - bin templates static data | sudo /usr/local/sbin/deploy-realtek-connect`,
+		`cp -R content templates static dist/`,
+		`test -f dist/content/docs/en/docs.yaml`,
+		`tar "${tar_owner_args[@]}" -C dist -czf - bin content templates static data | sudo /usr/local/sbin/deploy-realtek-connect`,
 	} {
 		if !strings.Contains(text, expected) {
 			t.Fatalf("cd workflow missing %q", expected)

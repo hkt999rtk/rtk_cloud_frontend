@@ -1,0 +1,25 @@
+---
+title: "開發者文件"
+subtitle: "以檔案驅動的文件首頁，服務產品、韌體、App、雲端與營運團隊。"
+hero_image: "/static/assets/connectplus-platform-surfaces.jpg"
+hero_image_alt: "Realtek Connect+ 裝置、雲端、App 與營運團隊的平台介面"
+sections:
+  - title: "檔案管理首頁內容"
+    icon: "document"
+    body: "文件首頁標題、摘要、敘事與 metadata 現在由 content/docs/zh-TW/docs.yaml 載入。"
+  - title: "支援多語內容來源"
+    icon: "grid"
+    body: "英文、繁體中文與簡體中文檔案並列，無需調整 template 就能更新。"
+  - title: "執行期重新載入"
+    icon: "refresh"
+    body: "營運人員可透過受保護的 admin refresh endpoint 重新載入記憶體內容快取。"
+seo:
+  meta_title: "開發者文件 | Realtek Connect+"
+  meta_description: "瀏覽 Realtek Connect+ 面向產品、韌體、App、雲端與營運團隊的文件入口。"
+  social_image: "/static/assets/connectplus-platform-surfaces.jpg"
+---
+Realtek Connect+ 保持第一版文件首頁精簡，同時讓更深入的文件章節繼續沿用既有 catalog 與伺服器端渲染。
+
+![文件架構預覽](/static/assets/connectplus-platform-surfaces.jpg)
+
+這個來源檔驅動的頁面讓團隊能迭代文件首頁內容，而不需要在同一個版本中遷移功能頁或詳細文件頁。
