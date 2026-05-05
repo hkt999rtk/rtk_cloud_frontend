@@ -160,7 +160,8 @@ page returns 404.
 
 **Hot reload:** a `POST /admin/reload-content` endpoint re-reads all content files
 from disk without restarting the process. The endpoint is protected by the same
-`Authorization: Bearer <ADMIN_TOKEN>` check used by the leads admin.
+admin-token contract used by the leads admin: `X-Admin-Token` header or
+`?token=` query parameter backed by `ADMIN_TOKEN`.
 
 This strategy means:
 - Zero latency for page renders (no disk I/O per request).
