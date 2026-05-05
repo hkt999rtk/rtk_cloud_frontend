@@ -235,6 +235,7 @@ func startLocalServer(root string) (string, func(), error) {
 	server, err := web.NewServer(web.Config{
 		TemplatesDir: filepath.Join(root, "templates"),
 		StaticDir:    filepath.Join(root, "static"),
+		ContentDir:   filepath.Join(root, "content", "docs"),
 	})
 	if err != nil {
 		return "", nil, err
