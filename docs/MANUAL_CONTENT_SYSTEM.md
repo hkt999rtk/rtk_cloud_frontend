@@ -130,8 +130,8 @@ Markdown source files) is never served directly.
 
 ## Markdown Rendering
 
-Library: **goldmark** (`github.com/yuin/goldmark`).  
-Extensions enabled: GFM tables, strikethrough, autolinks, task lists.  
+Library: **goldmark** (`github.com/yuin/goldmark`).
+Extensions enabled: GFM tables, strikethrough, autolinks, task lists.
 HTML output is sanitized before template insertion (allow-list of safe tags).
 
 Goldmark is a pure-Go library with no C dependencies and passes the CommonMark
