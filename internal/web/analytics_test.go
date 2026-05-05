@@ -46,6 +46,7 @@ func TestHandleAnalyticsEventSuccess(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"page_view","page":"home","session_id":"sid_01"}`))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Origin", "https://example.com")
+	req.Header.Set("X-Forwarded-Proto", "https")
 	req.Host = "example.com"
 	req.RemoteAddr = "198.51.100.10:1234"
 
@@ -138,6 +139,7 @@ func TestHandleAnalyticsEventRejectsDisallowedRequests(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(tc.body))
 			req.Header.Set("Content-Type", tc.ctype)
 			req.Header.Set("Origin", "https://example.com")
+			req.Header.Set("X-Forwarded-Proto", "https")
 			req.Host = "example.com"
 			req.RemoteAddr = "198.51.100.10:1234"
 			rec := httptest.NewRecorder()
@@ -148,8 +150,8 @@ func TestHandleAnalyticsEventRejectsDisallowedRequests(t *testing.T) {
 		})
 	}
 
-	if len(store.events) != 1 {
-		t.Fatalf("events stored = %d, want 1", len(store.events))
+	if len(store.events) != 0 {
+		t.Fatalf("events stored = %d, want 0", len(store.events))
 	}
 }
 
@@ -167,6 +169,7 @@ func TestHandleAnalyticsEventRejectsCrossOrigin(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Origin", "https://evil.example")
 	req.Header.Set("Referer", "https://example.com")
+	req.Header.Set("X-Forwarded-Proto", "https")
 	req.Host = "example.com"
 	req.RemoteAddr = "198.51.100.10:1234"
 
@@ -201,6 +204,7 @@ func TestHandleAnalyticsEventRateLimitsAndSanitizesReferrer(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Origin", "https://example.com")
 	req.Header.Set("Referer", "https://example.com/docs/overview?x=1#foo")
+	req.Header.Set("X-Forwarded-Proto", "https")
 	req.Host = "example.com"
 	req.RemoteAddr = "203.0.113.10:1234"
 	rec := httptest.NewRecorder()
@@ -213,6 +217,7 @@ func TestHandleAnalyticsEventRateLimitsAndSanitizesReferrer(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Origin", "https://example.com")
 	req.Header.Set("Referer", "https://example.com/docs/overview?x=1#foo")
+	req.Header.Set("X-Forwarded-Proto", "https")
 	req.Host = "example.com"
 	req.RemoteAddr = "203.0.113.10:1234"
 	rec = httptest.NewRecorder()
