@@ -36,7 +36,7 @@
       <a href="{{localizedPath . "/docs"}}">{{t . "nav.docs"}}</a>
       <a href="{{localizedPath . "/features"}}">{{t . "nav.features"}}</a>
       <a href="{{localizedPath . "/"}}#architecture">{{t . "nav.architecture"}}</a>
-      <a href="{{localizedPath . "/contact"}}" class="nav-cta">{{t . "nav.contact"}}</a>
+      <a href="{{localizedPath . "/contact"}}" class="nav-cta" data-analytics-cta="nav_cta_contact">{{t . "nav.contact"}}</a>
     </nav>
     {{if .AlternateLinks}}<nav class="language-nav" aria-label="Language">
       {{range .AlternateLinks}}{{if ne .HrefLang "x-default"}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}
@@ -59,6 +59,202 @@
       <a href="{{localizedPath . "/privacy"}}">{{t . "footer.privacy"}}</a>
     </div>
   </footer>
+
+  {{if .Analytics.Enabled}}
+  <script>
+    (function () {
+      const analyticsConfig = {
+        endpoint: "{{.AnalyticsEndpoint}}",
+        page: "{{.AnalyticsPage}}"
+      };
+
+      if (!analyticsConfig.endpoint || !analyticsConfig.page) {
+        return;
+      }
+
+      function generateSessionId() {
+        const randomPart = Math.random().toString(16).slice(2);
+        return "sid_" + Date.now().toString(36) + "_" + randomPart;
+      }
+
+      function sendEvent(payload) {
+        payload.page = analyticsConfig.page;
+        payload.session_id = sessionId;
+
+        const body = JSON.stringify(payload);
+        try {
+          if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
+            const queued = navigator.sendBeacon(
+              analyticsConfig.endpoint,
+              new Blob([body], { type: "application/json" })
+            );
+            if (queued) {
+              return;
+            }
+          }
+
+          fetch(analyticsConfig.endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: body,
+            credentials: "same-origin",
+            keepalive: true
+          }).catch(function () {
+            // Analytics errors are intentionally ignored in the frontend.
+          });
+        } catch (_err) {
+          // Ignore any serialization or transport errors.
+        }
+      }
+
+      function trackScroll() {
+        const docEl = document.documentElement;
+        const maxScroll = Math.max(docEl.scrollHeight - docEl.clientHeight, 1);
+        const current = Math.round((docEl.scrollTop / maxScroll) * 100);
+        for (const milestone of [25, 50, 75, 100]) {
+          if (current >= milestone && !scrollMilestones.has(milestone)) {
+            scrollMilestones.add(milestone);
+            sendEvent({
+              event: "scroll",
+              percent: milestone
+            });
+          }
+        }
+      }
+
+      function startEngagementTimer() {
+        if (engagedSent || engagementTimer !== null) {
+          return;
+        }
+
+        const remaining = Math.max(0, 10000 - visibleMs);
+        if (remaining === 0) {
+          sendEngaged();
+          return;
+        }
+
+        engagementTimer = window.setTimeout(sendEngaged, remaining);
+      }
+
+      function stopEngagementTimer() {
+        if (engagementTimer === null) {
+          return;
+        }
+        window.clearTimeout(engagementTimer);
+        engagementTimer = null;
+      }
+
+      function sendEngaged() {
+        if (engagedSent) {
+          return;
+        }
+
+        engagedSent = true;
+        stopEngagementTimer();
+        sendEvent({
+          event: "engaged",
+          duration: 10
+        });
+      }
+
+      function handleVisibilityChange() {
+        if (document.hidden) {
+          stopEngagementTimer();
+          if (engagedVisibleStart !== null) {
+            visibleMs += Math.max(0, Date.now() - engagedVisibleStart);
+            engagedVisibleStart = null;
+          }
+          return;
+        }
+
+        if (engagementTimer !== null) {
+          return;
+        }
+        if (engagedVisibleStart === null) {
+          engagedVisibleStart = Date.now();
+        }
+        startEngagementTimer();
+      }
+
+      function trackCTA(event) {
+        const button = event.target.closest && event.target.closest("[data-analytics-cta]");
+        if (!button) {
+          return;
+        }
+
+        const cta = button.getAttribute("data-analytics-cta");
+        if (!cta) {
+          return;
+        }
+
+        sendEvent({
+          event: "click_cta",
+          cta: cta
+        });
+      }
+
+      function tickScroll() {
+        if (scrollTick) {
+          return;
+        }
+        scrollTick = true;
+        window.requestAnimationFrame(function () {
+          trackScroll();
+          scrollTick = false;
+        });
+      }
+
+      function init() {
+        sendEvent({
+          event: "page_view"
+        });
+
+        if (document.hidden) {
+          engagedVisibleStart = null;
+        } else {
+          engagedVisibleStart = Date.now();
+          startEngagementTimer();
+        }
+
+        document.addEventListener("visibilitychange", handleVisibilityChange, { passive: true });
+        document.addEventListener("click", trackCTA, { passive: true });
+        window.addEventListener("scroll", tickScroll, { passive: true });
+        trackScroll();
+      }
+
+      const sessionId = generateSessionId();
+      const scrollMilestones = new Set();
+      const trackedVisibleMaxMs = 10000;
+      let visibleMs = 0;
+      let engagedVisibleStart = null;
+      let engagementTimer = null;
+      let scrollTick = false;
+      let engagedSent = false;
+
+      const trackVisibleMs = function () {
+        if (!engagedSent && engagedVisibleStart !== null) {
+          const now = Date.now();
+          const elapsed = now - engagedVisibleStart;
+          if (visibleMs + elapsed >= trackedVisibleMaxMs) {
+            visibleMs = trackedVisibleMaxMs;
+            sendEngaged();
+          }
+        }
+      };
+
+      window.addEventListener("beforeunload", trackVisibleMs);
+      window.addEventListener("pagehide", trackVisibleMs);
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init, { once: true });
+      } else {
+        init();
+      }
+    })();
+  </script>
+  {{end}}
 </body>
 </html>
 {{end}}
