@@ -72,6 +72,7 @@ type pageData struct {
 	Doc             docs.Section
 	Features        []features.Feature
 	Feature         features.Feature
+	InterestOptions []content.ContactInterestOption
 	Form            contactForm
 	Errors          map[string]string
 	Success         bool

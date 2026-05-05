@@ -25,7 +25,7 @@ func TestRepositoryInsert(t *testing.T) {
 		Name:     "  Kevin Huang  ",
 		Company:  "  Realtek  ",
 		Email:    "  kevin@example.com  ",
-		Interest: "  OTA  ",
+		Interest: "  evaluation-access  ",
 		Message:  "  Interested in rollout control.  ",
 	}); err != nil {
 		t.Fatalf("insert lead: %v", err)
@@ -55,8 +55,8 @@ func TestRepositoryInsert(t *testing.T) {
 	if records[0].Email != "kevin@example.com" {
 		t.Fatalf("email = %q, want kevin@example.com", records[0].Email)
 	}
-	if records[0].Interest != "OTA" {
-		t.Fatalf("interest = %q, want OTA", records[0].Interest)
+	if records[0].Interest != "evaluation-access" {
+		t.Fatalf("interest = %q, want evaluation-access", records[0].Interest)
 	}
 	if records[0].Message != "Interested in rollout control." {
 		t.Fatalf("message = %q, want trimmed value", records[0].Message)
@@ -83,21 +83,21 @@ func TestRepositoryListSupportsFilteringAndPagination(t *testing.T) {
 			Name:     "Alpha",
 			Company:  "Acme",
 			Email:    "alpha@example.com",
-			Interest: "Provision",
+			Interest: "evaluation-access",
 			Message:  "first",
 		},
 		{
 			Name:     "Beta",
 			Company:  "Acme Labs",
 			Email:    "beta@example.com",
-			Interest: "OTA",
+			Interest: "commercial-deployment",
 			Message:  "second",
 		},
 		{
 			Name:     "Gamma",
 			Company:  "Zenith",
 			Email:    "gamma@example.com",
-			Interest: "OTA",
+			Interest: "commercial-deployment",
 			Message:  "third",
 		},
 	} {
@@ -108,7 +108,7 @@ func TestRepositoryListSupportsFilteringAndPagination(t *testing.T) {
 
 	count, err := repo.Count(context.Background(), ListFilter{
 		Company:  "acme",
-		Interest: "ota",
+		Interest: "commercial",
 	})
 	if err != nil {
 		t.Fatalf("count filtered leads: %v", err)
@@ -119,7 +119,7 @@ func TestRepositoryListSupportsFilteringAndPagination(t *testing.T) {
 
 	records, err := repo.List(context.Background(), ListOptions{
 		Filter: ListFilter{
-			Interest: "ota",
+			Interest: "commercial",
 		},
 		Limit:  1,
 		Offset: 1,
@@ -197,7 +197,7 @@ func TestRepositoryInsertAcceptsUnicodeAtCharacterLimit(t *testing.T) {
 		Name:     strings.Repeat("界", NameMaxLength),
 		Company:  strings.Repeat("公", CompanyMaxLength),
 		Email:    "unicode@example.com",
-		Interest: strings.Repeat("类", InterestMaxLength),
+		Interest: "other",
 		Message:  strings.Repeat("文", MessageMaxLength),
 	})
 	if err != nil {

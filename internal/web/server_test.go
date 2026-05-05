@@ -941,6 +941,69 @@ func TestUserManagementFeatureClarifiesPlatformScope(t *testing.T) {
 	}
 }
 
+func TestHomeDeploySectionDisclosesEvaluationLimits(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"5 devices by default",
+		"raise up to 200 on request",
+		"No expiry",
+		"See plans &amp; limits",
+		`href="/features/private-cloud"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("home page missing %q: %s", want, body)
+		}
+	}
+}
+
+func TestContactFormRendersCanonicalInquiryOptions(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/contact", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		`value="evaluation-access"`,
+		`value="commercial-deployment"`,
+		`value="partnership"`,
+		`value="technical-question"`,
+		`value="other"`,
+		"Evaluation access",
+		"Commercial deployment",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("contact form missing %q: %s", want, body)
+		}
+	}
+
+	// The dropdown must no longer offer feature slugs as inquiry types.
+	for _, mustNot := range []string{
+		`value="provision"`,
+		`value="ota"`,
+		`value="private-cloud"`,
+	} {
+		if strings.Contains(body, mustNot) {
+			t.Fatalf("contact form unexpectedly still offers feature slug %q", mustNot)
+		}
+	}
+}
+
 func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
@@ -966,11 +1029,21 @@ func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
 		// Plans & Limits disclosure
 		"5-device default quota",
 		"up to 200 devices on request",
-		"one-time platform license fee plus annual maintenance",
+		"Evaluation access does not expire",
 		"no minimum scale for the commercial tier",
-		// SDK & Support disclosure
+		// Pricing Factors disclosure (no price list, just the inputs)
+		"How commercial pricing is shaped",
+		"Fleet size",
+		"Deployment topology",
+		"Support coverage",
+		"Customization scope",
+		"Term length",
+		// SDK Licensing (split from Support)
+		"What you can build with",
 		"open-source SDK release is planned at general availability",
 		"platform backend stays a proprietary commercial product",
+		// Support tier (split from SDK)
+		"What support looks like at each tier",
 		"Evaluation support is community-tier",
 		"Commercial support is contract-defined",
 		"<th scope=\"col\">Model</th>",
@@ -1205,7 +1278,7 @@ func TestValidContactPostStoresLead(t *testing.T) {
 		"name":     {"Kevin Huang"},
 		"company":  {"Realtek"},
 		"email":    {"kevin@example.com"},
-		"interest": {"OTA"},
+		"interest": {"evaluation-access"},
 		"message":  {"Need scheduled rollout support."},
 	}
 	req := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
@@ -1233,7 +1306,7 @@ func TestLocalizedContactPostStoresCanonicalInterest(t *testing.T) {
 		"name":     {"Kevin Huang"},
 		"company":  {"Realtek"},
 		"email":    {"kevin@example.com"},
-		"interest": {"ota"},
+		"interest": {"commercial-deployment"},
 		"message":  {"需要排程更新支援。"},
 	}
 	req := httptest.NewRequest(http.MethodPost, "/zh-tw/contact", strings.NewReader(form.Encode()))
@@ -1248,7 +1321,7 @@ func TestLocalizedContactPostStoresCanonicalInterest(t *testing.T) {
 	if len(store.leads) != 1 {
 		t.Fatalf("stored leads = %d, want 1", len(store.leads))
 	}
-	if got := store.leads[0].Interest; got != "ota" {
+	if got := store.leads[0].Interest; got != "commercial-deployment" {
 		t.Fatalf("interest = %q, want canonical slug", got)
 	}
 	if !strings.Contains(rec.Body.String(), "你的 Realtek Connect&#43; 請求已記錄。") {
@@ -1410,7 +1483,7 @@ func TestOversizedContactPostDoesNotStoreLead(t *testing.T) {
 		"name":     {strings.Repeat("N", leads.NameMaxLength+1)},
 		"company":  {strings.Repeat("C", leads.CompanyMaxLength+1)},
 		"email":    {"kevin@example.com"},
-		"interest": {"OTA"},
+		"interest": {"evaluation-access"},
 		"message":  {strings.Repeat("M", leads.MessageMaxLength+1)},
 	}
 	req := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
@@ -1444,7 +1517,7 @@ func TestSpamContactPostDoesNotStoreLead(t *testing.T) {
 	form := url.Values{
 		"name":     {"Kevin Huang"},
 		"email":    {"kevin@example.com"},
-		"interest": {"OTA"},
+		"interest": {"evaluation-access"},
 		"website":  {"https://spam.example.com"},
 	}
 	req := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
@@ -1484,7 +1557,7 @@ func TestContactPostRateLimitsRepeatedSubmissions(t *testing.T) {
 	form := url.Values{
 		"name":     {"Kevin Huang"},
 		"email":    {"kevin@example.com"},
-		"interest": {"OTA"},
+		"interest": {"evaluation-access"},
 	}
 
 	firstReq := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
@@ -1534,7 +1607,7 @@ func TestContactPostRateLimitIgnoresSpoofedForwardingHeaders(t *testing.T) {
 	form := url.Values{
 		"name":     {"Kevin Huang"},
 		"email":    {"kevin@example.com"},
-		"interest": {"OTA"},
+		"interest": {"evaluation-access"},
 	}
 
 	firstReq := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))

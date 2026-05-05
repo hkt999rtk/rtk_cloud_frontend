@@ -40,6 +40,7 @@ func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath
 		AlternateLinks:  s.alternateLinks(r, publicPath, locale),
 		Docs:            catalog.Docs,
 		Features:        catalog.Features,
+		InterestOptions: catalog.ContactInterestOptions(),
 	}
 	if s.disableSearchIndexing {
 		data.MetaRobots = "noindex, nofollow, noarchive"

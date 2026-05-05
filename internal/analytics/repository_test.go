@@ -95,7 +95,7 @@ func TestAnalyticsStorageIsSeparateFromLeadStorage(t *testing.T) {
 		Name:     "Ada",
 		Company:  "Example",
 		Email:    "ada@example.com",
-		Interest: "ota",
+		Interest: "evaluation-access",
 		Message:  "Please follow up.",
 	}); err != nil {
 		t.Fatalf("insert lead: %v", err)
