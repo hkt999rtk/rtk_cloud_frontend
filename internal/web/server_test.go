@@ -333,6 +333,7 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 				"third-party analytics services",
 				"advertising pixels",
 				"fingerprinting scripts",
+				"ANALYTICS_ENABLED=true",
 			},
 		},
 		{
@@ -353,6 +354,7 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 				"第三方 analytics services",
 				"advertising pixels",
 				"fingerprinting scripts",
+				"ANALYTICS_ENABLED=true",
 			},
 		},
 		{
@@ -373,6 +375,7 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 				"第三方 analytics services",
 				"advertising pixels",
 				"fingerprinting scripts",
+				"ANALYTICS_ENABLED=true",
 			},
 		},
 	}
