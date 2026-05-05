@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"os"
 	"path/filepath"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
@@ -45,6 +46,10 @@ func Open(ctx context.Context, cfg Config) (*Repository, error) {
 		retentionDays: cfg.RetentionDays,
 	}
 	if err := repository.Init(); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	if _, err := repository.CleanupExpiredEvents(ctx, time.Now().UTC()); err != nil {
 		_ = db.Close()
 		return nil, err
 	}
@@ -99,4 +104,24 @@ CREATE INDEX IF NOT EXISTS idx_analytics_events_event_page
   ON analytics_events(event, page);
 `)
 	return err
+}
+
+func (r *Repository) CleanupExpiredEvents(ctx context.Context, now time.Time) (int64, error) {
+	if r == nil || r.db == nil {
+		return 0, nil
+	}
+	if r.retentionDays <= 0 {
+		return 0, nil
+	}
+
+	cutoff := now.UTC().Add(-time.Duration(r.retentionDays) * 24 * time.Hour).Unix()
+	result, err := r.db.ExecContext(ctx, `DELETE FROM analytics_events WHERE ts < ?`, cutoff)
+	if err != nil {
+		return 0, err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return rowsAffected, nil
 }
