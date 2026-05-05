@@ -1,0 +1,35 @@
+{{define "content"}}
+<section class="page-hero feature-detail">
+  <span class="icon-box page-hero-icon">{{icon "document"}}</span>
+  <p class="eyebrow">Manual</p>
+  <h1>{{.ManualPage.Title}}</h1>
+  <p>{{.ManualPage.Description}}</p>
+  <div class="hero-actions">
+    <a class="button primary" href="{{localizedPath . "/manual"}}"><span class="button-icon">{{icon "document"}}</span>Back to manual</a>
+    <a class="button secondary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "nav.contact"}}</a>
+  </div>
+</section>
+
+<section class="section manual-content">
+  {{.ManualPage.BodyHTML}}
+</section>
+
+{{if .ManualIndex.Sections}}
+<section class="section doc-navigation">
+  <div class="section-heading">
+    <p class="eyebrow">Manual chapters</p>
+    <h2>More sections</h2>
+  </div>
+  <div class="docs-entry-grid">
+    {{range .ManualIndex.Sections}}
+    <a class="feature-card docs-card" href="{{localizedPath $ (printf "/manual/%s" .Slug)}}">
+      <span class="icon-box feature-icon">{{icon "document"}}</span>
+      <h3>{{.Title}}</h3>
+      <p>{{.Summary}}</p>
+      <span class="text-link">Open section <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
+    </a>
+    {{end}}
+  </div>
+</section>
+{{end}}
+{{end}}
