@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -265,6 +266,91 @@ func TestOpenCleansExpiredEventsOnStartup(t *testing.T) {
 	}
 }
 
+func TestConversionRate(t *testing.T) {
+	db := openAnalyticsDBForTest(t)
+	repository := testRepositoryForDB(t, db, DefaultRetentionDays)
+
+	seedRawAnalyticsEvent(t, db, "page_view", "home", "", 0, 0, "", "sid-1")
+	seedRawAnalyticsEvent(t, db, "page_view", "home", "", 0, 0, "", "sid-2")
+	seedRawAnalyticsEvent(t, db, "click_cta", "home", "home_cta_primary", 0, 0, "", "sid-1")
+
+	rate, err := repository.ConversionRate(context.Background())
+	if err != nil {
+		t.Fatalf("conversion rate: %v", err)
+	}
+	if rate != 0.5 {
+		t.Fatalf("conversion rate = %v, want 0.5", rate)
+	}
+}
+
+func TestTopReferrerOriginsOrdersByCount(t *testing.T) {
+	db := openAnalyticsDBForTest(t)
+	repository := testRepositoryForDB(t, db, DefaultRetentionDays)
+
+	seedRawAnalyticsEvent(t, db, "click_cta", "home", "home_cta_primary", 0, 0, "https://a.example", "sid-1")
+	seedRawAnalyticsEvent(t, db, "click_cta", "home", "home_cta_primary", 0, 0, "https://a.example", "sid-2")
+	seedRawAnalyticsEvent(t, db, "click_cta", "docs", "docs_cta_primary", 0, 0, "https://b.example", "sid-3")
+	seedRawAnalyticsEvent(t, db, "page_view", "home", "", 0, 0, "https://c.example", "sid-4")
+
+	items, err := repository.TopReferrerOrigins(context.Background(), 10)
+	if err != nil {
+		t.Fatalf("top referrer origins: %v", err)
+	}
+	if len(items) != 2 {
+		t.Fatalf("top referrer origins = %d, want 2", len(items))
+	}
+	if items[0].Origin != "https://a.example" {
+		t.Fatalf("first origin = %q, want %q", items[0].Origin, "https://a.example")
+	}
+	if items[0].Count != 2 {
+		t.Fatalf("first count = %d, want 2", items[0].Count)
+	}
+}
+
+func TestScrollDistribution(t *testing.T) {
+	db := openAnalyticsDBForTest(t)
+	repository := testRepositoryForDB(t, db, DefaultRetentionDays)
+
+	seedRawAnalyticsEvent(t, db, "scroll", "home", "", 25, 0, "", "sid-1")
+	seedRawAnalyticsEvent(t, db, "scroll", "home", "", 25, 0, "", "sid-2")
+	seedRawAnalyticsEvent(t, db, "scroll", "home", "", 50, 0, "", "sid-3")
+
+	items, err := repository.ScrollDistribution(context.Background())
+	if err != nil {
+		t.Fatalf("scroll distribution: %v", err)
+	}
+	if len(items) != 2 {
+		t.Fatalf("scroll milestones = %d, want 2", len(items))
+	}
+	if items[0].Percent != 25 || items[0].Count != 2 {
+		t.Fatalf("first milestone = %#v, want {Percent:25 Count:2}", items[0])
+	}
+	if items[1].Percent != 50 || items[1].Count != 1 {
+		t.Fatalf("second milestone = %#v, want {Percent:50 Count:1}", items[1])
+	}
+}
+
+func TestCTAClicksByPage(t *testing.T) {
+	db := openAnalyticsDBForTest(t)
+	repository := testRepositoryForDB(t, db, DefaultRetentionDays)
+
+	seedRawAnalyticsEvent(t, db, "click_cta", "home", "home_cta_primary", 0, 0, "", "sid-1")
+	seedRawAnalyticsEvent(t, db, "click_cta", "home", "home_cta_primary", 0, 0, "", "sid-2")
+	seedRawAnalyticsEvent(t, db, "click_cta", "home", "home_cta_secondary", 0, 0, "", "sid-3")
+	seedRawAnalyticsEvent(t, db, "click_cta", "docs", "docs_cta_primary", 0, 0, "", "sid-4")
+
+	items, err := repository.CTAClicksByPage(context.Background(), 10)
+	if err != nil {
+		t.Fatalf("cta clicks by page: %v", err)
+	}
+	if len(items) != 3 {
+		t.Fatalf("cta click rows = %d, want 3", len(items))
+	}
+	if items[0].Page != "home" || items[0].CTA != "home_cta_primary" || items[0].Count != 2 {
+		t.Fatalf("first cta metric = %#v", items[0])
+	}
+}
+
 func assertSQLiteObjectExists(t *testing.T, db *sql.DB, name string) {
 	t.Helper()
 	if countSQLiteObjects(t, db, name) != 1 {
@@ -309,6 +395,62 @@ INSERT INTO analytics_events (
 	); err != nil {
 		t.Fatalf("seed analytics event: %v", err)
 	}
+}
+
+func seedRawAnalyticsEvent(t *testing.T, db *sql.DB, event, page, cta string, percent, duration int, referrer, session string) {
+	t.Helper()
+	_, err := db.ExecContext(context.Background(), `
+INSERT INTO analytics_events (
+  ts,
+  event,
+  page,
+  cta,
+  percent,
+  duration,
+  referrer_origin,
+  session_id,
+  created_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		time.Now().UTC().Unix(),
+		event,
+		page,
+		nilIfEmpty(cta),
+		nullableInt(percent),
+		nullableInt(duration),
+		nilIfEmpty(referrer),
+		nilIfEmpty(session),
+		time.Now().UTC().Format(time.RFC3339),
+	)
+	if err != nil {
+		t.Fatalf("seed raw analytics event: %v", err)
+	}
+}
+
+func openAnalyticsDBForTest(t *testing.T) *sql.DB {
+	t.Helper()
+	dbPath := filepath.Join(t.TempDir(), "analytics.db")
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		t.Fatalf("open sqlite: %v", err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	return db
+}
+
+func testRepositoryForDB(t *testing.T, db *sql.DB, retention int) *Repository {
+	t.Helper()
+	repository := NewRepository(db, retention)
+	if err := repository.Init(); err != nil {
+		t.Fatalf("initialize analytics schema: %v", err)
+	}
+	return repository
+}
+
+func nilIfEmpty(value string) interface{} {
+	if strings.TrimSpace(value) == "" {
+		return nil
+	}
+	return value
 }
 
 func assertAnalyticsEventTimestamps(t *testing.T, db *sql.DB, want ...int64) {

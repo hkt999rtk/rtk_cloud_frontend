@@ -4,7 +4,7 @@
   <h1>{{.DocsPage.Title}}</h1>
   <p>{{.DocsPage.Subtitle}}</p>
   <div class="hero-actions">
-    <a class="button primary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "docs.cta.primary"}}</a>
+    <a class="button primary" href="{{localizedPath . "/contact"}}" data-analytics-cta="docs_cta_primary"><span class="button-icon">{{icon "mail"}}</span>{{t . "docs.cta.primary"}}</a>
     <a class="button secondary" href="{{localizedPath . "/features/app-sdk"}}"><span class="button-icon">{{icon "phone-code"}}</span>{{t . "docs.cta.secondary"}}</a>
   </div>
   {{if .DocsPage.HeroImage}}

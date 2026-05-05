@@ -70,6 +70,7 @@ func run(ctx context.Context, logger *log.Logger) error {
 
 	application, err := web.NewServer(web.Config{
 		LeadStore:               repository,
+		AnalyticsStore:          analyticsStore,
 		AdminToken:              os.Getenv("ADMIN_TOKEN"),
 		DisableSearchIndexing:   truthyEnv("DISABLE_SEARCH_INDEXING"),
 		PublicBaseURL:           os.Getenv("PUBLIC_BASE_URL"),

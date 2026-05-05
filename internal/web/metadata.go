@@ -26,26 +26,42 @@ type sitemapURL struct {
 func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath, title, description string) pageData {
 	catalog := content.CatalogFor(locale)
 	data := pageData{
-		Title:           title,
-		MetaDescription: description,
-		CanonicalURL:    s.absoluteURL(r, content.PathForLocale(locale, publicPath)),
-		SocialImageURL:  s.absoluteURL(r, s.assetPath(heroImagePath)),
-		SocialImageAlt:  heroImageAlt,
-		CurrentPath:     r.URL.Path,
-		PublicPath:      publicPath,
-		Lang:            locale.Lang,
-		Locale:          locale,
-		LocalePrefix:    locale.Prefix,
-		Text:            catalog.Text,
-		AlternateLinks:  s.alternateLinks(r, publicPath, locale),
-		Docs:            catalog.Docs,
-		Features:        catalog.Features,
-		InterestOptions: catalog.ContactInterestOptions(),
+		Title:             title,
+		MetaDescription:   description,
+		CanonicalURL:      s.absoluteURL(r, content.PathForLocale(locale, publicPath)),
+		SocialImageURL:    s.absoluteURL(r, s.assetPath(heroImagePath)),
+		SocialImageAlt:    heroImageAlt,
+		CurrentPath:       r.URL.Path,
+		PublicPath:        publicPath,
+		AnalyticsEnabled:  s.analyticsStore != nil,
+		AnalyticsPage:     analyticsPageKey(publicPath),
+		AnalyticsEndpoint: "/api/event",
+		Lang:              locale.Lang,
+		Locale:            locale,
+		LocalePrefix:      locale.Prefix,
+		Text:              catalog.Text,
+		AlternateLinks:    s.alternateLinks(r, publicPath, locale),
+		Docs:              catalog.Docs,
+		Features:          catalog.Features,
+		InterestOptions:   catalog.ContactInterestOptions(),
 	}
+	data.Analytics.Enabled = data.AnalyticsEnabled
 	if s.disableSearchIndexing {
 		data.MetaRobots = "noindex, nofollow, noarchive"
 	}
 	return data
+}
+
+func analyticsPageKey(publicPath string) string {
+	key := strings.TrimSpace(publicPath)
+	if key == "/" || key == "" {
+		return "home"
+	}
+	key = strings.Trim(key, "/")
+	if key == "" {
+		return "home"
+	}
+	return key
 }
 
 func (s *Server) adminPageData(r *http.Request, title, description string) pageData {

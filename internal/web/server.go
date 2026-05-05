@@ -21,12 +21,26 @@ import (
 	"sync"
 	"time"
 
+	"realtek-connect/internal/analytics"
 	"realtek-connect/internal/content"
 	"realtek-connect/internal/docs"
 	"realtek-connect/internal/features"
 	"realtek-connect/internal/leads"
 	"realtek-connect/internal/manual"
 )
+
+const (
+	adminAnalyticsDefaultLimit = 25
+	analyticsMaxPayloadBytes   = 4 * 1024
+)
+
+type AnalyticsStore interface {
+	InsertEvent(context.Context, analytics.Event) error
+	ConversionRate(context.Context) (float64, error)
+	TopReferrerOrigins(context.Context, int) ([]analytics.ReferrerMetric, error)
+	ScrollDistribution(context.Context) ([]analytics.ScrollMilestone, error)
+	CTAClicksByPage(context.Context, int) ([]analytics.CTAClickMetric, error)
+}
 
 type LeadStore interface {
 	Insert(context.Context, leads.Lead) error
@@ -38,6 +52,7 @@ type Config struct {
 	TemplatesDir            string
 	StaticDir               string
 	ContentDir              string
+	AnalyticsStore          AnalyticsStore
 	LeadStore               LeadStore
 	AdminToken              string
 	DisableSearchIndexing   bool
@@ -52,6 +67,7 @@ type Server struct {
 	contentDir              string
 	contentRoot             string
 	leadStore               LeadStore
+	analyticsStore          AnalyticsStore
 	adminToken              string
 	disableSearchIndexing   bool
 	publicBaseURL           string
@@ -59,42 +75,53 @@ type Server struct {
 	enableCDNCacheHeaders   bool
 	assetVersions           map[string]string
 	contactLimit            *submissionRateLimiter
+	analyticsLimiter        *submissionRateLimiter
 	docsContentMu           sync.RWMutex
 	docsContent             map[string]docs.ContentPage
 	manualLoader            *manual.Loader
 }
 
 type pageData struct {
-	Title           string
-	MetaDescription string
-	CanonicalURL    string
-	SocialImageURL  string
-	SocialImageAlt  string
-	MetaRobots      string
-	CurrentPath     string
-	PublicPath      string
-	Lang            string
-	Locale          content.Locale
-	LocalePrefix    string
-	Text            map[string]string
-	AlternateLinks  []content.AlternateLink
-	Docs            []docs.Section
-	DocsPage        docs.ContentPage
-	Doc             docs.Section
-	ManualIndex     manual.ManualIndex
-	ManualPage      manual.ManualPage
-	Features        []features.Feature
-	Feature         features.Feature
-	InterestOptions []content.ContactInterestOption
-	Form            contactForm
-	Errors          map[string]string
-	Success         bool
-	SubmittedFor    string
-	Leads           []leads.LeadRecord
-	AdminEnabled    bool
-	AdminCSVHref    string
-	LeadFilters     adminLeadFilters
-	LeadPagination  adminLeadPagination
+	Title             string
+	MetaDescription   string
+	CanonicalURL      string
+	SocialImageURL    string
+	SocialImageAlt    string
+	MetaRobots        string
+	CurrentPath       string
+	PublicPath        string
+	Lang              string
+	Locale            content.Locale
+	LocalePrefix      string
+	Text              map[string]string
+	AlternateLinks    []content.AlternateLink
+	Docs              []docs.Section
+	DocsPage          docs.ContentPage
+	Doc               docs.Section
+	ManualIndex       manual.ManualIndex
+	ManualPage        manual.ManualPage
+	Features          []features.Feature
+	Feature           features.Feature
+	InterestOptions   []content.ContactInterestOption
+	Form              contactForm
+	Errors            map[string]string
+	Success           bool
+	SubmittedFor      string
+	Leads             []leads.LeadRecord
+	AdminEnabled      bool
+	AdminCSVHref      string
+	LeadFilters       adminLeadFilters
+	LeadPagination    adminLeadPagination
+	AnalyticsEnabled  bool
+	AnalyticsPage     string
+	AnalyticsEndpoint string
+	Analytics         struct {
+		Enabled            bool
+		ConversionRate     float64
+		TopReferrerOrigins []analytics.ReferrerMetric
+		ScrollDistribution []analytics.ScrollMilestone
+		CTAClicksByPage    []analytics.CTAClickMetric
+	}
 }
 
 type contactForm struct {
@@ -161,6 +188,8 @@ func NewServer(cfg Config) (*Server, error) {
 		enableCDNCacheHeaders:   cfg.EnableCDNCacheHeaders,
 		assetVersions:           assetVersions,
 		contactLimit:            newSubmissionRateLimiter(5, 10*time.Minute),
+		analyticsLimiter:        newSubmissionRateLimiter(60, 1*time.Minute),
+		analyticsStore:          cfg.AnalyticsStore,
 		docsContent:             docsContent,
 		manualLoader:            manualLoader,
 	}, nil
@@ -174,6 +203,8 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
 	mux.HandleFunc("/admin/leads.csv", s.handleAdminLeadsCSV)
+	mux.HandleFunc("/admin/analytics", s.handleAdminAnalytics)
+	mux.HandleFunc("/api/event", s.handleAnalyticsEvent)
 	mux.HandleFunc("/admin/reload-content", s.handleAdminReloadContent)
 	mux.HandleFunc("/healthz", s.handleHealthz)
 	mux.HandleFunc("/", s.handlePublic)
