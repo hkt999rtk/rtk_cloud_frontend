@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -88,6 +90,7 @@ func testConfig(store LeadStore) Config {
 	return Config{
 		TemplatesDir: "../../templates",
 		StaticDir:    "../../static",
+		ContentDir:   "../../content/docs",
 		LeadStore:    store,
 	}
 }
@@ -100,6 +103,9 @@ func testServerWithConfig(t *testing.T, cfg Config) http.Handler {
 	if cfg.StaticDir == "" {
 		cfg.StaticDir = "../../static"
 	}
+	if cfg.ContentDir == "" {
+		cfg.ContentDir = "../../content/docs"
+	}
 	if cfg.LeadStore == nil {
 		cfg.LeadStore = &memoryLeadStore{}
 	}
@@ -109,6 +115,9 @@ func testServerWithConfig(t *testing.T, cfg Config) http.Handler {
 
 func newTestServer(t *testing.T, cfg Config) *Server {
 	t.Helper()
+	if cfg.ContentDir == "" {
+		cfg.ContentDir = "../../content/docs"
+	}
 	server, err := NewServer(cfg)
 	if err != nil {
 		t.Fatalf("new server: %v", err)
@@ -133,6 +142,88 @@ func TestRoutesReturnOK(t *testing.T) {
 		if rec.Code != http.StatusOK {
 			t.Fatalf("%s returned %d, want 200", path, rec.Code)
 		}
+	}
+}
+
+func TestDocsLandingRendersFileBackedContent(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/docs", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	body := rec.Body.String()
+	for _, expected := range []string{
+		"File-owned landing content",
+		`<img class="docs-content-image" src="/static/assets/connectplus-platform-surfaces.jpg" alt="Documentation architecture preview">`,
+		`<meta property="og:image" content="http://example.com/static/assets/connectplus-platform-surfaces.jpg">`,
+	} {
+		if !strings.Contains(body, expected) {
+			t.Fatalf("/docs missing %q", expected)
+		}
+	}
+}
+
+func TestAdminReloadContentRefreshesDocsCache(t *testing.T) {
+	contentDir := t.TempDir()
+	writeDocsContent(t, contentDir, "Initial docs")
+
+	handler := testServerWithConfig(t, Config{
+		ContentDir: contentDir,
+		AdminToken: "secret",
+	})
+
+	assertDocsContains(t, handler, "Initial docs")
+	writeDocsContent(t, contentDir, "Reloaded docs")
+
+	unauthorized := httptest.NewRequest(http.MethodPost, "/admin/reload-content", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, unauthorized)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("unauthorized reload status = %d, want %d", rec.Code, http.StatusUnauthorized)
+	}
+	assertDocsContains(t, handler, "Initial docs")
+
+	authorized := httptest.NewRequest(http.MethodPost, "/admin/reload-content", nil)
+	authorized.Header.Set("X-Admin-Token", "secret")
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, authorized)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("authorized reload status = %d, want %d: %s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+	assertDocsContains(t, handler, "Reloaded docs")
+}
+
+func writeDocsContent(t *testing.T, root, title string) {
+	t.Helper()
+	dir := filepath.Join(root, "en")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatalf("mkdir docs content: %v", err)
+	}
+	body := `---
+title: "` + title + `"
+subtitle: "Runtime docs"
+seo:
+  meta_title: "` + title + ` | Realtek Connect+"
+  meta_description: "Runtime docs description"
+---
+Runtime body.
+`
+	if err := os.WriteFile(filepath.Join(dir, "docs.yaml"), []byte(body), 0o644); err != nil {
+		t.Fatalf("write docs content: %v", err)
+	}
+}
+
+func assertDocsContains(t *testing.T, handler http.Handler, expected string) {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodGet, "/docs", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/docs status = %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), expected) {
+		t.Fatalf("/docs missing %q in %s", expected, rec.Body.String())
 	}
 }
 

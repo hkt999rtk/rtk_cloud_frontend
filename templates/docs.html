@@ -1,13 +1,24 @@
 {{define "content"}}
 <section class="page-hero docs-hero">
   <p class="eyebrow">{{t . "docs.eyebrow"}}</p>
-  <h1>{{t . "docs.title"}}</h1>
-  <p>{{t . "docs.body"}}</p>
+  <h1>{{.DocsPage.Title}}</h1>
+  <p>{{.DocsPage.Subtitle}}</p>
   <div class="hero-actions">
     <a class="button primary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "docs.cta.primary"}}</a>
     <a class="button secondary" href="{{localizedPath . "/features/app-sdk"}}"><span class="button-icon">{{icon "phone-code"}}</span>{{t . "docs.cta.secondary"}}</a>
   </div>
+  {{if .DocsPage.HeroImage}}
+  <figure class="docs-hero-media">
+    <img src="{{asset .DocsPage.HeroImage}}" alt="{{.DocsPage.HeroImageAlt}}">
+  </figure>
+  {{end}}
 </section>
+
+{{if .DocsPage.BodyHTML}}
+<section class="section docs-content">
+  {{.DocsPage.BodyHTML}}
+</section>
+{{end}}
 
 <section class="section">
   <div class="section-heading">
@@ -31,6 +42,20 @@
     {{end}}
   </div>
 </section>
+
+{{if .DocsPage.Sections}}
+<section class="section docs-structure">
+  <div class="use-case-list">
+    {{range .DocsPage.Sections}}
+    <article>
+      <span class="icon-box use-case-icon">{{icon .Icon}}</span>
+      <h3>{{.Title}}</h3>
+      <p>{{.Body}}</p>
+    </article>
+    {{end}}
+  </div>
+</section>
+{{end}}
 
 <section class="section docs-structure">
   <div class="section-heading">
