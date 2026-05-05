@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/csv"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -24,6 +25,7 @@ import (
 	"realtek-connect/internal/docs"
 	"realtek-connect/internal/features"
 	"realtek-connect/internal/leads"
+	"realtek-connect/internal/manual"
 )
 
 type LeadStore interface {
@@ -48,6 +50,7 @@ type Server struct {
 	templatesDir            string
 	staticDir               string
 	contentDir              string
+	contentRoot             string
 	leadStore               LeadStore
 	adminToken              string
 	disableSearchIndexing   bool
@@ -58,6 +61,7 @@ type Server struct {
 	contactLimit            *submissionRateLimiter
 	docsContentMu           sync.RWMutex
 	docsContent             map[string]docs.ContentPage
+	manualLoader            *manual.Loader
 }
 
 type pageData struct {
@@ -77,6 +81,8 @@ type pageData struct {
 	Docs            []docs.Section
 	DocsPage        docs.ContentPage
 	Doc             docs.Section
+	ManualIndex     manual.ManualIndex
+	ManualPage      manual.ManualPage
 	Features        []features.Feature
 	Feature         features.Feature
 	InterestOptions []content.ContactInterestOption
@@ -132,10 +138,12 @@ func NewServer(cfg Config) (*Server, error) {
 	if cfg.ContentDir == "" {
 		cfg.ContentDir = "content/docs"
 	}
+	contentRoot := filepath.Dir(cfg.ContentDir)
 	docsContent, err := docs.NewContentSource(cfg.ContentDir).Load()
 	if err != nil {
 		return nil, err
 	}
+	manualLoader := manual.NewLoader(filepath.Join(contentRoot, "manual"))
 	assetVersions := map[string]string{}
 	if cfg.EnableAssetFingerprints {
 		assetVersions = buildAssetVersions(cfg.StaticDir)
@@ -144,6 +152,7 @@ func NewServer(cfg Config) (*Server, error) {
 		templatesDir:            cfg.TemplatesDir,
 		staticDir:               cfg.StaticDir,
 		contentDir:              cfg.ContentDir,
+		contentRoot:             contentRoot,
 		leadStore:               cfg.LeadStore,
 		adminToken:              cfg.AdminToken,
 		disableSearchIndexing:   cfg.DisableSearchIndexing,
@@ -153,12 +162,14 @@ func NewServer(cfg Config) (*Server, error) {
 		assetVersions:           assetVersions,
 		contactLimit:            newSubmissionRateLimiter(5, 10*time.Minute),
 		docsContent:             docsContent,
+		manualLoader:            manualLoader,
 	}, nil
 }
 
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", s.staticHandler()))
+	mux.Handle("/content-assets/", http.StripPrefix("/content-assets/", s.contentAssetsHandler()))
 	mux.HandleFunc("/robots.txt", s.handleRobotsTxt)
 	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
@@ -195,6 +206,10 @@ func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
 		s.handleDocs(w, r, locale, publicPath)
 	case strings.HasPrefix(publicPath, "/docs/"):
 		s.handleDocDetail(w, r, locale, publicPath)
+	case publicPath == "/manual":
+		s.handleManualIndex(w, r, locale, publicPath)
+	case strings.HasPrefix(publicPath, "/manual/"):
+		s.handleManualPage(w, r, locale, publicPath)
 	case publicPath == "/features":
 		s.handleFeatures(w, r, locale, publicPath)
 	case strings.HasPrefix(publicPath, "/features/"):
@@ -426,15 +441,24 @@ func (s *Server) handleAdminReloadContent(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	loaded, err := docs.NewContentSource(s.contentDir).Load()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("could not reload content: %v", err), http.StatusInternalServerError)
+	errs := make([]error, 0, 2)
+
+	if loaded, err := docs.NewContentSource(s.contentDir).Load(); err != nil {
+		errs = append(errs, err)
+	} else {
+		s.docsContentMu.Lock()
+		s.docsContent = loaded
+		s.docsContentMu.Unlock()
+	}
+	if s.manualLoader != nil {
+		if err := s.manualLoader.Reload(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		http.Error(w, fmt.Sprintf("could not reload content: %v", errors.Join(errs...)), http.StatusInternalServerError)
 		return
 	}
-
-	s.docsContentMu.Lock()
-	s.docsContent = loaded
-	s.docsContentMu.Unlock()
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -448,6 +472,24 @@ func (s *Server) docsPageFor(locale content.Locale) docs.ContentPage {
 		return page
 	}
 	return s.docsContent["en"]
+}
+
+func (s *Server) manualIndexFor(locale content.Locale) (manual.ManualIndex, bool) {
+	if s.manualLoader == nil {
+		return manual.ManualIndex{}, false
+	}
+	return s.manualLoader.Index(locale)
+}
+
+func (s *Server) manualPageFor(locale content.Locale, slug string) (manual.ManualPage, bool) {
+	if s.manualLoader == nil {
+		return manual.ManualPage{}, false
+	}
+	return s.manualLoader.Page(locale, slug)
+}
+
+func (s *Server) contentAssetsHandler() http.Handler {
+	return http.FileServer(http.Dir(filepath.Join(s.contentRoot, "assets")))
 }
 
 func (s *Server) authorized(r *http.Request) bool {
@@ -506,6 +548,49 @@ func (s *Server) handleFeatureDetail(w http.ResponseWriter, r *http.Request, loc
 	)
 	data.Feature = feature
 	s.render(w, http.StatusOK, "feature.html", data)
+}
+
+func (s *Server) handleManualIndex(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+
+	index, ok := s.manualIndexFor(locale)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	data := s.basePageData(r, locale, publicPath, index.Title+" | Realtek Connect+", index.Description)
+	data.ManualIndex = index
+	s.render(w, http.StatusOK, "manual_index.html", data)
+}
+
+func (s *Server) handleManualPage(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+
+	slug := strings.TrimPrefix(publicPath, "/manual/")
+	slug = strings.Trim(slug, "/")
+	if slug == "" {
+		http.Redirect(w, r, content.PathForLocale(locale, "/manual"), http.StatusSeeOther)
+		return
+	}
+
+	page, ok := s.manualPageFor(locale, slug)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	index, _ := s.manualIndexFor(locale)
+	data := s.basePageData(r, locale, publicPath, page.Title+" | Realtek Connect+", page.Description)
+	data.ManualIndex = index
+	data.ManualPage = page
+	s.render(w, http.StatusOK, "manual_page.html", data)
 }
 
 func (s *Server) handleContact(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {

@@ -127,10 +127,11 @@ func newTestServer(t *testing.T, cfg Config) *Server {
 
 func TestRoutesReturnOK(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
-	paths := []string{"/", "/docs", "/features", "/contact", "/privacy", "/healthz", "/robots.txt", "/sitemap.xml"}
+	paths := []string{"/", "/docs", "/manual", "/features", "/contact", "/privacy", "/healthz", "/robots.txt", "/sitemap.xml", "/content-assets/manual/placeholder.png"}
 	for _, section := range docs.All() {
 		paths = append(paths, "/docs/"+section.Slug)
 	}
+	paths = append(paths, "/manual/getting-started", "/manual/deployment-notes", "/manual/reference")
 	for _, feature := range features.All() {
 		paths = append(paths, "/features/"+feature.Slug)
 	}
@@ -164,6 +165,88 @@ func TestDocsLandingRendersFileBackedContent(t *testing.T) {
 	}
 }
 
+func TestManualLandingRendersFileBackedContent(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/manual", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	body := rec.Body.String()
+	for _, expected := range []string{
+		"User Manual",
+		"Getting Started",
+		"Deployment Notes",
+		"Reference Material",
+	} {
+		if !strings.Contains(body, expected) {
+			t.Fatalf("/manual missing %q", expected)
+		}
+	}
+}
+
+func TestManualPageRendersMarkdownAndAssetImage(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/manual/getting-started", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/manual/getting-started status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, expected := range []string{
+		"Set up your first device and verify connectivity in under 10 minutes.",
+		`src="/content-assets/manual/placeholder.png"`,
+		"<table>",
+		`href="https://example.com/manual"`,
+		"<del>deprecated</del>",
+	} {
+		if !strings.Contains(body, expected) {
+			t.Fatalf("/manual/getting-started missing %q: %s", expected, body)
+		}
+	}
+}
+
+func TestManualSectionPagesRender(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	cases := map[string]string{
+		"/manual/deployment-notes": "Track rollout assumptions, content refresh steps, and manual publishing checks.",
+		"/manual/reference":        "Collect the recurring links, commands, and content-source reminders for the manual.",
+	}
+
+	for path, expected := range cases {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", path, rec.Code)
+		}
+		if !strings.Contains(rec.Body.String(), expected) {
+			t.Fatalf("%s missing %q: %s", path, expected, rec.Body.String())
+		}
+	}
+}
+
+func TestManualContentAssetServesPlaceholderImage(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/content-assets/manual/placeholder.png", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("asset status = %d, want 200", rec.Code)
+	}
+	if !strings.HasPrefix(rec.Header().Get("Content-Type"), "image/png") {
+		t.Fatalf("asset content type = %q, want image/png", rec.Header().Get("Content-Type"))
+	}
+}
+
 func TestAdminReloadContentRefreshesDocsCache(t *testing.T) {
 	contentDir := t.TempDir()
 	writeDocsContent(t, contentDir, "Initial docs")
@@ -194,6 +277,35 @@ func TestAdminReloadContentRefreshesDocsCache(t *testing.T) {
 	assertDocsContains(t, handler, "Reloaded docs")
 }
 
+func TestAdminReloadContentRefreshesManualCache(t *testing.T) {
+	contentRoot := t.TempDir()
+	writeDocsContent(t, filepath.Join(contentRoot, "docs"), "Initial docs")
+	writeManualContent(t, filepath.Join(contentRoot, "manual"), "Initial manual", "Manual body one.")
+
+	handler := testServerWithConfig(t, Config{
+		ContentDir: filepath.Join(contentRoot, "docs"),
+		AdminToken: "secret",
+	})
+
+	assertManualContains(t, handler, "Initial manual")
+	assertManualPageContains(t, handler, "Manual body one.")
+
+	writeDocsContent(t, filepath.Join(contentRoot, "docs"), "Reloaded docs")
+	writeManualContent(t, filepath.Join(contentRoot, "manual"), "Reloaded manual", "Manual body two.")
+
+	authorized := httptest.NewRequest(http.MethodPost, "/admin/reload-content", nil)
+	authorized.Header.Set("X-Admin-Token", "secret")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, authorized)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("authorized reload status = %d, want %d: %s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	assertDocsContains(t, handler, "Reloaded docs")
+	assertManualContains(t, handler, "Reloaded manual")
+	assertManualPageContains(t, handler, "Manual body two.")
+}
+
 func writeDocsContent(t *testing.T, root, title string) {
 	t.Helper()
 	dir := filepath.Join(root, "en")
@@ -214,6 +326,40 @@ Runtime body.
 	}
 }
 
+func writeManualContent(t *testing.T, root, title, bodyText string) {
+	t.Helper()
+	if err := os.MkdirAll(root, 0o755); err != nil {
+		t.Fatalf("mkdir manual content: %v", err)
+	}
+	index := `title: "` + title + `"
+description: "Runtime manual"
+sections:
+  - slug: getting-started
+    title: "Getting Started"
+    summary: "Start here"
+  - slug: deployment-notes
+    title: "Deployment Notes"
+    summary: "Rollout notes"
+  - slug: reference
+    title: "Reference Material"
+    summary: "Links and reminders"
+`
+	if err := os.WriteFile(filepath.Join(root, "index.en.yaml"), []byte(index), 0o644); err != nil {
+		t.Fatalf("write manual index: %v", err)
+	}
+	page := `---
+title: "Getting Started"
+description: "Runtime manual page"
+---
+` + bodyText + `
+
+![Placeholder manual screenshot](/content-assets/manual/placeholder.png)
+`
+	if err := os.WriteFile(filepath.Join(root, "getting-started.en.md"), []byte(page), 0o644); err != nil {
+		t.Fatalf("write manual page: %v", err)
+	}
+}
+
 func assertDocsContains(t *testing.T, handler http.Handler, expected string) {
 	t.Helper()
 	req := httptest.NewRequest(http.MethodGet, "/docs", nil)
@@ -227,12 +373,42 @@ func assertDocsContains(t *testing.T, handler http.Handler, expected string) {
 	}
 }
 
+func assertManualContains(t *testing.T, handler http.Handler, expected string) {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodGet, "/manual", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/manual status = %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), expected) {
+		t.Fatalf("/manual missing %q in %s", expected, rec.Body.String())
+	}
+}
+
+func assertManualPageContains(t *testing.T, handler http.Handler, expected string) {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodGet, "/manual/getting-started", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/manual/getting-started status = %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), expected) {
+		t.Fatalf("/manual/getting-started missing %q in %s", expected, rec.Body.String())
+	}
+}
+
 func TestLocalizedPublicRoutesReturnOK(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 	paths := []string{
 		"/zh-tw",
 		"/zh-tw/docs",
 		"/zh-tw/docs/apis",
+		"/zh-tw/manual",
+		"/zh-tw/manual/getting-started",
+		"/zh-tw/manual/deployment-notes",
+		"/zh-tw/manual/reference",
 		"/zh-tw/features",
 		"/zh-tw/features/provision",
 		"/zh-tw/contact",
@@ -240,6 +416,10 @@ func TestLocalizedPublicRoutesReturnOK(t *testing.T) {
 		"/zh-cn",
 		"/zh-cn/docs",
 		"/zh-cn/docs/apis",
+		"/zh-cn/manual",
+		"/zh-cn/manual/getting-started",
+		"/zh-cn/manual/deployment-notes",
+		"/zh-cn/manual/reference",
 		"/zh-cn/features",
 		"/zh-cn/features/provision",
 		"/zh-cn/contact",
@@ -1326,9 +1506,14 @@ func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 		`<?xml version="1.0" encoding="UTF-8"?>`,
 		`<loc>http://example.com/</loc>`,
 		`<loc>http://example.com/docs/product-overview</loc>`,
+		`<loc>http://example.com/manual/getting-started</loc>`,
+		`<loc>http://example.com/manual/deployment-notes</loc>`,
+		`<loc>http://example.com/manual/reference</loc>`,
 		`<loc>http://example.com/features/ota</loc>`,
 		`<loc>http://example.com/contact</loc>`,
 		`<loc>http://example.com/privacy</loc>`,
+		`<loc>http://example.com/zh-tw/manual/deployment-notes</loc>`,
+		`<loc>http://example.com/zh-cn/manual/reference</loc>`,
 		`<loc>http://example.com/zh-tw/features/ota</loc>`,
 		`<loc>http://example.com/zh-tw/privacy</loc>`,
 		`<loc>http://example.com/zh-cn/docs/apis</loc>`,

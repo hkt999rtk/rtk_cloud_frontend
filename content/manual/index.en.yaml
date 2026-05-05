@@ -1,0 +1,12 @@
+title: "User Manual"
+description: "Step-by-step guides and reference documentation for Realtek Connect+."
+sections:
+  - slug: getting-started
+    title: "Getting Started"
+    summary: "Set up your first device and verify connectivity."
+  - slug: deployment-notes
+    title: "Deployment Notes"
+    summary: "Review environment assumptions and rollout checkpoints."
+  - slug: reference
+    title: "Reference Material"
+    summary: "Keep a short list of commands, links, and recurring tasks."
