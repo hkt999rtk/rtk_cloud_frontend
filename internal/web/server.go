@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/csv"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -20,10 +21,12 @@ import (
 	"sync"
 	"time"
 
+	"realtek-connect/internal/analytics"
 	"realtek-connect/internal/content"
 	"realtek-connect/internal/docs"
 	"realtek-connect/internal/features"
 	"realtek-connect/internal/leads"
+	"realtek-connect/internal/manual"
 )
 
 type LeadStore interface {
@@ -37,6 +40,7 @@ type Config struct {
 	StaticDir               string
 	ContentDir              string
 	LeadStore               LeadStore
+	AnalyticsStore          *analytics.Repository
 	AdminToken              string
 	DisableSearchIndexing   bool
 	PublicBaseURL           string
@@ -48,7 +52,10 @@ type Server struct {
 	templatesDir            string
 	staticDir               string
 	contentDir              string
+	contentRoot             string
 	leadStore               LeadStore
+	analyticsStore          *analytics.Repository
+	manualLoader            *manual.Loader
 	adminToken              string
 	disableSearchIndexing   bool
 	publicBaseURL           string
@@ -61,34 +68,39 @@ type Server struct {
 }
 
 type pageData struct {
-	Title           string
-	MetaDescription string
-	CanonicalURL    string
-	SocialImageURL  string
-	SocialImageAlt  string
-	MetaRobots      string
-	CurrentPath     string
-	PublicPath      string
-	Lang            string
-	Locale          content.Locale
-	LocalePrefix    string
-	Text            map[string]string
-	AlternateLinks  []content.AlternateLink
-	Docs            []docs.Section
-	DocsPage        docs.ContentPage
-	Doc             docs.Section
-	Features        []features.Feature
-	Feature         features.Feature
-	InterestOptions []content.ContactInterestOption
-	Form            contactForm
-	Errors          map[string]string
-	Success         bool
-	SubmittedFor    string
-	Leads           []leads.LeadRecord
-	AdminEnabled    bool
-	AdminCSVHref    string
-	LeadFilters     adminLeadFilters
-	LeadPagination  adminLeadPagination
+	Title              string
+	MetaDescription    string
+	CanonicalURL       string
+	SocialImageURL     string
+	SocialImageAlt     string
+	MetaRobots         string
+	CurrentPath        string
+	PublicPath         string
+	Lang               string
+	Locale             content.Locale
+	LocalePrefix       string
+	Text               map[string]string
+	AlternateLinks     []content.AlternateLink
+	Docs               []docs.Section
+	DocsPage           docs.ContentPage
+	Doc                docs.Section
+	ManualIndex        manual.ManualIndex
+	ManualPage         manual.ManualPage
+	AdminAnalytics     adminAnalyticsView
+	Features           []features.Feature
+	Feature            features.Feature
+	InterestOptions    []content.ContactInterestOption
+	Form               contactForm
+	Errors             map[string]string
+	Success            bool
+	SubmittedFor       string
+	Leads              []leads.LeadRecord
+	AdminEnabled       bool
+	AdminCSVHref       string
+	AdminLeadsHref     string
+	AdminAnalyticsHref string
+	LeadFilters        adminLeadFilters
+	LeadPagination     adminLeadPagination
 }
 
 type contactForm struct {
@@ -132,10 +144,12 @@ func NewServer(cfg Config) (*Server, error) {
 	if cfg.ContentDir == "" {
 		cfg.ContentDir = "content/docs"
 	}
+	contentRoot := filepath.Dir(cfg.ContentDir)
 	docsContent, err := docs.NewContentSource(cfg.ContentDir).Load()
 	if err != nil {
 		return nil, err
 	}
+	manualLoader := manual.NewLoader(filepath.Join(contentRoot, "manual"))
 	assetVersions := map[string]string{}
 	if cfg.EnableAssetFingerprints {
 		assetVersions = buildAssetVersions(cfg.StaticDir)
@@ -144,7 +158,10 @@ func NewServer(cfg Config) (*Server, error) {
 		templatesDir:            cfg.TemplatesDir,
 		staticDir:               cfg.StaticDir,
 		contentDir:              cfg.ContentDir,
+		contentRoot:             contentRoot,
 		leadStore:               cfg.LeadStore,
+		analyticsStore:          cfg.AnalyticsStore,
+		manualLoader:            manualLoader,
 		adminToken:              cfg.AdminToken,
 		disableSearchIndexing:   cfg.DisableSearchIndexing,
 		publicBaseURL:           normalizePublicBaseURL(cfg.PublicBaseURL),
@@ -159,12 +176,15 @@ func NewServer(cfg Config) (*Server, error) {
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", s.staticHandler()))
+	mux.Handle("/content-assets/", http.StripPrefix("/content-assets/", s.contentAssetsHandler()))
 	mux.HandleFunc("/robots.txt", s.handleRobotsTxt)
 	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
 	mux.HandleFunc("/admin/leads.csv", s.handleAdminLeadsCSV)
+	mux.HandleFunc("/admin/analytics", s.handleAdminAnalytics)
 	mux.HandleFunc("/admin/reload-content", s.handleAdminReloadContent)
 	mux.HandleFunc("/healthz", s.handleHealthz)
+	mux.HandleFunc("/api/event", s.handleAnalyticsEvent)
 	mux.HandleFunc("/", s.handlePublic)
 	return securityHeaders(s.searchIndexingHeaders(s.cacheHeaders(mux)))
 }
@@ -195,6 +215,10 @@ func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
 		s.handleDocs(w, r, locale, publicPath)
 	case strings.HasPrefix(publicPath, "/docs/"):
 		s.handleDocDetail(w, r, locale, publicPath)
+	case publicPath == "/manual":
+		s.handleManualIndex(w, r, locale, publicPath)
+	case strings.HasPrefix(publicPath, "/manual/"):
+		s.handleManualPage(w, r, locale, publicPath)
 	case publicPath == "/features":
 		s.handleFeatures(w, r, locale, publicPath)
 	case strings.HasPrefix(publicPath, "/features/"):
@@ -361,6 +385,8 @@ func (s *Server) handleAdminLeads(w http.ResponseWriter, r *http.Request) {
 	data.Leads = records
 	data.AdminEnabled = s.adminToken != ""
 	data.AdminCSVHref = s.adminCSVHref(filters)
+	data.AdminLeadsHref = s.adminLeadsHref(filters.Token, filters)
+	data.AdminAnalyticsHref = s.adminAnalyticsHref(filters.Token)
 	data.LeadFilters = filters
 	data.LeadFilters.ClearHref = s.adminLeadsHref(filters.Token, adminLeadFilters{})
 	data.LeadPagination = s.adminLeadPagination(filters, page, totalCount)
@@ -426,15 +452,24 @@ func (s *Server) handleAdminReloadContent(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	loaded, err := docs.NewContentSource(s.contentDir).Load()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("could not reload content: %v", err), http.StatusInternalServerError)
+	errs := make([]error, 0, 2)
+
+	if loaded, err := docs.NewContentSource(s.contentDir).Load(); err != nil {
+		errs = append(errs, err)
+	} else {
+		s.docsContentMu.Lock()
+		s.docsContent = loaded
+		s.docsContentMu.Unlock()
+	}
+	if s.manualLoader != nil {
+		if err := s.manualLoader.Reload(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		http.Error(w, fmt.Sprintf("could not reload content: %v", errors.Join(errs...)), http.StatusInternalServerError)
 		return
 	}
-
-	s.docsContentMu.Lock()
-	s.docsContent = loaded
-	s.docsContentMu.Unlock()
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -448,6 +483,25 @@ func (s *Server) docsPageFor(locale content.Locale) docs.ContentPage {
 		return page
 	}
 	return s.docsContent["en"]
+}
+
+func (s *Server) manualIndexFor(locale content.Locale) (manual.ManualIndex, bool) {
+	if s.manualLoader == nil {
+		return manual.ManualIndex{}, false
+	}
+	return s.manualLoader.Index(locale)
+}
+
+func (s *Server) manualPageFor(locale content.Locale, slug string) (manual.ManualPage, bool) {
+	if s.manualLoader == nil {
+		return manual.ManualPage{}, false
+	}
+	return s.manualLoader.Page(locale, slug)
+}
+
+func (s *Server) contentAssetsHandler() http.Handler {
+	assetsDir := filepath.Join(s.contentRoot, "assets")
+	return http.FileServer(http.Dir(assetsDir))
 }
 
 func (s *Server) authorized(r *http.Request) bool {
@@ -506,6 +560,50 @@ func (s *Server) handleFeatureDetail(w http.ResponseWriter, r *http.Request, loc
 	)
 	data.Feature = feature
 	s.render(w, http.StatusOK, "feature.html", data)
+}
+
+func (s *Server) handleManualIndex(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+
+	index, ok := s.manualIndexFor(locale)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	title := index.Title + " | Realtek Connect+"
+	data := s.basePageData(r, locale, publicPath, title, index.Description)
+	data.ManualIndex = index
+	s.render(w, http.StatusOK, "manual_index.html", data)
+}
+
+func (s *Server) handleManualPage(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+
+	slug := strings.TrimPrefix(publicPath, "/manual/")
+	slug = strings.Trim(slug, "/")
+	if slug == "" {
+		http.Redirect(w, r, content.PathForLocale(locale, "/manual"), http.StatusSeeOther)
+		return
+	}
+
+	page, ok := s.manualPageFor(locale, slug)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	index, _ := s.manualIndexFor(locale)
+	data := s.basePageData(r, locale, publicPath, page.Title+" | Realtek Connect+", page.Description)
+	data.ManualIndex = index
+	data.ManualPage = page
+	s.render(w, http.StatusOK, "manual_page.html", data)
 }
 
 func (s *Server) handleContact(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
@@ -838,6 +936,8 @@ func (s *Server) cacheHeaders(next http.Handler) http.Handler {
 		case r.URL.Path == "/robots.txt" || r.URL.Path == "/sitemap.xml":
 			w.Header().Set("Cache-Control", "public, max-age=300")
 		case r.URL.Path == "/healthz" || strings.HasPrefix(r.URL.Path, "/admin/"):
+			w.Header().Set("Cache-Control", "no-store")
+		case r.Method == http.MethodPost && r.URL.Path == "/api/event":
 			w.Header().Set("Cache-Control", "no-store")
 		case r.Method == http.MethodPost && contentPublicPath(r.URL.Path) == "/contact":
 			w.Header().Set("Cache-Control", "no-store")

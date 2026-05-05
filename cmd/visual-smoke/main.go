@@ -144,6 +144,15 @@ func main() {
 			expectedTitle:    "Provision 配网 | Realtek Connect+",
 			expectedBodyText: "合约支撑的基础",
 		},
+		{
+			name:             "manual-en",
+			path:             "/manual/getting-started",
+			headingSelector:  ".feature-detail h1",
+			imageSelector:    ".manual-content img",
+			expectedHeading:  "Getting Started",
+			expectedTitle:    "Getting Started | Realtek Connect+",
+			expectedBodyText: "Set up your first device",
+		},
 	}
 
 	fmt.Printf("Visual smoke checks against %s\n", targetURL)

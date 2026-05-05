@@ -127,10 +127,11 @@ func newTestServer(t *testing.T, cfg Config) *Server {
 
 func TestRoutesReturnOK(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
-	paths := []string{"/", "/docs", "/features", "/contact", "/privacy", "/healthz", "/robots.txt", "/sitemap.xml"}
+	paths := []string{"/", "/docs", "/manual", "/features", "/contact", "/privacy", "/healthz", "/robots.txt", "/sitemap.xml", "/content-assets/manual/placeholder.png"}
 	for _, section := range docs.All() {
 		paths = append(paths, "/docs/"+section.Slug)
 	}
+	paths = append(paths, "/manual/getting-started")
 	for _, feature := range features.All() {
 		paths = append(paths, "/features/"+feature.Slug)
 	}
@@ -164,6 +165,66 @@ func TestDocsLandingRendersFileBackedContent(t *testing.T) {
 	}
 }
 
+func TestManualLandingRendersFileBackedContent(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/manual", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	body := rec.Body.String()
+	for _, expected := range []string{
+		"User Manual",
+		"Getting Started",
+		"Deployment Notes",
+		"Reference Material",
+	} {
+		if !strings.Contains(body, expected) {
+			t.Fatalf("/manual missing %q", expected)
+		}
+	}
+}
+
+func TestManualPageRendersMarkdownAndAssetImage(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/manual/getting-started", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/manual/getting-started status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, expected := range []string{
+		"Set up your first device and verify connectivity in under 10 minutes.",
+		`src="/content-assets/manual/placeholder.png"`,
+		"<table>",
+		`href="https://example.com/manual"`,
+		"<del>deprecated</del>",
+	} {
+		if !strings.Contains(body, expected) {
+			t.Fatalf("/manual/getting-started missing %q: %s", expected, body)
+		}
+	}
+}
+
+func TestManualContentAssetServesPlaceholderImage(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/content-assets/manual/placeholder.png", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("asset status = %d, want 200", rec.Code)
+	}
+	if !strings.HasPrefix(rec.Header().Get("Content-Type"), "image/png") {
+		t.Fatalf("asset content type = %q, want image/png", rec.Header().Get("Content-Type"))
+	}
+}
+
 func TestAdminReloadContentRefreshesDocsCache(t *testing.T) {
 	contentDir := t.TempDir()
 	writeDocsContent(t, contentDir, "Initial docs")
@@ -194,6 +255,35 @@ func TestAdminReloadContentRefreshesDocsCache(t *testing.T) {
 	assertDocsContains(t, handler, "Reloaded docs")
 }
 
+func TestAdminReloadContentRefreshesManualCache(t *testing.T) {
+	contentRoot := t.TempDir()
+	writeDocsContent(t, filepath.Join(contentRoot, "docs"), "Initial docs")
+	writeManualContent(t, filepath.Join(contentRoot, "manual"), "Initial manual", "Manual body one.")
+
+	handler := testServerWithConfig(t, Config{
+		ContentDir: filepath.Join(contentRoot, "docs"),
+		AdminToken: "secret",
+	})
+
+	assertManualContains(t, handler, "Initial manual")
+	assertManualPageContains(t, handler, "Manual body one.")
+
+	writeDocsContent(t, filepath.Join(contentRoot, "docs"), "Reloaded docs")
+	writeManualContent(t, filepath.Join(contentRoot, "manual"), "Reloaded manual", "Manual body two.")
+
+	authorized := httptest.NewRequest(http.MethodPost, "/admin/reload-content", nil)
+	authorized.Header.Set("X-Admin-Token", "secret")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, authorized)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("authorized reload status = %d, want %d: %s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	assertDocsContains(t, handler, "Reloaded docs")
+	assertManualContains(t, handler, "Reloaded manual")
+	assertManualPageContains(t, handler, "Manual body two.")
+}
+
 func writeDocsContent(t *testing.T, root, title string) {
 	t.Helper()
 	dir := filepath.Join(root, "en")
@@ -214,6 +304,40 @@ Runtime body.
 	}
 }
 
+func writeManualContent(t *testing.T, root, title, bodyText string) {
+	t.Helper()
+	if err := os.MkdirAll(root, 0o755); err != nil {
+		t.Fatalf("mkdir manual content: %v", err)
+	}
+	index := `title: "` + title + `"
+description: "Runtime manual"
+sections:
+  - slug: getting-started
+    title: "Getting Started"
+    summary: "Start here"
+  - slug: deployment-notes
+    title: "Deployment Notes"
+    summary: "Rollout notes"
+  - slug: reference
+    title: "Reference Material"
+    summary: "Links and reminders"
+`
+	if err := os.WriteFile(filepath.Join(root, "index.en.yaml"), []byte(index), 0o644); err != nil {
+		t.Fatalf("write manual index: %v", err)
+	}
+	page := `---
+title: "Getting Started"
+description: "Runtime manual page"
+---
+` + bodyText + `
+
+![Placeholder manual screenshot](/content-assets/manual/placeholder.png)
+`
+	if err := os.WriteFile(filepath.Join(root, "getting-started.en.md"), []byte(page), 0o644); err != nil {
+		t.Fatalf("write manual page: %v", err)
+	}
+}
+
 func assertDocsContains(t *testing.T, handler http.Handler, expected string) {
 	t.Helper()
 	req := httptest.NewRequest(http.MethodGet, "/docs", nil)
@@ -227,12 +351,40 @@ func assertDocsContains(t *testing.T, handler http.Handler, expected string) {
 	}
 }
 
+func assertManualContains(t *testing.T, handler http.Handler, expected string) {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodGet, "/manual", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/manual status = %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), expected) {
+		t.Fatalf("/manual missing %q in %s", expected, rec.Body.String())
+	}
+}
+
+func assertManualPageContains(t *testing.T, handler http.Handler, expected string) {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodGet, "/manual/getting-started", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/manual/getting-started status = %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), expected) {
+		t.Fatalf("/manual/getting-started missing %q in %s", expected, rec.Body.String())
+	}
+}
+
 func TestLocalizedPublicRoutesReturnOK(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 	paths := []string{
 		"/zh-tw",
 		"/zh-tw/docs",
 		"/zh-tw/docs/apis",
+		"/zh-tw/manual",
+		"/zh-tw/manual/getting-started",
 		"/zh-tw/features",
 		"/zh-tw/features/provision",
 		"/zh-tw/contact",
@@ -240,6 +392,8 @@ func TestLocalizedPublicRoutesReturnOK(t *testing.T) {
 		"/zh-cn",
 		"/zh-cn/docs",
 		"/zh-cn/docs/apis",
+		"/zh-cn/manual",
+		"/zh-cn/manual/getting-started",
 		"/zh-cn/features",
 		"/zh-cn/features/provision",
 		"/zh-cn/contact",
@@ -523,6 +677,42 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 	}
 }
 
+func TestPublicPagesDoNotEmitPersistentStorageOrThirdPartyAnalyticsScripts(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	paths := []string{
+		"/",
+		"/contact",
+		"/docs",
+		"/features",
+	}
+	for _, path := range paths {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", path, rec.Code)
+		}
+
+		body := rec.Body.String()
+		for _, unwanted := range []string{
+			"<script",
+			"localStorage",
+			"sessionStorage",
+			"document.cookie",
+			"googletagmanager",
+			"google-analytics",
+			"gtag(",
+			"analytics.js",
+		} {
+			if strings.Contains(strings.ToLower(body), strings.ToLower(unwanted)) {
+				t.Fatalf("%s response should not contain %q: %s", path, unwanted, body)
+			}
+		}
+	}
+}
+
 func TestPublicBaseURLOverridesGeneratedAbsoluteURLs(t *testing.T) {
 	handler := testServerWithConfig(t, Config{
 		LeadStore:     &memoryLeadStore{},
@@ -656,6 +846,7 @@ func TestCDNCacheHeadersAreOptional(t *testing.T) {
 		{method: http.MethodGet, path: "/robots.txt", want: "public, max-age=300"},
 		{method: http.MethodGet, path: "/sitemap.xml", want: "public, max-age=300"},
 		{method: http.MethodGet, path: "/static/styles.css", want: "public, max-age=31536000, immutable"},
+		{method: http.MethodPost, path: "/api/event", want: "no-store"},
 	}
 
 	for _, tc := range tests {
@@ -1228,6 +1419,80 @@ func TestIntegrationsFeatureCoversMatterAndEcosystemPaths(t *testing.T) {
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
+func TestSecurityFeatureCoversPKIAndLocalizedPaths(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("features listing status = %d, want 200", rec.Code)
+	}
+	listing := rec.Body.String()
+	for _, want := range []string{
+		`href="/features/security"`,
+		"Security &amp; PKI",
+	} {
+		if !strings.Contains(listing, want) {
+			t.Fatalf("features listing missing %q: %s", want, listing)
+		}
+	}
+
+	tests := []struct {
+		path string
+		want []string
+	}{
+		{
+			path: "/features/security",
+			want: []string{
+				"Security &amp; PKI",
+				"Two-tier X.509 CA hierarchy: offline root CA and online issuing CA for device certificate issuance",
+				"Platform security building blocks",
+				"OCSP responder",
+				"CRL distribution",
+			},
+		},
+		{
+			path: "/zh-tw/features/security",
+			want: []string{
+				"安全與 PKI",
+				"兩層 X.509 CA 階層：離線 root CA 與線上 issuing CA，負責裝置憑證簽發",
+				"平台基礎能力",
+				"OCSP responder",
+				"CRL",
+			},
+		},
+		{
+			path: "/zh-cn/features/security",
+			want: []string{
+				"安全与 PKI",
+				"平台基础能力",
+				"兩層 X.509 CA 阶層：離线 root CA 与线上 issuing CA，負責装置凭证簽发",
+				"OCSP responder",
+				"CRL",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", tc.path, rec.Code)
+		}
+
+		body := rec.Body.String()
+		for _, want := range tc.want {
+			if !strings.Contains(body, want) {
+				t.Fatalf("%s missing %q: %s", tc.path, want, body)
+			}
 		}
 	}
 }
