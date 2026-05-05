@@ -1,98 +1,135 @@
 {{define "content"}}
 <section class="page-hero compact">
   <span class="icon-box page-hero-icon">{{icon "chart"}}</span>
-  <p class="eyebrow">Admin Analytics</p>
-  <h1>Analytics aggregate view</h1>
-  <p>Operator-only metrics derived from first-party event aggregates.</p>
+  <p class="eyebrow">Admin</p>
+  <h1>Analytics summary</h1>
+  <p>Aggregate first-party analytics for the website. Raw events stay in SQLite and this view only surfaces summarized metrics.</p>
 </section>
 
 <section class="section admin-section">
-  <div class="analytics-overview">
-    <h2>Conversion rate</h2>
-    <p>{{printf "%.4f" .Analytics.ConversionRate}}</p>
-    <p>Calculated as click_cta / page_view over collected events.</p>
+  <div class="admin-actions">
+    <div class="admin-summary">
+      <p>{{if .AdminAnalytics.Enabled}}Showing aggregate analytics from the protected SQLite store.{{else}}Analytics storage is disabled, so this view shows the empty dashboard state.{{end}}</p>
+      <p>{{if .AdminAnalytics.Enabled}}Current conversion rate: {{.AdminAnalytics.ConversionRate}}.{{end}}</p>
+      <p>Use the linked admin pages to switch between lead review and analytics summaries.</p>
+    </div>
+    <div class="admin-action-links">
+      <a class="button secondary" href="{{.AdminAnalyticsHref}}"><span class="button-icon">{{icon "chart"}}</span>Refresh view</a>
+      <a class="button secondary" href="{{.AdminLeadsHref}}"><span class="button-icon">{{icon "dashboard"}}</span>Leads</a>
+    </div>
   </div>
 
-  <div class="admin-table-wrap">
-    <h2>Top referrer origins</h2>
-    {{if .Analytics.TopReferrerOrigins}}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Referrer origin</th>
-            <th scope="col">Events</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{range .Analytics.TopReferrerOrigins}}
-          <tr>
-            <td>{{.Origin}}</td>
-            <td>{{.Count}}</td>
-          </tr>
-          {{end}}
-        </tbody>
-      </table>
-    </div>
-    {{else}}
-    <p>No referrer-origin events yet.</p>
+  <div class="analytics-metric-grid">
+    {{range .AdminAnalytics.Metrics}}
+    <article class="analytics-metric-card">
+      <p class="analytics-metric-label">{{.Label}}</p>
+      <p class="analytics-metric-value">{{.Value}}</p>
+      <p class="analytics-metric-hint">{{.Hint}}</p>
+    </article>
     {{end}}
   </div>
 
-  <div class="admin-table-wrap">
-    <h2>Scroll distribution</h2>
-    {{if .Analytics.ScrollDistribution}}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Scroll percent</th>
-            <th scope="col">Events</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{range .Analytics.ScrollDistribution}}
-          <tr>
-            <td>{{.Percent}}</td>
-            <td>{{.Count}}</td>
-          </tr>
-          {{end}}
-        </tbody>
-      </table>
-    </div>
-    {{else}}
-    <p>No scroll events yet.</p>
-    {{end}}
+  {{if not .AdminAnalytics.Enabled}}
+  <div class="empty-state">
+    <h2>Analytics is disabled.</h2>
+    <p>Set <code>ANALYTICS_ENABLED=true</code> and provide a writable analytics database path to capture aggregate metrics here.</p>
+  </div>
+  {{else if not .AdminAnalytics.HasData}}
+  <div class="empty-state">
+    <h2>No analytics yet.</h2>
+    <p>Once the public pages send events, this page will show conversion rate, top referrers, scroll distribution, and CTA clicks by page.</p>
+  </div>
+  {{else}}
+  <div class="detail-grid analytics-grid">
+    <article class="detail-panel">
+      <p class="eyebrow">Traffic source</p>
+      <h2>Top referrer origins</h2>
+      {{if .AdminAnalytics.TopReferrers}}
+      <div class="table-wrap analytics-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Origin</th>
+              <th scope="col">Clicks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{range .AdminAnalytics.TopReferrers}}
+            <tr>
+              <td>{{.Primary}}</td>
+              <td>{{.Value}}</td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+      {{else}}
+      <p class="empty-copy">No CTA clicks have recorded a referrer origin yet.</p>
+      {{end}}
+    </article>
+
+    <article class="detail-panel">
+      <p class="eyebrow">Engagement depth</p>
+      <h2>Scroll distribution</h2>
+      {{if .AdminAnalytics.ScrollDistribution}}
+      <div class="table-wrap analytics-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Scroll percent</th>
+              <th scope="col">Events</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{range .AdminAnalytics.ScrollDistribution}}
+            <tr>
+              <td>{{.Primary}}</td>
+              <td>{{.Value}}</td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+      {{else}}
+      <p class="empty-copy">No scroll milestone events have been stored yet.</p>
+      {{end}}
+    </article>
   </div>
 
-  <div class="admin-table-wrap">
-    <h2>CTA clicks by page</h2>
-    {{if .Analytics.CTAClicksByPage}}
-    <div class="table-wrap">
+  <section class="section analytics-subsection">
+    <div class="section-heading">
+      <p class="eyebrow">CTA performance</p>
+      <h2>CTA clicks by page</h2>
+      <p class="section-lede">This table shows which page and CTA pairs are driving click events.</p>
+    </div>
+    {{if .AdminAnalytics.CtaByPage}}
+    <div class="table-wrap analytics-table-wrap">
       <table>
         <thead>
           <tr>
             <th scope="col">Page</th>
             <th scope="col">CTA</th>
-            <th scope="col">Events</th>
+            <th scope="col">Clicks</th>
           </tr>
         </thead>
         <tbody>
-          {{range .Analytics.CTAClicksByPage}}
+          {{range .AdminAnalytics.CtaByPage}}
           <tr>
-            <td>{{.Page}}</td>
-            <td>{{.CTA}}</td>
-            <td>{{.Count}}</td>
+            <td>{{.Primary}}</td>
+            <td>{{if .Secondary}}{{.Secondary}}{{else}}(none){{end}}</td>
+            <td>{{.Value}}</td>
           </tr>
           {{end}}
         </tbody>
       </table>
     </div>
     {{else}}
-    <p>No CTA click events yet.</p>
+    <div class="empty-state">
+      <h2>No CTA clicks yet.</h2>
+      <p>Once visitors interact with tracked CTA controls, the page and CTA breakdown will appear here.</p>
+    </div>
     {{end}}
-  </div>
-
-  <p class="admin-summary">This view only exposes aggregate metrics and does not include raw sessions or event payloads.</p>
+  </section>
+  {{end}}
 </section>
 {{end}}

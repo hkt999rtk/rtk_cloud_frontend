@@ -703,6 +703,42 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 	}
 }
 
+func TestPublicPagesDoNotEmitPersistentStorageOrThirdPartyAnalyticsScripts(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	paths := []string{
+		"/",
+		"/contact",
+		"/docs",
+		"/features",
+	}
+	for _, path := range paths {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", path, rec.Code)
+		}
+
+		body := rec.Body.String()
+		for _, unwanted := range []string{
+			"<script",
+			"localStorage",
+			"sessionStorage",
+			"document.cookie",
+			"googletagmanager",
+			"google-analytics",
+			"gtag(",
+			"analytics.js",
+		} {
+			if strings.Contains(strings.ToLower(body), strings.ToLower(unwanted)) {
+				t.Fatalf("%s response should not contain %q: %s", path, unwanted, body)
+			}
+		}
+	}
+}
+
 func TestPublicBaseURLOverridesGeneratedAbsoluteURLs(t *testing.T) {
 	handler := testServerWithConfig(t, Config{
 		LeadStore:     &memoryLeadStore{},
@@ -836,6 +872,7 @@ func TestCDNCacheHeadersAreOptional(t *testing.T) {
 		{method: http.MethodGet, path: "/robots.txt", want: "public, max-age=300"},
 		{method: http.MethodGet, path: "/sitemap.xml", want: "public, max-age=300"},
 		{method: http.MethodGet, path: "/static/styles.css", want: "public, max-age=31536000, immutable"},
+		{method: http.MethodPost, path: "/api/event", want: "no-store"},
 	}
 
 	for _, tc := range tests {
@@ -1412,6 +1449,80 @@ func TestIntegrationsFeatureCoversMatterAndEcosystemPaths(t *testing.T) {
 	}
 }
 
+func TestSecurityFeatureCoversPKIAndLocalizedPaths(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/features", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("features listing status = %d, want 200", rec.Code)
+	}
+	listing := rec.Body.String()
+	for _, want := range []string{
+		`href="/features/security"`,
+		"Security &amp; PKI",
+	} {
+		if !strings.Contains(listing, want) {
+			t.Fatalf("features listing missing %q: %s", want, listing)
+		}
+	}
+
+	tests := []struct {
+		path string
+		want []string
+	}{
+		{
+			path: "/features/security",
+			want: []string{
+				"Security &amp; PKI",
+				"Two-tier X.509 CA hierarchy: offline root CA and online issuing CA for device certificate issuance",
+				"Platform security building blocks",
+				"OCSP responder",
+				"CRL distribution",
+			},
+		},
+		{
+			path: "/zh-tw/features/security",
+			want: []string{
+				"安全與 PKI",
+				"兩層 X.509 CA 階層：離線 root CA 與線上 issuing CA，負責裝置憑證簽發",
+				"平台基礎能力",
+				"OCSP responder",
+				"CRL",
+			},
+		},
+		{
+			path: "/zh-cn/features/security",
+			want: []string{
+				"安全与 PKI",
+				"平台基础能力",
+				"兩層 X.509 CA 阶層：離线 root CA 与线上 issuing CA，負責装置凭证簽发",
+				"OCSP responder",
+				"CRL",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", tc.path, rec.Code)
+		}
+
+		body := rec.Body.String()
+		for _, want := range tc.want {
+			if !strings.Contains(body, want) {
+				t.Fatalf("%s missing %q: %s", tc.path, want, body)
+			}
+		}
+	}
+}
+
 func TestRobotsTxtIncludesSitemap(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
@@ -1506,14 +1617,9 @@ func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 		`<?xml version="1.0" encoding="UTF-8"?>`,
 		`<loc>http://example.com/</loc>`,
 		`<loc>http://example.com/docs/product-overview</loc>`,
-		`<loc>http://example.com/manual/getting-started</loc>`,
-		`<loc>http://example.com/manual/deployment-notes</loc>`,
-		`<loc>http://example.com/manual/reference</loc>`,
 		`<loc>http://example.com/features/ota</loc>`,
 		`<loc>http://example.com/contact</loc>`,
 		`<loc>http://example.com/privacy</loc>`,
-		`<loc>http://example.com/zh-tw/manual/deployment-notes</loc>`,
-		`<loc>http://example.com/zh-cn/manual/reference</loc>`,
 		`<loc>http://example.com/zh-tw/features/ota</loc>`,
 		`<loc>http://example.com/zh-tw/privacy</loc>`,
 		`<loc>http://example.com/zh-cn/docs/apis</loc>`,

@@ -2,494 +2,285 @@ package web
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"net/http/httptest"
-	"sort"
+	"net/url"
+	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
-	"time"
 
 	"realtek-connect/internal/analytics"
 )
 
-func TestHandleAnalyticsEventDisabledReturnsNotFound(t *testing.T) {
+func TestAnalyticsEventEndpointStoresValidEvent(t *testing.T) {
+	repo, dbPath := openAnalyticsTestStore(t)
+	defer repo.Close()
+
 	handler := testServerWithConfig(t, Config{
-		TemplatesDir: "../../templates",
-		StaticDir:    "../../static",
-		ContentDir:   "../../content/docs",
-		LeadStore:    &memoryLeadStore{},
-	})
-
-	req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"page_view","page":"home","session_id":"sid_1"}`))
-	req.Header.Set("Content-Type", "application/json")
-	req.RemoteAddr = "198.51.100.10:1234"
-
-	rec := httptest.NewRecorder()
-	handler.ServeHTTP(rec, req)
-
-	if rec.Code != http.StatusNotFound {
-		t.Fatalf("status = %d, want %d", rec.Code, http.StatusNotFound)
-	}
-}
-
-func TestHandleAnalyticsEventSuccess(t *testing.T) {
-	store := &memoryAnalyticsStore{}
-	handler := testServerWithConfig(t, Config{
-		TemplatesDir:   "../../templates",
-		StaticDir:      "../../static",
-		ContentDir:     "../../content/docs",
 		LeadStore:      &memoryLeadStore{},
-		AnalyticsStore: store,
+		AnalyticsStore: repo,
 	})
 
-	req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"page_view","page":"home","session_id":"sid_01"}`))
+	req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"click_cta","page":"home","cta":"contact_us","variant":"control","session_id":"session-123","extra":"ignored"}`))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Origin", "https://example.com")
-	req.Header.Set("X-Forwarded-Proto", "https")
-	req.Host = "example.com"
-	req.RemoteAddr = "198.51.100.10:1234"
-
+	req.Header.Set("Referer", "https://example.com/path?q=1#frag")
 	rec := httptest.NewRecorder()
+
 	handler.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusAccepted {
-		t.Fatalf("status = %d, want %d", rec.Code, http.StatusAccepted)
+		t.Fatalf("status = %d, want %d: %s", rec.Code, http.StatusAccepted, rec.Body.String())
 	}
 	if got := rec.Header().Get("Cache-Control"); got != "no-store" {
-		t.Fatalf("cache-control = %q, want no-store", got)
+		t.Fatalf("Cache-Control = %q, want no-store", got)
 	}
 	if got := strings.TrimSpace(rec.Body.String()); got != `{"status":"ok"}` {
 		t.Fatalf("body = %q, want %q", got, `{"status":"ok"}`)
 	}
-	if len(store.events) != 1 {
-		t.Fatalf("events stored = %d, want 1", len(store.events))
+
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		t.Fatalf("open sqlite: %v", err)
 	}
-	if store.events[0].Page != "home" {
-		t.Fatalf("stored page = %q, want home", store.events[0].Page)
+	defer db.Close()
+
+	var (
+		ts             int64
+		eventType      string
+		page           string
+		cta            sql.NullString
+		percent        sql.NullInt64
+		duration       sql.NullInt64
+		variant        sql.NullString
+		referrerOrigin sql.NullString
+		sessionID      string
+		createdAt      string
+	)
+	if err := db.QueryRowContext(context.Background(), `
+SELECT ts, event, page, cta, percent, duration, variant, referrer_origin, session_id, created_at
+FROM analytics_events
+LIMIT 1`).Scan(&ts, &eventType, &page, &cta, &percent, &duration, &variant, &referrerOrigin, &sessionID, &createdAt); err != nil {
+		t.Fatalf("query event: %v", err)
+	}
+
+	if ts == 0 {
+		t.Fatal("ts = 0, want generated timestamp")
+	}
+	if eventType != "click_cta" || page != "home" {
+		t.Fatalf("event/page = %q/%q, want click_cta/home", eventType, page)
+	}
+	if !cta.Valid || cta.String != "contact_us" {
+		t.Fatalf("cta = %+v, want contact_us", cta)
+	}
+	if percent.Valid || duration.Valid {
+		t.Fatalf("unexpected optional fields stored: percent=%+v duration=%+v", percent, duration)
+	}
+	if !variant.Valid || variant.String != "control" {
+		t.Fatalf("variant = %+v, want control", variant)
+	}
+	if !referrerOrigin.Valid || referrerOrigin.String != "https://example.com" {
+		t.Fatalf("referrer origin = %+v, want https://example.com", referrerOrigin)
+	}
+	if sessionID != "session-123" {
+		t.Fatalf("session id = %q, want session-123", sessionID)
+	}
+	if createdAt == "" {
+		t.Fatal("created_at = empty, want server timestamp")
 	}
 }
 
-func TestHandleAnalyticsEventRejectsDisallowedRequests(t *testing.T) {
-	store := &memoryAnalyticsStore{}
-	handler := testServerWithConfig(t, Config{
-		TemplatesDir:   "../../templates",
-		StaticDir:      "../../static",
-		ContentDir:     "../../content/docs",
-		LeadStore:      &memoryLeadStore{},
-		AnalyticsStore: store,
-	})
-
-	req := httptest.NewRequest(http.MethodGet, "/api/event", nil)
-	rec := httptest.NewRecorder()
-	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusMethodNotAllowed {
-		t.Fatalf("method status = %d, want %d", rec.Code, http.StatusMethodNotAllowed)
-	}
-
-	testCases := []struct {
-		name  string
-		body  string
-		ctype string
+func TestAnalyticsEventEndpointRejectsInvalidEvents(t *testing.T) {
+	cases := []struct {
+		name    string
+		body    string
+		want    int
+		headers map[string]string
 	}{
 		{
-			name:  "invalid content type",
-			body:  `{"event":"page_view","page":"home","session_id":"sid_01"}`,
-			ctype: "text/plain",
+			name: "invalid event",
+			body: `{"event":"hover","page":"home","session_id":"session-123"}`,
+			want: http.StatusBadRequest,
 		},
 		{
-			name:  "unknown event",
-			body:  `{"event":"bad","page":"home","session_id":"sid_01"}`,
-			ctype: "application/json",
+			name: "invalid page",
+			body: `{"event":"page_view","page":"/home","session_id":"session-123"}`,
+			want: http.StatusBadRequest,
 		},
 		{
-			name:  "invalid page",
-			body:  `{"event":"page_view","page":"../home","session_id":"sid_01"}`,
-			ctype: "application/json",
+			name: "invalid cta",
+			body: `{"event":"click_cta","page":"home","cta":"bad","session_id":"session-123"}`,
+			want: http.StatusBadRequest,
 		},
 		{
-			name:  "invalid cta",
-			body:  `{"event":"click_cta","page":"home","cta":"bad_key","session_id":"sid_01"}`,
-			ctype: "application/json",
+			name: "invalid percent",
+			body: `{"event":"scroll","page":"home","percent":33,"session_id":"session-123"}`,
+			want: http.StatusBadRequest,
 		},
 		{
-			name:  "scroll missing percent",
-			body:  `{"event":"scroll","page":"home","session_id":"sid_01"}`,
-			ctype: "application/json",
+			name: "invalid duration",
+			body: `{"event":"engaged","page":"home","duration":5,"session_id":"session-123"}`,
+			want: http.StatusBadRequest,
 		},
 		{
-			name:  "engaged invalid duration",
-			body:  `{"event":"engaged","page":"home","duration":15,"session_id":"sid_01"}`,
-			ctype: "application/json",
+			name: "invalid session id",
+			body: `{"event":"page_view","page":"home","session_id":"has spaces"}`,
+			want: http.StatusBadRequest,
 		},
 		{
-			name:  "bad session",
-			body:  `{"event":"page_view","page":"home","session_id":""}`,
-			ctype: "application/json",
+			name: "invalid variant",
+			body: `{"event":"page_view","page":"home","variant":"unknown","session_id":"session-123"}`,
+			want: http.StatusBadRequest,
 		},
 		{
-			name:  "unknown field",
-			body:  `{"event":"page_view","page":"home","session_id":"sid_01","unexpected":"x"}`,
-			ctype: "application/json",
+			name: "invalid content type",
+			body: `{"event":"page_view","page":"home","session_id":"session-123"}`,
+			want: http.StatusUnsupportedMediaType,
+			headers: map[string]string{
+				"Content-Type": "text/plain",
+			},
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			repo, dbPath := openAnalyticsTestStore(t)
+			defer repo.Close()
+
+			handler := testServerWithConfig(t, Config{
+				LeadStore:      &memoryLeadStore{},
+				AnalyticsStore: repo,
+			})
+
 			req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(tc.body))
-			req.Header.Set("Content-Type", tc.ctype)
-			req.Header.Set("Origin", "https://example.com")
-			req.Header.Set("X-Forwarded-Proto", "https")
-			req.Host = "example.com"
-			req.RemoteAddr = "198.51.100.10:1234"
+			req.Header.Set("Content-Type", "application/json")
+			if tc.headers != nil {
+				for key, value := range tc.headers {
+					req.Header.Set(key, value)
+				}
+			}
 			rec := httptest.NewRecorder()
+
 			handler.ServeHTTP(rec, req)
-			if rec.Code != http.StatusBadRequest {
-				t.Fatalf("status = %d, want %d", rec.Code, http.StatusBadRequest)
+
+			if rec.Code != tc.want {
+				t.Fatalf("status = %d, want %d: %s", rec.Code, tc.want, rec.Body.String())
+			}
+			if rec.Header().Get("Cache-Control") != "no-store" {
+				t.Fatalf("Cache-Control = %q, want no-store", rec.Header().Get("Cache-Control"))
+			}
+			if got := analyticsRowCount(t, dbPath); got != 0 {
+				t.Fatalf("analytics rows = %d, want 0", got)
 			}
 		})
 	}
-
-	if len(store.events) != 0 {
-		t.Fatalf("events stored = %d, want 0", len(store.events))
-	}
 }
 
-func TestHandleAnalyticsEventRejectsCrossOrigin(t *testing.T) {
-	store := &memoryAnalyticsStore{}
+func TestAnalyticsEventEndpointReturnsNoContentWhenDisabled(t *testing.T) {
 	handler := testServerWithConfig(t, Config{
-		TemplatesDir:   "../../templates",
-		StaticDir:      "../../static",
-		ContentDir:     "../../content/docs",
 		LeadStore:      &memoryLeadStore{},
-		AnalyticsStore: store,
+		AnalyticsStore: nil,
 	})
 
-	req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"page_view","page":"home","session_id":"sid_01"}`))
+	req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"page_view","page":"home","session_id":"session-123"}`))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Origin", "https://evil.example")
-	req.Header.Set("Referer", "https://example.com")
-	req.Header.Set("X-Forwarded-Proto", "https")
-	req.Host = "example.com"
-	req.RemoteAddr = "198.51.100.10:1234"
-
 	rec := httptest.NewRecorder()
+
 	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusForbidden {
-		t.Fatalf("status = %d, want %d", rec.Code, http.StatusForbidden)
+
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusNoContent)
 	}
-	if len(store.events) != 0 {
-		t.Fatalf("events stored = %d, want 0", len(store.events))
+	if rec.Body.Len() != 0 {
+		t.Fatalf("disabled response body = %q, want empty", rec.Body.String())
 	}
 }
 
-func TestHandleAnalyticsEventRateLimitsAndSanitizesReferrer(t *testing.T) {
-	store := &memoryAnalyticsStore{}
-	server := newTestServer(t, Config{
-		TemplatesDir:   "../../templates",
-		StaticDir:      "../../static",
-		ContentDir:     "../../content/docs",
-		LeadStore:      &memoryLeadStore{},
-		AnalyticsStore: store,
-	})
-	server.analyticsLimiter = &submissionRateLimiter{
-		limit:  1,
-		window: time.Minute,
-		now:    func() time.Time { return time.Date(2026, 5, 6, 0, 0, 0, 0, time.UTC) },
-		hits:   make(map[string][]time.Time),
-	}
-	handler := server.Routes()
-
-	req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"click_cta","page":"home","cta":"home_cta_primary","session_id":"sid_01"}`))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Origin", "https://example.com")
-	req.Header.Set("Referer", "https://example.com/docs/overview?x=1#foo")
-	req.Header.Set("X-Forwarded-Proto", "https")
-	req.Host = "example.com"
-	req.RemoteAddr = "203.0.113.10:1234"
-	rec := httptest.NewRecorder()
-	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusAccepted {
-		t.Fatalf("first status = %d, want %d", rec.Code, http.StatusAccepted)
-	}
-
-	req = httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"click_cta","page":"home","cta":"home_cta_primary","session_id":"sid_01"}`))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Origin", "https://example.com")
-	req.Header.Set("Referer", "https://example.com/docs/overview?x=1#foo")
-	req.Header.Set("X-Forwarded-Proto", "https")
-	req.Host = "example.com"
-	req.RemoteAddr = "203.0.113.10:1234"
-	rec = httptest.NewRecorder()
-	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusTooManyRequests {
-		t.Fatalf("second status = %d, want %d", rec.Code, http.StatusTooManyRequests)
-	}
-
-	if len(store.events) != 1 {
-		t.Fatalf("events stored = %d, want 1", len(store.events))
-	}
-	if store.events[0].ReferrerOrigin != "https://example.com" {
-		t.Fatalf("referrer origin = %q, want %q", store.events[0].ReferrerOrigin, "https://example.com")
-	}
-}
-
-func TestAnalyticsScriptRenderedBasedOnAnalyticsStore(t *testing.T) {
-	t.Run("enabled", func(t *testing.T) {
-		handler := testServerWithConfig(t, Config{
-			TemplatesDir:   "../../templates",
-			StaticDir:      "../../static",
-			ContentDir:     "../../content/docs",
-			LeadStore:      &memoryLeadStore{},
-			AnalyticsStore: &memoryAnalyticsStore{},
-		})
-
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		rec := httptest.NewRecorder()
-		handler.ServeHTTP(rec, req)
-
-		if rec.Code != http.StatusOK {
-			t.Fatalf("status = %d, want %d", rec.Code, http.StatusOK)
-		}
-		body := rec.Body.String()
-		for _, want := range []string{"navigator.sendBeacon", "analyticsConfig", "trackScroll()", "sendEvent({", "analyticsConfig.page"} {
-			if !strings.Contains(body, want) {
-				t.Fatalf("expected body to contain %q", want)
-			}
-		}
-		for _, banned := range []string{"localstorage", "sessionstorage", "document.cookie", "ga(", "gtag(", "google-analytics"} {
-			if strings.Contains(strings.ToLower(body), banned) {
-				t.Fatalf("body contains banned string %q", banned)
-			}
-		}
-	})
-
-	t.Run("disabled", func(t *testing.T) {
-		handler := testServerWithConfig(t, Config{
-			TemplatesDir: "../../templates",
-			StaticDir:    "../../static",
-			ContentDir:   "../../content/docs",
-			LeadStore:    &memoryLeadStore{},
-		})
-
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		rec := httptest.NewRecorder()
-		handler.ServeHTTP(rec, req)
-
-		if rec.Code != http.StatusOK {
-			t.Fatalf("status = %d, want %d", rec.Code, http.StatusOK)
-		}
-		if strings.Contains(rec.Body.String(), "analyticsConfig") {
-			t.Fatalf("disabled analytics should not include analyticsConfig")
-		}
-	})
-}
-
-func TestAdminAnalyticsRouteRequiresAuthAndRendersAggregateView(t *testing.T) {
-	store := &memoryAnalyticsStore{}
-	normalizeErr := func(err error) {
-		if err != nil {
-			t.Fatalf("unexpected analytics store error: %v", err)
-		}
-	}
-	normalizeErr(store.InsertEvent(context.Background(), analytics.Event{Event: "page_view", Page: "home", SessionID: "sid-1"}))
-	normalizeErr(store.InsertEvent(context.Background(), analytics.Event{Event: "page_view", Page: "home", SessionID: "sid-2"}))
-	normalizeErr(store.InsertEvent(context.Background(), analytics.Event{Event: "page_view", Page: "docs", SessionID: "sid-3"}))
-	normalizeErr(store.InsertEvent(context.Background(), analytics.Event{Event: "click_cta", Page: "home", SessionID: "sid-1", CTA: "home_cta_primary", ReferrerOrigin: "https://example.com"}))
-	normalizeErr(store.InsertEvent(context.Background(), analytics.Event{Event: "scroll", Page: "home", Percent: 25, SessionID: "sid-1"}))
-	normalizeErr(store.InsertEvent(context.Background(), analytics.Event{Event: "scroll", Page: "home", Percent: 50, SessionID: "sid-2"}))
+func TestAnalyticsEventEndpointRejectsOversizedBodies(t *testing.T) {
+	repo, dbPath := openAnalyticsTestStore(t)
+	defer repo.Close()
 
 	handler := testServerWithConfig(t, Config{
-		TemplatesDir:   "../../templates",
-		StaticDir:      "../../static",
-		ContentDir:     "../../content/docs",
 		LeadStore:      &memoryLeadStore{},
-		AnalyticsStore: store,
-		AdminToken:     "secret",
+		AnalyticsStore: repo,
 	})
 
-	req := httptest.NewRequest(http.MethodGet, "/admin/analytics", nil)
+	hugeSessionID := strings.Repeat("a", analyticsRequestBodyLimit)
+	req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"page_view","page":"home","session_id":"`+hugeSessionID+`"}`))
+	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
-	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusUnauthorized {
-		t.Fatalf("status without token = %d, want %d", rec.Code, http.StatusUnauthorized)
-	}
 
-	req = httptest.NewRequest(http.MethodGet, "/admin/analytics?token=secret", nil)
-	rec = httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusOK {
-		t.Fatalf("status with token = %d, want %d", rec.Code, http.StatusOK)
+
+	if rec.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("status = %d, want %d: %s", rec.Code, http.StatusRequestEntityTooLarge, rec.Body.String())
 	}
-	body := rec.Body.String()
-	if !strings.Contains(body, "Conversion rate") {
-		t.Fatalf("missing conversion section")
-	}
-	if !strings.Contains(body, "0.3333") {
-		t.Fatalf("missing conversion value")
-	}
-	if !strings.Contains(body, "https://example.com") {
-		t.Fatalf("missing referrer origin")
-	}
-	if !strings.Contains(body, "Top referrer origins") {
-		t.Fatalf("missing referrer section")
-	}
-	if !strings.Contains(body, "CTA clicks by page") {
-		t.Fatalf("missing CTA section")
-	}
-	if !strings.Contains(body, "Scroll distribution") {
-		t.Fatalf("missing scroll section")
+	if got := analyticsRowCount(t, dbPath); got != 0 {
+		t.Fatalf("analytics rows = %d, want 0", got)
 	}
 }
 
-func TestContactSubmitDoesNotWriteAnalytics(t *testing.T) {
-	leadStore := &memoryLeadStore{}
-	analyticsStore := &memoryAnalyticsStore{}
+func TestContactSubmissionDoesNotCaptureRawFormValuesInAnalytics(t *testing.T) {
+	repo, dbPath := openAnalyticsTestStore(t)
+	defer repo.Close()
+
+	store := &memoryLeadStore{}
 	handler := testServerWithConfig(t, Config{
-		TemplatesDir:   "../../templates",
-		StaticDir:      "../../static",
-		ContentDir:     "../../content/docs",
-		LeadStore:      leadStore,
-		AnalyticsStore: analyticsStore,
+		LeadStore:      store,
+		AnalyticsStore: repo,
 	})
 
-	req := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader("name=Kevin+Huang&email=kevin%40example.com&interest=evaluation-access&message=hello"))
+	form := url.Values{
+		"name":     {"Ada Lovelace"},
+		"company":  {"Example Systems"},
+		"email":    {"ada@example.com"},
+		"interest": {"evaluation-access"},
+		"message":  {"Please do not track this text in analytics."},
+	}
+	req := httptest.NewRequest(http.MethodPost, "/contact", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.RemoteAddr = "198.51.100.10:1234"
 	rec := httptest.NewRecorder()
+
 	handler.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
-		t.Fatalf("status = %d, want %d", rec.Code, http.StatusOK)
+		t.Fatalf("status = %d, want %d: %s", rec.Code, http.StatusOK, rec.Body.String())
 	}
-	if len(leadStore.leads) != 1 {
-		t.Fatalf("leads stored = %d, want 1", len(leadStore.leads))
+	if got := len(store.leads); got != 1 {
+		t.Fatalf("lead rows = %d, want 1", got)
 	}
-	if len(analyticsStore.events) != 0 {
-		t.Fatalf("analytics events = %d, want 0", len(analyticsStore.events))
+	if got := analyticsRowCount(t, dbPath); got != 0 {
+		t.Fatalf("analytics rows = %d, want 0", got)
 	}
 }
 
-type memoryAnalyticsStore struct {
-	mu     sync.Mutex
-	events []analytics.Event
-	err    error
-}
+func openAnalyticsTestStore(t *testing.T) (*analytics.Repository, string) {
+	t.Helper()
 
-func (s *memoryAnalyticsStore) InsertEvent(_ context.Context, event analytics.Event) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if s.err != nil {
-		return s.err
-	}
-	s.events = append(s.events, event)
-	return nil
-}
-
-func (s *memoryAnalyticsStore) ConversionRate(_ context.Context) (float64, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	var views, clicks float64
-	for _, event := range s.events {
-		switch event.Event {
-		case "page_view":
-			views++
-		case "click_cta":
-			clicks++
-		}
-	}
-	if views == 0 {
-		return 0, nil
-	}
-	return clicks / views, nil
-}
-
-func (s *memoryAnalyticsStore) TopReferrerOrigins(_ context.Context, limit int) ([]analytics.ReferrerMetric, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if limit <= 0 {
-		limit = 10
-	}
-
-	counts := map[string]int64{}
-	for _, event := range s.events {
-		if event.Event != "click_cta" || event.ReferrerOrigin == "" {
-			continue
-		}
-		counts[event.ReferrerOrigin]++
-	}
-	items := make([]analytics.ReferrerMetric, 0, len(counts))
-	for origin, count := range counts {
-		items = append(items, analytics.ReferrerMetric{Origin: origin, Count: count})
-	}
-	sort.Slice(items, func(i, j int) bool {
-		if items[i].Count == items[j].Count {
-			return items[i].Origin < items[j].Origin
-		}
-		return items[i].Count > items[j].Count
+	dir := t.TempDir()
+	dbPath := filepath.Join(dir, "analytics.db")
+	repo, err := analytics.Open(context.Background(), analytics.Config{
+		Enabled:      true,
+		DatabasePath: dbPath,
 	})
-	if len(items) > limit {
-		items = items[:limit]
+	if err != nil {
+		t.Fatalf("open analytics store: %v", err)
 	}
-	return items, nil
+	return repo, dbPath
 }
 
-func (s *memoryAnalyticsStore) ScrollDistribution(_ context.Context) ([]analytics.ScrollMilestone, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	counts := map[int]int64{}
-	for _, event := range s.events {
-		if event.Event != "scroll" {
-			continue
-		}
-		counts[event.Percent]++
-	}
-	items := make([]analytics.ScrollMilestone, 0, len(counts))
-	for percent, count := range counts {
-		items = append(items, analytics.ScrollMilestone{Percent: percent, Count: count})
-	}
-	sort.Slice(items, func(i, j int) bool {
-		if items[i].Percent == items[j].Percent {
-			return items[i].Count > items[j].Count
-		}
-		return items[i].Percent < items[j].Percent
-	})
-	return items, nil
-}
+func analyticsRowCount(t *testing.T, dbPath string) int {
+	t.Helper()
 
-func (s *memoryAnalyticsStore) CTAClicksByPage(_ context.Context, limit int) ([]analytics.CTAClickMetric, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if limit <= 0 {
-		limit = 20
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		t.Fatalf("open sqlite: %v", err)
 	}
+	defer db.Close()
 
-	type key struct {
-		page string
-		cta  string
+	var count int
+	if err := db.QueryRowContext(context.Background(), `SELECT COUNT(*) FROM analytics_events`).Scan(&count); err != nil {
+		t.Fatalf("count analytics events: %v", err)
 	}
-	counts := map[key]int64{}
-	for _, event := range s.events {
-		if event.Event != "click_cta" {
-			continue
-		}
-		counts[key{page: event.Page, cta: event.CTA}]++
-	}
-	items := make([]analytics.CTAClickMetric, 0, len(counts))
-	for group, count := range counts {
-		items = append(items, analytics.CTAClickMetric{Page: group.page, CTA: group.cta, Count: count})
-	}
-	sort.Slice(items, func(i, j int) bool {
-		if items[i].Count == items[j].Count {
-			if items[i].Page == items[j].Page {
-				return items[i].CTA < items[j].CTA
-			}
-			return items[i].Page < items[j].Page
-		}
-		return items[i].Count > items[j].Count
-	})
-	if len(items) > limit {
-		items = items[:limit]
-	}
-	return items, nil
+	return count
 }

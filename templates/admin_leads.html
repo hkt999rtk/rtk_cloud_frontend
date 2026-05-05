@@ -44,8 +44,11 @@
       <p>No leads have been captured yet.</p>
       {{end}}
     </div>
-    <a class="button secondary" href="{{.AdminCSVHref}}"><span class="button-icon">{{icon "download"}}</span>Export CSV</a>
-    <p>CSV export requires the same <code>X-Admin-Token</code> header, or a <code>?token=...</code> query parameter when using a browser.</p>
+    <div class="admin-action-links">
+      <a class="button secondary" href="{{.AdminAnalyticsHref}}"><span class="button-icon">{{icon "chart"}}</span>Analytics</a>
+      <a class="button secondary" href="{{.AdminCSVHref}}"><span class="button-icon">{{icon "download"}}</span>Export CSV</a>
+    </div>
+    <p>CSV export and analytics both require the same <code>X-Admin-Token</code> header, or a <code>?token=...</code> query parameter when using a browser.</p>
   </div>
 
   {{if .Leads}}

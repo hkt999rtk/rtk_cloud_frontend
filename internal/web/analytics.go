@@ -1,8 +1,10 @@
 package web
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -13,301 +15,269 @@ import (
 	"time"
 
 	"realtek-connect/internal/analytics"
+	"realtek-connect/internal/docs"
+	"realtek-connect/internal/features"
 )
 
-var (
-	allowedAnalyticsEvents = map[string]struct{}{
-		"page_view": {},
-		"click_cta": {},
-		"scroll":    {},
-		"engaged":   {},
-	}
+const analyticsRequestBodyLimit = 4 << 10
 
-	allowedAnalyticsPages = regexp.MustCompile(`^[a-z0-9][a-z0-9\/\-]{0,127}$`)
-	allowedScrollPercent  = map[int]struct{}{
-		25:  {},
-		50:  {},
-		75:  {},
-		100: {},
+var (
+	analyticsAllowedPages = func() map[string]struct{} {
+		pages := map[string]struct{}{
+			"home":     {},
+			"features": {},
+			"docs":     {},
+			"contact":  {},
+			"privacy":  {},
+		}
+		for _, feature := range features.All() {
+			pages[feature.Slug] = struct{}{}
+		}
+		for _, section := range docs.All() {
+			pages[section.Slug] = struct{}{}
+		}
+		return pages
+	}()
+	analyticsAllowedCTAs = map[string]struct{}{
+		"contact_us":               {},
+		"see_plans_limits":         {},
+		"watch_brand_film":         {},
+		"talk_to_sales":            {},
+		"talk_to_platform_team":    {},
+		"see_app_platform_context": {},
+		"evaluate_feature":         {},
+		"submit_request":           {},
+		"review_features":          {},
+		"apply_filters":            {},
+		"clear_filters":            {},
+		"export_csv":               {},
+		"previous_page":            {},
+		"next_page":                {},
+		"open_docs":                {},
+		"view_feature":             {},
 	}
-	allowedEngagedDuration = map[int]struct{}{
-		10: {},
-		30: {},
-		60: {},
+	analyticsAllowedVariants = map[string]struct{}{
+		"control":       {},
+		"default":       {},
+		"experiment_a":  {},
+		"experiment_b":  {},
+		"variant_a":     {},
+		"variant_b":     {},
+		"home_hero_a":   {},
+		"home_hero_b":   {},
+		"contact_cta_a": {},
+		"contact_cta_b": {},
 	}
-	allowedAnalyticsCta = map[string]struct{}{
-		"home_cta_primary":     {},
-		"home_cta_secondary":   {},
-		"home_cta_discuss":     {},
-		"home_cta_band":        {},
-		"home_feature_discuss": {},
-		"feature_cta_primary":  {},
-		"feature_cta_all":      {},
-		"docs_cta_primary":     {},
-		"docs_cta_secondary":   {},
-		"doc_cta_primary":      {},
-		"nav_cta_contact":      {},
-		"contact_submit":       {},
-	}
-	allowedAnalyticsVariant = map[string]struct{}{
-		"control": {},
-	}
-	sessionIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`)
+	analyticsSessionIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$`)
 )
 
 type analyticsEventPayload struct {
-	Event    string `json:"event"`
-	Page     string `json:"page"`
-	Cta      string `json:"cta"`
-	Percent  int    `json:"percent"`
-	Duration int    `json:"duration"`
-	Variant  string `json:"variant"`
-	Session  string `json:"session_id"`
+	Event     string `json:"event"`
+	Page      string `json:"page"`
+	CTA       string `json:"cta,omitempty"`
+	Percent   *int   `json:"percent,omitempty"`
+	Duration  *int   `json:"duration,omitempty"`
+	Variant   string `json:"variant,omitempty"`
+	SessionID string `json:"session_id"`
 }
 
 func (s *Server) handleAnalyticsEvent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
+
 	if r.URL.Path != "/api/event" {
 		http.NotFound(w, r)
 		return
 	}
 	if r.Method != http.MethodPost {
-		methodNotAllowed(w)
+		w.Header().Set("Allow", "POST")
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
 	if s.analyticsStore == nil {
-		http.NotFound(w, r)
-		return
-	}
-	if !isSameOrigin(r) {
-		http.Error(w, "forbidden", http.StatusForbidden)
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
 	mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil || mediaType != "application/json" {
-		http.Error(w, "invalid content type", http.StatusBadRequest)
+		http.Error(w, "content type must be application/json", http.StatusUnsupportedMediaType)
 		return
 	}
 
-	if r.ContentLength > analyticsMaxPayloadBytes {
-		http.Error(w, "payload too large", http.StatusBadRequest)
-		return
-	}
-
-	r.Body = http.MaxBytesReader(w, r.Body, analyticsMaxPayloadBytes)
-	defer r.Body.Close()
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-
-	if s.analyticsLimiter != nil {
-		if !s.analyticsLimiter.Allow(contactSubmissionKey(r)) {
-			http.Error(w, "too many requests", http.StatusTooManyRequests)
-			return
-		}
-	}
-
-	var payload analyticsEventPayload
-	if err := decoder.Decode(&payload); err != nil {
-		http.Error(w, "invalid payload", http.StatusBadRequest)
-		return
-	}
-	if err := decoder.Decode(&struct{}{}); err != io.EOF {
-		http.Error(w, "invalid payload", http.StatusBadRequest)
-		return
-	}
-
-	event, err := normalizeAndValidateAnalyticsEvent(payload)
+	event, err := s.parseAnalyticsEvent(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		status := http.StatusBadRequest
+		if errors.Is(err, errAnalyticsBodyTooLarge) {
+			status = http.StatusRequestEntityTooLarge
+		}
+		http.Error(w, err.Error(), status)
 		return
 	}
 
-	event.ReferrerOrigin = sanitizedReferrerOrigin(r)
 	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
 	defer cancel()
-
 	if err := s.analyticsStore.InsertEvent(ctx, event); err != nil {
-		http.Error(w, "could not store analytics event", http.StatusInternalServerError)
+		http.Error(w, "could not save analytics event", http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusAccepted)
 	_, _ = w.Write([]byte(`{"status":"ok"}`))
 }
 
-func (s *Server) handleAdminAnalytics(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/admin/analytics" {
-		http.NotFound(w, r)
-		return
+var errAnalyticsBodyTooLarge = errors.New("analytics event body too large")
+
+func (s *Server) parseAnalyticsEvent(r *http.Request) (analytics.Event, error) {
+	defer r.Body.Close()
+
+	limited := io.LimitedReader{R: r.Body, N: analyticsRequestBodyLimit + 1}
+	body, err := io.ReadAll(&limited)
+	if err != nil {
+		return analytics.Event{}, fmt.Errorf("invalid analytics event payload")
 	}
-	if r.Method != http.MethodGet {
-		methodNotAllowed(w)
-		return
-	}
-	if !s.authorized(r) {
-		s.unauthorized(w)
-		return
-	}
-	if s.analyticsStore == nil {
-		http.NotFound(w, r)
-		return
+	if len(body) > analyticsRequestBodyLimit {
+		return analytics.Event{}, errAnalyticsBodyTooLarge
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
-	defer cancel()
-
-	conversionRate, err := s.analyticsStore.ConversionRate(ctx)
-	if err != nil {
-		http.Error(w, "could not load analytics", http.StatusInternalServerError)
-		return
-	}
-	refs, err := s.analyticsStore.TopReferrerOrigins(ctx, adminAnalyticsDefaultLimit)
-	if err != nil {
-		http.Error(w, "could not load analytics", http.StatusInternalServerError)
-		return
-	}
-	scrolls, err := s.analyticsStore.ScrollDistribution(ctx)
-	if err != nil {
-		http.Error(w, "could not load analytics", http.StatusInternalServerError)
-		return
-	}
-	ctaClicks, err := s.analyticsStore.CTAClicksByPage(ctx, adminAnalyticsDefaultLimit)
-	if err != nil {
-		http.Error(w, "could not load analytics", http.StatusInternalServerError)
-		return
+	decoder := json.NewDecoder(bytes.NewReader(body))
+	var payload analyticsEventPayload
+	if err := decoder.Decode(&payload); err != nil {
+		return analytics.Event{}, fmt.Errorf("invalid analytics event payload")
 	}
 
-	data := s.adminPageData(r, "Analytics | Realtek Connect+", "Protected analytics aggregate dashboard.")
-	data.Analytics.Enabled = true
-	data.Analytics.ConversionRate = conversionRate
-	data.Analytics.TopReferrerOrigins = refs
-	data.Analytics.ScrollDistribution = scrolls
-	data.Analytics.CTAClicksByPage = ctaClicks
+	if err := ensureNoTrailingJSON(decoder); err != nil {
+		return analytics.Event{}, fmt.Errorf("invalid analytics event payload")
+	}
 
-	s.render(w, http.StatusOK, "admin_analytics.html", data)
+	return s.validateAnalyticsEvent(r, payload)
 }
 
-func normalizeAndValidateAnalyticsEvent(payload analyticsEventPayload) (analytics.Event, error) {
-	if !isAllowedAnalyticsEvent(payload.Event) {
-		return analytics.Event{}, fmt.Errorf("invalid event")
+func (s *Server) validateAnalyticsEvent(r *http.Request, payload analyticsEventPayload) (analytics.Event, error) {
+	now := time.Now().UTC()
+
+	eventType := strings.TrimSpace(payload.Event)
+	if _, ok := allowedAnalyticsEventTypes[eventType]; !ok {
+		return analytics.Event{}, fmt.Errorf("invalid analytics event type")
 	}
-	page := normalizeAnalyticsPage(payload.Page)
-	if !isAllowedAnalyticsPage(page) {
-		return analytics.Event{}, fmt.Errorf("invalid page")
+
+	page := strings.TrimSpace(payload.Page)
+	if _, ok := analyticsAllowedPages[page]; !ok {
+		return analytics.Event{}, fmt.Errorf("invalid analytics page")
 	}
-	if payload.Session == "" || !sessionIDPattern.MatchString(payload.Session) {
-		return analytics.Event{}, fmt.Errorf("invalid session_id")
+
+	sessionID := strings.TrimSpace(payload.SessionID)
+	if !analyticsSessionIDPattern.MatchString(sessionID) {
+		return analytics.Event{}, fmt.Errorf("invalid analytics session id")
 	}
+
+	referrerOrigin := sanitizeReferrerOrigin(r.Header.Get("Referer"))
 
 	event := analytics.Event{
-		Event:     payload.Event,
-		Page:      page,
-		SessionID: payload.Session,
+		TS:             now.Unix(),
+		Type:           eventType,
+		Page:           page,
+		ReferrerOrigin: referrerOrigin,
+		SessionID:      sessionID,
+		CreatedAt:      now,
 	}
 
-	if payload.Variant != "" {
-		if !isAllowedAnalyticsVariant(payload.Variant) {
-			return analytics.Event{}, fmt.Errorf("invalid variant")
+	variant := strings.TrimSpace(payload.Variant)
+	if variant != "" {
+		if _, ok := analyticsAllowedVariants[variant]; !ok {
+			return analytics.Event{}, fmt.Errorf("invalid analytics variant")
 		}
-		event.Variant = payload.Variant
+		event.Variant = variant
 	}
 
-	switch payload.Event {
+	if event.Variant != "" && strings.ContainsAny(event.Variant, " \t\r\n") {
+		return analytics.Event{}, fmt.Errorf("invalid analytics variant")
+	}
+
+	switch eventType {
 	case "page_view":
-		if payload.Percent != 0 || payload.Duration != 0 || payload.Cta != "" || payload.Variant != "" {
-			return analytics.Event{}, fmt.Errorf("invalid page_view payload")
+		if payload.CTA != "" || payload.Percent != nil || payload.Duration != nil {
+			return analytics.Event{}, fmt.Errorf("invalid analytics event fields")
 		}
 	case "click_cta":
-		if payload.Cta == "" || !isAllowedCTA(payload.Cta) {
-			return analytics.Event{}, fmt.Errorf("invalid cta")
+		cta := strings.TrimSpace(payload.CTA)
+		if _, ok := analyticsAllowedCTAs[cta]; !ok {
+			return analytics.Event{}, fmt.Errorf("invalid analytics cta")
 		}
-		event.CTA = payload.Cta
+		if payload.Percent != nil || payload.Duration != nil {
+			return analytics.Event{}, fmt.Errorf("invalid analytics event fields")
+		}
+		event.CTA = cta
 	case "scroll":
-		if payload.Percent == 0 || !isAllowedAnalyticsPercent(payload.Percent) {
-			return analytics.Event{}, fmt.Errorf("invalid percent")
+		if payload.CTA != "" || payload.Duration != nil {
+			return analytics.Event{}, fmt.Errorf("invalid analytics event fields")
 		}
-		event.Percent = payload.Percent
+		percent := payload.Percent
+		if percent == nil {
+			return analytics.Event{}, fmt.Errorf("invalid analytics percent")
+		}
+		if _, ok := allowedAnalyticsPercentages[*percent]; !ok {
+			return analytics.Event{}, fmt.Errorf("invalid analytics percent")
+		}
+		event.Percent = percent
 	case "engaged":
-		if payload.Duration == 0 || !isAllowedAnalyticsDuration(payload.Duration) {
-			return analytics.Event{}, fmt.Errorf("invalid duration")
+		if payload.CTA != "" || payload.Percent != nil {
+			return analytics.Event{}, fmt.Errorf("invalid analytics event fields")
 		}
-		event.Duration = payload.Duration
+		duration := payload.Duration
+		if duration == nil {
+			return analytics.Event{}, fmt.Errorf("invalid analytics duration")
+		}
+		if _, ok := allowedAnalyticsDurations[*duration]; !ok {
+			return analytics.Event{}, fmt.Errorf("invalid analytics duration")
+		}
+		event.Duration = duration
 	}
 
 	return event, nil
 }
 
-func normalizeAnalyticsPage(value string) string {
-	return strings.ToLower(strings.TrimSpace(strings.Trim(value, "/")))
+var (
+	allowedAnalyticsEventTypes = map[string]struct{}{
+		"page_view": {},
+		"click_cta": {},
+		"scroll":    {},
+		"engaged":   {},
+	}
+	allowedAnalyticsPercentages = map[int]struct{}{
+		25:  {},
+		50:  {},
+		75:  {},
+		100: {},
+	}
+	allowedAnalyticsDurations = map[int]struct{}{
+		10: {},
+		30: {},
+		60: {},
+	}
+)
+
+func ensureNoTrailingJSON(decoder *json.Decoder) error {
+	var extra json.RawMessage
+	if err := decoder.Decode(&extra); err != io.EOF {
+		return err
+	}
+	return nil
 }
 
-func isAllowedAnalyticsEvent(value string) bool {
-	_, ok := allowedAnalyticsEvents[value]
-	return ok
-}
-
-func isAllowedAnalyticsPage(value string) bool {
-	return allowedAnalyticsPages.MatchString(value)
-}
-
-func isAllowedCTA(value string) bool {
-	_, ok := allowedAnalyticsCta[value]
-	return ok
-}
-
-func isAllowedAnalyticsPercent(value int) bool {
-	_, ok := allowedScrollPercent[value]
-	return ok
-}
-
-func isAllowedAnalyticsDuration(value int) bool {
-	_, ok := allowedEngagedDuration[value]
-	return ok
-}
-
-func isAllowedAnalyticsVariant(value string) bool {
-	_, ok := allowedAnalyticsVariant[value]
-	return ok
-}
-
-func sanitizedReferrerOrigin(r *http.Request) string {
-	referer := strings.TrimSpace(r.Header.Get("Referer"))
-	if referer == "" {
+func sanitizeReferrerOrigin(raw string) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
 		return ""
 	}
-	parsed, err := url.Parse(referer)
-	if err != nil {
+
+	parsed, err := url.Parse(raw)
+	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
 		return ""
 	}
-	if parsed.Scheme == "" || parsed.Host == "" {
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
 		return ""
 	}
 	return parsed.Scheme + "://" + parsed.Host
-}
-
-func isSameOrigin(r *http.Request) bool {
-	origin := strings.TrimSpace(r.Header.Get("Origin"))
-	if origin == "" {
-		return true
-	}
-	if origin == "null" {
-		return false
-	}
-	originURL, err := url.Parse(origin)
-	if err != nil || originURL.Scheme == "" || originURL.Host == "" {
-		return false
-	}
-
-	host := strings.TrimSpace(r.Header.Get("X-Forwarded-Host"))
-	if host == "" {
-		host = r.Host
-	}
-	if host == "" {
-		return false
-	}
-
-	expected := requestScheme(r) + "://" + host
-	return originURL.String() == expected
 }

@@ -29,19 +29,6 @@ import (
 	"realtek-connect/internal/manual"
 )
 
-const (
-	adminAnalyticsDefaultLimit = 25
-	analyticsMaxPayloadBytes   = 4 * 1024
-)
-
-type AnalyticsStore interface {
-	InsertEvent(context.Context, analytics.Event) error
-	ConversionRate(context.Context) (float64, error)
-	TopReferrerOrigins(context.Context, int) ([]analytics.ReferrerMetric, error)
-	ScrollDistribution(context.Context) ([]analytics.ScrollMilestone, error)
-	CTAClicksByPage(context.Context, int) ([]analytics.CTAClickMetric, error)
-}
-
 type LeadStore interface {
 	Insert(context.Context, leads.Lead) error
 	Count(context.Context, leads.ListFilter) (int, error)
@@ -52,8 +39,8 @@ type Config struct {
 	TemplatesDir            string
 	StaticDir               string
 	ContentDir              string
-	AnalyticsStore          AnalyticsStore
 	LeadStore               LeadStore
+	AnalyticsStore          *analytics.Repository
 	AdminToken              string
 	DisableSearchIndexing   bool
 	PublicBaseURL           string
@@ -67,7 +54,8 @@ type Server struct {
 	contentDir              string
 	contentRoot             string
 	leadStore               LeadStore
-	analyticsStore          AnalyticsStore
+	analyticsStore          *analytics.Repository
+	manualLoader            *manual.Loader
 	adminToken              string
 	disableSearchIndexing   bool
 	publicBaseURL           string
@@ -75,53 +63,44 @@ type Server struct {
 	enableCDNCacheHeaders   bool
 	assetVersions           map[string]string
 	contactLimit            *submissionRateLimiter
-	analyticsLimiter        *submissionRateLimiter
 	docsContentMu           sync.RWMutex
 	docsContent             map[string]docs.ContentPage
-	manualLoader            *manual.Loader
 }
 
 type pageData struct {
-	Title             string
-	MetaDescription   string
-	CanonicalURL      string
-	SocialImageURL    string
-	SocialImageAlt    string
-	MetaRobots        string
-	CurrentPath       string
-	PublicPath        string
-	Lang              string
-	Locale            content.Locale
-	LocalePrefix      string
-	Text              map[string]string
-	AlternateLinks    []content.AlternateLink
-	Docs              []docs.Section
-	DocsPage          docs.ContentPage
-	Doc               docs.Section
-	ManualIndex       manual.ManualIndex
-	ManualPage        manual.ManualPage
-	Features          []features.Feature
-	Feature           features.Feature
-	InterestOptions   []content.ContactInterestOption
-	Form              contactForm
-	Errors            map[string]string
-	Success           bool
-	SubmittedFor      string
-	Leads             []leads.LeadRecord
-	AdminEnabled      bool
-	AdminCSVHref      string
-	LeadFilters       adminLeadFilters
-	LeadPagination    adminLeadPagination
-	AnalyticsEnabled  bool
-	AnalyticsPage     string
-	AnalyticsEndpoint string
-	Analytics         struct {
-		Enabled            bool
-		ConversionRate     float64
-		TopReferrerOrigins []analytics.ReferrerMetric
-		ScrollDistribution []analytics.ScrollMilestone
-		CTAClicksByPage    []analytics.CTAClickMetric
-	}
+	Title              string
+	MetaDescription    string
+	CanonicalURL       string
+	SocialImageURL     string
+	SocialImageAlt     string
+	MetaRobots         string
+	CurrentPath        string
+	PublicPath         string
+	Lang               string
+	Locale             content.Locale
+	LocalePrefix       string
+	Text               map[string]string
+	AlternateLinks     []content.AlternateLink
+	Docs               []docs.Section
+	DocsPage           docs.ContentPage
+	Doc                docs.Section
+	ManualIndex        manual.ManualIndex
+	ManualPage         manual.ManualPage
+	AdminAnalytics     adminAnalyticsView
+	Features           []features.Feature
+	Feature            features.Feature
+	InterestOptions    []content.ContactInterestOption
+	Form               contactForm
+	Errors             map[string]string
+	Success            bool
+	SubmittedFor       string
+	Leads              []leads.LeadRecord
+	AdminEnabled       bool
+	AdminCSVHref       string
+	AdminLeadsHref     string
+	AdminAnalyticsHref string
+	LeadFilters        adminLeadFilters
+	LeadPagination     adminLeadPagination
 }
 
 type contactForm struct {
@@ -181,6 +160,8 @@ func NewServer(cfg Config) (*Server, error) {
 		contentDir:              cfg.ContentDir,
 		contentRoot:             contentRoot,
 		leadStore:               cfg.LeadStore,
+		analyticsStore:          cfg.AnalyticsStore,
+		manualLoader:            manualLoader,
 		adminToken:              cfg.AdminToken,
 		disableSearchIndexing:   cfg.DisableSearchIndexing,
 		publicBaseURL:           normalizePublicBaseURL(cfg.PublicBaseURL),
@@ -188,10 +169,7 @@ func NewServer(cfg Config) (*Server, error) {
 		enableCDNCacheHeaders:   cfg.EnableCDNCacheHeaders,
 		assetVersions:           assetVersions,
 		contactLimit:            newSubmissionRateLimiter(5, 10*time.Minute),
-		analyticsLimiter:        newSubmissionRateLimiter(60, 1*time.Minute),
-		analyticsStore:          cfg.AnalyticsStore,
 		docsContent:             docsContent,
-		manualLoader:            manualLoader,
 	}, nil
 }
 
@@ -204,9 +182,9 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
 	mux.HandleFunc("/admin/leads.csv", s.handleAdminLeadsCSV)
 	mux.HandleFunc("/admin/analytics", s.handleAdminAnalytics)
-	mux.HandleFunc("/api/event", s.handleAnalyticsEvent)
 	mux.HandleFunc("/admin/reload-content", s.handleAdminReloadContent)
 	mux.HandleFunc("/healthz", s.handleHealthz)
+	mux.HandleFunc("/api/event", s.handleAnalyticsEvent)
 	mux.HandleFunc("/", s.handlePublic)
 	return securityHeaders(s.searchIndexingHeaders(s.cacheHeaders(mux)))
 }
@@ -407,6 +385,8 @@ func (s *Server) handleAdminLeads(w http.ResponseWriter, r *http.Request) {
 	data.Leads = records
 	data.AdminEnabled = s.adminToken != ""
 	data.AdminCSVHref = s.adminCSVHref(filters)
+	data.AdminLeadsHref = s.adminLeadsHref(filters.Token, filters)
+	data.AdminAnalyticsHref = s.adminAnalyticsHref(filters.Token)
 	data.LeadFilters = filters
 	data.LeadFilters.ClearHref = s.adminLeadsHref(filters.Token, adminLeadFilters{})
 	data.LeadPagination = s.adminLeadPagination(filters, page, totalCount)
@@ -520,7 +500,8 @@ func (s *Server) manualPageFor(locale content.Locale, slug string) (manual.Manua
 }
 
 func (s *Server) contentAssetsHandler() http.Handler {
-	return http.FileServer(http.Dir(filepath.Join(s.contentRoot, "assets")))
+	assetsDir := filepath.Join(s.contentRoot, "assets")
+	return http.FileServer(http.Dir(assetsDir))
 }
 
 func (s *Server) authorized(r *http.Request) bool {
@@ -593,7 +574,8 @@ func (s *Server) handleManualIndex(w http.ResponseWriter, r *http.Request, local
 		return
 	}
 
-	data := s.basePageData(r, locale, publicPath, index.Title+" | Realtek Connect+", index.Description)
+	title := index.Title + " | Realtek Connect+"
+	data := s.basePageData(r, locale, publicPath, title, index.Description)
 	data.ManualIndex = index
 	s.render(w, http.StatusOK, "manual_index.html", data)
 }
@@ -954,6 +936,8 @@ func (s *Server) cacheHeaders(next http.Handler) http.Handler {
 		case r.URL.Path == "/robots.txt" || r.URL.Path == "/sitemap.xml":
 			w.Header().Set("Cache-Control", "public, max-age=300")
 		case r.URL.Path == "/healthz" || strings.HasPrefix(r.URL.Path, "/admin/"):
+			w.Header().Set("Cache-Control", "no-store")
+		case r.Method == http.MethodPost && r.URL.Path == "/api/event":
 			w.Header().Set("Cache-Control", "no-store")
 		case r.Method == http.MethodPost && contentPublicPath(r.URL.Path) == "/contact":
 			w.Header().Set("Cache-Control", "no-store")
