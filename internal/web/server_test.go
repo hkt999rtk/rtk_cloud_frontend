@@ -131,7 +131,7 @@ func TestRoutesReturnOK(t *testing.T) {
 	for _, section := range docs.All() {
 		paths = append(paths, "/docs/"+section.Slug)
 	}
-	paths = append(paths, "/manual/getting-started")
+	paths = append(paths, "/manual/getting-started", "/manual/deployment-notes", "/manual/reference")
 	for _, feature := range features.All() {
 		paths = append(paths, "/features/"+feature.Slug)
 	}
@@ -206,6 +206,28 @@ func TestManualPageRendersMarkdownAndAssetImage(t *testing.T) {
 	} {
 		if !strings.Contains(body, expected) {
 			t.Fatalf("/manual/getting-started missing %q: %s", expected, body)
+		}
+	}
+}
+
+func TestManualSectionPagesRender(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	cases := map[string]string{
+		"/manual/deployment-notes": "Track rollout assumptions, content refresh steps, and manual publishing checks.",
+		"/manual/reference":        "Collect the recurring links, commands, and content-source reminders for the manual.",
+	}
+
+	for path, expected := range cases {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", path, rec.Code)
+		}
+		if !strings.Contains(rec.Body.String(), expected) {
+			t.Fatalf("%s missing %q: %s", path, expected, rec.Body.String())
 		}
 	}
 }
@@ -385,6 +407,8 @@ func TestLocalizedPublicRoutesReturnOK(t *testing.T) {
 		"/zh-tw/docs/apis",
 		"/zh-tw/manual",
 		"/zh-tw/manual/getting-started",
+		"/zh-tw/manual/deployment-notes",
+		"/zh-tw/manual/reference",
 		"/zh-tw/features",
 		"/zh-tw/features/provision",
 		"/zh-tw/contact",
@@ -394,6 +418,8 @@ func TestLocalizedPublicRoutesReturnOK(t *testing.T) {
 		"/zh-cn/docs/apis",
 		"/zh-cn/manual",
 		"/zh-cn/manual/getting-started",
+		"/zh-cn/manual/deployment-notes",
+		"/zh-cn/manual/reference",
 		"/zh-cn/features",
 		"/zh-cn/features/provision",
 		"/zh-cn/contact",
@@ -1480,9 +1506,14 @@ func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 		`<?xml version="1.0" encoding="UTF-8"?>`,
 		`<loc>http://example.com/</loc>`,
 		`<loc>http://example.com/docs/product-overview</loc>`,
+		`<loc>http://example.com/manual/getting-started</loc>`,
+		`<loc>http://example.com/manual/deployment-notes</loc>`,
+		`<loc>http://example.com/manual/reference</loc>`,
 		`<loc>http://example.com/features/ota</loc>`,
 		`<loc>http://example.com/contact</loc>`,
 		`<loc>http://example.com/privacy</loc>`,
+		`<loc>http://example.com/zh-tw/manual/deployment-notes</loc>`,
+		`<loc>http://example.com/zh-cn/manual/reference</loc>`,
 		`<loc>http://example.com/zh-tw/features/ota</loc>`,
 		`<loc>http://example.com/zh-tw/privacy</loc>`,
 		`<loc>http://example.com/zh-cn/docs/apis</loc>`,
