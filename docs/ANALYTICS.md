@@ -349,6 +349,7 @@ Before enabling analytics, update `/privacy` in all supported locales to explain
 - Retention period.
 - No third-party analytics, advertising pixels, or fingerprinting.
 - How users can contact the privacy address for questions.
+- Production enablement for issue #49 stays blocked until the privacy notice updates in issues #52 and #54 are both complete.
 
 If persistent browser storage is added later, add an analytics preference UI before enabling it.
 
