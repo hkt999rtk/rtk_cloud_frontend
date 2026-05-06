@@ -368,7 +368,15 @@ func zhTWDocs() map[string]localizedDoc {
 		"sdks":        docZH("SDK", "記錄打造連網產品體驗所需的開發者介面。"),
 		"firmware":    docZH("韌體", "釐清裝置軟體堆疊必須提供的能力。"),
 		"cli":         docZH("CLI", "用可重複的命令列流程支援開發者與營運者。"),
-		"deployment":  docZH("部署", "說明評估環境如何成熟為商用雲端部署。"),
+		"deployment": {
+			Title:        "部署",
+			Kicker:       "記錄評估與商用部署背後的生產執行設定。",
+			Summary:      "生產部署設定、持久化 SQLite 儲存、反向代理 TLS、健康檢查、備份/還原與回滾注意事項。",
+			Description:  "部署說明如何在不把 TLS 終止搬進應用程式本身的前提下，以生產設定執行 Go 站台。內容涵蓋容器或 VM 執行模式、用來保存聯絡與分析資料的持久化 SQLite volume、健康檢查端點、邊緣快取預期，以及生產營運所需的備份/還原流程。",
+			Highlights:   []string{"具備模板與靜態資產的容器或 VM 部署設定", "用於聯絡與分析事件的持久化 SQLite volume", "TLS 終止、快取標頭與探針由反向代理或託管邊緣負責", "生產發布的備份、還原與回滾檢查點"},
+			Deliverables: []string{"生產部署檢查表", "SQLite 備份與還原作業手冊", "供營運人員使用的回滾與驗證步驟"},
+			Audience:     []string{"規劃託管環境的平台團隊", "處理生產復原的營運團隊", "評估資料與復原邊界的企業買家"},
+		},
 		"release-notes": {
 			Title:        "版本資訊",
 			Kicker:       "追蹤韌體、雲端、App 與營運介面的產品演進。",

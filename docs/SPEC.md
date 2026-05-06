@@ -662,6 +662,7 @@ Goal: Make the Go site easy to run outside local development.
 Acceptance criteria:
 
 - Add Dockerfile or equivalent deployment recipe.
+- Document the production deployment profile, including backup and restore notes.
 - Document reverse proxy TLS assumption.
 - Document persistent SQLite volume.
 - `go build` remains supported.

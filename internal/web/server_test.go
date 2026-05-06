@@ -210,11 +210,37 @@ func TestManualPageRendersMarkdownAndAssetImage(t *testing.T) {
 	}
 }
 
+func TestDeploymentDocCoversProductionProfileAndRecovery(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/docs/deployment", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/docs/deployment status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"Document the production runtime profile behind evaluation and commercial deployments.",
+		"Production deployment profile, persistent SQLite storage, reverse proxy TLS, health checks, backup/restore, and rollback notes.",
+		"Persistent SQLite volume for lead submissions and analytics events",
+		"TLS termination, cache headers, and probes handled by the reverse proxy or hosting edge",
+		"Backup, restore, and rollback checkpoints for production releases",
+		"SQLite backup and restore runbook",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("/docs/deployment missing %q: %s", want, body)
+		}
+	}
+}
+
 func TestManualSectionPagesRender(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
 	cases := map[string]string{
-		"/manual/deployment-notes": "Track rollout assumptions, content refresh steps, and manual publishing checks.",
+		"/manual/deployment-notes": "Track the production deployment profile, backup and restore steps, and manual publishing checks.",
 		"/manual/reference":        "Collect the recurring links, commands, and content-source reminders for the manual.",
 	}
 
@@ -228,6 +254,34 @@ func TestManualSectionPagesRender(t *testing.T) {
 		}
 		if !strings.Contains(rec.Body.String(), expected) {
 			t.Fatalf("%s missing %q: %s", path, expected, rec.Body.String())
+		}
+	}
+}
+
+func TestDeploymentNotesCoversProductionProfileAndRestore(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/manual/deployment-notes", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/manual/deployment-notes status = %d, want 200", rec.Code)
+	}
+
+	body := rec.Body.String()
+	for _, want := range []string{
+		"Production profile",
+		"The site is expected to run as a Go binary inside a container or VM.",
+		"Mount a persistent SQLite volume for lead records and analytics events.",
+		"Point health checks at <code>/healthz</code> so platform probes stay lightweight.",
+		"Backup and restore",
+		"Verify the restored deployment with <code>/healthz</code>, <code>/admin/leads</code>, and <code>/admin/analytics</code>.",
+		"Rollback",
+		"Keep the previous image or deployment manifest available until the new release is verified.",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("/manual/deployment-notes missing %q: %s", want, body)
 		}
 	}
 }

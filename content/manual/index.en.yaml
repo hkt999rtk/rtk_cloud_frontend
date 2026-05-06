@@ -6,7 +6,7 @@ sections:
     summary: "Set up your first device and verify connectivity."
   - slug: deployment-notes
     title: "Deployment Notes"
-    summary: "Review environment assumptions and rollout checkpoints."
+    summary: "Review production assumptions, backup and restore steps, and rollout checkpoints."
   - slug: reference
     title: "Reference Material"
     summary: "Keep a short list of commands, links, and recurring tasks."
