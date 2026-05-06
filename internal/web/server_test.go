@@ -934,7 +934,7 @@ func TestFeatureMetadataUsesFeatureSummary(t *testing.T) {
 	body := rec.Body.String()
 	for _, want := range []string{
 		`<title>OTA | Realtek Connect&#43;</title>`,
-		`<meta name="description" content="Firmware upload, catalog, target enablement, rollout status, report, cancel, and download are available foundations; advanced campaign policy remains contract-defined follow-up work.">`,
+		`<meta name="description" content="Firmware upload, catalog, target enablement, rollout status, report, cancel, and download are available foundations; scheduled, time-window, user-consent, and archive campaign policy surfaces are now available too, while approval workflow, dashboards, analytics, and staged percentage rollout remain roadmap scope.">`,
 		`<meta property="og:url" content="http://example.com/features/ota">`,
 		`<meta name="twitter:title" content="OTA | Realtek Connect&#43;">`,
 	} {
@@ -957,19 +957,21 @@ func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
 
 	body := rec.Body.String()
 	for _, want := range []string{
-		"Firmware upload, catalog, target enablement, rollout status, report, cancel, and download are available foundations; advanced campaign policy remains contract-defined follow-up work.",
+		"Firmware upload, catalog, target enablement, rollout status, report, cancel, and download are available foundations; scheduled, time-window, user-consent, and archive campaign policy surfaces are now available too, while approval workflow, dashboards, analytics, and staged percentage rollout remain roadmap scope.",
 		"Firmware campaign interface contract",
 		`href="https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/FIRMWARE_CAMPAIGN.md"`,
 		"Use the current firmware lifecycle as the implementation boundary",
 		"Describe publish, enablement, whitelist, rollout query/report, cancel, and download behavior as the available firmware lifecycle foundation.",
-		"Scheduled and time-window OTA are contract-defined policy concepts until backend enforcement and SDK handling are documented as available.",
-		"User-consent-required OTA is a policy flag in phase one, not a shipped mobile UX or app-side consent flow.",
+		"Promote the campaign policy surfaces that are now implemented",
+		"Scheduled and time-window OTA are available campaign-policy surfaces with backend enforcement and SDK handling in place.",
+		"User-consent-required OTA is now a supported policy surface rather than a placeholder mobile UX.",
+		"Archive is available for closing or hiding completed campaigns without deleting audit history.",
 		"Approval workflow, operator dashboards, analytics, and success-rate reporting are roadmap capabilities, not phase-one availability claims.",
 		"Map each OTA concept to the right implementation status",
 		"<th scope=\"col\">Status</th>",
 		"Available foundation",
-		"Integration-ready contract",
-		"Roadmap campaign management",
+		"Implemented Policy Surfaces",
+		"Roadmap Guardrails",
 		"Staged percentage rollout and automatic cohort ramping stay out of the available feature list until a campaign engine implements them.",
 	} {
 		if !strings.Contains(body, want) {
@@ -978,7 +980,7 @@ func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
 	}
 }
 
-func TestOTAFeaturePageDoesNotPromoteCampaignPolicyScope(t *testing.T) {
+func TestOTAFeaturePagePromotesImplementedCampaignPolicyScope(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/ota", nil)
@@ -990,19 +992,19 @@ func TestOTAFeaturePageDoesNotPromoteCampaignPolicyScope(t *testing.T) {
 	}
 
 	body := rec.Body.String()
-	assertTableRowStatus(t, body, "Scheduled policy", "Integration-ready contract")
-	assertTableRowStatus(t, body, "Time-window policy", "Integration-ready contract")
-	assertTableRowStatus(t, body, "User-consent policy", "Integration-ready contract")
-	assertTableRowStatus(t, body, "Archive", "Roadmap campaign management")
+	assertTableRowStatus(t, body, "Scheduled policy", "Available foundation")
+	assertTableRowStatus(t, body, "Time-window policy", "Available foundation")
+	assertTableRowStatus(t, body, "User-consent policy", "Available foundation")
+	assertTableRowStatus(t, body, "Archive", "Available foundation")
 
 	for _, tc := range []struct {
 		concept string
 		status  string
 	}{
-		{concept: "Scheduled policy", status: "Available foundation"},
-		{concept: "Time-window policy", status: "Available foundation"},
-		{concept: "User-consent policy", status: "Available foundation"},
-		{concept: "Archive", status: "Available foundation"},
+		{concept: "Scheduled policy", status: "Integration-ready contract"},
+		{concept: "Time-window policy", status: "Integration-ready contract"},
+		{concept: "User-consent policy", status: "Integration-ready contract"},
+		{concept: "Archive", status: "Roadmap campaign management"},
 	} {
 		assertTableRowDoesNotHaveStatus(t, body, tc.concept, tc.status)
 	}

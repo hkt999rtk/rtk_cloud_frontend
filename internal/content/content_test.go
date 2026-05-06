@@ -36,17 +36,17 @@ func TestLocalizedCatalogsKeepFeatureAndDocSlugs(t *testing.T) {
 	}
 }
 
-func TestOTACopyKeepsCampaignPoliciesUnpromoted(t *testing.T) {
+func TestOTACopyPromotesImplementedCampaignPolicies(t *testing.T) {
 	catalog := CatalogFor(DefaultLocale())
 	ota, ok := catalog.FeatureBySlug("ota")
 	if !ok {
 		t.Fatal("default catalog missing ota feature")
 	}
 
-	assertOTATableStatus(t, ota, "Scheduled policy", "Integration-ready contract")
-	assertOTATableStatus(t, ota, "Time-window policy", "Integration-ready contract")
-	assertOTATableStatus(t, ota, "User-consent policy", "Integration-ready contract")
-	assertOTATableStatus(t, ota, "Archive", "Roadmap campaign management")
+	assertOTATableStatus(t, ota, "Scheduled policy", "Available foundation")
+	assertOTATableStatus(t, ota, "Time-window policy", "Available foundation")
+	assertOTATableStatus(t, ota, "User-consent policy", "Available foundation")
+	assertOTATableStatus(t, ota, "Archive", "Available foundation")
 
 	copy := strings.Join([]string{
 		ota.Summary,
@@ -56,8 +56,8 @@ func TestOTACopyKeepsCampaignPoliciesUnpromoted(t *testing.T) {
 	}, " ")
 	for _, want := range []string{
 		"available foundations",
-		"contract-defined follow-up work",
-		"integration-ready policy vocabulary",
+		"Available campaign policy surfaces",
+		"implemented",
 		"roadmap scope",
 	} {
 		if !strings.Contains(copy, want) {
@@ -66,18 +66,18 @@ func TestOTACopyKeepsCampaignPoliciesUnpromoted(t *testing.T) {
 	}
 }
 
-func TestLocalizedOTACopyKeepsCampaignPoliciesUnpromoted(t *testing.T) {
+func TestLocalizedOTACopyPromotesImplementedCampaignPolicies(t *testing.T) {
 	tests := []struct {
 		localeCode string
 		wants      []string
 	}{
 		{
 			localeCode: "zh-TW",
-			wants:      []string{"現有基礎", "合約定義", "integration-ready policy vocabulary", "roadmap 範圍"},
+			wants:      []string{"現有基礎", "已可用的 campaign surface", "roadmap 範圍"},
 		},
 		{
 			localeCode: "zh-CN",
-			wants:      []string{"现有基础", "合约定義", "integration-ready policy vocabulary", "roadmap 範圍"},
+			wants:      []string{"现有基础", "已可用的 campaign surface", "roadmap 範圍"},
 		},
 	}
 

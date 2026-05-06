@@ -260,13 +260,13 @@ func zhTWFeatures() map[string]localizedFeature {
 		"ota": {
 			Title:        "OTA 韌體更新",
 			Kicker:       "區分韌體生命週期基礎與 campaign roadmap。",
-			Summary:      "韌體上傳、catalog、target enablement、rollout 狀態、report、cancel 與 download 屬於現有基礎；進階 campaign policy 仍是合約定義的後續工作。",
-			Description:  "OTA 以 interface-first 韌體 campaign 路徑呈現。現階段公開文案可描述 upload、enablement、rollout query/report、cancel 與 download route 代表的韌體生命週期基礎；排程、時間窗、使用者同意、封存語意、審核流程、dashboard、analytics 與分階段百分比 rollout 需標示為規劃中的 campaign policy 工作。",
+			Summary:      "韌體上傳、catalog、target enablement、rollout 狀態、report、cancel 與 download 屬於現有基礎；scheduled、time-window、user-consent 與 archive campaign policy 已可用；approval workflow、dashboard、analytics 與分階段百分比 rollout 仍屬 roadmap 範圍。",
+			Description:  "OTA 以 interface-first 韌體 campaign 路徑呈現。現階段公開文案可描述 upload、enablement、rollout query/report、cancel 與 download route 代表的韌體生命週期基礎；scheduled、time-window、user-consent 與 archive policy 已可視為可用的 campaign surface；approval workflow、dashboard、analytics 與分階段百分比 rollout 仍需標示為 roadmap。",
 			ImageAlt:     "顯示分階段發布時間軸、裝置群組與 OTA 工作狀態卡片的韌體發布控制中心。",
 			SourceLabel:  "韌體 campaign 介面合約",
-			Highlights:   []string{"韌體上傳、catalog、target enablement、rollout 狀態、report、cancel 與 download 的現有基礎", "排程、時間窗與使用者同意 policy 屬於合約定義的 campaign vocabulary", "審核流程、dashboard、analytics、分階段百分比 rollout 與封存 UX 維持 roadmap 標示"},
-			Capabilities: []string{"以既有 firmware route 作為可用實作邊界，而非暗示完整 campaign engine 已完成", "在 backend、SDK 與 App 支援落地前，將 scheduled、time-window 與 user-consent 行為標示為 integration-ready policy vocabulary", "cancel 保持為生命週期基礎；archive 則標示為 campaign-management roadmap 範圍"},
-			Outcomes:     []string{"保留 OTA campaign 願景且不誇大第一階段實作", "讓 firmware、SDK、backend 與產品團隊共用 availability 詞彙", "讓評估討論清楚區分目前可用、合約定義與 roadmap"},
+			Highlights:   []string{"韌體上傳、catalog、target enablement、rollout 狀態、report、cancel 與 download 的現有基礎", "scheduled、time-window、user-consent 與 archive 屬於已可用的 campaign surface", "審核流程、dashboard、analytics、分階段百分比 rollout 與自動 cohort ramping 維持 roadmap 標示"},
+			Capabilities: []string{"以既有 firmware route 作為可用實作邊界，而非暗示完整 campaign engine 已完成", "將 scheduled、time-window、user-consent 與 archive 行為視為已可用的 campaign policy vocabulary", "cancel 保持為生命週期基礎；approval workflow、dashboard、analytics 與分階段百分比 rollout 則標示為 roadmap 範圍"},
+			Outcomes:     []string{"保留 OTA campaign 願景且不誇大第一階段實作", "讓 firmware、SDK、backend 與產品團隊共用 availability 詞彙", "讓評估討論清楚區分目前可用、已實作與 roadmap"},
 		},
 		"fleet-management": {
 			Title:        "裝置群管理",
