@@ -218,7 +218,7 @@ Realtek Connect+ presents the following Realtek IoT cloud platform capabilities:
 
 - Platform Overview: device firmware, cloud backend, mobile app, dashboard, and third-party integrations.
 - Provision: Wi-Fi/BLE onboarding, device binding, activation, user-device association.
-- OTA: firmware lifecycle foundation for upload/catalog, target enablement, rollout status, report, cancel, and download; campaign policy vocabulary for scheduled, time-window, user-consent, archive, and advanced rollout operations is contract-defined or roadmap scope until implementation lands.
+- OTA: firmware lifecycle foundation for upload/catalog, target enablement, rollout status, report, cancel, and download; implemented campaign policy surfaces for scheduled, time-window, user-consent, and archive are available now, while advanced rollout operations remain roadmap scope.
 - Fleet Management: device registry, groups, metadata/tags, batch operations, timezone, device sharing.
 - Smart Home Experience: remote control, local control fallback, schedules, scenes, grouping, node sharing, push notifications, alerts, and household sharing flows framed as product capabilities rather than current website app behavior.
 - User Management: sign up, sign in, OTP verification, third-party login, password recovery/change, and account deletion framed as platform capabilities rather than current website authentication flows.
@@ -242,7 +242,7 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 | --- | --- | --- | --- |
 | Platform Overview | Content Partial | Homepage, `/features`, docs landing page | The site now explains the device-cloud-app-dashboard story, but follow-on work can deepen security, scalability, cost, and deployment comparison narratives. |
 | Provision | Content Partial | `/features/provision`, [`PRODUCT_ONBOARDING.md`](https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/PRODUCT_ONBOARDING.md) | Provisioning copy now distinguishes the contract-backed cloud registry, cross-service activation, scoped-token, and transport-readiness foundation from integration-ready claim material interfaces and roadmap local onboarding work. Local Wi-Fi/BLE setup, QR/SoftAP UX, ownership transfer, factory reset policy, and aggregate product readiness are not described as generally available until the owner repositories land those implementations. |
-| OTA | Content Partial | `/features/ota`, [`FIRMWARE_CAMPAIGN.md`](https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/FIRMWARE_CAMPAIGN.md) | OTA copy now distinguishes the available firmware lifecycle foundation for upload, catalog, target enablement, rollout status, report, cancel, and download from the planned campaign policy engine. Scheduled/time-window/user-consent policy, archive management, approval workflow, dashboards, analytics, and staged percentage rollout are contract-defined or roadmap scope rather than generally available phase-one implementation. |
+| OTA | Content Partial | `/features/ota`, [`FIRMWARE_CAMPAIGN.md`](https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/FIRMWARE_CAMPAIGN.md) | OTA copy now distinguishes the available firmware lifecycle foundation for upload, catalog, target enablement, rollout status, report, cancel, and download from the implemented campaign policy surfaces for scheduled, time-window, user-consent, and archive. Approval workflow, dashboards, analytics, and staged percentage rollout remain roadmap scope rather than generally available phase-one implementation. |
 | Fleet Management | Implemented | `/features/fleet-management` | The fleet page covers node registration, bootstrap certificates, registry, groups, metadata, OTA jobs, firmware images, batch operations, and operator statistics widgets as website content without claiming a live console implementation. |
 | Admin Operations | Content Partial | `/features/fleet-management`, `/admin/leads`, `/admin/leads.csv` | Website v1 ships lead-review tooling plus admin-operations product copy, but it does not ship the full fleet console described by the marketing content. |
 | User Management | Content Partial | `/features/user-management` | The feature page covers sign up, sign in, OTP verification, third-party login, forgot/change password, delete account, and account lifecycle boundaries; follow-on work can add deeper session behavior, support workflows, and visuals. |
@@ -296,7 +296,7 @@ Localized public route variants:
 Feature slugs:
 
 - `provision`: aligns public provisioning availability wording with the product onboarding interface contract, separating the cloud-side activation foundation from integration-ready claim material and roadmap local onboarding/readiness work.
-- `ota`: aligns public OTA availability wording with the firmware campaign interface contract, separating the available firmware lifecycle foundation from planned campaign policy and roadmap operations.
+- `ota`: aligns public OTA availability wording with the firmware campaign interface contract, promoting the implemented campaign policy surfaces while keeping roadmap operations explicit.
 - `fleet-management`
 - `smart-home`
 - `user-management`
