@@ -17,10 +17,11 @@ Implemented today:
 - Server-rendered pages using `html/template`.
 - Static CSS with a Realtek-style white, deep navy, and blue-green/teal visual system.
 - Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
-- Generated feature visuals for Provision, OTA, Insights, and Private Cloud stored under `static/assets/` and rendered from workspace-local paths on their feature pages.
+- Generated feature and platform visuals stored under `static/assets/`, including the SDK sample ecosystem diagram at `static/assets/connectplus-sample-ecosystem.png`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
-- Feature overview and detail pages for Provision, OTA, Fleet Management, Smart Home Experience, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured end-user smart-home workflow story, a structured mobile app delivery comparison story, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
+- Feature overview and detail pages for Provision, OTA, Fleet Management, Smart Home Experience, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured end-user smart-home workflow story, App SDK reference sample application coverage, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
+- File-backed manual routes for customer-facing guides, including `/manual/sdk-samples` for Android, iOS, WebApp, Linux simulator, and PRO2 device sample evaluation paths.
 - Locale-aware public site support for English, Traditional Chinese, and Simplified Chinese. English keeps the existing unprefixed URL structure; Traditional Chinese uses `/zh-tw/...`; Simplified Chinese uses `/zh-cn/...`.
 - Language switcher in the shared header that points to the same public page in each supported locale.
 - Localized public page metadata with canonical URLs, `hreflang` alternates, and localized sitemap entries.
@@ -37,6 +38,8 @@ Current routes:
 - `GET /`
 - `GET /docs`
 - `GET /docs/{slug}`
+- `GET /manual`
+- `GET /manual/{slug}`
 - `GET /features`
 - `GET /features/{slug}`
 - `GET /contact`
@@ -51,6 +54,8 @@ Current routes:
 - `GET /zh-tw`
 - `GET /zh-tw/docs`
 - `GET /zh-tw/docs/{slug}`
+- `GET /zh-tw/manual`
+- `GET /zh-tw/manual/{slug}`
 - `GET /zh-tw/features`
 - `GET /zh-tw/features/{slug}`
 - `GET /zh-tw/contact`
@@ -59,6 +64,8 @@ Current routes:
 - `GET /zh-cn`
 - `GET /zh-cn/docs`
 - `GET /zh-cn/docs/{slug}`
+- `GET /zh-cn/manual`
+- `GET /zh-cn/manual/{slug}`
 - `GET /zh-cn/features`
 - `GET /zh-cn/features/{slug}`
 - `GET /zh-cn/contact`
@@ -99,6 +106,7 @@ Assets:
 - Current generated homepage assets:
   - `static/assets/connectplus-hero-v2.jpg`: text-free chip-to-cloud-to-app/dashboard hero visual.
   - `static/assets/connectplus-platform-surfaces.jpg`: platform surfaces visual showing onboarding, OTA rollout, and fleet health dashboard context.
+  - `static/assets/connectplus-sample-ecosystem.png`: app and device sample ecosystem visual for Android/iOS/WebApp clients, Linux simulator, PRO2 device demo, and cloud hub context.
 - Homepage brand film:
   - The homepage may include the official Realtek corporate brand film as a trust-building section after Architecture and before Deployment.
   - The current implementation uses a local MP4 asset at `static/assets/realtek-brand-film.mp4`, tracked with Git LFS.
@@ -222,10 +230,21 @@ Realtek Connect+ presents the following Realtek IoT cloud platform capabilities:
 - Fleet Management: device registry, groups, metadata/tags, batch operations, timezone, device sharing.
 - Smart Home Experience: remote control, local control fallback, schedules, scenes, grouping, node sharing, push notifications, alerts, and household sharing flows framed as product capabilities rather than current website app behavior.
 - User Management: sign up, sign in, OTP verification, third-party login, password recovery/change, and account deletion framed as platform capabilities rather than current website authentication flows.
-- App SDK: iOS/Android SDK layers, sample app and rebrand path, push notifications, app publishing path, and launch-readiness ownership boundaries.
+- App SDK: iOS/Android SDK layers, Android/iOS/WebApp reference app samples, Linux simulator, PRO2 camera device demo, push notifications, app publishing path, and launch-readiness ownership boundaries.
 - Insights: activation statistics, firmware distribution, logs, crash reports, reboot reasons, RSSI/memory metrics.
 - Private Cloud: VM/container cloud-agnostic deployment (GCP/Azure/AWS/on-premises) versus serverless-locked alternatives, public evaluation tier (5-device default, up to 200 on request, non-commercial), private commercial tier (one-time license + annual maintenance, no minimum scale, contact sales for pricing), SDK licensing posture (currently proprietary, open-source release planned at GA), and tier-aware support boundary (community-tier for evaluation, contract-defined for commercial). Tier numbers, pricing structure, and SDK licensing source-of-truth live in `rtk_cloud_workspace/docs/business-model.md`; the website mirrors that document and must not introduce conflicting figures.
 - Integrations: Matter Fabric positioning, Alexa/Google Assistant paths, REST APIs, MQTT over TLS, webhooks, and cloud-to-cloud integration boundaries.
+
+## Client Sample Ecosystem
+
+The website summarizes the `rtk_cloud_client` sample ecosystem as a customer enablement path, not as code hosted or executed by this Go website.
+
+- Public surfaces: homepage sample proof point, `/features/app-sdk`, `/docs/sdks`, and `/manual/sdk-samples`.
+- App-side samples: Android Home Automation sample, iOS Home Automation sample, and WebApp Ops Lab sample.
+- Device-side samples: Linux simulator and PRO2 camera device demo.
+- Validation scope: provisioning adapter states, token/session setup, device list/detail, light and AC command flow, camera monitor, snapshot/stream/WebRTC signaling boundary, MQTT payload inspection, status/log/event reporting, and redacted debug reports.
+- Boundaries: samples are SDK usage references, not production app-store apps, white-label release packages, customer release artifacts, or formal cloud wire contracts. The WebApp sample does not implement BLE or SoftAP onboarding.
+- Source of truth: deeper sample details remain in `rtk_cloud_client/docs/SAMPLE_APPLICATIONS.md`, `rtk_cloud_client/docs/SAMPLE_HOME_APP_SPEC.md`, `rtk_cloud_client/docs/SAMPLE_DEVICE_APP_SPEC.md`, and the sample README files under `rtk_cloud_client/samples/...` plus `rtk_cloud_client/packages/freertos/pro2_demo/README.md`.
 
 ## Platform Completion Gap
 
@@ -247,13 +266,13 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 | Admin Operations | Content Partial | `/features/fleet-management`, `/admin/leads`, `/admin/leads.csv` | Website v1 ships lead-review tooling plus admin-operations product copy, but it does not ship the full fleet console described by the marketing content. |
 | User Management | Content Partial | `/features/user-management` | The feature page covers sign up, sign in, OTP verification, third-party login, forgot/change password, delete account, and account lifecycle boundaries; follow-on work can add deeper session behavior, support workflows, and visuals. |
 | End-user Smart Home Features | Content Partial | `/features/smart-home` | The smart-home page now covers remote control, local fallback, scheduling, scenes, grouping, node sharing, push notifications, alerts, and household workflow boundaries, with room for richer mobile personas and control-state diagrams. |
-| Mobile App SDK | Implemented | `/features/app-sdk` | The app SDK page covers iOS and Android SDK layers, sample app and rebrand paths, push notifications, and App Store/Google Play publishing guidance without introducing a client-side framework into the website itself. |
+| Mobile App SDK | Implemented | `/features/app-sdk`, `/manual/sdk-samples` | The app SDK page and manual now cover iOS and Android SDK layers, Android/iOS/WebApp reference samples, Linux simulator, PRO2 camera device demo, push notifications, and App Store/Google Play publishing guidance without introducing a client-side framework into the website itself. The website summarizes `rtk_cloud_client`; deeper sample specs remain in `rtk_cloud_client/docs/SAMPLE_APPLICATIONS.md` and the sample README files. |
 | Insights | Content Partial | `/features/insights` | Insights copy covers activation statistics, firmware distribution, logs, crash reports, reboot reasons, RSSI, and memory signals, but the website still needs stronger dashboard visuals and deeper support/metrics storytelling. |
 | Private Cloud / Deployment | Implemented | `/features/private-cloud`, `/docs/deployment` | Website v1 now compares public evaluation, managed private deployment, and customer-operated private regions with coverage for VM/container deployment substrate, GCP/Azure/AWS/on-premises targets, evaluation device limits (5 default / 200 max), commercial pricing structure (license + maintenance, no minimum scale, contact sales for figures), SDK licensing posture, and tier-aware support boundaries. The page mirrors `rtk_cloud_workspace/docs/business-model.md`; self-service signup is owned by `rtk_cloud_admin` and `rtk_account_manager` and is referred to from the marketing site rather than implemented inside it. |
 | Matter / Ecosystem Integrations | Implemented | `/features/integrations` | The integrations page now covers Matter Fabric positioning, voice assistants, MQTT over TLS, REST APIs, webhooks, and a structured integration-path comparison without promising unsupported live services. |
 | Developer Docs Portal | Content Partial | `/docs`, `/docs/product-overview`, `/docs/development`, `/docs/deployment`, `/docs/release-notes` | The portal structure exists and is navigable, but follow-on work can deepen setup guides, architecture diagrams, and operational runbooks. |
 | APIs | Content Partial | `/docs/apis`, `/features/integrations` | API positioning exists, but website v1 still lacks reference-grade endpoint coverage, auth flows, webhook payload examples, and error-model detail. |
-| SDK Reference | Content Partial | `/docs/sdks`, `/features/app-sdk` | The docs and feature surfaces position the mobile SDK layers, but they do not yet provide install guides, versioned reference material, or language-specific sample code depth. |
+| SDK Reference | Content Partial | `/docs/sdks`, `/features/app-sdk`, `/manual/sdk-samples` | The docs, feature, and manual surfaces now include a sample matrix covering Android Home Automation, iOS Home Automation, WebApp Ops Lab, Linux simulator, and PRO2 camera device demo. Follow-on depth can add versioned install guides and language-specific code walkthroughs. |
 | CLI | Content Partial | `/docs/cli` | The CLI section exists as part of the docs portal, but website v1 still needs command catalogs, auth/session examples, and operator workflow walkthroughs. |
 | SEO / Launch Readiness | Content Partial | Shared layout metadata, `/robots.txt`, `/sitemap.xml`, `go run ./cmd/visual-smoke` | Metadata, sitemap, robots, CI, deployment packaging, and desktop/mobile visual smoke checks for English, Traditional Chinese, and Simplified Chinese public pages now exist; remaining work is broader launch polish such as expanded product visuals plus final parity and documentation close-out. |
 | Real IoT Cloud Operations | Out of Scope for website v1 | Public marketing and docs copy only | The public website will describe platform capabilities, but it will not implement real device provisioning, OTA delivery, user auth, telemetry ingestion, or a production device-operations control plane in v1. |
@@ -272,6 +291,8 @@ Routes:
 - `GET /`: homepage.
 - `GET /docs`: developer/documentation portal landing page.
 - `GET /docs/{slug}`: developer/documentation section detail pages.
+- `GET /manual`: file-backed customer manual landing page.
+- `GET /manual/{slug}`: file-backed customer manual detail pages, including `/manual/sdk-samples`.
 - `GET /features`: feature overview.
 - `GET /features/{slug}`: feature detail pages.
 - `GET /contact`: contact / early access registration form.
@@ -288,7 +309,7 @@ Localized public route variants:
 
 - Traditional Chinese mirrors public routes under `/zh-tw`.
 - Simplified Chinese mirrors public routes under `/zh-cn`.
-- Examples: `/zh-tw/features/ota`, `/zh-cn/docs/apis`, `/zh-tw/contact`.
+- Examples: `/zh-tw/features/ota`, `/zh-cn/docs/apis`, `/zh-tw/manual/sdk-samples`, `/zh-tw/contact`.
 - Privacy examples: `/zh-tw/privacy`, `/zh-cn/privacy`.
 - Localized `POST /contact` variants write to the same SQLite lead table.
 - Feature and documentation slugs remain English across all locales.

@@ -1,0 +1,15 @@
+title: "使用手册"
+description: "Realtek Connect+ 的操作指南与参考文件。"
+sections:
+  - slug: getting-started
+    title: "开始使用"
+    summary: "设置第一台装置并验证连接。"
+  - slug: deployment-notes
+    title: "部署注意事项"
+    summary: "检查生产假设、备份还原步骤与 rollout checkpoint。"
+  - slug: reference
+    title: "参考资料"
+    summary: "整理常用命令、链接与内容来源提醒。"
+  - slug: sdk-samples
+    title: "SDK 范例应用"
+    summary: "使用 App 端与装置端范例验证 Realtek Connect+ SDK 流程。"

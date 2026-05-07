@@ -104,6 +104,23 @@
   </div>
 </section>
 
+<section class="section sample-ecosystem-band">
+  <div class="sample-ecosystem-copy">
+    <span class="icon-box panel-icon">{{icon "package"}}</span>
+    <p class="eyebrow">{{t . "home.samples.eyebrow"}}</p>
+    <h2>{{t . "home.samples.title"}}</h2>
+    <p>{{t . "home.samples.body"}}</p>
+    <div class="sample-ecosystem-tags" aria-label="SDK sample surfaces">
+      <span><span class="module-icon">{{icon "phone-code"}}</span>{{t . "home.samples.app"}}</span>
+      <span><span class="module-icon">{{icon "device"}}</span>{{t . "home.samples.device"}}</span>
+    </div>
+    <a class="button secondary" href="{{localizedPath . "/manual/sdk-samples"}}"><span class="button-icon">{{icon "document"}}</span>{{t . "home.samples.cta"}}</a>
+  </div>
+  <div class="sample-ecosystem-visual">
+    <img src="{{asset "/static/assets/connectplus-sample-ecosystem.png"}}" alt="Realtek Connect+ SDK sample ecosystem with app clients, device simulator, PRO2 demo, and cloud hub">
+  </div>
+</section>
+
 <section class="section architecture" id="architecture">
   <div class="section-heading">
     <p class="eyebrow">{{t . "home.arch.eyebrow"}}</p>

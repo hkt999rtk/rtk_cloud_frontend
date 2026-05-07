@@ -10,6 +10,19 @@ type Section struct {
 	Highlights   []string
 	Deliverables []string
 	Audience     []string
+	Table        Table
+}
+
+type Table struct {
+	Eyebrow string
+	Title   string
+	Intro   string
+	Columns []string
+	Rows    []TableRow
+}
+
+type TableRow struct {
+	Cells []string
 }
 
 func All() []Section {
@@ -52,11 +65,24 @@ func All() []Section {
 			Title:        "SDKs",
 			Icon:         "package",
 			Kicker:       "Document the developer surfaces used to build connected product experiences.",
-			Summary:      "Mobile SDK, firmware SDK, and reusable client components for branded product delivery.",
-			Description:  "SDKs serves as the catalog of implementation building blocks. It connects mobile, firmware, and service-side integration stories so product teams can understand which surfaces are reused, customized, or wrapped for their own connected product launch.",
-			Highlights:   []string{"iOS and Android mobile integration path", "Firmware-side service and identity building blocks", "Sample client components for branded product apps"},
-			Deliverables: []string{"SDK selection guidance by product type", "Customization boundaries for branded experiences", "Support expectations for onboarding and lifecycle features"},
+			Summary:      "Mobile SDK, firmware SDK, reusable client components, and reference samples for branded product delivery.",
+			Description:  "SDKs serves as the catalog of implementation building blocks. It connects mobile, firmware, device simulation, and service-side integration stories so product teams can validate Realtek Connect+ flows before committing to a production app or device integration.",
+			Highlights:   []string{"iOS and Android mobile integration path", "Firmware-side service and identity building blocks", "Android, iOS, WebApp, Linux simulator, and PRO2 device reference samples"},
+			Deliverables: []string{"SDK selection guidance by product type", "Customization boundaries for branded experiences", "Reference sample applications that demonstrate provisioning, device list/detail, light and AC command flows, camera paths, debug reports, and MQTT payload inspection"},
 			Audience:     []string{"Mobile engineers integrating branded apps", "Embedded developers mapping device-side dependencies", "Program leads planning reuse vs customization"},
+			Table: Table{
+				Eyebrow: "Reference Samples",
+				Title:   "SDK sample matrix",
+				Intro:   "The sample ecosystem proves app-side and device-side SDK usage while keeping production app ownership, app-store publishing, and formal cloud contracts separate.",
+				Columns: []string{"Sample", "Surface", "What it validates"},
+				Rows: []TableRow{
+					{Cells: []string{"Android Home Automation sample", "Native mobile app", "Provisioning adapter states, device list/detail, light and AC controls, camera monitor, debug report, and redacted evidence collection."}},
+					{Cells: []string{"iOS Home Automation sample", "Native mobile app", "Swift SDK usage for the same home automation flows, including setup profiles, device control, camera boundaries, and debug evidence."}},
+					{Cells: []string{"WebApp Ops Lab sample", "Browser app", "Cloud-side onboarding, device registry exploration, MQTT payload inspection, simulated controls, camera monitor helpers, and debug report flow without BLE or SoftAP."}},
+					{Cells: []string{"Linux device simulator", "Device reference", "Light, AC, and camera command handling without physical hardware, including local state updates, reports, and validation output."}},
+					{Cells: []string{"PRO2 camera device demo", "Device firmware reference", "Device-bound token flow, owner transport, snapshot upload, camera status/log/event reporting, and WebRTC answerer boundary."}},
+				},
+			},
 		},
 		{
 			Slug:         "firmware",
