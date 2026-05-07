@@ -86,6 +86,9 @@ type pageData struct {
 	Doc                docs.Section
 	ManualIndex        manual.ManualIndex
 	ManualPage         manual.ManualPage
+	Analytics          pageAnalyticsView
+	AnalyticsEndpoint  string
+	AnalyticsPage      string
 	AdminAnalytics     adminAnalyticsView
 	Features           []features.Feature
 	Feature            features.Feature
@@ -101,6 +104,10 @@ type pageData struct {
 	AdminAnalyticsHref string
 	LeadFilters        adminLeadFilters
 	LeadPagination     adminLeadPagination
+}
+
+type pageAnalyticsView struct {
+	Enabled bool
 }
 
 type contactForm struct {

@@ -40,7 +40,12 @@ func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath
 		AlternateLinks:  s.alternateLinks(r, publicPath, locale),
 		Docs:            catalog.Docs,
 		Features:        catalog.Features,
-		InterestOptions: catalog.ContactInterestOptions(),
+		Analytics: pageAnalyticsView{
+			Enabled: s.analyticsStore != nil && isPublicAnalyticsPage(publicPath),
+		},
+		AnalyticsEndpoint: "/api/event",
+		AnalyticsPage:     analyticsPageKey(publicPath),
+		InterestOptions:   catalog.ContactInterestOptions(),
 	}
 	if s.disableSearchIndexing {
 		data.MetaRobots = "noindex, nofollow, noarchive"
@@ -161,6 +166,7 @@ func publicSitemapPaths() []string {
 		"/manual/getting-started",
 		"/manual/deployment-notes",
 		"/manual/reference",
+		"/manual/sdk-samples",
 	}
 	for _, section := range catalog.Docs {
 		basePaths = append(basePaths, "/docs/"+section.Slug)
@@ -176,6 +182,34 @@ func publicSitemapPaths() []string {
 		}
 	}
 	return paths
+}
+
+func isPublicAnalyticsPage(publicPath string) bool {
+	key := analyticsPageKey(publicPath)
+	_, ok := analyticsAllowedPages[key]
+	return ok
+}
+
+func analyticsPageKey(publicPath string) string {
+	path := "/" + strings.Trim(strings.TrimSpace(publicPath), "/")
+	switch {
+	case path == "/":
+		return "home"
+	case path == "/features":
+		return "features"
+	case strings.HasPrefix(path, "/features/"):
+		return strings.TrimPrefix(path, "/features/")
+	case path == "/docs":
+		return "docs"
+	case strings.HasPrefix(path, "/docs/"):
+		return strings.TrimPrefix(path, "/docs/")
+	case path == "/contact":
+		return "contact"
+	case path == "/privacy":
+		return "privacy"
+	default:
+		return ""
+	}
 }
 
 func (s *Server) absoluteURL(r *http.Request, path string) string {

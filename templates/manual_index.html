@@ -1,6 +1,6 @@
 {{define "content"}}
 <section class="page-hero docs-hero">
-  <p class="eyebrow">Manual</p>
+  <p class="eyebrow">{{t . "manual.eyebrow"}}</p>
   <h1>{{.ManualIndex.Title}}</h1>
   <p>{{.ManualIndex.Description}}</p>
   <div class="hero-actions">
@@ -14,10 +14,10 @@
     {{range .ManualIndex.Sections}}
     <a class="feature-card docs-card tall" href="{{localizedPath $ (printf "/manual/%s" .Slug)}}">
       <span class="icon-box feature-icon">{{icon "document"}}</span>
-      <p class="card-kicker">Manual chapter</p>
+      <p class="card-kicker">{{t $ "manual.chapter"}}</p>
       <h2>{{.Title}}</h2>
       <p>{{.Summary}}</p>
-      <span class="text-link">Open section <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
+      <span class="text-link">{{t $ "manual.open"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>

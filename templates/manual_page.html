@@ -1,11 +1,11 @@
 {{define "content"}}
 <section class="page-hero feature-detail">
   <span class="icon-box page-hero-icon">{{icon "document"}}</span>
-  <p class="eyebrow">Manual</p>
+  <p class="eyebrow">{{t . "manual.eyebrow"}}</p>
   <h1>{{.ManualPage.Title}}</h1>
   <p>{{.ManualPage.Description}}</p>
   <div class="hero-actions">
-    <a class="button primary" href="{{localizedPath . "/manual"}}"><span class="button-icon">{{icon "document"}}</span>Back to manual</a>
+    <a class="button primary" href="{{localizedPath . "/manual"}}"><span class="button-icon">{{icon "document"}}</span>{{t . "manual.back"}}</a>
     <a class="button secondary" href="{{localizedPath . "/contact"}}"><span class="button-icon">{{icon "mail"}}</span>{{t . "nav.contact"}}</a>
   </div>
 </section>
@@ -17,8 +17,8 @@
 {{if .ManualIndex.Sections}}
 <section class="section doc-navigation">
   <div class="section-heading">
-    <p class="eyebrow">Manual chapters</p>
-    <h2>More sections</h2>
+    <p class="eyebrow">{{t . "manual.more"}}</p>
+    <h2>{{t . "manual.more.title"}}</h2>
   </div>
   <div class="docs-entry-grid">
     {{range .ManualIndex.Sections}}
@@ -26,7 +26,7 @@
       <span class="icon-box feature-icon">{{icon "document"}}</span>
       <h3>{{.Title}}</h3>
       <p>{{.Summary}}</p>
-      <span class="text-link">Open section <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
+      <span class="text-link">{{t $ "manual.open"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
     </a>
     {{end}}
   </div>

@@ -10,3 +10,6 @@ sections:
   - slug: reference
     title: "Reference Material"
     summary: "Keep a short list of commands, links, and recurring tasks."
+  - slug: sdk-samples
+    title: "SDK Sample Applications"
+    summary: "Use app-side and device-side samples to validate Realtek Connect+ SDK flows."

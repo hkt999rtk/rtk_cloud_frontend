@@ -131,7 +131,7 @@ func TestRoutesReturnOK(t *testing.T) {
 	for _, section := range docs.All() {
 		paths = append(paths, "/docs/"+section.Slug)
 	}
-	paths = append(paths, "/manual/getting-started", "/manual/deployment-notes", "/manual/reference")
+	paths = append(paths, "/manual/getting-started", "/manual/deployment-notes", "/manual/reference", "/manual/sdk-samples")
 	for _, feature := range features.All() {
 		paths = append(paths, "/features/"+feature.Slug)
 	}
@@ -242,6 +242,7 @@ func TestManualSectionPagesRender(t *testing.T) {
 	cases := map[string]string{
 		"/manual/deployment-notes": "Track the production deployment profile, backup and restore steps, and manual publishing checks.",
 		"/manual/reference":        "Collect the recurring links, commands, and content-source reminders for the manual.",
+		"/manual/sdk-samples":      "Validate app and device flows with the Realtek Connect",
 	}
 
 	for path, expected := range cases {
@@ -254,6 +255,133 @@ func TestManualSectionPagesRender(t *testing.T) {
 		}
 		if !strings.Contains(rec.Body.String(), expected) {
 			t.Fatalf("%s missing %q: %s", path, expected, rec.Body.String())
+		}
+	}
+}
+
+func TestClientSampleEcosystemContentRenders(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	cases := map[string][]string{
+		"/": {
+			"SDK sample ecosystem",
+			"Run app and device reference samples before committing to product integration.",
+			`href="/manual/sdk-samples"`,
+		},
+		"/features/app-sdk": {
+			"Reference sample applications",
+			"Use the rtk_cloud_client repository as the source of truth for sample code",
+			"Android Home Automation sample",
+			"iOS Home Automation sample",
+			"WebApp Ops Lab sample",
+			"Linux Simulator",
+			"PRO2 Device Demo",
+			"SDK usage references, not production app-store apps or white-label release packages.",
+			`src="/static/assets/connectplus-sample-ecosystem.png"`,
+		},
+		"/docs/sdks": {
+			"SDK sample matrix",
+			"Android Home Automation sample",
+			"iOS Home Automation sample",
+			"WebApp Ops Lab sample",
+			"Linux device simulator",
+			"PRO2 camera device demo",
+		},
+		"/manual": {
+			"SDK Sample Applications",
+			"Use app-side and device-side samples to validate Realtek Connect",
+			`href="/manual/sdk-samples"`,
+		},
+		"/manual/sdk-samples": {
+			"Validate app and device flows with the Realtek Connect",
+			"Home app reference clients",
+			"Device reference clients",
+			"sample-local reference",
+			"not a formal cloud wire contract",
+			"Linux simulator",
+			"WebApp Ops Lab",
+			"PRO2 camera device demo",
+			`href="https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_APPLICATIONS.md"`,
+			`href="https://github.com/hkt999rtk/rtk_cloud_client/blob/main/samples/android/README.md"`,
+			`href="https://github.com/hkt999rtk/rtk_cloud_client/blob/main/packages/freertos/pro2_demo/README.md"`,
+			`href="/contact"`,
+		},
+	}
+
+	for path, expectedValues := range cases {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", path, rec.Code)
+		}
+		body := rec.Body.String()
+		for _, expected := range expectedValues {
+			if !strings.Contains(body, expected) {
+				t.Fatalf("%s missing %q: %s", path, expected, body)
+			}
+		}
+	}
+}
+
+func TestClientSampleEcosystemContentIsLocalized(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	cases := map[string][]string{
+		"/zh-tw/features/app-sdk": {
+			"參考範例應用",
+			"Android 智慧家庭範例",
+			"iOS 智慧家庭範例",
+			"WebApp Ops Lab 範例",
+			"Linux 模擬器",
+			"PRO2 裝置範例",
+		},
+		"/zh-cn/features/app-sdk": {
+			"参考范例应用",
+			"Android 智能家庭范例",
+			"iOS 智能家庭范例",
+			"WebApp Ops Lab 范例",
+			"Linux 模拟器",
+			"PRO2 装置范例",
+		},
+		"/zh-tw/docs/sdks": {
+			"SDK 範例矩陣",
+			"Android 智慧家庭範例",
+			"PRO2 相機裝置範例",
+		},
+		"/zh-cn/docs/sdks": {
+			"SDK 范例矩阵",
+			"Android 智能家庭范例",
+			"PRO2 相机装置范例",
+		},
+		"/zh-tw/manual/sdk-samples": {
+			"SDK 範例生態系驗證 App 與裝置流程。",
+			"家庭 App 參考客戶端",
+			"裝置參考客戶端",
+			"不是正式雲端 wire contract",
+			`href="/zh-tw/contact"`,
+		},
+		"/zh-cn/manual/sdk-samples": {
+			"SDK 范例生态系验证 App 与装置流程。",
+			"家庭 App 参考客户端",
+			"装置参考客户端",
+			"不是正式云端 wire contract",
+			`href="/zh-cn/contact"`,
+		},
+	}
+
+	for path, expectedValues := range cases {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", path, rec.Code)
+		}
+		body := rec.Body.String()
+		for _, expected := range expectedValues {
+			if !strings.Contains(body, expected) {
+				t.Fatalf("%s missing %q: %s", path, expected, body)
+			}
 		}
 	}
 }
@@ -463,6 +591,7 @@ func TestLocalizedPublicRoutesReturnOK(t *testing.T) {
 		"/zh-tw/manual/getting-started",
 		"/zh-tw/manual/deployment-notes",
 		"/zh-tw/manual/reference",
+		"/zh-tw/manual/sdk-samples",
 		"/zh-tw/features",
 		"/zh-tw/features/provision",
 		"/zh-tw/contact",
@@ -474,6 +603,7 @@ func TestLocalizedPublicRoutesReturnOK(t *testing.T) {
 		"/zh-cn/manual/getting-started",
 		"/zh-cn/manual/deployment-notes",
 		"/zh-cn/manual/reference",
+		"/zh-cn/manual/sdk-samples",
 		"/zh-cn/features",
 		"/zh-cn/features/provision",
 		"/zh-cn/contact",
@@ -575,7 +705,7 @@ func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
 		},
 		{
 			path:       "/zh-cn/",
-			title:      "建立在 Realtek 的連网智慧之上。",
+			title:      "建立在 Realtek 的連网智能之上。",
 			body:       "Realtek Connect&#43; 将半导体与連线技术基础延伸为云端平台敘事",
 			point:      "半导体技术基础",
 			videoTitle: `title="Realtek 企业形象影片"`,
@@ -1168,8 +1298,8 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 		},
 		{
 			path: "/features/app-sdk",
-			src:  `/static/assets/feature-app-sdk.png`,
-			alt:  `alt="Mobile app SDK workspace with app screens, code modules, push notification blocks, and publishing checklist."`,
+			src:  `/static/assets/connectplus-sample-ecosystem.png`,
+			alt:  `alt="Realtek Connect&#43; sample ecosystem diagram with Android, iOS, WebApp, Linux simulator, PRO2 device demo, and cloud hub nodes."`,
 		},
 		{
 			path: "/features/insights",
@@ -1456,14 +1586,15 @@ func TestAppSDKFeatureCoversMobileDeliveryPaths(t *testing.T) {
 	for _, want := range []string{
 		"Deliver branded mobile apps without rebuilding the connected product stack",
 		"Cover shared onboarding, authentication, device control, and account-linking primitives through iOS and Android SDK layers instead of promising a full client framework in this repo.",
-		"Use a sample app to accelerate white-label or branded launches while preserving room for custom navigation, design systems, and product-specific device flows.",
+		"Use the rtk_cloud_client repository as the source of truth for sample code",
+		"Use Android Home Automation, iOS Home Automation, and WebApp Ops Lab samples to validate provisioning",
 		"Plan push notifications around onboarding completion, shared-device events, OTA prompts, alerts, and support workflows that need deep links back into the branded app.",
 		"Coordinate bundle identifiers, signing assets, store metadata, review checklists, and staged rollout plans for both the App Store and Google Play.",
 		"Discuss App SDK",
-		"Choose the mobile delivery path that fits launch speed and brand control",
-		"<th scope=\"col\">Delivery path</th>",
-		"Rebranded starter app",
-		"Custom app on shared SDK",
+		"Reference sample applications across app and device surfaces",
+		"<th scope=\"col\">Sample</th>",
+		"WebApp Ops Lab sample",
+		"PRO2 Device Demo",
 		"not a shipped mobile framework",
 	} {
 		if !strings.Contains(body, want) {
@@ -1676,9 +1807,12 @@ func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 		`<loc>http://example.com/features/ota</loc>`,
 		`<loc>http://example.com/contact</loc>`,
 		`<loc>http://example.com/privacy</loc>`,
+		`<loc>http://example.com/manual/sdk-samples</loc>`,
 		`<loc>http://example.com/zh-tw/features/ota</loc>`,
+		`<loc>http://example.com/zh-tw/manual/sdk-samples</loc>`,
 		`<loc>http://example.com/zh-tw/privacy</loc>`,
 		`<loc>http://example.com/zh-cn/docs/apis</loc>`,
+		`<loc>http://example.com/zh-cn/manual/sdk-samples</loc>`,
 		`<loc>http://example.com/zh-cn/contact</loc>`,
 		`<loc>http://example.com/zh-cn/privacy</loc>`,
 	} {

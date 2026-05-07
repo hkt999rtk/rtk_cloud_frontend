@@ -90,6 +90,37 @@ LIMIT 1`).Scan(&ts, &eventType, &page, &cta, &percent, &duration, &variant, &ref
 	}
 }
 
+func TestPublicPageRendersAnalyticsConfigWhenStoreExists(t *testing.T) {
+	repo, _ := openAnalyticsTestStore(t)
+	defer repo.Close()
+
+	handler := testServerWithConfig(t, Config{
+		LeadStore:      &memoryLeadStore{},
+		AnalyticsStore: repo,
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	for _, want := range []string{
+		`endpoint: "\/api\/event"`,
+		`page: "home"`,
+		`event: "page_view"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("analytics config missing %q: %s", want, body)
+		}
+	}
+	if strings.Contains(body, "template render error") {
+		t.Fatalf("page rendered template error: %s", body)
+	}
+}
+
 func TestAnalyticsEventEndpointRejectsInvalidEvents(t *testing.T) {
 	cases := []struct {
 		name    string

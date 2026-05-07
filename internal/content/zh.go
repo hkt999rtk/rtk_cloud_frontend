@@ -18,6 +18,8 @@ type localizedFeature struct {
 	Highlights   []string
 	Capabilities []string
 	Outcomes     []string
+	Sections     []features.FeatureSection
+	Table        features.FeatureTable
 }
 
 type localizedDoc struct {
@@ -28,6 +30,7 @@ type localizedDoc struct {
 	Highlights   []string
 	Deliverables []string
 	Audience     []string
+	Table        docs.Table
 }
 
 func zhTWCatalog() Catalog {
@@ -155,6 +158,12 @@ func zhTWText() map[string]string {
 		"home.docs.eyebrow":                         "開發者入口",
 		"home.docs.title":                           "為產品、韌體、App 與雲端團隊建立共同文件主軸。",
 		"home.docs.open":                            "開啟章節",
+		"home.samples.eyebrow":                      "SDK 範例生態系",
+		"home.samples.title":                        "投入產品整合前，先跑 App 與裝置參考範例。",
+		"home.samples.body":                         "Android、iOS、WebApp、Linux 模擬器與 PRO2 裝置範例協助客戶跨 App 與裝置介面驗證 Realtek Connect+ SDK 流程。",
+		"home.samples.app":                          "App 客戶端",
+		"home.samples.device":                       "裝置參考",
+		"home.samples.cta":                          "開啟範例指南",
 		"home.cta.eyebrow":                          "早期評估",
 		"home.cta.title":                            "規劃 Realtek Connect+ 產品路徑。",
 		"home.cta.body":                             "登記你對配網、OTA、私有雲、App SDK 或裝置群營運的需求。",
@@ -200,6 +209,12 @@ func zhTWText() map[string]string {
 		"doc.next":                                  "下一個章節",
 		"doc.next.title":                            "繼續瀏覽開發者入口。",
 		"doc.view":                                  "查看章節",
+		"manual.eyebrow":                            "使用手冊",
+		"manual.chapter":                            "手冊章節",
+		"manual.open":                               "開啟章節",
+		"manual.back":                               "返回使用手冊",
+		"manual.more":                               "手冊章節",
+		"manual.more.title":                         "更多章節",
 		"contact.eyebrow":                           "聯絡",
 		"contact.title":                             "登記 Realtek Connect+ 評估需求。",
 		"contact.body":                              "告訴我們你的產品團隊最關注哪一項服務。第一版會將請求儲存在本機 SQLite。",
@@ -301,12 +316,31 @@ func zhTWFeatures() map[string]localizedFeature {
 		"app-sdk": {
 			Title:        "App SDK",
 			Kicker:       "更快打造品牌化行動體驗。",
-			Summary:      "iOS/Android SDK、範例 App、推播通知、rebrand 指引與 App 上架路徑。",
-			Description:  "App SDK 將行動體驗定位為可品牌化、可擴充與可發布的產品介面，協助團隊重用常見連網 App 能力。",
-			ImageAlt:     "顯示 App 畫面、程式模組、推播區塊與上架 checklist 的行動 SDK 工作區。",
-			Highlights:   []string{"涵蓋導入、控制與帳號流程的 iOS/Android SDK", "範例 App 與 rebrand 路徑", "推播、發布準備與上架指引"},
-			Capabilities: []string{"登入、配網、裝置控制與分享的共用行動元件", "可設定、換皮或擴充的參考 App 結構", "App Store 與 Google Play 發布規劃"},
-			Outcomes:     []string{"縮短行動 App 上市時間", "對齊 App 開發與產品權責", "減少每條產品線的一次性整合工作"},
+			Summary:      "iOS/Android SDK、App 端與裝置端參考範例、推播規劃、rebrand 指引與 App 上架路徑。",
+			Description:  "App SDK 將行動體驗定位為可品牌化、可擴充與可發布的產品介面，並透過 Android/iOS/WebApp 家庭 App 範例、Linux 裝置模擬器與 PRO2 裝置範例協助團隊先驗證 SDK 流程。",
+			ImageAlt:     "顯示 Android、iOS、WebApp、Linux 模擬器、PRO2 裝置範例與雲端中心的 Realtek Connect+ 範例生態系圖。",
+			Highlights:   []string{"涵蓋導入、控制與帳號流程的 iOS/Android SDK", "Android、iOS、WebApp、Linux 模擬器與 PRO2 裝置範例", "推播、發布準備與上架指引"},
+			Capabilities: []string{"登入、配網、裝置控制與分享的共用行動元件", "用 App 與裝置參考範例驗證跨端 SDK 用法", "App Store 與 Google Play 發布規劃"},
+			Outcomes:     []string{"縮短行動與裝置整合驗證時程", "對齊 App、韌體與產品團隊的範例邊界", "減少每條產品線的一次性 App/雲端/裝置整合工作"},
+			Sections: []features.FeatureSection{
+				{Eyebrow: "SDK 基礎", Title: "不用重建連網產品堆疊，也能交付品牌化行動 App", Intro: "此頁將行動 SDK 定位為可重用的平台層，而不是籠統宣稱已經有完整 App runtime。", Items: []string{"透過 iOS 與 Android SDK 層涵蓋導入、認證、裝置控制與帳號連結 primitive。", "協助行動團隊把常見裝置模型、配網狀態與控制介面映射到產品專屬體驗。", "保持清楚邊界：此 Go 網站描述 App enablement 範圍，不是 native mobile client runtime。"}},
+				{Eyebrow: "參考範例", Title: "參考範例應用先證明 SDK 用法，再進入產品整合", Intro: "範例生態系讓 App、韌體與產品團隊用具體的 App 端與裝置端 reference 驗證流程。", Items: []string{"以 rtk_cloud_client repository 作為 sample code、specification 與 sample README 的 source of truth；此網站只摘要客戶評估路徑，不 hosting SDK source。", "使用 Android 智慧家庭範例、iOS 智慧家庭範例與 WebApp Ops Lab 範例驗證配網、裝置列表/細節、燈具與空調控制、相機監看與 debug report。", "使用 Linux 模擬器與 PRO2 裝置範例驗證裝置端 command handling、sample MQTT payload、snapshot upload、狀態/log/event 回報與 WebRTC answerer 邊界。", "這些是 SDK usage references，不是正式 app-store app 或 white-label release package。"}},
+				{Eyebrow: "通知", Title: "把提醒與生命週期訊息當成 App 產品介面的一部分", Intro: "推播與 in-app notification 流程需要行動、雲端與支援能力協同規劃。", Items: []string{"圍繞導入完成、分享事件、OTA 提醒、警報與支援流程規劃推播通知。", "將通知 payload 連接到使用者權限、裝置所有權狀態與支援升級路徑。", "讓產品團隊可依市場與合規需求調整通知語氣、品牌與偏好設定。"}},
+				{Eyebrow: "發布", Title: "跨工程與產品團隊協調上架工作", Intro: "上架指引讓 App SDK 頁面與實際 release execution 連結，而不是停在 SDK 選型。", Items: []string{"協調 bundle identifier、簽章資產、商店 metadata、審核 checklist 與 App Store / Google Play staged rollout。", "用 contact path 讓 App 開發與產品團隊對齊品牌、release readiness 與後端能力範圍。", "產品團隊仍擁有 store ownership、privacy disclosure、crash monitoring 與 release approval。"}, Accent: true},
+			},
+			Table: features.FeatureTable{
+				Eyebrow: "範例生態系",
+				Title:   "橫跨 App 與裝置介面的參考範例應用",
+				Intro:   "每個範例都協助客戶驗證特定 Realtek Connect+ 整合路徑，同時把正式 App 所有權與正式雲端 wire contract 分開。",
+				Columns: []string{"範例", "端點", "驗證重點", "邊界"},
+				Rows: []features.FeatureTableRow{
+					{Cells: []string{"Android 智慧家庭範例", "App", "配網 adapter 狀態、裝置列表/細節、燈具與空調控制、相機監看與 debug report。", "Native Kotlin reference；不是 app-store deliverable。"}},
+					{Cells: []string{"iOS 智慧家庭範例", "App", "Swift SDK 的設定 profile、裝置控制、相機邊界與 debug evidence。", "Native Swift reference；客戶產品團隊擁有 release UX 與簽章。"}},
+					{Cells: []string{"WebApp Ops Lab 範例", "App", "雲端側導入、MQTT payload inspection、模擬控制、相機輔助流程與 debug report。", "瀏覽器 reference，不包含 BLE 或 SoftAP onboarding。"}},
+					{Cells: []string{"Linux 模擬器", "裝置", "不需硬體即可驗證燈具、空調與相機 command handling、local state 與 validation output。", "供開發與 evidence 使用的模擬器；不是 production device firmware package。"}},
+					{Cells: []string{"PRO2 裝置範例", "裝置", "Device-bound token、owner transport、snapshot upload、相機 logs/events 與 WebRTC answerer 邊界。", "韌體 reference；具體 Realtek SDK calls 仍由 firmware 擁有。"}},
+				},
+			},
 		},
 		"insights": {
 			Title:        "營運洞察",
@@ -365,9 +399,30 @@ func zhTWDocs() map[string]localizedDoc {
 		},
 		"development": docZH("開發", "以一個交付計畫組織韌體、雲端與 App 工作流。"),
 		"apis":        docZH("API", "透過結構化整合介面開放雲端能力。"),
-		"sdks":        docZH("SDK", "記錄打造連網產品體驗所需的開發者介面。"),
-		"firmware":    docZH("韌體", "釐清裝置軟體堆疊必須提供的能力。"),
-		"cli":         docZH("CLI", "用可重複的命令列流程支援開發者與營運者。"),
+		"sdks": {
+			Title:        "SDK",
+			Kicker:       "記錄打造連網產品體驗所需的開發者介面。",
+			Summary:      "行動 SDK、韌體 SDK、可重用 client 元件，以及用於產品驗證的參考範例。",
+			Description:  "SDK 章節串接 App、韌體、裝置模擬與雲端整合工作，協助產品團隊在投入正式 App 或裝置整合前先驗證 Realtek Connect+ 流程。",
+			Highlights:   []string{"iOS 與 Android 行動整合路徑", "韌體端服務與身分建構區塊", "Android、iOS、WebApp、Linux 模擬器與 PRO2 裝置參考範例"},
+			Deliverables: []string{"依產品類型選擇 SDK 的指引", "品牌化體驗的客製化邊界", "展示配網、裝置列表/細節、燈具與空調控制、相機流程、debug report 與 MQTT payload 檢視的參考範例"},
+			Audience:     []string{"整合品牌 App 的行動工程師", "對齊裝置端依賴的嵌入式工程師", "規劃重用與客製化範圍的專案負責人"},
+			Table: docs.Table{
+				Eyebrow: "參考範例",
+				Title:   "SDK 範例矩陣",
+				Intro:   "範例生態系用來證明 App 端與裝置端 SDK 用法，同時把正式 App 所有權、上架與正式雲端合約分開。",
+				Columns: []string{"範例", "介面", "驗證內容"},
+				Rows: []docs.TableRow{
+					{Cells: []string{"Android 智慧家庭範例", "原生行動 App", "配網 adapter 狀態、裝置列表/細節、燈具與空調控制、相機監看、debug report 與 redacted evidence 收集。"}},
+					{Cells: []string{"iOS 智慧家庭範例", "原生行動 App", "使用 Swift SDK 驗證相同智慧家庭流程，包含設定 profile、裝置控制、相機邊界與 debug evidence。"}},
+					{Cells: []string{"WebApp Ops Lab 範例", "瀏覽器 App", "雲端側導入、裝置 registry 檢視、MQTT payload inspection、模擬控制、相機輔助流程與 debug report，不包含 BLE 或 SoftAP。"}},
+					{Cells: []string{"Linux 裝置模擬器", "裝置參考", "不需實體硬體即可驗證燈具、空調與相機 command handling、local state update、report 與 validation output。"}},
+					{Cells: []string{"PRO2 相機裝置範例", "裝置韌體參考", "device-bound token、owner transport、snapshot upload、相機狀態/log/event 回報與 WebRTC answerer 邊界。"}},
+				},
+			},
+		},
+		"firmware": docZH("韌體", "釐清裝置軟體堆疊必須提供的能力。"),
+		"cli":      docZH("CLI", "用可重複的命令列流程支援開發者與營運者。"),
 		"deployment": {
 			Title:        "部署",
 			Kicker:       "記錄評估與商用部署背後的生產執行設定。",
@@ -420,8 +475,8 @@ func localizedFeatures(overrides map[string]localizedFeature) []features.Feature
 			feature.Highlights = item.Highlights
 			feature.Capabilities = item.Capabilities
 			feature.Outcomes = item.Outcomes
-			feature.Sections = nil
-			feature.Table = features.FeatureTable{}
+			feature.Sections = item.Sections
+			feature.Table = item.Table
 		}
 		out = append(out, feature)
 	}
@@ -440,6 +495,9 @@ func localizedDocs(overrides map[string]localizedDoc) []docs.Section {
 			section.Highlights = item.Highlights
 			section.Deliverables = item.Deliverables
 			section.Audience = item.Audience
+			if len(item.Table.Rows) > 0 {
+				section.Table = item.Table
+			}
 		}
 		out = append(out, section)
 	}
@@ -476,6 +534,8 @@ func simplifiedFeatures(input []features.Feature) []features.Feature {
 		feature.Highlights = simplifiedSlice(feature.Highlights)
 		feature.Capabilities = simplifiedSlice(feature.Capabilities)
 		feature.Outcomes = simplifiedSlice(feature.Outcomes)
+		feature.Sections = simplifiedFeatureSections(feature.Sections)
+		feature.Table = simplifiedFeatureTable(feature.Table)
 		out[index] = feature
 	}
 	return out
@@ -491,9 +551,46 @@ func simplifiedDocs(input []docs.Section) []docs.Section {
 		section.Highlights = simplifiedSlice(section.Highlights)
 		section.Deliverables = simplifiedSlice(section.Deliverables)
 		section.Audience = simplifiedSlice(section.Audience)
+		section.Table = simplifiedDocsTable(section.Table)
 		out[index] = section
 	}
 	return out
+}
+
+func simplifiedFeatureSections(input []features.FeatureSection) []features.FeatureSection {
+	out := make([]features.FeatureSection, len(input))
+	for index, section := range input {
+		section.Eyebrow = toSimplified(section.Eyebrow)
+		section.Title = toSimplified(section.Title)
+		section.Intro = toSimplified(section.Intro)
+		section.Items = simplifiedSlice(section.Items)
+		out[index] = section
+	}
+	return out
+}
+
+func simplifiedFeatureTable(input features.FeatureTable) features.FeatureTable {
+	input.Eyebrow = toSimplified(input.Eyebrow)
+	input.Title = toSimplified(input.Title)
+	input.Intro = toSimplified(input.Intro)
+	input.Columns = simplifiedSlice(input.Columns)
+	for index, row := range input.Rows {
+		row.Cells = simplifiedSlice(row.Cells)
+		input.Rows[index] = row
+	}
+	return input
+}
+
+func simplifiedDocsTable(input docs.Table) docs.Table {
+	input.Eyebrow = toSimplified(input.Eyebrow)
+	input.Title = toSimplified(input.Title)
+	input.Intro = toSimplified(input.Intro)
+	input.Columns = simplifiedSlice(input.Columns)
+	for index, row := range input.Rows {
+		row.Cells = simplifiedSlice(row.Cells)
+		input.Rows[index] = row
+	}
+	return input
 }
 
 func simplifiedSlice(input []string) []string {
@@ -532,6 +629,8 @@ func toSimplified(value string) string {
 		"行銷", "营销", "品質", "质量", "銷", "销", "觀", "观", "質", "质", "筆", "笔", "無", "无", "於", "于", "沒", "没", "記", "记", "屬", "属",
 		"預", "预", "期", "期", "個月", "个月", "訊息", "讯息", "嵌", "嵌",
 		"瀏", "浏", "約", "约", "撐", "撑",
+		"範", "范", "陣", "阵", "參", "参", "號", "号", "燈", "灯", "鏡", "镜",
+		"智慧", "智能", "相機", "相机", "模擬", "模拟", "驗", "验",
 	)
 	return replacer.Replace(value)
 }

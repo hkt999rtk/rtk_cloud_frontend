@@ -55,6 +55,17 @@ var (
 		"next_page":                {},
 		"open_docs":                {},
 		"view_feature":             {},
+		"contact_submit":           {},
+		"doc_cta_primary":          {},
+		"docs_cta_primary":         {},
+		"feature_cta_all":          {},
+		"feature_cta_primary":      {},
+		"home_cta_band":            {},
+		"home_cta_discuss":         {},
+		"home_cta_primary":         {},
+		"home_cta_secondary":       {},
+		"home_feature_discuss":     {},
+		"nav_cta_contact":          {},
 	}
 	analyticsAllowedVariants = map[string]struct{}{
 		"control":       {},

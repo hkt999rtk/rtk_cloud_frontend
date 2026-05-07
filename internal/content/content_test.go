@@ -77,7 +77,7 @@ func TestLocalizedOTACopyPromotesImplementedCampaignPolicies(t *testing.T) {
 		},
 		{
 			localeCode: "zh-CN",
-			wants:      []string{"现有基础", "已可用的 campaign surface", "roadmap 範圍"},
+			wants:      []string{"现有基础", "已可用的 campaign surface", "roadmap 范圍"},
 		},
 	}
 

@@ -6,7 +6,9 @@ Realtek Connect+ is a Go-rendered HTTP website for a Realtek-style IoT cloud pla
 
 Current status: **v0.1 Marketing Foundation**.
 
-This repository currently contains a working marketing website foundation, a developer docs portal structure, feature pages for provisioning, OTA, fleet management, smart home experience, user management, app SDK, insights, private cloud, and integrations, multilingual public routes for English, Traditional Chinese, and Simplified Chinese, per-page SEO/social metadata, sitemap and robots endpoints, a privacy notice, contact lead capture, SQLite storage, admin lead review with filtering and pagination, filtered CSV export, health check, and a container deployment recipe. It is not yet a complete IoT console, user authentication service, real OTA service, device provisioning backend, or telemetry platform.
+This repository currently contains a working marketing website foundation, a developer docs portal structure, feature pages for provisioning, OTA, fleet management, smart home experience, user management, app SDK, insights, private cloud, and integrations, a file-backed manual surface with SDK sample application guidance, multilingual public routes for English, Traditional Chinese, and Simplified Chinese, per-page SEO/social metadata, sitemap and robots endpoints, a privacy notice, contact lead capture, SQLite storage, admin lead review with filtering and pagination, filtered CSV export, health check, and a container deployment recipe. It is not yet a complete IoT console, user authentication service, real OTA service, device provisioning backend, telemetry platform, or production mobile app package.
+
+The App SDK, SDK docs, homepage, and manual now summarize the `rtk_cloud_client` sample ecosystem: Android and iOS Home Automation samples, WebApp Ops Lab, Linux device simulator, and PRO2 camera device demo. The website treats those samples as customer-facing SDK usage references and points to `rtk_cloud_client/docs/SAMPLE_APPLICATIONS.md` plus the sample README files as the deeper source of truth.
 
 The homepage includes a locally hosted Realtek corporate brand film at `static/assets/realtek-brand-film.mp4`, with a generated poster image and `preload="metadata"`. The video supports brand trust after the platform architecture section and is not used as autoplay hero media.
 
@@ -71,6 +73,8 @@ CDN readiness:
 - `GET /`
 - `GET /docs`
 - `GET /docs/{slug}`
+- `GET /manual`
+- `GET /manual/{slug}`
 - `GET /features`
 - `GET /features/{slug}`
 - `GET /contact`
