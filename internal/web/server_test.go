@@ -1211,7 +1211,7 @@ func TestProvisionFeatureAlignsPublicCopyWithContractStatus(t *testing.T) {
 		"Product onboarding interface contract",
 		`href="https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/PRODUCT_ONBOARDING.md"`,
 		"Cloud-side provisioning is the implemented contract boundary",
-		"Account-side device registration, cross-service provisioning requests, video activation results, scoped token issuance, and owner transport readiness are the public cloud-side behaviors to discuss today.",
+		"Account-side device registration, cross-service provisioning requests, WebRTC Video over TURN activation results, scoped token issuance, and owner transport readiness are the public cloud-side behaviors to discuss today.",
 		"Claim material has a defined interface, not final ownership policy",
 		"BLE provisioning, SoftAP provisioning, local Wi-Fi credential transport, QR onboarding UX, ECDH or challenge-response handshakes, and manufacturing CA policy are not yet stable website-available implementation claims.",
 		"Separate what is available, integration-ready, and roadmap",
@@ -1595,11 +1595,64 @@ func TestAppSDKFeatureCoversMobileDeliveryPaths(t *testing.T) {
 		"<th scope=\"col\">Sample</th>",
 		"WebApp Ops Lab sample",
 		"PRO2 Device Demo",
+		"WebRTC Video over TURN answerer and ICE/TURN boundary",
 		"not a shipped mobile framework",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
 		}
+	}
+}
+
+func TestPublicStreamingCopyUsesWebRTCVideoOverTURN(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	tests := []struct {
+		path string
+		want string
+	}{
+		{path: "/features/provision", want: "WebRTC Video over TURN activation"},
+		{path: "/features/app-sdk", want: "WebRTC Video over TURN answerer and ICE/TURN boundary"},
+		{path: "/docs/sdks", want: "WebRTC Video over TURN answerer and ICE/TURN boundary"},
+		{path: "/manual/sdk-samples", want: "WebRTC Video over TURN answerer and ICE/TURN boundary"},
+		{path: "/zh-tw/features/app-sdk", want: "WebRTC Video over TURN answerer / ICE/TURN"},
+		{path: "/zh-tw/docs/sdks", want: "WebRTC Video over TURN answerer / ICE/TURN"},
+		{path: "/zh-tw/manual/sdk-samples", want: "WebRTC Video over TURN answerer / ICE/TURN"},
+		{path: "/zh-cn/features/app-sdk", want: "WebRTC Video over TURN answerer / ICE/TURN"},
+		{path: "/zh-cn/docs/sdks", want: "WebRTC Video over TURN answerer / ICE/TURN"},
+		{path: "/zh-cn/manual/sdk-samples", want: "WebRTC Video over TURN answerer / ICE/TURN"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+			rec := httptest.NewRecorder()
+			handler.ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", rec.Code)
+			}
+
+			body := rec.Body.String()
+			if !strings.Contains(body, tt.want) {
+				t.Fatalf("response does not contain %q: %s", tt.want, body)
+			}
+
+			for _, forbidden := range []string{
+				"RTSP",
+				"rtsp",
+				"POST /request_stream",
+				"mode=rtsp",
+				"mode=relay",
+				"ScopeRTSP",
+				"streaming_rtsp_push",
+				"streaming_relay_push",
+			} {
+				if strings.Contains(body, forbidden) {
+					t.Fatalf("response contains legacy streaming marker %q: %s", forbidden, body)
+				}
+			}
+		})
 	}
 }
 

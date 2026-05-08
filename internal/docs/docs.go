@@ -80,7 +80,7 @@ func All() []Section {
 					{Cells: []string{"iOS Home Automation sample", "Native mobile app", "Swift SDK usage for the same home automation flows, including setup profiles, device control, camera boundaries, and debug evidence."}},
 					{Cells: []string{"WebApp Ops Lab sample", "Browser app", "Cloud-side onboarding, device registry exploration, MQTT payload inspection, simulated controls, camera monitor helpers, and debug report flow without BLE or SoftAP."}},
 					{Cells: []string{"Linux device simulator", "Device reference", "Light, AC, and camera command handling without physical hardware, including local state updates, reports, and validation output."}},
-					{Cells: []string{"PRO2 camera device demo", "Device firmware reference", "Device-bound token flow, owner transport, snapshot upload, camera status/log/event reporting, and WebRTC answerer boundary."}},
+					{Cells: []string{"PRO2 camera device demo", "Device firmware reference", "Device-bound token flow, owner transport, snapshot upload, camera status/log/event reporting, and WebRTC Video over TURN answerer and ICE/TURN boundary."}},
 				},
 			},
 		},

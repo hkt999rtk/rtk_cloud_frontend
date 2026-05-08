@@ -242,8 +242,8 @@ The website summarizes the `rtk_cloud_client` sample ecosystem as a customer ena
 - Public surfaces: homepage sample proof point, `/features/app-sdk`, `/docs/sdks`, and `/manual/sdk-samples`.
 - App-side samples: Android Home Automation sample, iOS Home Automation sample, and WebApp Ops Lab sample.
 - Device-side samples: Linux simulator and PRO2 camera device demo.
-- Validation scope: provisioning adapter states, token/session setup, device list/detail, light and AC command flow, camera monitor, snapshot/stream/WebRTC signaling boundary, MQTT payload inspection, status/log/event reporting, and redacted debug reports.
-- Boundaries: samples are SDK usage references, not production app-store apps, white-label release packages, customer release artifacts, or formal cloud wire contracts. The WebApp sample does not implement BLE or SoftAP onboarding.
+- Validation scope: provisioning adapter states, token/session setup, device list/detail, light and AC command flow, camera monitor, snapshot upload, WebRTC Video over TURN signaling and ICE/TURN boundary, MQTT payload inspection, status/log/event reporting, and redacted debug reports.
+- Boundaries: samples are SDK usage references, not production app-store apps, white-label release packages, customer release artifacts, or formal cloud wire contracts. The WebApp sample does not implement BLE or SoftAP onboarding. Public streaming copy must describe WebRTC Video over TURN only; TURN and coturn wording is allowed only as WebRTC ICE infrastructure, not as a standalone relay product.
 - Source of truth: deeper sample details remain in `rtk_cloud_client/docs/SAMPLE_APPLICATIONS.md`, `rtk_cloud_client/docs/SAMPLE_HOME_APP_SPEC.md`, `rtk_cloud_client/docs/SAMPLE_DEVICE_APP_SPEC.md`, and the sample README files under `rtk_cloud_client/samples/...` plus `rtk_cloud_client/packages/freertos/pro2_demo/README.md`.
 
 ## Platform Completion Gap
