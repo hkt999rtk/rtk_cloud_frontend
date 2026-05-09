@@ -1,5 +1,6 @@
 bin/
 /server
+.artifacts/
 data/*.db
 data/*.db-*
 data/analytics.db

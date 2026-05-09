@@ -30,6 +30,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Verify video asset
+        id: verify_video_asset
         shell: bash
         run: |
           test "$(wc -c < static/assets/realtek-brand-film.mp4)" -gt 1000000
@@ -38,6 +39,7 @@ jobs:
         run: go version
 
       - name: Check Go formatting
+        id: gofmt
         shell: bash
         run: |
           files="$(git ls-files '*.go')"
@@ -49,9 +51,11 @@ jobs:
           fi
 
       - name: Run tests
+        id: tests
         run: go test ./...
 
       - name: Check public copy
+        id: public_copy
         shell: bash
         run: |
           if grep -R -n -E 'RainMaker|Rainmaker|rainmaker' . \
@@ -63,6 +67,7 @@ jobs:
           fi
 
       - name: Build deployment bundle
+        id: build_bundle
         shell: bash
         run: |
           rm -rf dist
@@ -76,6 +81,7 @@ jobs:
           test -w dist/data
 
       - name: Deploy on website test host
+        id: deploy
         shell: bash
         run: |
           test -x /usr/local/sbin/deploy-realtek-connect
@@ -107,17 +113,63 @@ jobs:
           echo "$recent_logs"
           exit "$deploy_status"
 
-      - name: Verify public deployment
+      - name: Check public health
+        id: public_health
         shell: bash
         run: |
           curl -k -fsS --max-time 20 "${PUBLIC_BASE_URL}/healthz" | grep -qx "ok"
+
+      - name: Verify homepage
+        id: homepage
+        shell: bash
+        run: |
           curl -k -fsS --max-time 20 "${PUBLIC_BASE_URL}/" > /tmp/realtek-connect-home.html
           grep -q "Realtek Connect" /tmp/realtek-connect-home.html
           grep -q "Contact Us" /tmp/realtek-connect-home.html
+
+      - name: Verify deployed video asset
+        id: deployed_video
+        shell: bash
+        run: |
           curl -k -fsSI --max-time 20 "${PUBLIC_BASE_URL}/static/assets/realtek-brand-film.mp4" > /tmp/realtek-connect-video.headers
           grep -qi "content-type: video/mp4" /tmp/realtek-connect-video.headers
           awk 'BEGIN { ok = 0 } tolower($1) == "content-length:" && $2 + 0 > 1000000 { ok = 1 } END { exit ok ? 0 : 1 }' /tmp/realtek-connect-video.headers
+
+      - name: Check stale deployed copy
+        id: stale_copy
+        shell: bash
+        run: |
+          test -f /tmp/realtek-connect-home.html
           if grep -q "Contact Sales" /tmp/realtek-connect-home.html; then
             echo "Unexpected stale Contact Sales copy found in deployed homepage"
             exit 1
           fi
+
+      - name: Generate CD report candidate
+        if: always()
+        shell: bash
+        env:
+          REPORT_SOURCE_VIDEO_RESULT: ${{ steps.verify_video_asset.outcome == 'success' && 'PASS' || 'FAIL' }}
+          REPORT_BUNDLE_RESULT: ${{ steps.build_bundle.outcome == 'success' && 'PASS' || 'FAIL' }}
+          REPORT_DEPLOY_RESULT: ${{ steps.deploy.outcome == 'success' && 'PASS' || 'FAIL' }}
+          REPORT_HEALTH_RESULT: ${{ steps.public_health.outcome == 'success' && 'PASS' || 'FAIL' }}
+          REPORT_HOMEPAGE_RESULT: ${{ steps.homepage.outcome == 'success' && 'PASS' || 'FAIL' }}
+          REPORT_DEPLOYED_VIDEO_RESULT: ${{ steps.deployed_video.outcome == 'success' && 'PASS' || 'FAIL' }}
+          REPORT_STALE_COPY_RESULT: ${{ steps.stale_copy.outcome == 'success' && 'PASS' || 'FAIL' }}
+        run: |
+          chmod +x scripts/generate_report_candidate.sh scripts/validate_report_candidate.sh
+          scripts/generate_report_candidate.sh cd .artifacts/report-candidates/docs/READINESS_TEST_REPORT.md
+          scripts/validate_report_candidate.sh .artifacts/report-candidates/docs/READINESS_TEST_REPORT.md docs/READINESS_TEST_REPORT.md
+
+      - name: Upload report candidates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-candidates
+          path: .artifacts/report-candidates/docs/
+          if-no-files-found: error
+
+      - name: Check readiness report drift
+        shell: bash
+        run: |
+          diff -u docs/READINESS_TEST_REPORT.md .artifacts/report-candidates/docs/READINESS_TEST_REPORT.md
