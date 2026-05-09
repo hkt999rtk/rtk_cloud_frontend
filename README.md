@@ -16,6 +16,11 @@ Privacy readiness is intentionally lightweight for this prototype: `/privacy` de
 
 The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.md).
 
+Content classification terms for future project discussions:
+
+- **Fixed Content**: content written directly in templates, hard-coded HTML, or Go code. Use this term when referring to page structure, shared UI copy, or fixed text that is not driven by content files.
+- **Managed Content**: content maintained in content files, Markdown, YAML, content catalog data, or structured Go data and then rendered by templates. Use this term when referring to feature/docs/manual/localized content that can be centrally managed or validated.
+
 Tracked validation reports:
 
 - `docs/TEST_REPORT.md`: deterministic CI / PR validation report.
