@@ -16,6 +16,13 @@ Privacy readiness is intentionally lightweight for this prototype: `/privacy` de
 
 The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.md).
 
+Tracked validation reports:
+
+- `docs/TEST_REPORT.md`: deterministic CI / PR validation report.
+- `docs/READINESS_TEST_REPORT.md`: deterministic CD / deployed readiness report.
+- CI/CD generate sanitized candidates under `.artifacts/report-candidates/docs/` and upload them as the `report-candidates` artifact.
+- Use the `Import Report Candidate` workflow to import only `docs/TEST_REPORT.md` or `docs/READINESS_TEST_REPORT.md` from a selected workflow run into a target PR branch or explicit branch after heading, redaction, and path validation.
+
 ## Run
 
 ```bash

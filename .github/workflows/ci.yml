@@ -23,6 +23,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Verify video asset
+        id: verify_video_asset
         shell: bash
         run: |
           test "$(wc -c < static/assets/realtek-brand-film.mp4)" -gt 1000000
@@ -31,6 +32,7 @@ jobs:
         run: go version
 
       - name: Check Go formatting
+        id: gofmt
         shell: bash
         run: |
           files="$(git ls-files '*.go')"
@@ -42,7 +44,48 @@ jobs:
           fi
 
       - name: Run tests
+        id: tests
         run: go test ./...
 
       - name: Build server
+        id: build
         run: go build ./cmd/server
+
+      - name: Run visual smoke
+        id: visual_smoke
+        shell: bash
+        run: |
+          if command -v google-chrome >/dev/null 2>&1 || command -v chromium >/dev/null 2>&1 || command -v chromium-browser >/dev/null 2>&1; then
+            go run ./cmd/visual-smoke
+            echo "result=PASS" >> "$GITHUB_OUTPUT"
+          else
+            echo "Chrome is not available on this runner; recording visual smoke as SKIP."
+            echo "result=SKIP" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate CI report candidate
+        if: always()
+        shell: bash
+        env:
+          REPORT_ASSET_RESULT: ${{ steps.verify_video_asset.outcome == 'success' && 'PASS' || 'FAIL' }}
+          REPORT_GOFMT_RESULT: ${{ steps.gofmt.outcome == 'success' && 'PASS' || 'FAIL' }}
+          REPORT_TEST_RESULT: ${{ steps.tests.outcome == 'success' && 'PASS' || 'FAIL' }}
+          REPORT_BUILD_RESULT: ${{ steps.build.outcome == 'success' && 'PASS' || 'FAIL' }}
+          REPORT_VISUAL_SMOKE_RESULT: ${{ steps.visual_smoke.outputs.result || 'FAIL' }}
+        run: |
+          chmod +x scripts/generate_report_candidate.sh scripts/validate_report_candidate.sh
+          scripts/generate_report_candidate.sh ci .artifacts/report-candidates/docs/TEST_REPORT.md
+          scripts/validate_report_candidate.sh .artifacts/report-candidates/docs/TEST_REPORT.md docs/TEST_REPORT.md
+
+      - name: Upload report candidates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-candidates
+          path: .artifacts/report-candidates/docs/
+          if-no-files-found: error
+
+      - name: Check CI report drift
+        shell: bash
+        run: |
+          diff -u docs/TEST_REPORT.md .artifacts/report-candidates/docs/TEST_REPORT.md

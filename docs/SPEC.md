@@ -74,6 +74,32 @@ Current routes:
 
 This implementation is enough to demonstrate the Realtek Connect+ direction and collect leads. It is not yet content-complete as a full public IoT cloud platform website and documentation surface.
 
+## CI/CD Test Report Workflow
+
+Realtek Connect+ follows the shared test report policy from
+`hkt999rtk/rtk_cloud_contracts_doc` PR #24.
+
+- Canonical tracked reports:
+  - `docs/TEST_REPORT.md` for CI and PR validation.
+  - `docs/READINESS_TEST_REPORT.md` for CD and deployed readiness evidence.
+- CI generates `.artifacts/report-candidates/docs/TEST_REPORT.md` covering:
+  - brand film asset check
+  - Go formatting
+  - `go test ./...`
+  - `go build ./cmd/server`
+  - `go run ./cmd/visual-smoke`
+- CD generates `.artifacts/report-candidates/docs/READINESS_TEST_REPORT.md` covering:
+  - deployment bundle build
+  - website-test deployment result
+  - public `/healthz`
+  - public homepage verification
+  - deployed video asset verification
+  - stale-copy checks
+- CI/CD upload report candidates as the `report-candidates` artifact and keep raw logs in workflow logs or separate artifacts.
+- Drift checks compare committed reports with generated candidates for the selected validation profile.
+- Manual report import is handled by the `Import Report Candidate` workflow. It can update only `docs/TEST_REPORT.md` or `docs/READINESS_TEST_REPORT.md` in a target PR branch or explicit branch after allowlist, heading, redaction, path, and whitespace validation.
+- Report candidates are deterministic. They intentionally avoid volatile timestamps, local absolute paths, and raw credentials so committed reports can be reviewed and drift-checked reliably.
+
 ## Visual Direction
 
 The site uses a modern, minimal, direct enterprise style aligned with Realtek's official web presence: white content areas, clear navigation, product-led messaging, and blue-green brand accents. Compared with a traditional corporate site, Realtek Connect+ uses more whitespace, denser feature grids, stronger calls to action, and a clear platform architecture visual.

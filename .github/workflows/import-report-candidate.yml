@@ -1,0 +1,106 @@
+name: Import Report Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: GitHub Actions run id that uploaded the report-candidates artifact.
+        required: true
+        type: string
+      target_pr:
+        description: Optional pull request number whose head branch should receive the report update.
+        required: false
+        type: string
+      target_branch:
+        description: Branch to update when target_pr is not provided.
+        required: false
+        type: string
+      report_path:
+        description: Allowlisted canonical report path to import.
+        required: true
+        type: choice
+        options:
+          - docs/TEST_REPORT.md
+          - docs/READINESS_TEST_REPORT.md
+
+permissions:
+  actions: read
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: import-report-candidate-${{ inputs.target_pr || inputs.target_branch }}-${{ inputs.report_path }}
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: [self-hosted, rtk_cloud_frontend, go]
+
+    steps:
+      - name: Reset self-hosted workspace
+        shell: bash
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+
+      - name: Resolve target branch
+        id: target
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_PR: ${{ inputs.target_pr }}
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+        run: |
+          if [ -n "$TARGET_PR" ]; then
+            branch="$(gh pr view "$TARGET_PR" --json headRefName --jq .headRefName)"
+          else
+            branch="$TARGET_BRANCH"
+          fi
+          if [ -z "$branch" ]; then
+            echo "Provide target_pr or target_branch."
+            exit 1
+          fi
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Check out target branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.target.outputs.branch }}
+
+      - name: Download report candidate artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: report-candidates
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ github.token }}
+          path: .artifacts/imported-report-candidates
+
+      - name: Validate and import report
+        shell: bash
+        env:
+          REPORT_PATH: ${{ inputs.report_path }}
+        run: |
+          chmod +x scripts/validate_report_candidate.sh
+          candidate=".artifacts/imported-report-candidates/$(basename "$REPORT_PATH")"
+          scripts/validate_report_candidate.sh "$candidate" "$REPORT_PATH"
+          cp "$candidate" "$REPORT_PATH"
+          scripts/validate_report_candidate.sh "$REPORT_PATH" "$REPORT_PATH"
+          git diff --check -- "$REPORT_PATH"
+          changed="$(git diff --name-only)"
+          if [ -n "$changed" ] && [ "$changed" != "$REPORT_PATH" ]; then
+            echo "Import attempted to modify unexpected files:"
+            echo "$changed"
+            exit 1
+          fi
+
+      - name: Commit report update
+        shell: bash
+        run: |
+          if git diff --quiet -- "${{ inputs.report_path }}"; then
+            echo "No report changes to import."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${{ inputs.report_path }}"
+          git commit -m "Update test report from workflow run ${{ inputs.source_run_id }}"
+          git push origin "HEAD:${{ steps.target.outputs.branch }}"
