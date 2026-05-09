@@ -67,7 +67,7 @@ jobs:
           ref: ${{ steps.target.outputs.branch }}
 
       - name: Download report candidate artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: report-candidates
           run-id: ${{ inputs.source_run_id }}
