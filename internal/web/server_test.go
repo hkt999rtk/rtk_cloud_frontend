@@ -156,8 +156,8 @@ func TestDocsLandingRendersFileBackedContent(t *testing.T) {
 	body := rec.Body.String()
 	for _, expected := range []string{
 		"File-owned landing content",
-		`<img class="docs-content-image" src="/static/assets/connectplus-platform-surfaces.jpg" alt="Documentation architecture preview">`,
-		`<meta property="og:image" content="http://example.com/static/assets/connectplus-platform-surfaces.jpg">`,
+		`<img class="docs-content-image" src="/static/assets/connectplus-platform-surfaces-corporate-v2.jpg" alt="Documentation architecture preview">`,
+		`<meta property="og:image" content="http://example.com/static/assets/connectplus-platform-surfaces-corporate-v2.jpg">`,
 	} {
 		if !strings.Contains(body, expected) {
 			t.Fatalf("/docs missing %q", expected)
@@ -277,7 +277,7 @@ func TestClientSampleEcosystemContentRenders(t *testing.T) {
 			"Linux Simulator",
 			"PRO2 Device Demo",
 			"SDK usage references, not production app-store apps or white-label release packages.",
-			`src="/static/assets/connectplus-sample-ecosystem.png"`,
+			`src="/static/assets/connectplus-sample-ecosystem-corporate-v2.jpg"`,
 		},
 		"/docs/sdks": {
 			"SDK sample matrix",
@@ -667,7 +667,7 @@ func TestHomeMetadataIncludesSocialTags(t *testing.T) {
 		`<link rel="canonical" href="http://example.com/">`,
 		`<meta property="og:title" content="Realtek Connect&#43; | IoT Cloud Platform">`,
 		`<meta property="og:url" content="http://example.com/">`,
-		`<meta property="og:image" content="http://example.com/static/assets/connectplus-hero.png">`,
+		`<meta property="og:image" content="http://example.com/static/assets/connectplus-hero-corporate-v2.jpg">`,
 		`<meta name="twitter:card" content="summary_large_image">`,
 	} {
 		if !strings.Contains(body, want) {
@@ -944,7 +944,7 @@ func TestPublicBaseURLOverridesGeneratedAbsoluteURLs(t *testing.T) {
 		`hreflang="zh-Hant" href="https://webtest.mgmeet.io/zh-tw/features/provision"`,
 		`hreflang="zh-Hans" href="https://webtest.mgmeet.io/zh-cn/features/provision"`,
 		`<meta property="og:url" content="https://webtest.mgmeet.io/zh-tw/features/provision">`,
-		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/connectplus-hero.png">`,
+		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/connectplus-hero-corporate-v2.jpg">`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
@@ -1009,8 +1009,8 @@ func TestAssetFingerprintsAreOptional(t *testing.T) {
 	for _, want := range []string{
 		`href="/static/styles.css?v=`,
 		`src="/static/assets/realtek-logo.png?v=`,
-		`src="/static/assets/connectplus-hero-v2.jpg?v=`,
-		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/connectplus-hero.png?v=`,
+		`src="/static/assets/connectplus-hero-corporate-v2.jpg?v=`,
+		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/connectplus-hero-corporate-v2.jpg?v=`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("fingerprinted response does not contain %q: %s", want, body)
@@ -1273,48 +1273,48 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 	}{
 		{
 			path: "/features/provision",
-			src:  `/static/assets/feature-provision-flow.jpg`,
-			alt:  `alt="Provisioning dashboard concept with mobile pairing steps, QR onboarding, and device activation status cards."`,
+			src:  `/static/assets/connectplus-platform-surfaces-corporate-v2.jpg`,
+			alt:  `alt="Enterprise platform surface showing device registry, onboarding status, dashboard panels, and a mobile companion view."`,
 		},
 		{
 			path: "/features/ota",
-			src:  `/static/assets/feature-ota-control-center.jpg`,
-			alt:  `alt="Firmware rollout control center with staged release timeline, device cohorts, and OTA job status cards."`,
+			src:  `/static/assets/connectplus-operations-console-corporate-v2.jpg`,
+			alt:  `alt="Enterprise operations console showing firmware rollout, device registry, fleet health charts, and alert panels."`,
 		},
 		{
 			path: "/features/fleet-management",
-			src:  `/static/assets/feature-fleet-management.png`,
-			alt:  `alt="Fleet management dashboard with connected device groups, health status tiles, tags, and batch operation queue."`,
+			src:  `/static/assets/connectplus-operations-console-corporate-v2.jpg`,
+			alt:  `alt="Enterprise operations console showing device registry, fleet health charts, rollout status, and operational alerts."`,
 		},
 		{
 			path: "/features/smart-home",
-			src:  `/static/assets/feature-smart-home-experience.png`,
-			alt:  `alt="Smart home app control surface with connected home devices, scenes, schedules, grouping, and notification cards."`,
+			src:  `/static/assets/connectplus-platform-surfaces-corporate-v2.jpg`,
+			alt:  `alt="Enterprise platform surfaces showing mobile app context, connected device panels, and operations dashboard views."`,
 		},
 		{
 			path: "/features/user-management",
-			src:  `/static/assets/feature-user-management.png`,
-			alt:  `alt="User management console with profile cards, security verification, sharing permissions, and account lifecycle controls."`,
+			src:  `/static/assets/connectplus-operations-console-corporate-v2.jpg`,
+			alt:  `alt="Enterprise operations console showing account, device, security, and fleet management panels."`,
 		},
 		{
 			path: "/features/app-sdk",
-			src:  `/static/assets/connectplus-sample-ecosystem.png`,
-			alt:  `alt="Realtek Connect&#43; sample ecosystem diagram with Android, iOS, WebApp, Linux simulator, PRO2 device demo, and cloud hub nodes."`,
+			src:  `/static/assets/connectplus-sample-ecosystem-corporate-v2.jpg`,
+			alt:  `alt="Realtek Connect&#43; sample ecosystem diagram with generic app clients, simulator, reference device, and central platform hub."`,
 		},
 		{
 			path: "/features/insights",
-			src:  `/static/assets/feature-insights-dashboard.jpg`,
-			alt:  `alt="Operations insights dashboard with fleet health charts, alert cards, and device telemetry summaries."`,
+			src:  `/static/assets/connectplus-operations-console-corporate-v2.jpg`,
+			alt:  `alt="Enterprise operations console showing fleet health charts, firmware distribution, telemetry summaries, and alert panels."`,
 		},
 		{
 			path: "/features/private-cloud",
-			src:  `/static/assets/feature-private-cloud-architecture.jpg`,
-			alt:  `alt="Private cloud architecture showing container and VM workloads running across multiple cloud providers and on-premises data centers."`,
+			src:  `/static/assets/connectplus-architecture-diagram-corporate-v2.jpg`,
+			alt:  `alt="Enterprise architecture diagram showing device identity, private cloud services, data stores, and integration endpoints."`,
 		},
 		{
 			path: "/features/integrations",
-			src:  `/static/assets/feature-integrations.png`,
-			alt:  `alt="Integration hub connecting generic Matter, voice assistant, REST API, MQTT over TLS, webhook, app, and enterprise system endpoints."`,
+			src:  `/static/assets/connectplus-architecture-diagram-corporate-v2.jpg`,
+			alt:  `alt="Enterprise architecture diagram showing secure device connections, cloud services, APIs, MQTT, webhooks, and ecosystem endpoints."`,
 		},
 	}
 

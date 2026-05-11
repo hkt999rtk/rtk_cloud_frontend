@@ -1,7 +1,7 @@
 ---
 title: "开发者文档"
 subtitle: "以文件驱动的文档首页，服务产品、固件、App、云端与运营团队。"
-hero_image: "/static/assets/connectplus-platform-surfaces.jpg"
+hero_image: "/static/assets/connectplus-platform-surfaces-corporate-v2.jpg"
 hero_image_alt: "Realtek Connect+ 设备、云端、App 与运营团队的平台界面"
 sections:
   - title: "文件管理首页内容"
@@ -16,10 +16,10 @@ sections:
 seo:
   meta_title: "开发者文档 | Realtek Connect+"
   meta_description: "浏览 Realtek Connect+ 面向产品、固件、App、云端与运营团队的文档入口。"
-  social_image: "/static/assets/connectplus-platform-surfaces.jpg"
+  social_image: "/static/assets/connectplus-platform-surfaces-corporate-v2.jpg"
 ---
 Realtek Connect+ 保持第一版文档首页精简，同时让更深入的文档章节继续沿用既有 catalog 与服务器端渲染。
 
-![文档架构预览](/static/assets/connectplus-platform-surfaces.jpg)
+![文档架构预览](/static/assets/connectplus-platform-surfaces-corporate-v2.jpg)
 
 这个来源文件驱动的页面让团队能迭代文档首页内容，而不需要在同一个版本中迁移功能页或详细文档页。
