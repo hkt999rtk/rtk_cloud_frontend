@@ -38,6 +38,7 @@ func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath
 		LocalePrefix:    locale.Prefix,
 		Text:            catalog.Text,
 		AlternateLinks:  s.alternateLinks(r, publicPath, locale),
+		FooterSitemap:   s.footerSitemap(locale, catalog),
 		Docs:            catalog.Docs,
 		Features:        catalog.Features,
 		Analytics: pageAnalyticsView{
@@ -51,6 +52,62 @@ func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath
 		data.MetaRobots = "noindex, nofollow, noarchive"
 	}
 	return data
+}
+
+func (s *Server) footerSitemap(locale content.Locale, catalog content.Catalog) []footerSitemapGroup {
+	manualIndex, _ := s.manualIndexFor(locale)
+
+	groups := []footerSitemapGroup{
+		{
+			Title: catalog.T("footer.group.platform"),
+			Links: []footerSitemapLink{
+				{Label: catalog.T("footer.home"), Href: content.PathForLocale(locale, "/")},
+				{Label: catalog.T("footer.features"), Href: content.PathForLocale(locale, "/features")},
+				{Label: catalog.T("footer.docs"), Href: content.PathForLocale(locale, "/docs")},
+				{Label: catalog.T("footer.manual"), Href: content.PathForLocale(locale, "/manual")},
+			},
+		},
+		{
+			Title: catalog.T("footer.group.features"),
+			Links: make([]footerSitemapLink, 0, len(catalog.Features)),
+		},
+		{
+			Title: catalog.T("footer.group.docs"),
+			Links: make([]footerSitemapLink, 0, len(catalog.Docs)),
+		},
+		{
+			Title: catalog.T("footer.group.manual"),
+			Links: make([]footerSitemapLink, 0, len(manualIndex.Sections)),
+		},
+		{
+			Title: catalog.T("footer.group.company"),
+			Links: []footerSitemapLink{
+				{Label: catalog.T("footer.contact"), Href: content.PathForLocale(locale, "/contact")},
+				{Label: catalog.T("footer.privacy"), Href: content.PathForLocale(locale, "/privacy")},
+			},
+		},
+	}
+
+	for _, feature := range catalog.Features {
+		groups[1].Links = append(groups[1].Links, footerSitemapLink{
+			Label: feature.Title,
+			Href:  content.PathForLocale(locale, "/features/"+feature.Slug),
+		})
+	}
+	for _, section := range catalog.Docs {
+		groups[2].Links = append(groups[2].Links, footerSitemapLink{
+			Label: section.Title,
+			Href:  content.PathForLocale(locale, "/docs/"+section.Slug),
+		})
+	}
+	for _, section := range manualIndex.Sections {
+		groups[3].Links = append(groups[3].Links, footerSitemapLink{
+			Label: section.Title,
+			Href:  content.PathForLocale(locale, "/manual/"+section.Slug),
+		})
+	}
+
+	return groups
 }
 
 func (s *Server) adminPageData(r *http.Request, title, description string) pageData {

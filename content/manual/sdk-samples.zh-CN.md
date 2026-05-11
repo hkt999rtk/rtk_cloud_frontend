@@ -44,4 +44,4 @@ Realtek Connect+ 客户评估应先从可执行的参考范例开始，再决定
 
 ## 下一步
 
-先用这些范例判断哪一条 App 与装置路径符合你的产品评估，再[联络 Realtek Connect+ 团队](/zh-cn/contact)讨论 SDK 范围、装置类型与部署假设。
+先用这些范例判断哪一条 App 与装置路径符合你的产品评估，再[联络 Realtek Connect+ 团队](/contact)讨论 SDK 范围、装置类型与部署假设。

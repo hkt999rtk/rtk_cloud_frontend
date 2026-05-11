@@ -83,11 +83,12 @@ func (l *Loader) Reload() error {
 	if enPages, ok := state.pages["en"]; ok {
 		for _, locale := range []string{"zh-TW", "zh-CN"} {
 			if _, exists := state.pages[locale]; !exists {
-				state.pages[locale] = clonePageMap(enPages)
+				state.pages[locale] = clonePageMap(enPages, manualLocalePrefix(locale))
 				continue
 			}
 			for slug, page := range enPages {
 				if _, exists := state.pages[locale][slug]; !exists {
+					page.BodyHTML = LocalizeRenderedHTML(page.BodyHTML, manualLocalePrefix(locale))
 					state.pages[locale][slug] = page
 				}
 			}
@@ -250,8 +251,19 @@ func (l *Loader) loadPage(locale, slug string) (ManualPage, error) {
 		Slug:        slug,
 		Title:       strings.TrimSpace(file.Title),
 		Description: strings.TrimSpace(file.Description),
-		BodyHTML:    RenderMarkdown(markdown),
+		BodyHTML:    RenderMarkdownWithPrefix(markdown, manualLocalePrefix(locale)),
 	}, nil
+}
+
+func manualLocalePrefix(locale string) string {
+	switch locale {
+	case "zh-TW":
+		return "/zh-tw"
+	case "zh-CN":
+		return "/zh-cn"
+	default:
+		return ""
+	}
 }
 
 func splitFrontmatter(input []byte) ([]byte, []byte, error) {
@@ -268,9 +280,10 @@ func splitFrontmatter(input []byte) ([]byte, []byte, error) {
 	return rest[:end], rest[end+len("\n---\n"):], nil
 }
 
-func clonePageMap(src map[string]ManualPage) map[string]ManualPage {
+func clonePageMap(src map[string]ManualPage, localePrefix string) map[string]ManualPage {
 	dst := make(map[string]ManualPage, len(src))
 	for slug, page := range src {
+		page.BodyHTML = LocalizeRenderedHTML(page.BodyHTML, localePrefix)
 		dst[slug] = page
 	}
 	return dst

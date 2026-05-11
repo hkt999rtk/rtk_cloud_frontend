@@ -26,6 +26,7 @@ Implemented today:
 - Language switcher in the shared header that points to the same public page in each supported locale.
 - Localized public page metadata with canonical URLs, `hreflang` alternates, and localized sitemap entries.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
+- Shared footer sitemap for human navigation across platform entry points, features, developer docs, manual chapters, contact, and privacy.
 - Localized privacy notice routes describing contact form data, first-party SQLite analytics, analytics event types, referrer-origin-only handling, ephemeral session ids, retention intent, data request handling, admin protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
@@ -103,6 +104,8 @@ Realtek Connect+ follows the shared test report policy from
 ## Visual Direction
 
 The site uses a modern, minimal, direct enterprise style aligned with Realtek's official web presence: white content areas, clear navigation, product-led messaging, and blue-green brand accents. Compared with a traditional corporate site, Realtek Connect+ uses more whitespace, denser feature grids, stronger calls to action, and a clear platform architecture visual.
+
+Footer navigation uses a human-readable sitemap pattern. It is Fixed Content in the shared layout, populated from localized feature/docs/manual catalogs, and intentionally excludes admin, health, static, internal API, robots, and XML sitemap routes. The XML `/sitemap.xml` remains crawler-facing infrastructure rather than a normal visitor page.
 
 Color system:
 

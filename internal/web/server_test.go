@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -201,12 +202,15 @@ func TestManualPageRendersMarkdownAndAssetImage(t *testing.T) {
 		"Set up your first device and verify connectivity in under 10 minutes.",
 		`src="/content-assets/manual/placeholder.png"`,
 		"<table>",
-		`href="https://example.com/manual"`,
+		`href="/manual"`,
 		"<del>deprecated</del>",
 	} {
 		if !strings.Contains(body, expected) {
 			t.Fatalf("/manual/getting-started missing %q: %s", expected, body)
 		}
+	}
+	if strings.Contains(body, "https://example.com/manual") {
+		t.Fatalf("/manual/getting-started should not contain placeholder example link: %s", body)
 	}
 }
 
@@ -1104,6 +1108,165 @@ func TestLayoutIncludesSkipLinkToMainContent(t *testing.T) {
 	}
 }
 
+func TestFooterSitemapRendersPublicNavigation(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	tests := []struct {
+		path string
+		want []string
+	}{
+		{
+			path: "/",
+			want: []string{
+				`<nav class="footer-sitemap" aria-label="Footer sitemap">`,
+				"<h2>Platform</h2>",
+				`href="/features/ota"`,
+				`href="/docs/apis"`,
+				`href="/manual/sdk-samples"`,
+				`href="/privacy"`,
+			},
+		},
+		{
+			path: "/zh-tw/features/ota",
+			want: []string{
+				"<h2>平台</h2>",
+				`href="/zh-tw/features/ota"`,
+				`href="/zh-tw/docs/apis"`,
+				`href="/zh-tw/manual/sdk-samples"`,
+				`href="/zh-tw/privacy"`,
+			},
+		},
+		{
+			path: "/zh-cn/docs/apis",
+			want: []string{
+				"<h2>平台</h2>",
+				`href="/zh-cn/features/ota"`,
+				`href="/zh-cn/docs/apis"`,
+				`href="/zh-cn/manual/sdk-samples"`,
+				`href="/zh-cn/privacy"`,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+			rec := httptest.NewRecorder()
+			handler.ServeHTTP(rec, req)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", rec.Code)
+			}
+			body := rec.Body.String()
+			footer := footerHTML(t, body)
+			for _, want := range tt.want {
+				if !strings.Contains(footer, want) {
+					t.Fatalf("%s footer missing %q: %s", tt.path, want, footer)
+				}
+			}
+			for _, forbidden := range []string{"/admin/", "/healthz", "/robots.txt", "/sitemap.xml", "/static/", "/content-assets/"} {
+				if strings.Contains(footer, `href="`+forbidden) {
+					t.Fatalf("%s footer should not contain %s: %s", tt.path, forbidden, footer)
+				}
+			}
+		})
+	}
+}
+
+func footerHTML(t *testing.T, body string) string {
+	t.Helper()
+	start := strings.Index(body, `<footer class="site-footer">`)
+	if start < 0 {
+		t.Fatalf("footer not found: %s", body)
+	}
+	end := strings.Index(body[start:], "</footer>")
+	if end < 0 {
+		t.Fatalf("footer end not found: %s", body[start:])
+	}
+	return body[start : start+end+len("</footer>")]
+}
+
+func TestDetailNavigationDoesNotLinkToCurrentPage(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	tests := []struct {
+		path     string
+		forbid   string
+		required string
+	}{
+		{
+			path:     "/docs/apis",
+			forbid:   `class="feature-card docs-card" href="/docs/apis"`,
+			required: `class="feature-card docs-card" href="/docs/sdks"`,
+		},
+		{
+			path:     "/manual/sdk-samples",
+			forbid:   `class="feature-card docs-card" href="/manual/sdk-samples"`,
+			required: `class="feature-card docs-card" href="/manual/getting-started"`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+			rec := httptest.NewRecorder()
+			handler.ServeHTTP(rec, req)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", rec.Code)
+			}
+			body := rec.Body.String()
+			if strings.Contains(body, tt.forbid) {
+				t.Fatalf("%s contains self navigation card %q: %s", tt.path, tt.forbid, body)
+			}
+			if !strings.Contains(body, tt.required) {
+				t.Fatalf("%s missing related navigation card %q: %s", tt.path, tt.required, body)
+			}
+		})
+	}
+}
+
+func TestLocalizedManualFallbackLinksUseLocalePrefix(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	tests := []struct {
+		path string
+		want []string
+	}{
+		{
+			path: "/zh-tw/manual/reference",
+			want: []string{
+				`href="/zh-tw/manual"`,
+				`href="/zh-tw/manual/getting-started"`,
+				`href="/zh-tw/manual/deployment-notes"`,
+			},
+		},
+		{
+			path: "/zh-cn/manual/reference",
+			want: []string{
+				`href="/zh-cn/manual"`,
+				`href="/zh-cn/manual/getting-started"`,
+				`href="/zh-cn/manual/deployment-notes"`,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+			rec := httptest.NewRecorder()
+			handler.ServeHTTP(rec, req)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", rec.Code)
+			}
+			body := rec.Body.String()
+			for _, want := range tt.want {
+				if !strings.Contains(body, want) {
+					t.Fatalf("%s missing %q: %s", tt.path, want, body)
+				}
+			}
+		})
+	}
+}
+
 func TestFeatureMetadataUsesFeatureSummary(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
@@ -1875,6 +2038,64 @@ func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 	}
 	if strings.Contains(body, "/admin/leads") {
 		t.Fatalf("sitemap should not contain admin routes: %s", body)
+	}
+}
+
+func TestPublicInternalLinksResolve(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	hrefPattern := regexp.MustCompile(`\shref="([^"]+)"`)
+
+	for _, pagePath := range publicSitemapPaths() {
+		req := httptest.NewRequest(http.MethodGet, pagePath, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", pagePath, rec.Code)
+		}
+
+		seen := map[string]bool{}
+		for _, match := range hrefPattern.FindAllStringSubmatch(rec.Body.String(), -1) {
+			href := match[1]
+			if shouldSkipPublicLinkCheck(href) {
+				continue
+			}
+			parsed, err := url.Parse(href)
+			if err != nil {
+				t.Fatalf("%s has invalid href %q: %v", pagePath, href, err)
+			}
+			target := parsed.Path
+			if target == "" {
+				target = "/"
+			}
+			if seen[target] {
+				continue
+			}
+			seen[target] = true
+
+			targetReq := httptest.NewRequest(http.MethodGet, target, nil)
+			targetRec := httptest.NewRecorder()
+			handler.ServeHTTP(targetRec, targetReq)
+			if targetRec.Code != http.StatusOK {
+				t.Fatalf("%s links to %s, status = %d, want 200", pagePath, href, targetRec.Code)
+			}
+		}
+	}
+}
+
+func shouldSkipPublicLinkCheck(href string) bool {
+	switch {
+	case href == "" || strings.HasPrefix(href, "#"):
+		return true
+	case strings.HasPrefix(href, "http://") || strings.HasPrefix(href, "https://"):
+		return true
+	case strings.HasPrefix(href, "mailto:") || strings.HasPrefix(href, "tel:"):
+		return true
+	case strings.HasPrefix(href, "/static/") || strings.HasPrefix(href, "/content-assets/"):
+		return true
+	case strings.HasPrefix(href, "/admin/") || strings.HasPrefix(href, "/api/"):
+		return true
+	default:
+		return false
 	}
 }
 

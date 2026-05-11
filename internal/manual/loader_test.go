@@ -50,6 +50,26 @@ func TestRenderMarkdownSanitizesUnsafeLinks(t *testing.T) {
 	}
 }
 
+func TestRenderMarkdownWithPrefixLocalizesPublicLinks(t *testing.T) {
+	html := RenderMarkdownWithPrefix([]byte(`[manual](/manual)
+[asset](/content-assets/manual/placeholder.png)
+[external](https://github.com/hkt999rtk/rtk_cloud_client)
+
+![image](/static/assets/connectplus-hero.png)
+`), "/zh-tw")
+	body := string(html)
+	for _, want := range []string{
+		`href="/zh-tw/manual"`,
+		`href="/content-assets/manual/placeholder.png"`,
+		`href="https://github.com/hkt999rtk/rtk_cloud_client"`,
+		`src="/static/assets/connectplus-hero.png"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("localized markdown missing %q: %s", want, body)
+		}
+	}
+}
+
 func TestReloadKeepsLoadedSectionsAndPages(t *testing.T) {
 	root := t.TempDir()
 	writeManualIndex(t, root, "en", "User Manual", "Manual description")

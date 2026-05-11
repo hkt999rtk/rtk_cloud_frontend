@@ -81,11 +81,14 @@ type pageData struct {
 	LocalePrefix       string
 	Text               map[string]string
 	AlternateLinks     []content.AlternateLink
+	FooterSitemap      []footerSitemapGroup
 	Docs               []docs.Section
 	DocsPage           docs.ContentPage
 	Doc                docs.Section
+	RelatedDocs        []docs.Section
 	ManualIndex        manual.ManualIndex
 	ManualPage         manual.ManualPage
+	RelatedManual      []manual.ManualSection
 	Analytics          pageAnalyticsView
 	AnalyticsEndpoint  string
 	AnalyticsPage      string
@@ -108,6 +111,16 @@ type pageData struct {
 
 type pageAnalyticsView struct {
 	Enabled bool
+}
+
+type footerSitemapGroup struct {
+	Title string
+	Links []footerSitemapLink
+}
+
+type footerSitemapLink struct {
+	Label string
+	Href  string
 }
 
 type contactForm struct {
@@ -317,6 +330,7 @@ func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request, locale 
 		doc.Summary,
 	)
 	data.Doc = doc
+	data.RelatedDocs = relatedDocs(catalog.Docs, slug)
 	s.render(w, http.StatusOK, "doc.html", data)
 }
 
@@ -610,7 +624,30 @@ func (s *Server) handleManualPage(w http.ResponseWriter, r *http.Request, locale
 	data := s.basePageData(r, locale, publicPath, page.Title+" | Realtek Connect+", page.Description)
 	data.ManualIndex = index
 	data.ManualPage = page
+	data.RelatedManual = relatedManualSections(index.Sections, slug)
 	s.render(w, http.StatusOK, "manual_page.html", data)
+}
+
+func relatedDocs(sections []docs.Section, currentSlug string) []docs.Section {
+	related := make([]docs.Section, 0, len(sections))
+	for _, section := range sections {
+		if section.Slug == currentSlug {
+			continue
+		}
+		related = append(related, section)
+	}
+	return related
+}
+
+func relatedManualSections(sections []manual.ManualSection, currentSlug string) []manual.ManualSection {
+	related := make([]manual.ManualSection, 0, len(sections))
+	for _, section := range sections {
+		if section.Slug == currentSlug {
+			continue
+		}
+		related = append(related, section)
+	}
+	return related
 }
 
 func (s *Server) handleContact(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {

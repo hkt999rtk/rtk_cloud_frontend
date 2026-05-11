@@ -21,6 +21,12 @@ Content classification terms for future project discussions:
 - **Fixed Content**: content written directly in templates, hard-coded HTML, or Go code. Use this term when referring to page structure, shared UI copy, or fixed text that is not driven by content files.
 - **Managed Content**: content maintained in content files, Markdown, YAML, content catalog data, or structured Go data and then rendered by templates. Use this term when referring to feature/docs/manual/localized content that can be centrally managed or validated.
 
+Navigation conventions:
+
+- The page footer contains a localized human-readable sitemap for public pages: platform entry points, features, developer docs, manual chapters, contact, and privacy.
+- `/sitemap.xml` remains the crawler-facing XML sitemap. It is not linked as a normal website page and should not include admin, health, static, or internal API routes.
+- Fixed Content owns footer layout and detail-page related navigation. Managed Content owns Markdown links, which should use root-relative public paths so they can be localized when rendered.
+
 Tracked validation reports:
 
 - `docs/TEST_REPORT.md`: deterministic CI / PR validation report.
