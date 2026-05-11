@@ -3,7 +3,7 @@ title: "SDK 範例應用"
 description: "使用 Realtek Connect+ SDK 範例生態系驗證 App 與裝置流程。"
 ---
 
-![Realtek Connect+ 範例生態系](/static/assets/connectplus-sample-ecosystem.png)
+![Realtek Connect+ 範例生態系](/static/assets/connectplus-sample-ecosystem-corporate-v2.jpg)
 
 Realtek Connect+ 客戶評估應先從可執行的參考範例開始，再決定正式品牌 App、量產韌體或私有部署計畫。詳細 source of truth 仍在 [`rtk_cloud_client`](https://github.com/hkt999rtk/rtk_cloud_client) repository，尤其是 [`docs/SAMPLE_APPLICATIONS.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_APPLICATIONS.md) 與各 sample README。
 

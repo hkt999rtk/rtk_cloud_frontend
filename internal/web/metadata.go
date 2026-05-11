@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	heroImagePath = "/static/assets/connectplus-hero.png"
+	heroImagePath = "/static/assets/connectplus-hero-corporate-v2.jpg"
 	heroImageAlt  = "Realtek Connect+ device, cloud, mobile app, and dashboard platform flow"
 )
 

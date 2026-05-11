@@ -3,7 +3,7 @@ title: "SDK Sample Applications"
 description: "Validate app and device flows with the Realtek Connect+ SDK sample ecosystem."
 ---
 
-![Realtek Connect+ sample ecosystem](/static/assets/connectplus-sample-ecosystem.png)
+![Realtek Connect+ sample ecosystem](/static/assets/connectplus-sample-ecosystem-corporate-v2.jpg)
 
 Realtek Connect+ customer evaluations should start with runnable reference samples before product teams commit to a branded app, production firmware, or a private deployment plan. The detailed source of truth stays in the [`rtk_cloud_client`](https://github.com/hkt999rtk/rtk_cloud_client) repository, especially [`docs/SAMPLE_APPLICATIONS.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_APPLICATIONS.md) and the sample-specific README files.
 

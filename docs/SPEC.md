@@ -16,8 +16,8 @@ Implemented today:
 - Runtime entrypoint under `cmd/server` with request logging, graceful shutdown, and baseline read/write/idle timeouts.
 - Server-rendered pages using `html/template`.
 - Static CSS with a Realtek-style white, deep navy, and blue-green/teal visual system.
-- Generated hero/platform image stored in `static/assets/connectplus-hero.png`.
-- Generated feature and platform visuals stored under `static/assets/`, including the SDK sample ecosystem diagram at `static/assets/connectplus-sample-ecosystem.png`.
+- Corporate hero/platform image stored in `static/assets/connectplus-hero-corporate-v2.jpg`.
+- Corporate feature and platform visuals stored under `static/assets/`, including the SDK sample ecosystem diagram at `static/assets/connectplus-sample-ecosystem-corporate-v2.jpg`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
 - Feature overview and detail pages for Provision, OTA, Fleet Management, Smart Home Experience, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured end-user smart-home workflow story, App SDK reference sample application coverage, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
@@ -130,12 +130,12 @@ UI system:
 Assets:
 
 - Generated hero/platform and feature imagery lives in `static/assets/`.
-- The generated image style must be clean B2B technology: white background, teal/blue accents, device-cloud-app-dashboard flow, no stock-photo people, no third-party marks.
+- The generated image style must be clean B2B technology: white background, teal/blue accents, credible product UI mockups and technical diagrams, no stock-photo people, no third-party marks, no neon sci-fi/glass-cloud treatment, and no readable fake text.
 - Bitmap imagery supports platform context only; semantic navigation and feature recognition should come from the inline SVG icon system.
 - Current generated homepage assets:
-  - `static/assets/connectplus-hero-v2.jpg`: text-free chip-to-cloud-to-app/dashboard hero visual.
-  - `static/assets/connectplus-platform-surfaces.jpg`: platform surfaces visual showing onboarding, OTA rollout, and fleet health dashboard context.
-  - `static/assets/connectplus-sample-ecosystem.png`: app and device sample ecosystem visual for Android/iOS/WebApp clients, Linux simulator, PRO2 device demo, and cloud hub context.
+  - `static/assets/connectplus-hero-corporate-v2.jpg`: text-free semiconductor-to-gateway-to-dashboard hero visual.
+  - `static/assets/connectplus-platform-surfaces-corporate-v2.jpg`: enterprise product surface visual showing registry, dashboards, charts, and mobile companion context.
+  - `static/assets/connectplus-sample-ecosystem-corporate-v2.jpg`: generic app/client/simulator/reference-device sample ecosystem diagram without third-party platform marks.
 - Homepage brand film:
   - The homepage may include the official Realtek corporate brand film as a trust-building section after Architecture and before Deployment.
   - The current implementation uses a local MP4 asset at `static/assets/realtek-brand-film.mp4`, tracked with Git LFS.
