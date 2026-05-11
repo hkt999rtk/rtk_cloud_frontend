@@ -48,16 +48,22 @@
   </main>
 
   <footer class="site-footer">
-    <div>
+    <div class="footer-brand">
       <strong>Realtek Connect+</strong>
       <p>{{t . "footer.tagline"}}</p>
     </div>
-    <div class="footer-links">
-      <a href="{{localizedPath . "/docs"}}">{{t . "footer.docs"}}</a>
-      <a href="{{localizedPath . "/features"}}">{{t . "footer.features"}}</a>
-      <a href="{{localizedPath . "/contact"}}">{{t . "footer.contact"}}</a>
-      <a href="{{localizedPath . "/privacy"}}">{{t . "footer.privacy"}}</a>
-    </div>
+    <nav class="footer-sitemap" aria-label="{{t . "footer.sitemap.label"}}">
+      {{range .FooterSitemap}}
+      <section class="footer-sitemap-group">
+        <h2>{{.Title}}</h2>
+        <ul>
+          {{range .Links}}
+          <li><a href="{{.Href}}">{{.Label}}</a></li>
+          {{end}}
+        </ul>
+      </section>
+      {{end}}
+    </nav>
   </footer>
 
   {{if .Analytics.Enabled}}

@@ -14,14 +14,14 @@
   {{.ManualPage.BodyHTML}}
 </section>
 
-{{if .ManualIndex.Sections}}
+{{if .RelatedManual}}
 <section class="section doc-navigation">
   <div class="section-heading">
     <p class="eyebrow">{{t . "manual.more"}}</p>
     <h2>{{t . "manual.more.title"}}</h2>
   </div>
   <div class="docs-entry-grid">
-    {{range .ManualIndex.Sections}}
+    {{range .RelatedManual}}
     <a class="feature-card docs-card" href="{{localizedPath $ (printf "/manual/%s" .Slug)}}">
       <span class="icon-box feature-icon">{{icon "document"}}</span>
       <h3>{{.Title}}</h3>

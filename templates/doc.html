@@ -73,13 +73,14 @@
 </section>
 {{end}}
 
+{{if .RelatedDocs}}
 <section class="section doc-navigation">
   <div class="section-heading">
     <p class="eyebrow">{{t . "doc.next"}}</p>
     <h2>{{t . "doc.next.title"}}</h2>
   </div>
   <div class="docs-entry-grid">
-    {{range .Docs}}
+    {{range .RelatedDocs}}
     <a class="feature-card docs-card" href="{{localizedPath $ (printf "/docs/%s" .Slug)}}">
       <span class="icon-box feature-icon">{{icon .Icon}}</span>
       <h3>{{.Title}}</h3>
@@ -89,4 +90,5 @@
     {{end}}
   </div>
 </section>
+{{end}}
 {{end}}

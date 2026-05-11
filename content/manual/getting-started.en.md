@@ -28,6 +28,6 @@ Follow the quick overview below before you begin:
 - [ ] Confirm the device appears in the dashboard.
 - [x] Confirm the device boots with the default firmware.
 
-Visit https://example.com/manual for the public example reference.
+Return to the [manual home](/manual) for the full chapter list.
 
 This walkthrough is intentionally not ~~deprecated~~.
