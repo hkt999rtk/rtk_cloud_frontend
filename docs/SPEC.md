@@ -16,6 +16,7 @@ Implemented today:
 - Runtime entrypoint under `cmd/server` with request logging, graceful shutdown, and baseline read/write/idle timeouts.
 - Server-rendered pages using `html/template`.
 - Static CSS with a Realtek-style white, deep navy, and blue-green/teal visual system.
+- Artifact-first Linode deployment path with release bundles, Linode Object Storage publication, manual VM deploy workflow, rollback runbook, and SQLite backup policy.
 - Corporate hero/platform image stored in `static/assets/connectplus-hero-corporate-v2.jpg`.
 - Corporate feature and platform visuals stored under `static/assets/`, including the SDK sample ecosystem diagram at `static/assets/connectplus-sample-ecosystem-corporate-v2.jpg`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
@@ -444,6 +445,14 @@ Container deployment notes:
 - The native CD bundle includes an empty writable `data/` directory so default `data/connectplus.db` and `data/analytics.db` paths can initialize on the website test host. Production native hosts should set `DATABASE_PATH` and `ANALYTICS_DATABASE_PATH` to persistent service-owned storage.
 - `/data` is declared as the persistent volume for SQLite-backed lead and analytics storage.
 - HTTPS is intentionally out of process and should be handled by the reverse proxy or deployment platform instead of the Go app directly.
+
+Linode artifact deployment notes:
+
+- `deploy/package.sh <version>` builds `dist/realtek-connect-<version>.tar.gz`, `realtek-connect-<version>.tar.gz.sha256`, and `realtek-connect-<version>.object-manifest.json`.
+- Release artifacts contain the server binary, `content/`, `templates/`, `static/`, `deploy/`, `VERSION`, and release manifest metadata. SQLite runtime DB files are excluded.
+- `.github/workflows/release.yml` publishes versioned artifacts to GitHub Releases and Linode Object Storage under `releases/<version>/`.
+- `.github/workflows/deploy-linode.yml` installs a selected version to `/opt/realtek-connect/releases/<version>`, updates `/opt/realtek-connect/current`, restarts `realtek-connect.service`, and runs public readiness checks.
+- Linode host bootstrap, GoDaddy DNS, nginx reverse proxy, Let’s Encrypt TLS, rollback, and SQLite backup are documented in `docs/deployment-linode.md`, `docs/deployment-promotion-rollback.md`, and `docs/sqlite-backup-linode.md`.
 
 Schema:
 

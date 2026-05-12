@@ -1,4 +1,5 @@
 bin/
+dist/
 /server
 .artifacts/
 data/*.db
