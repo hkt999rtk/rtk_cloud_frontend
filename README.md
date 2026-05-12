@@ -199,3 +199,13 @@ Deployment notes:
 - The native CD bundle includes a writable `data/` directory for test-host defaults. Production native deployments should still set `DATABASE_PATH` and `ANALYTICS_DATABASE_PATH` to a persistent service-owned directory.
 - The container serves HTTP on port `8080`. Production TLS termination should be handled by a reverse proxy, ingress, or deployment platform in front of the app.
 - Native builds remain supported for environments that prefer `go build` over containers.
+
+Artifact-based Linode deployment is also supported:
+
+- `deploy/package.sh <version>` creates `dist/realtek-connect-<version>.tar.gz`, a checksum, and an object-storage manifest.
+- `.github/workflows/release.yml` publishes release bundles to GitHub Releases and Linode Object Storage under `releases/<version>/`.
+- `.github/workflows/deploy-linode.yml` installs a selected version onto a standalone Linode VM and verifies public health.
+- Linode VM, GoDaddy DNS, nginx, TLS, rollback, and SQLite backup runbooks live in:
+  - `docs/deployment-linode.md`
+  - `docs/deployment-promotion-rollback.md`
+  - `docs/sqlite-backup-linode.md`

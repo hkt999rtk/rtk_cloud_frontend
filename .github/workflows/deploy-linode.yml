@@ -1,0 +1,222 @@
+name: Deploy Linode
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "GitHub deployment environment."
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+      version:
+        description: "Existing release artifact version to deploy."
+        required: true
+        type: string
+      run_verify:
+        description: "Run deploy/verify.sh on the remote host after restart."
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: realtek-connect-linode-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy release to Linode
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Select version
+        id: version
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          version="$INPUT_VERSION"
+          case "$version" in
+            *[!A-Za-z0-9._-]* | "" | .* | *..*)
+              echo "invalid version: use only letters, digits, dot, underscore, and dash" >&2
+              exit 1
+              ;;
+          esac
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+
+      - name: Download release bundle from Linode Object Storage
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.LINODE_OBJ_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.LINODE_OBJ_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-sea
+          AWS_EC2_METADATA_DISABLED: "true"
+          LINODE_OBJ_BUCKET: ${{ vars.LINODE_OBJ_BUCKET }}
+          LINODE_OBJ_ENDPOINT: ${{ vars.LINODE_OBJ_ENDPOINT }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          if ! command -v aws >/dev/null 2>&1; then
+            python3 -m pip install --user awscli
+            export PATH="$HOME/.local/bin:$PATH"
+          fi
+          test -n "$AWS_ACCESS_KEY_ID"
+          test -n "$AWS_SECRET_ACCESS_KEY"
+          test -n "$LINODE_OBJ_BUCKET"
+          test -n "$LINODE_OBJ_ENDPOINT"
+          rm -rf dist
+          mkdir -p dist
+          prefix="s3://$LINODE_OBJ_BUCKET/releases/$VERSION"
+          aws s3 cp "$prefix/realtek-connect-$VERSION.tar.gz" "dist/realtek-connect-$VERSION.tar.gz" --endpoint-url "$LINODE_OBJ_ENDPOINT" --only-show-errors
+          aws s3 cp "$prefix/realtek-connect-$VERSION.tar.gz.sha256" "dist/realtek-connect-$VERSION.tar.gz.sha256" --endpoint-url "$LINODE_OBJ_ENDPOINT" --only-show-errors
+          aws s3 cp "$prefix/manifest.json" "dist/realtek-connect-$VERSION.object-manifest.json" --endpoint-url "$LINODE_OBJ_ENDPOINT" --only-show-errors
+          (cd dist && shasum -a 256 -c "realtek-connect-$VERSION.tar.gz.sha256")
+          tar -C dist -xzf "dist/realtek-connect-$VERSION.tar.gz"
+
+      - name: Verify release bundle
+        run: deploy/check-release.sh "dist/realtek-connect-${{ steps.version.outputs.version }}"
+
+      - name: Validate deployment inputs
+        shell: bash
+        env:
+          REALTEK_CONNECT_DEPLOY_PREFIX: ${{ vars.REALTEK_CONNECT_DEPLOY_PREFIX }}
+          REALTEK_CONNECT_DEPLOY_ETC_DIR: ${{ vars.REALTEK_CONNECT_DEPLOY_ETC_DIR }}
+          REALTEK_CONNECT_DEPLOY_SYSTEMD_DIR: ${{ vars.REALTEK_CONNECT_DEPLOY_SYSTEMD_DIR }}
+          REALTEK_CONNECT_DEPLOY_DATA_DIR: ${{ vars.REALTEK_CONNECT_DEPLOY_DATA_DIR }}
+          REALTEK_CONNECT_DEPLOY_REMOTE_DIR: ${{ vars.REALTEK_CONNECT_DEPLOY_REMOTE_DIR }}
+          REALTEK_CONNECT_PUBLIC_BASE_URL: ${{ vars.REALTEK_CONNECT_PUBLIC_BASE_URL }}
+        run: |
+          valid_path='^/[A-Za-z0-9._/-]+$'
+          [[ "${REALTEK_CONNECT_DEPLOY_PREFIX:-/opt/realtek-connect}" =~ $valid_path ]]
+          [[ "${REALTEK_CONNECT_DEPLOY_ETC_DIR:-/etc/realtek-connect}" =~ $valid_path ]]
+          [[ "${REALTEK_CONNECT_DEPLOY_SYSTEMD_DIR:-/etc/systemd/system}" =~ $valid_path ]]
+          [[ "${REALTEK_CONNECT_DEPLOY_DATA_DIR:-/var/lib/realtek-connect}" =~ $valid_path ]]
+          [[ "${REALTEK_CONNECT_DEPLOY_REMOTE_DIR:-/tmp/realtek-connect-deploy}" =~ $valid_path ]]
+          test -n "$REALTEK_CONNECT_PUBLIC_BASE_URL"
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          REALTEK_CONNECT_DEPLOY_HOST: ${{ secrets.REALTEK_CONNECT_DEPLOY_HOST }}
+          REALTEK_CONNECT_DEPLOY_USER: ${{ secrets.REALTEK_CONNECT_DEPLOY_USER }}
+          REALTEK_CONNECT_DEPLOY_SSH_KEY: ${{ secrets.REALTEK_CONNECT_DEPLOY_SSH_KEY }}
+          REALTEK_CONNECT_DEPLOY_PORT: ${{ secrets.REALTEK_CONNECT_DEPLOY_PORT }}
+        run: |
+          test -n "$REALTEK_CONNECT_DEPLOY_HOST"
+          test -n "$REALTEK_CONNECT_DEPLOY_USER"
+          test -n "$REALTEK_CONNECT_DEPLOY_SSH_KEY"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$REALTEK_CONNECT_DEPLOY_SSH_KEY" > ~/.ssh/realtek_connect_deploy
+          chmod 600 ~/.ssh/realtek_connect_deploy
+          port="${REALTEK_CONNECT_DEPLOY_PORT:-22}"
+          ssh-keyscan -p "$port" "$REALTEK_CONNECT_DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Upload bundle
+        shell: bash
+        env:
+          REALTEK_CONNECT_DEPLOY_HOST: ${{ secrets.REALTEK_CONNECT_DEPLOY_HOST }}
+          REALTEK_CONNECT_DEPLOY_USER: ${{ secrets.REALTEK_CONNECT_DEPLOY_USER }}
+          REALTEK_CONNECT_DEPLOY_PORT: ${{ secrets.REALTEK_CONNECT_DEPLOY_PORT }}
+          REALTEK_CONNECT_DEPLOY_REMOTE_DIR: ${{ vars.REALTEK_CONNECT_DEPLOY_REMOTE_DIR }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          port="${REALTEK_CONNECT_DEPLOY_PORT:-22}"
+          remote_dir="${REALTEK_CONNECT_DEPLOY_REMOTE_DIR:-/tmp/realtek-connect-deploy}"
+          ssh -i ~/.ssh/realtek_connect_deploy -p "$port" \
+            "$REALTEK_CONNECT_DEPLOY_USER@$REALTEK_CONNECT_DEPLOY_HOST" \
+            "mkdir -p -- \"$remote_dir\""
+          scp -i ~/.ssh/realtek_connect_deploy -P "$port" \
+            "dist/realtek-connect-$VERSION.tar.gz" \
+            "$REALTEK_CONNECT_DEPLOY_USER@$REALTEK_CONNECT_DEPLOY_HOST:$remote_dir/"
+
+      - name: Install and restart
+        shell: bash
+        env:
+          REALTEK_CONNECT_DEPLOY_HOST: ${{ secrets.REALTEK_CONNECT_DEPLOY_HOST }}
+          REALTEK_CONNECT_DEPLOY_USER: ${{ secrets.REALTEK_CONNECT_DEPLOY_USER }}
+          REALTEK_CONNECT_DEPLOY_PORT: ${{ secrets.REALTEK_CONNECT_DEPLOY_PORT }}
+          REALTEK_CONNECT_DEPLOY_REMOTE_DIR: ${{ vars.REALTEK_CONNECT_DEPLOY_REMOTE_DIR }}
+          REALTEK_CONNECT_DEPLOY_PREFIX: ${{ vars.REALTEK_CONNECT_DEPLOY_PREFIX }}
+          REALTEK_CONNECT_DEPLOY_ETC_DIR: ${{ vars.REALTEK_CONNECT_DEPLOY_ETC_DIR }}
+          REALTEK_CONNECT_DEPLOY_SYSTEMD_DIR: ${{ vars.REALTEK_CONNECT_DEPLOY_SYSTEMD_DIR }}
+          REALTEK_CONNECT_DEPLOY_DATA_DIR: ${{ vars.REALTEK_CONNECT_DEPLOY_DATA_DIR }}
+          REALTEK_CONNECT_PUBLIC_BASE_URL: ${{ vars.REALTEK_CONNECT_PUBLIC_BASE_URL }}
+          VERSION: ${{ steps.version.outputs.version }}
+          RUN_VERIFY: ${{ inputs.run_verify }}
+        run: |
+          port="${REALTEK_CONNECT_DEPLOY_PORT:-22}"
+          remote_dir="${REALTEK_CONNECT_DEPLOY_REMOTE_DIR:-/tmp/realtek-connect-deploy}"
+          prefix="${REALTEK_CONNECT_DEPLOY_PREFIX:-/opt/realtek-connect}"
+          etc_dir="${REALTEK_CONNECT_DEPLOY_ETC_DIR:-/etc/realtek-connect}"
+          systemd_dir="${REALTEK_CONNECT_DEPLOY_SYSTEMD_DIR:-/etc/systemd/system}"
+          data_dir="${REALTEK_CONNECT_DEPLOY_DATA_DIR:-/var/lib/realtek-connect}"
+          ssh -i ~/.ssh/realtek_connect_deploy -p "$port" \
+            "$REALTEK_CONNECT_DEPLOY_USER@$REALTEK_CONNECT_DEPLOY_HOST" \
+            "bash -s" -- "$remote_dir" "$VERSION" "$prefix" "$etc_dir" "$systemd_dir" "$data_dir" "$REALTEK_CONNECT_PUBLIC_BASE_URL" "$RUN_VERIFY" <<'REMOTE'
+          set -eu
+          remote_dir=$1
+          version=$2
+          prefix=$3
+          etc_dir=$4
+          systemd_dir=$5
+          data_dir=$6
+          public_base_url=$7
+          run_verify=$8
+
+          cd "$remote_dir"
+          previous_version=$(sudo sh -c "cat \"$prefix/current-version\" 2>/dev/null || true")
+          rm -rf "realtek-connect-$version"
+          tar -xzf "realtek-connect-$version.tar.gz"
+          sudo "./realtek-connect-$version/deploy/install.sh" "realtek-connect-$version" "$prefix" "$etc_dir" "$systemd_dir" "$data_dir"
+          if sudo grep -q '^PUBLIC_BASE_URL=' "$etc_dir/realtek-connect.env"; then
+            sudo sed -i "s|^PUBLIC_BASE_URL=.*|PUBLIC_BASE_URL=$public_base_url|" "$etc_dir/realtek-connect.env"
+          else
+            printf 'PUBLIC_BASE_URL=%s\n' "$public_base_url" | sudo tee -a "$etc_dir/realtek-connect.env" >/dev/null
+          fi
+          sudo systemctl daemon-reload
+          sudo systemctl enable realtek-connect.service
+          sudo systemctl restart realtek-connect.service
+          if [ "$run_verify" = "true" ]; then
+            sudo REALTEK_CONNECT_VERIFY_BASE_URL="$public_base_url" REALTEK_CONNECT_DEPLOY_PREFIX="$prefix" "$prefix/current/deploy/verify.sh"
+          fi
+          if [ -n "$previous_version" ]; then
+            printf '%s\n' "$previous_version" | sudo tee "$prefix/previous-version" >/dev/null
+          fi
+          printf '%s\n' "$version" | sudo tee "$prefix/current-version" >/dev/null
+          test "$(sudo cat "$prefix/current-version")" = "$version"
+          REMOTE
+
+      - name: Upload deployment summary
+        if: always()
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          RUN_VERIFY: ${{ inputs.run_verify }}
+        run: |
+          mkdir -p .artifacts/deploy
+          {
+            echo "# Realtek Connect+ Linode Deploy Summary"
+            echo
+            echo "- Version: $VERSION"
+            echo "- Environment: ${{ inputs.environment }}"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Public base URL: ${{ vars.REALTEK_CONNECT_PUBLIC_BASE_URL }}"
+            echo "- Run verify: $RUN_VERIFY"
+          } > .artifacts/deploy/linode-deploy-summary.md
+
+      - name: Upload deployment summary artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: linode-deploy-summary-${{ steps.version.outputs.version }}
+          path: .artifacts/deploy/linode-deploy-summary.md
+          if-no-files-found: warn
