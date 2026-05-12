@@ -8,9 +8,13 @@ replace that test deployment.
 
 Realtek Connect+ uses an artifact-first deployment model:
 
-- CI builds `realtek-connect-<version>.tar.gz`.
-- The release workflow uploads the bundle, checksum, and manifest to GitHub
-  Releases and Linode Object Storage under `releases/<version>/`.
+- CI builds `realtek-connect-ci-<shortsha>.tar.gz` for every PR and push.
+- CI uploads every deployable bundle as a GitHub Actions artifact named
+  `realtek-connect-ci-<shortsha>`.
+- On `main`, tags, and manual runs, CI also uploads the bundle, checksum, and
+  manifest to Linode Object Storage under `releases/ci-<shortsha>/`.
+- The release workflow uploads explicit release bundles to GitHub Releases and
+  Linode Object Storage under `releases/<version>/`.
 - The Linode deploy workflow installs a selected version onto the VM.
 - Rollback deploys a previous published artifact version.
 
@@ -20,8 +24,10 @@ Do not deploy production by copying a developer checkout to the VM.
 
 Required secrets:
 
-- `LINODE_OBJ_ACCESS_KEY_ID`
-- `LINODE_OBJ_SECRET_ACCESS_KEY`
+- `LINODE_TOKEN`, used by CI to create a temporary bucket-scoped Object Storage
+  key for artifact upload.
+- Optional `LINODE_OBJ_ACCESS_KEY_ID` and `LINODE_OBJ_SECRET_ACCESS_KEY` if a
+  long-lived bucket-scoped key is preferred over temporary keys.
 - `REALTEK_CONNECT_DEPLOY_HOST`
 - `REALTEK_CONNECT_DEPLOY_USER`
 - `REALTEK_CONNECT_DEPLOY_SSH_KEY`
@@ -29,8 +35,10 @@ Required secrets:
 
 Required variables:
 
-- `LINODE_OBJ_BUCKET`
-- `LINODE_OBJ_ENDPOINT`
+- Optional `LINODE_OBJ_BUCKET`; required only when the Linode account has more
+  than one Object Storage bucket.
+- Optional `LINODE_OBJ_ENDPOINT`; inferred from the selected bucket hostname
+  when omitted.
 - `REALTEK_CONNECT_PUBLIC_BASE_URL`
 
 Optional variables:
@@ -40,6 +48,39 @@ Optional variables:
 - `REALTEK_CONNECT_DEPLOY_SYSTEMD_DIR`, default `/etc/systemd/system`
 - `REALTEK_CONNECT_DEPLOY_DATA_DIR`, default `/var/lib/realtek-connect`
 - `REALTEK_CONNECT_DEPLOY_REMOTE_DIR`, default `/tmp/realtek-connect-deploy`
+
+## CI Artifact Contract
+
+Every CI run builds and verifies a deployment-ready bundle:
+
+```text
+realtek-connect-ci-<shortsha>
+realtek-connect-ci-<shortsha>.tar.gz
+realtek-connect-ci-<shortsha>.tar.gz.sha256
+realtek-connect-ci-<shortsha>.object-manifest.json
+```
+
+For `main`, tags, and manual CI runs, the same files are published to Linode
+Object Storage:
+
+```text
+releases/ci-<shortsha>/realtek-connect-ci-<shortsha>.tar.gz
+releases/ci-<shortsha>/realtek-connect-ci-<shortsha>.tar.gz.sha256
+releases/ci-<shortsha>/manifest.json
+```
+
+Pull request CI never uploads to Object Storage and does not require Linode
+secrets. The bundle includes the binary, `content/`, `templates/`, `static/`,
+`deploy/`, `VERSION`, and release manifests. Runtime SQLite database files must
+not be included.
+
+The upload script supports two authentication modes. If
+`LINODE_OBJ_ACCESS_KEY_ID` and `LINODE_OBJ_SECRET_ACCESS_KEY` are present, it
+uses them directly with the Linode S3-compatible API. Otherwise it uses
+`LINODE_TOKEN` to create a temporary limited-access Object Storage key for the
+selected bucket, uploads through the S3-compatible API, and deletes the temporary
+key before exiting. It signs S3-compatible HTTP requests itself and does not
+require the AWS CLI on the runner.
 
 ## Host Bootstrap
 

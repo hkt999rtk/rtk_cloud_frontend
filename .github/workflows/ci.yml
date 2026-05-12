@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
@@ -57,6 +60,12 @@ jobs:
         id: build
         run: go build ./cmd/server
 
+      - name: Select CI artifact version
+        id: artifact_version
+        shell: bash
+        run: |
+          printf 'version=ci-%s\n' "${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
       - name: Build deployable bundle
         id: package
         shell: bash
@@ -65,16 +74,33 @@ jobs:
           SEARCH_EMBEDDING_MODEL: text-embedding-3-small
         run: |
           chmod +x deploy/*.sh
-          deploy/package.sh "ci-${GITHUB_SHA::12}"
-          deploy/check-release.sh "dist/realtek-connect-ci-${GITHUB_SHA::12}"
+          deploy/package.sh "${{ steps.artifact_version.outputs.version }}"
+          deploy/check-release.sh "dist/realtek-connect-${{ steps.artifact_version.outputs.version }}"
 
       - name: Upload deployable bundle
         uses: actions/upload-artifact@v7
         with:
-          name: realtek-connect-ci-${{ github.sha }}
+          name: realtek-connect-${{ steps.artifact_version.outputs.version }}
           path: |
-            dist/realtek-connect-ci-*
+            dist/realtek-connect-${{ steps.artifact_version.outputs.version }}
+            dist/realtek-connect-${{ steps.artifact_version.outputs.version }}.tar.gz
+            dist/realtek-connect-${{ steps.artifact_version.outputs.version }}.tar.gz.sha256
+            dist/realtek-connect-${{ steps.artifact_version.outputs.version }}.object-manifest.json
           if-no-files-found: error
+
+      - name: Upload deployable bundle to Linode Object Storage
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.LINODE_OBJ_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.LINODE_OBJ_SECRET_ACCESS_KEY }}
+          LINODE_TOKEN: ${{ secrets.LINODE_TOKEN }}
+          AWS_DEFAULT_REGION: us-sea
+          AWS_EC2_METADATA_DISABLED: "true"
+          LINODE_OBJ_BUCKET: ${{ vars.LINODE_OBJ_BUCKET }}
+          LINODE_OBJ_ENDPOINT: ${{ vars.LINODE_OBJ_ENDPOINT }}
+        run: |
+          deploy/upload-linode-artifact.sh "${{ steps.artifact_version.outputs.version }}"
 
       - name: Run visual smoke
         id: visual_smoke
