@@ -35,6 +35,7 @@ var iconPaths = map[string]string{
 	"registry":    `<path d="M5 6c0-1.1 3.1-2 7-2s7 .9 7 2-3.1 2-7 2-7-.9-7-2Z"/><path d="M5 6v6c0 1.1 3.1 2 7 2s7-.9 7-2V6"/><path d="M5 12v6c0 1.1 3.1 2 7 2s7-.9 7-2v-6"/>`,
 	"refresh":     `<path d="M20 12a8 8 0 0 1-13.5 5.8"/><path d="M4 12A8 8 0 0 1 17.5 6.2"/><path d="M17 3v4h4"/><path d="M7 21v-4H3"/>`,
 	"route":       `<circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 6h3a4 4 0 0 1 0 8H9a4 4 0 0 0 0 8h3"/><path d="m14 18 3 0"/>`,
+	"search":      `<circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/>`,
 	"shield-user": `<path d="M12 3 5 6v5c0 4.4 2.8 7.8 7 10 4.2-2.2 7-5.6 7-10V6z"/><circle cx="12" cy="10" r="2"/><path d="M8.8 16a3.6 3.6 0 0 1 6.4 0"/>`,
 	"support":     `<path d="M5 13a7 7 0 0 1 14 0"/><path d="M5 13v3a2 2 0 0 0 2 2h1v-6H6a1 1 0 0 0-1 1Z"/><path d="M19 13v3a2 2 0 0 1-2 2h-1v-6h2a1 1 0 0 1 1 1Z"/><path d="M13 20h2a4 4 0 0 0 4-4"/>`,
 	"telemetry":   `<path d="M4 17h3l2-7 4 10 3-8 2 5h2"/><path d="M4 6h16"/>`,

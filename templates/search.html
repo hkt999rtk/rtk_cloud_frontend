@@ -1,0 +1,129 @@
+{{define "content"}}
+<section class="page-hero search-hero">
+  <div class="section-inner">
+    <p class="eyebrow">{{t . "search.eyebrow"}}</p>
+    <h1>{{t . "search.title"}}</h1>
+    <p class="section-lede">{{t . "search.body"}}</p>
+  </div>
+</section>
+
+<section class="section search-section">
+  <div class="section-inner search-layout">
+    <form class="search-panel" id="doc-search-form" data-search-enabled="{{if .SearchEnabled}}true{{else}}false{{end}}">
+      <label for="doc-search-query">{{t . "search.label"}}</label>
+      <textarea id="doc-search-query" name="query" maxlength="500" rows="4" placeholder="{{t . "search.placeholder"}}"></textarea>
+      <div class="search-actions">
+        <button class="primary-button" type="submit">
+          {{icon "search"}}
+          <span>{{t . "search.submit"}}</span>
+        </button>
+        <p class="search-note">{{t . "search.note"}}</p>
+      </div>
+    </form>
+    <div class="search-results" aria-live="polite">
+      <div class="search-empty" id="doc-search-empty">
+        <h2>{{t . "search.empty.title"}}</h2>
+        <p>{{t . "search.empty.body"}}</p>
+      </div>
+      <div class="search-answer" id="doc-search-answer" hidden></div>
+      <div class="search-sources" id="doc-search-sources" hidden></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    const form = document.getElementById("doc-search-form");
+    const input = document.getElementById("doc-search-query");
+    const empty = document.getElementById("doc-search-empty");
+    const answer = document.getElementById("doc-search-answer");
+    const sources = document.getElementById("doc-search-sources");
+    const locale = "{{.Locale.Code}}";
+    const enabled = form && form.getAttribute("data-search-enabled") === "true";
+
+    function setText(node, text) {
+      node.textContent = text || "";
+    }
+
+    function showMessage(title, body) {
+      answer.hidden = false;
+      sources.hidden = true;
+      empty.hidden = true;
+      answer.innerHTML = "";
+      const heading = document.createElement("h2");
+      const paragraph = document.createElement("p");
+      setText(heading, title);
+      setText(paragraph, body);
+      answer.appendChild(heading);
+      answer.appendChild(paragraph);
+    }
+
+    function renderResult(result) {
+      empty.hidden = true;
+      answer.hidden = false;
+      sources.hidden = false;
+      answer.innerHTML = "";
+      sources.innerHTML = "";
+
+      const heading = document.createElement("h2");
+      const paragraph = document.createElement("p");
+      setText(heading, result.answer_found ? "{{t . "search.answer.title"}}" : "{{t . "search.nohit.title"}}");
+      setText(paragraph, result.answer || "{{t . "search.nohit.body"}}");
+      answer.appendChild(heading);
+      answer.appendChild(paragraph);
+
+      if (!result.sources || result.sources.length === 0) {
+        sources.hidden = true;
+        return;
+      }
+
+      const sourcesHeading = document.createElement("h2");
+      sourcesHeading.textContent = "{{t . "search.sources.title"}}";
+      sources.appendChild(sourcesHeading);
+      result.sources.forEach(function (source) {
+        const item = document.createElement("article");
+        item.className = "search-source-card";
+        const title = document.createElement("a");
+        title.href = source.url || "#";
+        title.textContent = source.title || source.url;
+        const snippet = document.createElement("p");
+        snippet.textContent = source.snippet || "";
+        item.appendChild(title);
+        item.appendChild(snippet);
+        sources.appendChild(item);
+      });
+    }
+
+    if (!form) {
+      return;
+    }
+    if (!enabled) {
+      showMessage("{{t . "search.disabled.title"}}", "{{t . "search.disabled.body"}}");
+    }
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      const query = (input.value || "").trim();
+      if (!query) {
+        showMessage("{{t . "search.invalid.title"}}", "{{t . "search.invalid.body"}}");
+        return;
+      }
+      showMessage("{{t . "search.loading.title"}}", "{{t . "search.loading.body"}}");
+      fetch("/api/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ query: query, locale: locale })
+      }).then(function (response) {
+        return response.json().then(function (body) {
+          if (!response.ok) {
+            throw body;
+          }
+          return body;
+        });
+      }).then(renderResult).catch(function (error) {
+        showMessage("{{t . "search.error.title"}}", error && error.answer ? error.answer : "{{t . "search.error.body"}}");
+      });
+    });
+  })();
+</script>
+{{end}}

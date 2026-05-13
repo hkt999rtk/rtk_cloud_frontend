@@ -13,9 +13,10 @@ const (
 )
 
 type Config struct {
-	Enabled       bool
-	DatabasePath  string
-	RetentionDays int
+	Enabled           bool
+	DatabasePath      string
+	RetentionDays     int
+	UnsafeDisableSync bool
 }
 
 func DefaultConfig() Config {

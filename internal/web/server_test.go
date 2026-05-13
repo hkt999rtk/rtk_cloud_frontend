@@ -17,10 +17,24 @@ import (
 	"realtek-connect/internal/docs"
 	"realtek-connect/internal/features"
 	"realtek-connect/internal/leads"
+	"realtek-connect/internal/search"
 )
 
 type memoryLeadStore struct {
 	leads []leads.Lead
+}
+
+type stubSearchService struct {
+	result search.Result
+	err    error
+	calls  int
+	query  search.Query
+}
+
+func (s *stubSearchService) Query(_ context.Context, query search.Query) (search.Result, error) {
+	s.calls++
+	s.query = query
+	return s.result, s.err
 }
 
 func (s *memoryLeadStore) Insert(_ context.Context, lead leads.Lead) error {
@@ -143,6 +157,92 @@ func TestRoutesReturnOK(t *testing.T) {
 		handler.ServeHTTP(rec, req)
 		if rec.Code != http.StatusOK {
 			t.Fatalf("%s returned %d, want 200", path, rec.Code)
+		}
+	}
+}
+
+func TestSearchRoutesReturnOKWhenEnabled(t *testing.T) {
+	handler := testServerWithConfig(t, Config{
+		LeadStore:     &memoryLeadStore{},
+		SearchEnabled: true,
+		SearchService: &stubSearchService{},
+	})
+	for _, path := range []string{"/search", "/zh-tw/search", "/zh-cn/search"} {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s returned %d, want 200", path, rec.Code)
+		}
+	}
+}
+
+func TestSearchAPIDisabledReturnsControlledJSON(t *testing.T) {
+	handler := testServerWithConfig(t, Config{LeadStore: &memoryLeadStore{}})
+	req := httptest.NewRequest(http.MethodPost, "/api/search", strings.NewReader(`{"query":"ota","locale":"en"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("/api/search status = %d, want 503", rec.Code)
+	}
+	if body := rec.Body.String(); !strings.Contains(body, `"answer_found":false`) || !strings.Contains(body, "Search is not enabled") {
+		t.Fatalf("unexpected disabled response: %s", body)
+	}
+}
+
+func TestSearchAPIReturnsNoHitWithoutSources(t *testing.T) {
+	service := &stubSearchService{result: search.Result{AnswerFound: false, Answer: "No matching documentation was found.", Sources: []search.Source{}}}
+	handler := testServerWithConfig(t, Config{
+		LeadStore:     &memoryLeadStore{},
+		SearchEnabled: true,
+		SearchService: service,
+	})
+	req := httptest.NewRequest(http.MethodPost, "/api/search", strings.NewReader(`{"query":"unrelated topic","locale":"en"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/api/search status = %d, want 200: %s", rec.Code, rec.Body.String())
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, `"answer_found":false`) || !strings.Contains(body, `"sources":[]`) {
+		t.Fatalf("unexpected no-hit response: %s", body)
+	}
+	if service.calls != 1 || service.query.Text != "unrelated topic" {
+		t.Fatalf("service query = %+v calls=%d", service.query, service.calls)
+	}
+}
+
+func TestSearchAPIReturnsAnswerWithSources(t *testing.T) {
+	service := &stubSearchService{result: search.Result{
+		AnswerFound: true,
+		Answer:      "OTA supports firmware rollout.",
+		Sources: []search.Source{{
+			Title:      "OTA",
+			URL:        "/features/ota",
+			Snippet:    "OTA firmware rollout campaign controls.",
+			Locale:     "en",
+			SourceType: "feature",
+			Score:      0.91,
+		}},
+	}}
+	handler := testServerWithConfig(t, Config{
+		LeadStore:     &memoryLeadStore{},
+		SearchEnabled: true,
+		SearchService: service,
+	})
+	req := httptest.NewRequest(http.MethodPost, "/api/search", strings.NewReader(`{"query":"ota rollout","locale":"en"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/api/search status = %d, want 200: %s", rec.Code, rec.Body.String())
+	}
+	body := rec.Body.String()
+	for _, want := range []string{`"answer_found":true`, "OTA supports firmware rollout.", "/features/ota"} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("response missing %q: %s", want, body)
 		}
 	}
 }
@@ -1061,6 +1161,7 @@ func TestCDNCacheHeadersAreOptional(t *testing.T) {
 		{method: http.MethodGet, path: "/sitemap.xml", want: "public, max-age=300"},
 		{method: http.MethodGet, path: "/static/styles.css", want: "public, max-age=31536000, immutable"},
 		{method: http.MethodPost, path: "/api/event", want: "no-store"},
+		{method: http.MethodPost, path: "/api/search", want: "no-store"},
 	}
 
 	for _, tc := range tests {

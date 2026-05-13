@@ -40,6 +40,12 @@ func Open(ctx context.Context, cfg Config) (*Repository, error) {
 		_ = db.Close()
 		return nil, err
 	}
+	if cfg.UnsafeDisableSync {
+		if _, err := db.ExecContext(ctx, `PRAGMA synchronous = OFF; PRAGMA journal_mode = MEMORY;`); err != nil {
+			_ = db.Close()
+			return nil, err
+		}
+	}
 
 	repository := &Repository{
 		db:            db,

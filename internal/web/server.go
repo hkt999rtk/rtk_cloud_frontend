@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/csv"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -27,6 +28,7 @@ import (
 	"realtek-connect/internal/features"
 	"realtek-connect/internal/leads"
 	"realtek-connect/internal/manual"
+	"realtek-connect/internal/search"
 )
 
 type LeadStore interface {
@@ -46,6 +48,12 @@ type Config struct {
 	PublicBaseURL           string
 	EnableAssetFingerprints bool
 	EnableCDNCacheHeaders   bool
+	SearchEnabled           bool
+	SearchService           SearchService
+}
+
+type SearchService interface {
+	Query(context.Context, search.Query) (search.Result, error)
 }
 
 type Server struct {
@@ -61,8 +69,11 @@ type Server struct {
 	publicBaseURL           string
 	enableAssetFingerprints bool
 	enableCDNCacheHeaders   bool
+	searchEnabled           bool
+	searchService           SearchService
 	assetVersions           map[string]string
 	contactLimit            *submissionRateLimiter
+	searchLimit             *submissionRateLimiter
 	docsContentMu           sync.RWMutex
 	docsContent             map[string]docs.ContentPage
 }
@@ -107,6 +118,7 @@ type pageData struct {
 	AdminAnalyticsHref string
 	LeadFilters        adminLeadFilters
 	LeadPagination     adminLeadPagination
+	SearchEnabled      bool
 }
 
 type pageAnalyticsView struct {
@@ -187,8 +199,11 @@ func NewServer(cfg Config) (*Server, error) {
 		publicBaseURL:           normalizePublicBaseURL(cfg.PublicBaseURL),
 		enableAssetFingerprints: cfg.EnableAssetFingerprints,
 		enableCDNCacheHeaders:   cfg.EnableCDNCacheHeaders,
+		searchEnabled:           cfg.SearchEnabled,
+		searchService:           cfg.SearchService,
 		assetVersions:           assetVersions,
 		contactLimit:            newSubmissionRateLimiter(5, 10*time.Minute),
+		searchLimit:             newSubmissionRateLimiter(20, 10*time.Minute),
 		docsContent:             docsContent,
 	}, nil
 }
@@ -205,6 +220,7 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("/admin/reload-content", s.handleAdminReloadContent)
 	mux.HandleFunc("/healthz", s.handleHealthz)
 	mux.HandleFunc("/api/event", s.handleAnalyticsEvent)
+	mux.HandleFunc("/api/search", s.handleSearchAPI)
 	mux.HandleFunc("/", s.handlePublic)
 	return securityHeaders(s.searchIndexingHeaders(s.cacheHeaders(mux)))
 }
@@ -247,6 +263,8 @@ func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
 		s.handleContact(w, r, locale, publicPath)
 	case publicPath == "/privacy":
 		s.handlePrivacy(w, r, locale, publicPath)
+	case publicPath == "/search":
+		s.handleSearchPage(w, r, locale, publicPath)
 	default:
 		http.NotFound(w, r)
 	}
@@ -300,6 +318,108 @@ func (s *Server) handlePrivacy(w http.ResponseWriter, r *http.Request, locale co
 	catalog := content.CatalogFor(locale)
 	page := catalog.Page("privacy")
 	s.render(w, http.StatusOK, "privacy.html", s.basePageData(r, locale, publicPath, page.Title, page.Description))
+}
+
+func (s *Server) handleSearchPage(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+	catalog := content.CatalogFor(locale)
+	page := catalog.Page("search")
+	data := s.basePageData(r, locale, publicPath, page.Title, page.Description)
+	data.SearchEnabled = s.searchEnabled && s.searchService != nil
+	s.render(w, http.StatusOK, "search.html", data)
+}
+
+type searchAPIRequest struct {
+	Query  string `json:"query"`
+	Locale string `json:"locale"`
+}
+
+type searchAPIErrorResponse struct {
+	AnswerFound bool            `json:"answer_found"`
+	Answer      string          `json:"answer"`
+	Sources     []search.Source `json:"sources"`
+	Error       string          `json:"error,omitempty"`
+}
+
+func (s *Server) handleSearchAPI(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/api/search" {
+		http.NotFound(w, r)
+		return
+	}
+	if r.Method != http.MethodPost {
+		methodNotAllowed(w)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if !s.searchEnabled || s.searchService == nil {
+		writeSearchJSON(w, http.StatusServiceUnavailable, searchAPIErrorResponse{
+			AnswerFound: false,
+			Answer:      "Search is not enabled.",
+			Sources:     []search.Source{},
+			Error:       "search_disabled",
+		})
+		return
+	}
+	if !s.searchLimit.Allow(contactSubmissionKey(r)) {
+		writeSearchJSON(w, http.StatusTooManyRequests, searchAPIErrorResponse{
+			AnswerFound: false,
+			Answer:      "Too many search requests. Please try again later.",
+			Sources:     []search.Source{},
+			Error:       "rate_limited",
+		})
+		return
+	}
+	var payload searchAPIRequest
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&payload); err != nil {
+		writeSearchJSON(w, http.StatusBadRequest, searchAPIErrorResponse{
+			AnswerFound: false,
+			Answer:      "Invalid search request.",
+			Sources:     []search.Source{},
+			Error:       "invalid_json",
+		})
+		return
+	}
+	query := strings.TrimSpace(payload.Query)
+	if query == "" || len([]rune(query)) > 500 {
+		writeSearchJSON(w, http.StatusBadRequest, searchAPIErrorResponse{
+			AnswerFound: false,
+			Answer:      "Enter a search question up to 500 characters.",
+			Sources:     []search.Source{},
+			Error:       "invalid_query",
+		})
+		return
+	}
+	locale := normalizeSearchLocale(payload.Locale)
+	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+	defer cancel()
+	result, err := s.searchService.Query(ctx, search.Query{Text: query, Locale: locale})
+	if err != nil {
+		writeSearchJSON(w, http.StatusBadGateway, searchAPIErrorResponse{
+			AnswerFound: false,
+			Answer:      "Search is temporarily unavailable.",
+			Sources:     []search.Source{},
+			Error:       "search_unavailable",
+		})
+		return
+	}
+	writeSearchJSON(w, http.StatusOK, result)
+}
+
+func writeSearchJSON(w http.ResponseWriter, status int, payload any) {
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(payload)
+}
+
+func normalizeSearchLocale(value string) string {
+	switch strings.TrimSpace(value) {
+	case "zh-TW", "zh-CN":
+		return strings.TrimSpace(value)
+	default:
+		return "en"
+	}
 }
 
 func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
@@ -981,7 +1101,7 @@ func (s *Server) cacheHeaders(next http.Handler) http.Handler {
 			w.Header().Set("Cache-Control", "public, max-age=300")
 		case r.URL.Path == "/healthz" || strings.HasPrefix(r.URL.Path, "/admin/"):
 			w.Header().Set("Cache-Control", "no-store")
-		case r.Method == http.MethodPost && r.URL.Path == "/api/event":
+		case r.Method == http.MethodPost && (r.URL.Path == "/api/event" || r.URL.Path == "/api/search"):
 			w.Header().Set("Cache-Control", "no-store")
 		case r.Method == http.MethodPost && contentPublicPath(r.URL.Path) == "/contact":
 			w.Header().Set("Cache-Control", "no-store")

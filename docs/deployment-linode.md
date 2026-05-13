@@ -85,6 +85,8 @@ does not already exist. Review it before public launch:
 PORT=8080
 DATABASE_PATH=/var/lib/realtek-connect/connectplus.db
 ANALYTICS_DATABASE_PATH=/var/lib/realtek-connect/analytics.db
+SEARCH_DATABASE_PATH=/opt/realtek-connect/current/data/search.db
+SEARCH_ENABLED=false
 PUBLIC_BASE_URL=https://example.com
 DISABLE_SEARCH_INDEXING=true
 ENABLE_ASSET_FINGERPRINTS=true
@@ -95,7 +97,10 @@ ADMIN_TOKEN=change-me-before-public-use
 
 Set `DISABLE_SEARCH_INDEXING=false` only when the site is ready to be indexed.
 Keep SQLite files in `/var/lib/realtek-connect`; they are runtime state and are
-never part of release artifacts.
+never part of release artifacts. Documentation search can use the precomputed
+`/opt/realtek-connect/current/data/search.db` bundled with a release artifact.
+Enable it only after `OPENAI_API_KEY` is present in the env file and the bundle
+manifest confirms `search_index.included=true`.
 
 ## GoDaddy DNS
 

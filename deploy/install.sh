@@ -29,6 +29,8 @@ if [[ ! -f "$env_file" ]]; then
 PORT=8080
 DATABASE_PATH=$data_dir/connectplus.db
 ANALYTICS_DATABASE_PATH=$data_dir/analytics.db
+SEARCH_DATABASE_PATH=$prefix/current/data/search.db
+SEARCH_ENABLED=false
 PUBLIC_BASE_URL=
 DISABLE_SEARCH_INDEXING=true
 ENABLE_ASSET_FINGERPRINTS=true

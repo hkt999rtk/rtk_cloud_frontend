@@ -46,9 +46,11 @@ Current routes:
 - `GET /features/{slug}`
 - `GET /contact`
 - `GET /privacy`
+- `GET /search`
 - `GET /robots.txt`
 - `GET /sitemap.xml`
 - `POST /contact`
+- `POST /api/search`
 - `GET /healthz`
 - `GET /admin/leads`
 - `GET /admin/leads.csv`
@@ -62,6 +64,7 @@ Current routes:
 - `GET /zh-tw/features/{slug}`
 - `GET /zh-tw/contact`
 - `GET /zh-tw/privacy`
+- `GET /zh-tw/search`
 - `POST /zh-tw/contact`
 - `GET /zh-cn`
 - `GET /zh-cn/docs`
@@ -72,6 +75,7 @@ Current routes:
 - `GET /zh-cn/features/{slug}`
 - `GET /zh-cn/contact`
 - `GET /zh-cn/privacy`
+- `GET /zh-cn/search`
 - `POST /zh-cn/contact`
 
 This implementation is enough to demonstrate the Realtek Connect+ direction and collect leads. It is not yet content-complete as a full public IoT cloud platform website and documentation surface.
@@ -231,10 +235,28 @@ The website applies privacy information globally instead of using EU-only IP det
 - Public routes include `/privacy`, `/zh-tw/privacy`, and `/zh-cn/privacy`.
 - The footer links to the localized privacy notice on every page.
 - The contact form includes a localized privacy note linking to the privacy notice.
-- The privacy notice explains contact form fields, inquiry handling purpose, first-party SQLite analytics when `ANALYTICS_ENABLED=true`, collected analytics event types, referrer-origin-only handling, ephemeral session id behavior, 90-day raw analytics event retention through `ANALYTICS_RETENTION_DAYS`, 24-month lead retention intent, data access/correction/deletion request handling, admin token protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior.
+- The privacy notice explains contact form fields, inquiry handling purpose, first-party SQLite analytics when `ANALYTICS_ENABLED=true`, OpenAI-backed documentation query behavior when `SEARCH_ENABLED=true`, collected analytics event types, referrer-origin-only handling, ephemeral session id behavior, 90-day raw analytics event retention through `ANALYTICS_RETENTION_DAYS`, 24-month lead retention intent, data access/correction/deletion request handling, admin token protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior.
 - The first implementation uses `privacy@example.com` as a placeholder privacy contact. This must be replaced with an official contact address before public launch.
 - The privacy notice is GDPR-lite readiness for the website prototype, not a complete legal compliance package.
 - The homepage brand film is served as a local MP4 asset and does not create a YouTube iframe.
+
+## OpenAI Documentation Query
+
+The website includes a first-version public documentation query tool scoped only to content in this repository.
+
+- Public routes include `/search`, `/zh-tw/search`, and `/zh-cn/search`.
+- The query API is `POST /api/search` with JSON body `{ "query": "string", "locale": "en|zh-TW|zh-CN" }`.
+- The search index is CLI-only and is not rebuilt during server startup. Run `OPENAI_API_KEY=... go run ./cmd/search-index` before enabling runtime search.
+- Release packaging can build a precomputed `data/search.db` into the deployable artifact when `OPENAI_API_KEY` is available. This keeps fixed website-document embeddings out of git while allowing deployment bundles to be search-ready.
+- The indexer scans website content from `content/`, `docs/`, `README.md`, feature/docs/manual catalog data, and localized public content, then stores documents, chunks, embeddings, and source metadata in SQLite.
+- The default search database path is `data/search.db`, overrideable with `SEARCH_DATABASE_PATH`.
+- Embeddings use OpenAI `text-embedding-3-small` by default through `SEARCH_EMBEDDING_MODEL`.
+- Runtime answers use OpenAI Responses API with `gpt-4.1-mini` by default through `SEARCH_ANSWER_MODEL`.
+- `SEARCH_ENABLED` defaults to `false`. When disabled, `/search` still renders but explains that the index is unavailable, and `/api/search` returns a controlled disabled JSON response.
+- Runtime retrieval creates a query embedding, searches local SQLite chunks, and filters by score. If no retrieved chunk clears the threshold, the API returns `answer_found=false`, an empty `sources` array, and a localized no-hit answer without calling the answer model.
+- When sources are found, only the user query and retrieved snippets are sent to the answer model. The prompt instructs the model to answer only from sources and to say no matching documentation was found if the answer is not present.
+- The endpoint limits query length, rate-limits requests by client address, and limits returned sources.
+- Raw search queries must not be stored in analytics event payloads. Only aggregate search count, success, or no-hit metrics may be tracked in later analytics work.
 
 SEO rules:
 
@@ -327,9 +349,11 @@ Routes:
 - `GET /features/{slug}`: feature detail pages.
 - `GET /contact`: contact / early access registration form.
 - `GET /privacy`: privacy notice.
+- `GET /search`: OpenAI-backed documentation query UI.
 - `GET /robots.txt`: crawl directives for search bots.
 - `GET /sitemap.xml`: sitemap covering public marketing and docs pages.
 - `POST /contact`: validate and store a lead in SQLite.
+- `POST /api/search`: JSON documentation query endpoint.
 - `GET /healthz`: plain-text health check.
 - `GET /admin/leads`: protected lead review page, enabled only when `ADMIN_TOKEN` is set.
 - `GET /admin/leads.csv`: protected CSV export, enabled only when `ADMIN_TOKEN` is set.
@@ -339,7 +363,7 @@ Localized public route variants:
 
 - Traditional Chinese mirrors public routes under `/zh-tw`.
 - Simplified Chinese mirrors public routes under `/zh-cn`.
-- Examples: `/zh-tw/features/ota`, `/zh-cn/docs/apis`, `/zh-tw/manual/sdk-samples`, `/zh-tw/contact`.
+- Examples: `/zh-tw/features/ota`, `/zh-cn/docs/apis`, `/zh-tw/manual/sdk-samples`, `/zh-tw/contact`, `/zh-cn/search`.
 - Privacy examples: `/zh-tw/privacy`, `/zh-cn/privacy`.
 - Localized `POST /contact` variants write to the same SQLite lead table.
 - Feature and documentation slugs remain English across all locales.
@@ -376,6 +400,11 @@ Environment:
 - `ANALYTICS_RETENTION_DAYS`, optional and default `90`.
 - `ADMIN_TOKEN`, optional. When set, enables protected lead review and CSV export.
 - `DISABLE_SEARCH_INDEXING`, optional. When truthy, marks the site as non-indexable with HTTP `X-Robots-Tag`, page-level robots meta tags, `/robots.txt` `Disallow: /`, and a disabled `/sitemap.xml`.
+- `OPENAI_API_KEY`, required by `cmd/search-index` and by runtime search answering when `SEARCH_ENABLED=true`.
+- `SEARCH_DATABASE_PATH`, optional and default `data/search.db`.
+- `SEARCH_ENABLED`, optional and disabled by default.
+- `SEARCH_EMBEDDING_MODEL`, optional and default `text-embedding-3-small`.
+- `SEARCH_ANSWER_MODEL`, optional and default `gpt-4.1-mini`.
 - `PUBLIC_BASE_URL`, optional. When empty, canonical URLs, social image URLs, `hreflang` alternates, robots sitemap references, and sitemap locations are generated from the incoming request host and forwarded headers. When set, generated public absolute URLs use this fixed base URL.
 - `ENABLE_ASSET_FINGERPRINTS`, optional and disabled by default. When truthy, template-rendered `/static/...` URLs receive a `?v=<content-hash>` query string based on file contents.
 - `ENABLE_CDN_CACHE_HEADERS`, optional and disabled by default. When truthy, the app emits provider-neutral CDN cache headers.
@@ -442,14 +471,14 @@ Container default analytics database path:
 Container deployment notes:
 
 - `Dockerfile` copies the compiled server together with `templates/` and `static/`, which are runtime dependencies for page rendering and asset delivery.
-- The native CD bundle includes an empty writable `data/` directory so default `data/connectplus.db` and `data/analytics.db` paths can initialize on the website test host. Production native hosts should set `DATABASE_PATH` and `ANALYTICS_DATABASE_PATH` to persistent service-owned storage.
+- The native CD bundle includes a writable `data/` directory so default `data/connectplus.db` and `data/analytics.db` paths can initialize on the website test host. When `OPENAI_API_KEY` is available during packaging, the bundle also includes precomputed `data/search.db` for documentation search. Production native hosts should set `DATABASE_PATH` and `ANALYTICS_DATABASE_PATH` to persistent service-owned storage while allowing `SEARCH_DATABASE_PATH` to point at the immutable bundled index if desired.
 - `/data` is declared as the persistent volume for SQLite-backed lead and analytics storage.
 - HTTPS is intentionally out of process and should be handled by the reverse proxy or deployment platform instead of the Go app directly.
 
 Linode artifact deployment notes:
 
 - `deploy/package.sh <version>` builds `dist/realtek-connect-<version>.tar.gz`, `realtek-connect-<version>.tar.gz.sha256`, and `realtek-connect-<version>.object-manifest.json`.
-- Release artifacts contain the server binary, `content/`, `templates/`, `static/`, `deploy/`, `VERSION`, and release manifest metadata. SQLite runtime DB files are excluded.
+- Release artifacts contain the server binary, `content/`, `templates/`, `static/`, `deploy/`, `VERSION`, and release manifest metadata. SQLite runtime DB files are excluded; the only SQLite DB allowed in a release bundle is optional precomputed `data/search.db`.
 - `.github/workflows/release.yml` publishes versioned artifacts to GitHub Releases and Linode Object Storage under `releases/<version>/`.
 - `.github/workflows/deploy-linode.yml` installs a selected version to `/opt/realtek-connect/releases/<version>`, updates `/opt/realtek-connect/current`, restarts `realtek-connect.service`, and runs public readiness checks.
 - Linode host bootstrap, GoDaddy DNS, nginx reverse proxy, Let’s Encrypt TLS, rollback, and SQLite backup are documented in `docs/deployment-linode.md`, `docs/deployment-promotion-rollback.md`, and `docs/sqlite-backup-linode.md`.
@@ -503,8 +532,8 @@ Contact form fields:
 ## Test Plan
 
 - `go test ./...`
-- HTTP route tests for `/`, `/docs`, `/features`, feature/detail pages, `/contact`, `/privacy`, `/robots.txt`, and `/sitemap.xml`.
-- Localized HTTP route tests for `/zh-tw`, `/zh-tw/features/{slug}`, `/zh-tw/docs/{slug}`, `/zh-tw/contact`, `/zh-tw/privacy`, `/zh-cn`, `/zh-cn/features/{slug}`, `/zh-cn/docs/{slug}`, `/zh-cn/contact`, and `/zh-cn/privacy`.
+- HTTP route tests for `/`, `/docs`, `/features`, feature/detail pages, `/contact`, `/privacy`, `/search`, `/robots.txt`, and `/sitemap.xml`.
+- Localized HTTP route tests for `/zh-tw`, `/zh-tw/features/{slug}`, `/zh-tw/docs/{slug}`, `/zh-tw/contact`, `/zh-tw/privacy`, `/zh-tw/search`, `/zh-cn`, `/zh-cn/features/{slug}`, `/zh-cn/docs/{slug}`, `/zh-cn/contact`, `/zh-cn/privacy`, and `/zh-cn/search`.
 - Localized metadata tests for `<html lang>`, canonical URL, `hreflang` alternates, and language switcher current-state links.
 - Unknown feature slug returns 404.
 - Unknown locale prefix and unknown localized feature/docs slugs return 404.
@@ -516,6 +545,7 @@ Contact form fields:
 - CDN readiness tests verify `ENABLE_ASSET_FINGERPRINTS=true` adds content hashes to rendered static asset URLs.
 - CDN readiness tests verify `ENABLE_CDN_CACHE_HEADERS=true` applies the expected static, public HTML, contact, admin, health, robots, and sitemap cache headers.
 - Privacy tests verify localized privacy notice routes, footer links, contact form notice links, sitemap privacy URLs, and privacy metadata.
+- Search tests verify content extraction, SQLite search schema, no-hit behavior without answer generation, source-only prompt construction, query validation, rate limiting, disabled behavior, localized `/search` routes, cited source responses, and no-hit JSON responses.
 - Homepage brand film tests verify the local MP4 source, poster image, native video metadata preload, no YouTube iframe, and localized section copy between Architecture and Deployment.
 - Admin lead routes require `ADMIN_TOKEN`; unauthorized requests return 401, disabled admin routes return 404.
 - `go run ./cmd/visual-smoke`

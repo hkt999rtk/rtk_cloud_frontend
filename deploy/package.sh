@@ -35,21 +35,45 @@ chmod 0755 "$release_dir/bin/realtek-connect" "$release_dir/deploy/"*.sh
 chmod 0775 "$release_dir/data"
 printf '%s\n' "$version" > "$release_dir/VERSION"
 
+search_index_included="false"
+search_index_sha=""
+if [[ "${BUILD_SEARCH_INDEX:-true}" != "false" && -n "${OPENAI_API_KEY:-}" ]]; then
+  echo "building precomputed documentation search index"
+  SEARCH_DATABASE_PATH="$release_dir/data/search.db" \
+    go run ./cmd/search-index \
+      -repo-root "$repo_root" \
+      -content-root "$repo_root/content" \
+      -database "$release_dir/data/search.db"
+  search_index_included="true"
+  search_index_sha="$(shasum -a 256 "$release_dir/data/search.db" | awk '{print $1}')"
+else
+  echo "skipping precomputed documentation search index: OPENAI_API_KEY is not set or BUILD_SEARCH_INDEX=false"
+fi
+
 source_commit="$(git -C "$repo_root" rev-parse HEAD 2>/dev/null || echo unknown)"
 created_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 binary_sha="$(shasum -a 256 "$release_dir/bin/realtek-connect" | awk '{print $1}')"
 
-python3 - "$release_dir/release-manifest.json" "$version" "$source_commit" "$created_at" "$binary_sha" <<'PY'
+python3 - "$release_dir/release-manifest.json" "$version" "$source_commit" "$created_at" "$binary_sha" "$search_index_included" "$search_index_sha" <<'PY'
 import json
 import sys
 from pathlib import Path
 
-out, version, source_commit, created_at, binary_sha = sys.argv[1:]
+out, version, source_commit, created_at, binary_sha, search_index_included, search_index_sha = sys.argv[1:]
+includes = ["bin/realtek-connect", "content/", "templates/", "static/", "deploy/", "VERSION"]
+search_index = {
+    "included": search_index_included == "true",
+    "path": "data/search.db" if search_index_included == "true" else "",
+    "sha256": search_index_sha,
+}
+if search_index["included"]:
+    includes.append("data/search.db")
 manifest = {
     "artifact": f"realtek-connect-{version}",
     "binary_sha256": binary_sha,
     "created_at": created_at,
-    "includes": ["bin/realtek-connect", "content/", "templates/", "static/", "deploy/", "VERSION"],
+    "includes": includes,
+    "search_index": search_index,
     "source_commit": source_commit,
     "version": version,
 }
