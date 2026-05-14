@@ -6,4 +6,5 @@ data/*.db
 data/*.db-*
 data/analytics.db
 data/analytics.db-*
+keys/test_device/
 .DS_Store
