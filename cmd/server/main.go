@@ -15,6 +15,7 @@ import (
 
 	"realtek-connect/internal/analytics"
 	"realtek-connect/internal/leads"
+	"realtek-connect/internal/search"
 	"realtek-connect/internal/web"
 
 	_ "modernc.org/sqlite"
@@ -68,6 +69,47 @@ func run(ctx context.Context, logger *log.Logger) error {
 		defer analyticsStore.Close()
 	}
 
+	var searchDB *sql.DB
+	var searchService web.SearchService
+	searchEnabled := truthyEnv("SEARCH_ENABLED")
+	if searchEnabled {
+		openAIAPIKey := os.Getenv("OPENAI_API_KEY")
+		if strings.TrimSpace(openAIAPIKey) == "" {
+			logger.Printf("SEARCH_ENABLED=true but OPENAI_API_KEY is empty; documentation search is disabled")
+			searchEnabled = false
+		}
+	}
+	if searchEnabled {
+		searchDatabasePath := envOrDefault("SEARCH_DATABASE_PATH", "data/search.db")
+		if !filepath.IsAbs(searchDatabasePath) {
+			searchDatabasePath = filepath.Clean(searchDatabasePath)
+		}
+		if err := os.MkdirAll(filepath.Dir(searchDatabasePath), 0o755); err != nil {
+			return err
+		}
+		searchDB, err = sql.Open("sqlite", searchDatabasePath)
+		if err != nil {
+			return err
+		}
+		defer searchDB.Close()
+		if err := searchDB.PingContext(ctx); err != nil {
+			return err
+		}
+		searchRepository := search.NewRepository(searchDB)
+		if err := searchRepository.Init(ctx); err != nil {
+			return err
+		}
+		openAIClient := search.OpenAIClient{
+			APIKey:         os.Getenv("OPENAI_API_KEY"),
+			EmbeddingModel: envOrDefault("SEARCH_EMBEDDING_MODEL", "text-embedding-3-small"),
+			AnswerModel:    envOrDefault("SEARCH_ANSWER_MODEL", "gpt-4.1-mini"),
+		}
+		searchService = search.NewService(searchRepository, openAIClient, openAIClient, search.ServiceConfig{
+			MaxSources: 5,
+			MinScore:   0.35,
+		})
+	}
+
 	application, err := web.NewServer(web.Config{
 		LeadStore:               repository,
 		AnalyticsStore:          analyticsStore,
@@ -76,6 +118,8 @@ func run(ctx context.Context, logger *log.Logger) error {
 		PublicBaseURL:           os.Getenv("PUBLIC_BASE_URL"),
 		EnableAssetFingerprints: truthyEnv("ENABLE_ASSET_FINGERPRINTS"),
 		EnableCDNCacheHeaders:   truthyEnv("ENABLE_CDN_CACHE_HEADERS"),
+		SearchEnabled:           searchEnabled,
+		SearchService:           searchService,
 	})
 	if err != nil {
 		return err

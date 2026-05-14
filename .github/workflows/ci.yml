@@ -2,7 +2,13 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
 
 env:
   GIT_CONFIG_COUNT: 1
@@ -45,11 +51,30 @@ jobs:
 
       - name: Run tests
         id: tests
-        run: go test ./...
+        run: go test -count=1 -timeout=3m ./...
 
       - name: Build server
         id: build
         run: go build ./cmd/server
+
+      - name: Build deployable bundle
+        id: package
+        shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SEARCH_EMBEDDING_MODEL: text-embedding-3-small
+        run: |
+          chmod +x deploy/*.sh
+          deploy/package.sh "ci-${GITHUB_SHA::12}"
+          deploy/check-release.sh "dist/realtek-connect-ci-${GITHUB_SHA::12}"
+
+      - name: Upload deployable bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: realtek-connect-ci-${{ github.sha }}
+          path: |
+            dist/realtek-connect-ci-*
+          if-no-files-found: error
 
       - name: Run visual smoke
         id: visual_smoke

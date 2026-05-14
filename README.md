@@ -12,7 +12,7 @@ The App SDK, SDK docs, homepage, and manual now summarize the `rtk_cloud_client`
 
 The homepage includes a locally hosted Realtek corporate brand film at `static/assets/realtek-brand-film.mp4`, with a generated poster image and `preload="metadata"`. The video supports brand trust after the platform architecture section and is not used as autoplay hero media.
 
-Privacy readiness is intentionally lightweight for this prototype: `/privacy` describes contact form data, first-party SQLite analytics when `ANALYTICS_ENABLED=true`, the analytics event types collected, referrer-origin-only handling, ephemeral session ids, 90-day raw analytics event retention, the 24-month lead retention intent, data request handling, admin protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior. Replace the placeholder `privacy@example.com` contact before public launch and complete legal review.
+Privacy readiness is intentionally lightweight for this prototype: `/privacy` describes contact form data, first-party SQLite analytics when `ANALYTICS_ENABLED=true`, OpenAI-backed documentation query behavior when search is enabled, the analytics event types collected, referrer-origin-only handling, ephemeral session ids, 90-day raw analytics event retention, the 24-month lead retention intent, data request handling, admin protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior. Replace the placeholder `privacy@example.com` contact before public launch and complete legal review.
 
 The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.md).
 
@@ -64,6 +64,11 @@ Environment variables:
 - `ANALYTICS_DATABASE_PATH`: SQLite analytics database path, default `data/analytics.db`.
 - `ANALYTICS_RETENTION_DAYS`: raw analytics retention window, default `90`.
 - `ADMIN_TOKEN`: enables protected lead viewing and CSV export.
+- `OPENAI_API_KEY`: required by `cmd/search-index` and by runtime search answering when `SEARCH_ENABLED=true`.
+- `SEARCH_DATABASE_PATH`: SQLite documentation search database path, default `data/search.db`.
+- `SEARCH_ENABLED`: public documentation query toggle, default `false`. Enable only after `search.db` has been built and `OPENAI_API_KEY` is configured.
+- `SEARCH_EMBEDDING_MODEL`: OpenAI embedding model, default `text-embedding-3-small`.
+- `SEARCH_ANSWER_MODEL`: OpenAI answer model, default `gpt-4.1-mini`.
 - `DISABLE_SEARCH_INDEXING`: set to `true` on private/test deployments to emit `X-Robots-Tag: noindex, nofollow, noarchive`, add page-level `robots` meta tags, disallow all crawling in `/robots.txt`, and hide `/sitemap.xml`.
 - `PUBLIC_BASE_URL`: optional public origin such as `https://webtest.mgmeet.io`. When empty, canonical URLs, social image URLs, `hreflang`, robots sitemap references, and sitemap locations are built from the incoming request host and forwarded headers.
 - `ENABLE_ASSET_FINGERPRINTS`: optional. Set to `true` to append content hashes to template-rendered static URLs, for example `/static/styles.css?v=<hash>`.
@@ -78,6 +83,14 @@ Search indexing:
 
 - Test and preview deployments should run with `DISABLE_SEARCH_INDEXING=true`.
 - Public launch deployments can omit it when the site is approved for indexing.
+
+Documentation query:
+
+- Build the local website-only search index with `OPENAI_API_KEY=... go run ./cmd/search-index`.
+- `deploy/package.sh` builds a precomputed `data/search.db` into the release bundle when `OPENAI_API_KEY` is available. If the key is absent, packaging succeeds without the index so normal PR validation is not blocked.
+- Start the server with `SEARCH_ENABLED=true` only after `SEARCH_DATABASE_PATH` points at a built index and `OPENAI_API_KEY` is configured.
+- Search answers are generated only when retrieved website content clears the relevance threshold. No matching documentation returns a controlled no-hit answer without calling the answer model.
+- Search query text is sent to OpenAI for embeddings. When sources are found, the query and retrieved snippets are sent to the OpenAI Responses API to generate a source-grounded answer. Raw query text is not stored in the analytics event payload.
 
 CDN readiness:
 
@@ -97,9 +110,11 @@ CDN readiness:
 - `GET /features/{slug}`
 - `GET /contact`
 - `GET /privacy`
+- `GET /search`
 - `GET /robots.txt`
 - `GET /sitemap.xml`
 - `POST /contact`
+- `POST /api/search`
 - `GET /healthz`
 - `GET /admin/leads`, requires `ADMIN_TOKEN`
 - `GET /admin/leads.csv`, requires `ADMIN_TOKEN`
@@ -196,13 +211,13 @@ Deployment notes:
 
 - The image keeps application state only in SQLite under `/data/connectplus.db`; mount `/data` to persist leads across restarts.
 - When analytics is enabled, the app also keeps first-party event data in `/data/analytics.db`.
-- The native CD bundle includes a writable `data/` directory for test-host defaults. Production native deployments should still set `DATABASE_PATH` and `ANALYTICS_DATABASE_PATH` to a persistent service-owned directory.
+- The native CD bundle includes a writable `data/` directory for test-host defaults and may include precomputed `data/search.db` for documentation search. Production native deployments should still set `DATABASE_PATH` and `ANALYTICS_DATABASE_PATH` to a persistent service-owned directory; `SEARCH_DATABASE_PATH` can point at the immutable bundled index under `/opt/realtek-connect/current/data/search.db`.
 - The container serves HTTP on port `8080`. Production TLS termination should be handled by a reverse proxy, ingress, or deployment platform in front of the app.
 - Native builds remain supported for environments that prefer `go build` over containers.
 
 Artifact-based Linode deployment is also supported:
 
-- `deploy/package.sh <version>` creates `dist/realtek-connect-<version>.tar.gz`, a checksum, and an object-storage manifest.
+- `deploy/package.sh <version>` creates `dist/realtek-connect-<version>.tar.gz`, a checksum, and an object-storage manifest. When `OPENAI_API_KEY` is present, the bundle includes `data/search.db` as a precomputed documentation search index.
 - `.github/workflows/release.yml` publishes release bundles to GitHub Releases and Linode Object Storage under `releases/<version>/`.
 - `.github/workflows/deploy-linode.yml` installs a selected version onto a standalone Linode VM and verifies public health.
 - Linode VM, GoDaddy DNS, nginx, TLS, rollback, and SQLite backup runbooks live in:

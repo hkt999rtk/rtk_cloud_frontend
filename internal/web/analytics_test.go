@@ -39,10 +39,7 @@ func TestAnalyticsEventEndpointStoresValidEvent(t *testing.T) {
 		t.Fatalf("body = %q, want %q", got, `{"status":"ok"}`)
 	}
 
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		t.Fatalf("open sqlite: %v", err)
-	}
+	db := openSQLiteAnalyticsTestDB(t, dbPath)
 	defer db.Close()
 
 	var (
@@ -291,8 +288,9 @@ func openAnalyticsTestStore(t *testing.T) (*analytics.Repository, string) {
 	dir := t.TempDir()
 	dbPath := filepath.Join(dir, "analytics.db")
 	repo, err := analytics.Open(context.Background(), analytics.Config{
-		Enabled:      true,
-		DatabasePath: dbPath,
+		Enabled:           true,
+		DatabasePath:      dbPath,
+		UnsafeDisableSync: true,
 	})
 	if err != nil {
 		t.Fatalf("open analytics store: %v", err)
@@ -300,13 +298,23 @@ func openAnalyticsTestStore(t *testing.T) (*analytics.Repository, string) {
 	return repo, dbPath
 }
 
-func analyticsRowCount(t *testing.T, dbPath string) int {
+func openSQLiteAnalyticsTestDB(t *testing.T, dbPath string) *sql.DB {
 	t.Helper()
-
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		t.Fatalf("open sqlite: %v", err)
 	}
+	if _, err := db.Exec(`PRAGMA synchronous = OFF; PRAGMA journal_mode = MEMORY;`); err != nil {
+		_ = db.Close()
+		t.Fatalf("configure sqlite test db: %v", err)
+	}
+	return db
+}
+
+func analyticsRowCount(t *testing.T, dbPath string) int {
+	t.Helper()
+
+	db := openSQLiteAnalyticsTestDB(t, dbPath)
 	defer db.Close()
 
 	var count int

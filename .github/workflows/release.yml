@@ -67,6 +67,9 @@ jobs:
 
       - name: Build release bundle
         shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SEARCH_EMBEDDING_MODEL: text-embedding-3-small
         run: |
           chmod +x deploy/*.sh
           deploy/package.sh "${{ steps.version.outputs.version }}"

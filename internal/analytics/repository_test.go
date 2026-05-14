@@ -17,8 +17,7 @@ func TestOpenInitializesSQLiteSchema(t *testing.T) {
 	dbPath := filepath.Join(dir, "analytics.db")
 
 	repository, err := Open(context.Background(), func() Config {
-		cfg := DefaultConfig()
-		cfg.DatabasePath = dbPath
+		cfg := analyticsTestConfig(dbPath)
 		return cfg
 	}())
 	if err != nil {
@@ -30,10 +29,7 @@ func TestOpenInitializesSQLiteSchema(t *testing.T) {
 		t.Fatalf("analytics database file was not created: %v", err)
 	}
 
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		t.Fatalf("open sqlite: %v", err)
-	}
+	db := openSQLiteTestDB(t, dbPath)
 	defer db.Close()
 
 	for _, name := range []string{
@@ -83,10 +79,7 @@ func TestAnalyticsStorageIsSeparateFromLeadStorage(t *testing.T) {
 	leadPath := filepath.Join(dir, "connectplus.db")
 	analyticsPath := filepath.Join(dir, "analytics.db")
 
-	leadDB, err := sql.Open("sqlite", leadPath)
-	if err != nil {
-		t.Fatalf("open lead sqlite: %v", err)
-	}
+	leadDB := openSQLiteTestDB(t, leadPath)
 	defer leadDB.Close()
 
 	leadRepository := leads.NewRepository(leadDB)
@@ -103,10 +96,7 @@ func TestAnalyticsStorageIsSeparateFromLeadStorage(t *testing.T) {
 		t.Fatalf("insert lead: %v", err)
 	}
 
-	analyticsRepository, err := Open(context.Background(), Config{
-		Enabled:      true,
-		DatabasePath: analyticsPath,
-	})
+	analyticsRepository, err := Open(context.Background(), analyticsTestConfig(analyticsPath))
 	if err != nil {
 		t.Fatalf("open analytics store: %v", err)
 	}
@@ -115,10 +105,7 @@ func TestAnalyticsStorageIsSeparateFromLeadStorage(t *testing.T) {
 	assertSQLiteObjectExists(t, leadDB, "leads")
 	assertSQLiteObjectMissing(t, leadDB, "analytics_events")
 
-	analyticsDB, err := sql.Open("sqlite", analyticsPath)
-	if err != nil {
-		t.Fatalf("open analytics sqlite: %v", err)
-	}
+	analyticsDB := openSQLiteTestDB(t, analyticsPath)
 	defer analyticsDB.Close()
 
 	assertSQLiteObjectExists(t, analyticsDB, "analytics_events")
@@ -129,10 +116,7 @@ func TestInsertEventStoresAnalyticsRow(t *testing.T) {
 	dir := t.TempDir()
 	dbPath := filepath.Join(dir, "analytics.db")
 
-	repository, err := Open(context.Background(), Config{
-		Enabled:      true,
-		DatabasePath: dbPath,
-	})
+	repository, err := Open(context.Background(), analyticsTestConfig(dbPath))
 	if err != nil {
 		t.Fatalf("open analytics store: %v", err)
 	}
@@ -156,10 +140,7 @@ func TestInsertEventStoresAnalyticsRow(t *testing.T) {
 		t.Fatalf("insert event: %v", err)
 	}
 
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		t.Fatalf("open sqlite: %v", err)
-	}
+	db := openSQLiteTestDB(t, dbPath)
 	defer db.Close()
 
 	var (
@@ -214,10 +195,7 @@ func TestCleanupExpiredEventsUsesDefaultRetention(t *testing.T) {
 	dir := t.TempDir()
 	dbPath := filepath.Join(dir, "analytics.db")
 
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		t.Fatalf("open sqlite: %v", err)
-	}
+	db := openSQLiteTestDB(t, dbPath)
 	defer db.Close()
 
 	repository := NewRepository(db, 0)
@@ -247,10 +225,7 @@ func TestCleanupExpiredEventsUsesCustomRetention(t *testing.T) {
 	dir := t.TempDir()
 	dbPath := filepath.Join(dir, "analytics.db")
 
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		t.Fatalf("open sqlite: %v", err)
-	}
+	db := openSQLiteTestDB(t, dbPath)
 	defer db.Close()
 
 	repository := NewRepository(db, 14)
@@ -280,10 +255,7 @@ func TestCleanupExpiredEventsPreservesBoundaryTimestamp(t *testing.T) {
 	dir := t.TempDir()
 	dbPath := filepath.Join(dir, "analytics.db")
 
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		t.Fatalf("open sqlite: %v", err)
-	}
+	db := openSQLiteTestDB(t, dbPath)
 	defer db.Close()
 
 	repository := NewRepository(db, DefaultRetentionDays)
@@ -311,10 +283,7 @@ func TestOpenCleansExpiredEventsOnStartup(t *testing.T) {
 	dir := t.TempDir()
 	dbPath := filepath.Join(dir, "analytics.db")
 
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		t.Fatalf("open sqlite: %v", err)
-	}
+	db := openSQLiteTestDB(t, dbPath)
 
 	repository := NewRepository(db, DefaultRetentionDays)
 	if err := repository.Init(); err != nil {
@@ -330,20 +299,17 @@ func TestOpenCleansExpiredEventsOnStartup(t *testing.T) {
 		t.Fatalf("close seeded sqlite: %v", err)
 	}
 
-	reopened, err := Open(context.Background(), Config{
-		Enabled:       true,
-		DatabasePath:  dbPath,
-		RetentionDays: DefaultRetentionDays,
-	})
+	reopened, err := Open(context.Background(), func() Config {
+		cfg := analyticsTestConfig(dbPath)
+		cfg.RetentionDays = DefaultRetentionDays
+		return cfg
+	}())
 	if err != nil {
 		t.Fatalf("reopen analytics store: %v", err)
 	}
 	defer reopened.Close()
 
-	verifyDB, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		t.Fatalf("open sqlite for verification: %v", err)
-	}
+	verifyDB := openSQLiteTestDB(t, dbPath)
 	defer verifyDB.Close()
 
 	if got := countRows(t, verifyDB); got != 1 {
@@ -355,10 +321,7 @@ func TestSummaryQueriesAggregateAnalyticsData(t *testing.T) {
 	dir := t.TempDir()
 	dbPath := filepath.Join(dir, "analytics.db")
 
-	repository, err := Open(context.Background(), Config{
-		Enabled:      true,
-		DatabasePath: dbPath,
-	})
+	repository, err := Open(context.Background(), analyticsTestConfig(dbPath))
 	if err != nil {
 		t.Fatalf("open analytics store: %v", err)
 	}
@@ -464,6 +427,28 @@ func TestSummaryQueriesAggregateAnalyticsData(t *testing.T) {
 	if ctaRows[1].Page != "features" || ctaRows[1].CTA != "talk_to_sales" || ctaRows[1].Count != 1 {
 		t.Fatalf("second cta row = %+v", ctaRows[1])
 	}
+}
+
+func analyticsTestConfig(dbPath string) Config {
+	return Config{
+		Enabled:           true,
+		DatabasePath:      dbPath,
+		RetentionDays:     DefaultRetentionDays,
+		UnsafeDisableSync: true,
+	}
+}
+
+func openSQLiteTestDB(t *testing.T, dbPath string) *sql.DB {
+	t.Helper()
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		t.Fatalf("open sqlite: %v", err)
+	}
+	if _, err := db.Exec(`PRAGMA synchronous = OFF; PRAGMA journal_mode = MEMORY;`); err != nil {
+		_ = db.Close()
+		t.Fatalf("configure sqlite test db: %v", err)
+	}
+	return db
 }
 
 func assertSQLiteObjectExists(t *testing.T, db *sql.DB, name string) {

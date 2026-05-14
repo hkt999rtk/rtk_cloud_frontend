@@ -65,6 +65,7 @@ func (s *Server) footerSitemap(locale content.Locale, catalog content.Catalog) [
 				{Label: catalog.T("footer.features"), Href: content.PathForLocale(locale, "/features")},
 				{Label: catalog.T("footer.docs"), Href: content.PathForLocale(locale, "/docs")},
 				{Label: catalog.T("footer.manual"), Href: content.PathForLocale(locale, "/manual")},
+				{Label: catalog.T("footer.search"), Href: content.PathForLocale(locale, "/search")},
 			},
 		},
 		{
@@ -220,6 +221,7 @@ func publicSitemapPaths() []string {
 		"/features",
 		"/contact",
 		"/privacy",
+		"/search",
 		"/manual/getting-started",
 		"/manual/deployment-notes",
 		"/manual/reference",
