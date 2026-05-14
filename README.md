@@ -217,7 +217,9 @@ Deployment notes:
 
 Artifact-based Linode deployment is also supported:
 
+- CI builds deployable `realtek-connect-ci-<shortsha>` artifacts for every PR, `main` push, tag, and manual run. On `main`, tags, and manual runs, CI also uploads the bundle, checksum, and manifest to Linode Object Storage under `releases/ci-<shortsha>/`.
 - `deploy/package.sh <version>` creates `dist/realtek-connect-<version>.tar.gz`, a checksum, and an object-storage manifest. When `OPENAI_API_KEY` is present, the bundle includes `data/search.db` as a precomputed documentation search index.
+- `deploy/upload-linode-artifact.sh <version>` uploads the release bundle, checksum, and manifest to Linode Object Storage using the S3-compatible HTTP API directly; it does not require the AWS CLI. It requires either `LINODE_OBJ_ACCESS_KEY_ID` and `LINODE_OBJ_SECRET_ACCESS_KEY`, or `LINODE_TOKEN` so it can create a temporary bucket-scoped Object Storage key. `LINODE_OBJ_BUCKET` and `LINODE_OBJ_ENDPOINT` may be provided explicitly; when only one bucket exists, the script can infer both from the Linode API.
 - `.github/workflows/release.yml` publishes release bundles to GitHub Releases and Linode Object Storage under `releases/<version>/`.
 - `.github/workflows/deploy-linode.yml` installs a selected version onto a standalone Linode VM and verifies public health.
 - Linode VM, GoDaddy DNS, nginx, TLS, rollback, and SQLite backup runbooks live in:
