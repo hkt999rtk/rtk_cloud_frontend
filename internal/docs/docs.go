@@ -55,9 +55,9 @@ func All() []Section {
 			Icon:         "api",
 			Kicker:       "Expose cloud capabilities through structured integration surfaces.",
 			Summary:      "REST, MQTT over TLS, webhook, and service contract documentation entry points for external systems.",
-			Description:  "APIs describes the contract layer around Realtek Connect+. It positions cloud APIs as the integration surface for dashboards, support tooling, business systems, and device event workflows, while keeping the first implementation static and server-rendered.",
+			Description:  "APIs describes the contract layer around Realtek Connect+. It positions cloud APIs as the integration surface for dashboards, support tooling, business systems, and device event workflows, while keeping the first implementation static and server-rendered. Human product roles stay with the account-side authorization contract; bearer token scopes stay service credentials.",
 			Highlights:   []string{"REST resource categories for devices, users, OTA, and analytics", "MQTT over TLS for device messaging and state updates", "Webhook patterns for operational event delivery"},
-			Deliverables: []string{"Authentication and authorization model overview", "Endpoint families and payload expectations", "Integration examples for support and CRM workflows"},
+			Deliverables: []string{"Product authorization boundary overview", "Endpoint families and payload expectations", "Integration examples for support and CRM workflows", "Clear separation between human role assignments, device credentials, and service bearer scopes"},
 			Audience:     []string{"Backend teams integrating cloud services", "Partner engineers building business system hooks", "Technical account teams answering API scope questions"},
 		},
 		{

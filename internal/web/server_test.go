@@ -1475,7 +1475,7 @@ func TestProvisionFeatureAlignsPublicCopyWithContractStatus(t *testing.T) {
 		"Product onboarding interface contract",
 		`href="https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/PRODUCT_ONBOARDING.md"`,
 		"Cloud-side provisioning is the implemented contract boundary",
-		"Account-side device registration, cross-service provisioning requests, WebRTC Video over TURN activation results, scoped token issuance, and owner transport readiness are the public cloud-side behaviors to discuss today.",
+		"Account-side device registration, cross-service provisioning requests, WebRTC Video over TURN activation results, service-scoped credential issuance, and owner transport readiness are the public cloud-side behaviors to discuss today.",
 		"Claim material has a defined interface, not final ownership policy",
 		"BLE provisioning, SoftAP provisioning, local Wi-Fi credential transport, QR onboarding UX, ECDH or challenge-response handshakes, and manufacturing CA policy are not yet stable website-available implementation claims.",
 		"Separate what is available, integration-ready, and roadmap",
@@ -1717,6 +1717,79 @@ func TestUserManagementFeatureClarifiesPlatformScope(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
 		}
+	}
+}
+
+func TestPublicAuthorizationCopyClarifiesProductContractBoundary(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+
+	tests := []struct {
+		path string
+		want []string
+	}{
+		{
+			path: "/docs/apis",
+			want: []string{
+				"Product authorization boundary overview",
+				"Human product roles stay with the account-side authorization contract",
+				"bearer token scopes stay service credentials",
+			},
+		},
+		{
+			path: "/features/provision",
+			want: []string{
+				"Service-scoped provisioning credentials are integration credentials, not human product roles or a product ACL policy.",
+			},
+		},
+		{
+			path: "/features/user-management",
+			want: []string{
+				"Role assignments and permission policy are described as product authorization contract scope, not as a live ACL system in this website.",
+			},
+		},
+		{
+			path: "/features/integrations",
+			want: []string{
+				"Treat bearer tokens, MQTT topic scopes, and webhook signatures as service or integration credentials rather than human product roles.",
+			},
+		},
+		{
+			path: "/features/security",
+			want: []string{
+				"Device certificates identify hardware and constrain device endpoints; they do not define human user roles or announce product ACL availability.",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+			rec := httptest.NewRecorder()
+			handler.ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", rec.Code)
+			}
+
+			body := rec.Body.String()
+			for _, want := range tc.want {
+				if !strings.Contains(body, want) {
+					t.Fatalf("response does not contain %q: %s", want, body)
+				}
+			}
+
+			for _, forbidden := range []string{
+				"Video Cloud bearer scopes are user roles",
+				"bearer scopes as user roles",
+				"website implements product ACL",
+				"website provides product ACL",
+				"complete product ACL is available",
+			} {
+				if strings.Contains(body, forbidden) {
+					t.Fatalf("response contains unsupported authorization claim %q: %s", forbidden, body)
+				}
+			}
+		})
 	}
 }
 
