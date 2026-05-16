@@ -37,47 +37,89 @@ delete_temp_key() {
 trap delete_temp_key EXIT
 
 if [[ -z "${AWS_ACCESS_KEY_ID:-}" || -z "${AWS_SECRET_ACCESS_KEY:-}" || -z "${LINODE_OBJ_BUCKET:-}" || -z "${LINODE_OBJ_ENDPOINT:-}" ]]; then
-  test -n "${LINODE_TOKEN:-}"
-  command -v curl >/dev/null 2>&1
-  command -v jq >/dev/null 2>&1
+	test -n "${LINODE_TOKEN:-}"
+	command -v curl >/dev/null 2>&1
+	command -v python3 >/dev/null 2>&1
 
-  buckets_json="$(curl -fsS -H "Authorization: Bearer $LINODE_TOKEN" "$linode_api/object-storage/buckets")"
-  if [[ -z "${LINODE_OBJ_BUCKET:-}" ]]; then
-    bucket_count="$(jq '.data | length' <<<"$buckets_json")"
-    if [[ "$bucket_count" != "1" ]]; then
-      echo "LINODE_OBJ_BUCKET is required when the account has $bucket_count Object Storage buckets" >&2
-      jq -r '.data[].label' <<<"$buckets_json" >&2
-      exit 2
-    fi
-    LINODE_OBJ_BUCKET="$(jq -r '.data[0].label' <<<"$buckets_json")"
-  fi
+	buckets_json="$(curl -fsS -H "Authorization: Bearer $LINODE_TOKEN" "$linode_api/object-storage/buckets")"
+	bucket_info="$(BUCKETS_JSON="$buckets_json" DESIRED_BUCKET="${LINODE_OBJ_BUCKET:-}" python3 <<'PY'
+import json
+import os
+import sys
 
-  bucket_json="$(jq -e --arg bucket "$LINODE_OBJ_BUCKET" '.data[] | select(.label == $bucket)' <<<"$buckets_json")"
-  bucket_region="$(jq -r '.region // .cluster // empty' <<<"$bucket_json")"
-  bucket_hostname="$(jq -r '.hostname // .s3_endpoint // empty' <<<"$bucket_json")"
-  test -n "$bucket_region"
-  if [[ -z "${LINODE_OBJ_ENDPOINT:-}" ]]; then
-    test -n "$bucket_hostname"
-    LINODE_OBJ_ENDPOINT="https://${bucket_hostname#${LINODE_OBJ_BUCKET}.}"
-  fi
+payload = json.loads(os.environ["BUCKETS_JSON"])
+buckets = payload.get("data", [])
+desired = os.environ.get("DESIRED_BUCKET", "")
+if not desired:
+    if len(buckets) != 1:
+        print(f"LINODE_OBJ_BUCKET is required when the account has {len(buckets)} Object Storage buckets", file=sys.stderr)
+        for bucket in buckets:
+            label = bucket.get("label", "")
+            if label:
+                print(label, file=sys.stderr)
+        sys.exit(2)
+    selected = buckets[0]
+else:
+    selected = next((bucket for bucket in buckets if bucket.get("label") == desired), None)
+    if selected is None:
+        print(f"LINODE_OBJ_BUCKET {desired!r} was not found in Linode Object Storage buckets", file=sys.stderr)
+        for bucket in buckets:
+            label = bucket.get("label", "")
+            if label:
+                print(label, file=sys.stderr)
+        sys.exit(2)
 
-  key_label="realtek-connect-$version-$(date -u +%Y%m%d%H%M%S)"
-  key_payload="$(jq -n \
-    --arg label "$key_label" \
-    --arg bucket "$LINODE_OBJ_BUCKET" \
-    --arg region "$bucket_region" \
-    '{label: $label, bucket_access: [{bucket_name: $bucket, region: $region, permissions: "read_write"}]}')"
-  key_json="$(curl -fsS -X POST \
-    -H "Authorization: Bearer $LINODE_TOKEN" \
-    -H "Content-Type: application/json" \
-    --data "$key_payload" \
-    "$linode_api/object-storage/keys")"
-  temp_key_id="$(jq -r '.id // empty' <<<"$key_json")"
-  AWS_ACCESS_KEY_ID="$(jq -r '.access_key // empty' <<<"$key_json")"
-  AWS_SECRET_ACCESS_KEY="$(jq -r '.secret_key // empty' <<<"$key_json")"
-  test -n "$AWS_ACCESS_KEY_ID"
-  test -n "$AWS_SECRET_ACCESS_KEY"
-  export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY LINODE_OBJ_BUCKET LINODE_OBJ_ENDPOINT
+print(selected.get("label", ""))
+print(selected.get("region") or selected.get("cluster") or "")
+print(selected.get("hostname") or selected.get("s3_endpoint") or "")
+PY
+	)"
+	LINODE_OBJ_BUCKET="$(printf '%s\n' "$bucket_info" | sed -n '1p')"
+	bucket_region="$(printf '%s\n' "$bucket_info" | sed -n '2p')"
+	bucket_hostname="$(printf '%s\n' "$bucket_info" | sed -n '3p')"
+	test -n "$bucket_region"
+	if [[ -z "${LINODE_OBJ_ENDPOINT:-}" ]]; then
+		test -n "$bucket_hostname"
+		LINODE_OBJ_ENDPOINT="https://${bucket_hostname#${LINODE_OBJ_BUCKET}.}"
+	fi
+
+	key_label="realtek-connect-$version-$(date -u +%Y%m%d%H%M%S)"
+	key_payload="$(python3 - "$key_label" "$LINODE_OBJ_BUCKET" "$bucket_region" <<'PY'
+import json
+import sys
+
+label, bucket, region = sys.argv[1:]
+print(json.dumps({
+    "label": label,
+    "bucket_access": [{
+        "bucket_name": bucket,
+        "region": region,
+        "permissions": "read_write",
+    }],
+}, separators=(",", ":")))
+PY
+	)"
+	key_json="$(curl -fsS -X POST \
+		-H "Authorization: Bearer $LINODE_TOKEN" \
+		-H "Content-Type: application/json" \
+		--data "$key_payload" \
+		"$linode_api/object-storage/keys")"
+	key_info="$(KEY_JSON="$key_json" python3 <<'PY'
+import json
+import os
+
+payload = json.loads(os.environ["KEY_JSON"])
+print(payload.get("id", ""))
+print(payload.get("access_key", ""))
+print(payload.get("secret_key", ""))
+PY
+	)"
+	temp_key_id="$(printf '%s\n' "$key_info" | sed -n '1p')"
+	AWS_ACCESS_KEY_ID="$(printf '%s\n' "$key_info" | sed -n '2p')"
+	AWS_SECRET_ACCESS_KEY="$(printf '%s\n' "$key_info" | sed -n '3p')"
+	test -n "$AWS_ACCESS_KEY_ID"
+	test -n "$AWS_SECRET_ACCESS_KEY"
+	export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY LINODE_OBJ_BUCKET LINODE_OBJ_ENDPOINT
 fi
 
 test -n "${AWS_ACCESS_KEY_ID:-}"
