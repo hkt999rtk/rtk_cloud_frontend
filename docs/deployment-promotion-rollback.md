@@ -10,7 +10,7 @@ Do not deploy until all of these are true:
 - CI on the candidate commit is green.
 - `Release Bundle` produced `realtek-connect-<version>.tar.gz`.
 - The bundle, checksum, and manifest exist in Linode Object Storage under
-  `releases/<version>/`.
+  `releases/realtek_connect-<version>/`.
 - `deploy/check-release.sh` passed for the same bundle.
 - The Linode VM has nginx, TLS, systemd, SQLite storage, and the deploy user
   configured according to [deployment-linode.md](deployment-linode.md).

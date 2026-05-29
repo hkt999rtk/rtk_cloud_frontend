@@ -18,6 +18,9 @@ dist_dir="$repo_root/dist"
 bundle="$dist_dir/realtek-connect-$version.tar.gz"
 checksum="$bundle.sha256"
 manifest="$dist_dir/realtek-connect-$version.object-manifest.json"
+artifact_name="realtek_connect"
+object_bundle="$version.tar.gz"
+object_checksum="$object_bundle.sha256"
 
 test -f "$bundle"
 test -f "$checksum"
@@ -134,7 +137,12 @@ command -v curl >/dev/null 2>&1
   shasum -a 256 -c "realtek-connect-$version.tar.gz.sha256"
 )
 
-prefix="s3://$LINODE_OBJ_BUCKET/releases/$version"
+object_checksum_file="$(mktemp)"
+trap 'rm -f "$object_checksum_file"; delete_temp_key' EXIT
+bundle_sha="$(shasum -a 256 "$bundle" | awk '{print $1}')"
+printf '%s  %s\n' "$bundle_sha" "$object_bundle" >"$object_checksum_file"
+
+prefix="s3://$LINODE_OBJ_BUCKET/releases/$artifact_name-$version"
 
 s3_put() {
   local file="$1"
@@ -219,8 +227,8 @@ PY
     "$url" >/dev/null
 }
 
-s3_put "$bundle" "releases/$version/realtek-connect-$version.tar.gz"
-s3_put "$checksum" "releases/$version/realtek-connect-$version.tar.gz.sha256"
-s3_put "$manifest" "releases/$version/manifest.json"
+s3_put "$bundle" "releases/$artifact_name-$version/$object_bundle"
+s3_put "$object_checksum_file" "releases/$artifact_name-$version/$object_checksum"
+s3_put "$manifest" "releases/$artifact_name-$version/manifest.json"
 
 echo "uploaded realtek-connect $version to $prefix"

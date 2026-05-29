@@ -74,12 +74,12 @@ jobs:
           test -n "$LINODE_OBJ_ENDPOINT"
           rm -rf dist
           mkdir -p dist
-          prefix="s3://$LINODE_OBJ_BUCKET/releases/$VERSION"
-          aws s3 cp "$prefix/realtek-connect-$VERSION.tar.gz" "dist/realtek-connect-$VERSION.tar.gz" --endpoint-url "$LINODE_OBJ_ENDPOINT" --only-show-errors
-          aws s3 cp "$prefix/realtek-connect-$VERSION.tar.gz.sha256" "dist/realtek-connect-$VERSION.tar.gz.sha256" --endpoint-url "$LINODE_OBJ_ENDPOINT" --only-show-errors
+          prefix="s3://$LINODE_OBJ_BUCKET/releases/realtek_connect-$VERSION"
+          aws s3 cp "$prefix/$VERSION.tar.gz" "dist/$VERSION.tar.gz" --endpoint-url "$LINODE_OBJ_ENDPOINT" --only-show-errors
+          aws s3 cp "$prefix/$VERSION.tar.gz.sha256" "dist/$VERSION.tar.gz.sha256" --endpoint-url "$LINODE_OBJ_ENDPOINT" --only-show-errors
           aws s3 cp "$prefix/manifest.json" "dist/realtek-connect-$VERSION.object-manifest.json" --endpoint-url "$LINODE_OBJ_ENDPOINT" --only-show-errors
-          (cd dist && shasum -a 256 -c "realtek-connect-$VERSION.tar.gz.sha256")
-          tar -C dist -xzf "dist/realtek-connect-$VERSION.tar.gz"
+          (cd dist && shasum -a 256 -c "$VERSION.tar.gz.sha256")
+          tar -C dist -xzf "dist/$VERSION.tar.gz"
 
       - name: Verify release bundle
         run: deploy/check-release.sh "dist/realtek-connect-${{ steps.version.outputs.version }}"
@@ -135,7 +135,7 @@ jobs:
             "$REALTEK_CONNECT_DEPLOY_USER@$REALTEK_CONNECT_DEPLOY_HOST" \
             "mkdir -p -- \"$remote_dir\""
           scp -i ~/.ssh/realtek_connect_deploy -P "$port" \
-            "dist/realtek-connect-$VERSION.tar.gz" \
+            "dist/$VERSION.tar.gz" \
             "$REALTEK_CONNECT_DEPLOY_USER@$REALTEK_CONNECT_DEPLOY_HOST:$remote_dir/"
 
       - name: Install and restart
@@ -175,7 +175,7 @@ jobs:
           cd "$remote_dir"
           previous_version=$(sudo sh -c "cat \"$prefix/current-version\" 2>/dev/null || true")
           rm -rf "realtek-connect-$version"
-          tar -xzf "realtek-connect-$version.tar.gz"
+          tar -xzf "$version.tar.gz"
           sudo "./realtek-connect-$version/deploy/install.sh" "realtek-connect-$version" "$prefix" "$etc_dir" "$systemd_dir" "$data_dir"
           if sudo grep -q '^PUBLIC_BASE_URL=' "$etc_dir/realtek-connect.env"; then
             sudo sed -i "s|^PUBLIC_BASE_URL=.*|PUBLIC_BASE_URL=$public_base_url|" "$etc_dir/realtek-connect.env"

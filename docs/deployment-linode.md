@@ -12,9 +12,9 @@ Realtek Connect+ uses an artifact-first deployment model:
 - CI uploads every deployable bundle as a GitHub Actions artifact named
   `realtek-connect-ci-<shortsha>`.
 - On `main`, tags, and manual runs, CI also uploads the bundle, checksum, and
-  manifest to Linode Object Storage under `releases/ci-<shortsha>/`.
+  manifest to Linode Object Storage under `releases/realtek_connect-ci-<shortsha>/`.
 - The release workflow uploads explicit release bundles to GitHub Releases and
-  Linode Object Storage under `releases/<version>/`.
+  Linode Object Storage under `releases/realtek_connect-<version>/`.
 - The Linode deploy workflow installs a selected version onto the VM.
 - Rollback deploys a previous published artifact version.
 
@@ -64,9 +64,9 @@ For `main`, tags, and manual CI runs, the same files are published to Linode
 Object Storage:
 
 ```text
-releases/ci-<shortsha>/realtek-connect-ci-<shortsha>.tar.gz
-releases/ci-<shortsha>/realtek-connect-ci-<shortsha>.tar.gz.sha256
-releases/ci-<shortsha>/manifest.json
+releases/realtek_connect-ci-<shortsha>/ci-<shortsha>.tar.gz
+releases/realtek_connect-ci-<shortsha>/ci-<shortsha>.tar.gz.sha256
+releases/realtek_connect-ci-<shortsha>/manifest.json
 ```
 
 Pull request CI never uploads to Object Storage and does not require Linode

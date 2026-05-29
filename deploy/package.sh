@@ -90,9 +90,11 @@ import sys
 from pathlib import Path
 
 out, version, source_commit, created_at, bundle_sha = sys.argv[1:]
-bundle = f"realtek-connect-{version}.tar.gz"
+artifact_name = "realtek_connect"
+bundle = f"{version}.tar.gz"
 manifest = {
-    "artifact_path": f"releases/{version}/{bundle}",
+    "artifact_name": artifact_name,
+    "artifact_path": f"releases/{artifact_name}-{version}/{bundle}",
     "bundle": bundle,
     "created_at": created_at,
     "sha256": bundle_sha,
