@@ -77,17 +77,6 @@ jobs:
           deploy/package.sh "${{ steps.artifact_version.outputs.version }}"
           deploy/check-release.sh "dist/realtek-connect-${{ steps.artifact_version.outputs.version }}"
 
-      - name: Upload deployable bundle
-        uses: actions/upload-artifact@v7
-        with:
-          name: realtek-connect-${{ steps.artifact_version.outputs.version }}
-          path: |
-            dist/realtek-connect-${{ steps.artifact_version.outputs.version }}
-            dist/realtek-connect-${{ steps.artifact_version.outputs.version }}.tar.gz
-            dist/realtek-connect-${{ steps.artifact_version.outputs.version }}.tar.gz.sha256
-            dist/realtek-connect-${{ steps.artifact_version.outputs.version }}.object-manifest.json
-          if-no-files-found: error
-
       - name: Upload deployable bundle to Linode Object Storage
         if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
         shell: bash
@@ -127,14 +116,6 @@ jobs:
           chmod +x scripts/generate_report_candidate.sh scripts/validate_report_candidate.sh
           scripts/generate_report_candidate.sh ci .artifacts/report-candidates/docs/TEST_REPORT.md
           scripts/validate_report_candidate.sh .artifacts/report-candidates/docs/TEST_REPORT.md docs/TEST_REPORT.md
-
-      - name: Upload report candidates
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: report-candidates
-          path: .artifacts/report-candidates/docs/
-          if-no-files-found: error
 
       - name: Check CI report drift
         shell: bash
