@@ -48,7 +48,7 @@ gofmt -l $(git ls-files '*.go')\ngo test ./...\ngo build ./cmd/server\nif Chrome
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Formatting / static checks | 2 | 0 | 0 | 0 | 0 |
 | Unit tests | 1 | 0 | 0 | 0 | 0 |
-| Integration tests | 0 | 0 | 1 | 0 | 0 |
+| Integration tests | 1 | 0 | 0 | 0 | 0 |
 | Contract validation | 0 | 0 | 0 | 0 | 1 |
 | Build / packaging | 1 | 0 | 0 | 0 | 0 |
 | Coverage / metrics | 0 | 0 | 0 | 0 | 1 |
@@ -62,7 +62,7 @@ gofmt -l $(git ls-files '*.go')\ngo test ./...\ngo build ./cmd/server\nif Chrome
 | CI-002 | Go files are formatted | PASS | gofmt -l over tracked Go files | N/A | Fails if gofmt reports files. |
 | CI-003 | Go tests pass | PASS | go test ./... | N/A | Covers server, content, analytics, leads, manual, and web packages. |
 | CI-004 | Server builds | PASS | go build ./cmd/server | N/A | Confirms the deployable server package compiles. |
-| CI-005 | Visual smoke passes | SKIP | go run ./cmd/visual-smoke | N/A | Checks representative desktop/mobile pages and asset loading. |
+| CI-005 | Visual smoke passes | PASS | go run ./cmd/visual-smoke | N/A | Checks representative desktop/mobile pages and asset loading. |
 | CI-006 | Contract validation | N/A | N/A | N/A | No separate contract validator is configured for this frontend profile. |
 
 ## Correctness / Behavior Gates
@@ -70,7 +70,7 @@ gofmt -l $(git ls-files '*.go')\ngo test ./...\ngo build ./cmd/server\nif Chrome
 | Behavior group | Required evidence | Representative test or command | Result | Notes |
 | --- | --- | --- | --- | --- |
 | Public website routing and forms | Go package tests pass | go test ./... | PASS | Includes localized routes, contact validation, analytics, admin, and metadata tests. |
-| Visual and responsive smoke | Desktop/mobile smoke output | go run ./cmd/visual-smoke | SKIP | Ensures home/manual/feature pages render without horizontal overflow in representative viewports. |
+| Visual and responsive smoke | Desktop/mobile smoke output | go run ./cmd/visual-smoke | PASS | Ensures home/manual/feature pages render without horizontal overflow in representative viewports. |
 | Static asset integrity | Brand film asset check | wc -c static/assets/realtek-brand-film.mp4 | PASS | Keeps the local MP4 asset present for the brand film section. |
 
 ## Coverage / Metrics
@@ -84,7 +84,7 @@ gofmt -l $(git ls-files '*.go')\ngo test ./...\ngo build ./cmd/server\nif Chrome
 | Check | Result | Reason | Owner | Follow-up |
 | --- | --- | --- | --- | --- |
 | Coverage threshold | N/A | This repository does not define a coverage gate for the selected profile. | frontend | Add a threshold only when coverage becomes a release gate. |
-| Visual smoke | SKIP | Chrome is not available on the selected CI runner; the check is recorded when the browser is available. | frontend | Install Chrome on the runner or keep browser smoke as local/CD evidence. |
+
 
 ## Failures
 
