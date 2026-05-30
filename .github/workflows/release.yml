@@ -91,17 +91,6 @@ jobs:
         run: |
           deploy/upload-linode-artifact.sh "$VERSION"
 
-      - name: Upload workflow artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: realtek-connect-${{ steps.version.outputs.version }}
-          path: |
-            dist/realtek-connect-${{ steps.version.outputs.version }}
-            dist/realtek-connect-${{ steps.version.outputs.version }}.tar.gz
-            dist/realtek-connect-${{ steps.version.outputs.version }}.tar.gz.sha256
-            dist/realtek-connect-${{ steps.version.outputs.version }}.object-manifest.json
-          if-no-files-found: error
-
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

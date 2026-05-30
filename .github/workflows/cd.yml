@@ -161,14 +161,6 @@ jobs:
           scripts/generate_report_candidate.sh cd .artifacts/report-candidates/docs/READINESS_TEST_REPORT.md
           scripts/validate_report_candidate.sh .artifacts/report-candidates/docs/READINESS_TEST_REPORT.md docs/READINESS_TEST_REPORT.md
 
-      - name: Upload report candidates
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: report-candidates
-          path: .artifacts/report-candidates/docs/
-          if-no-files-found: error
-
       - name: Check readiness report drift
         shell: bash
         run: |

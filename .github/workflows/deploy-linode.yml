@@ -212,11 +212,3 @@ jobs:
             echo "- Public base URL: ${{ vars.REALTEK_CONNECT_PUBLIC_BASE_URL }}"
             echo "- Run verify: $RUN_VERIFY"
           } > .artifacts/deploy/linode-deploy-summary.md
-
-      - name: Upload deployment summary artifact
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: linode-deploy-summary-${{ steps.version.outputs.version }}
-          path: .artifacts/deploy/linode-deploy-summary.md
-          if-no-files-found: warn
