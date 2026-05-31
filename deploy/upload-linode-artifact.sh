@@ -39,12 +39,40 @@ delete_temp_key() {
 }
 trap delete_temp_key EXIT
 
+linode_api_json() {
+  local method="$1"
+  local path="$2"
+  local data="${3:-}"
+  local response_file status
+  response_file="$(mktemp)"
+  if [[ -n "$data" ]]; then
+    status="$(curl -sS -o "$response_file" -w '%{http_code}' -X "$method" \
+      -H "Authorization: Bearer $LINODE_TOKEN" \
+      -H "Content-Type: application/json" \
+      --data "$data" \
+      "$linode_api$path")"
+  else
+    status="$(curl -sS -o "$response_file" -w '%{http_code}' -X "$method" \
+      -H "Authorization: Bearer $LINODE_TOKEN" \
+      "$linode_api$path")"
+  fi
+  if [[ "$status" -lt 200 || "$status" -ge 300 ]]; then
+    printf 'Linode API %s %s failed with HTTP %s\n' "$method" "$path" "$status" >&2
+    cat "$response_file" >&2
+    printf '\n' >&2
+    rm -f "$response_file"
+    return 1
+  fi
+  cat "$response_file"
+  rm -f "$response_file"
+}
+
 if [[ -z "${AWS_ACCESS_KEY_ID:-}" || -z "${AWS_SECRET_ACCESS_KEY:-}" || -z "${LINODE_OBJ_BUCKET:-}" || -z "${LINODE_OBJ_ENDPOINT:-}" ]]; then
 	test -n "${LINODE_TOKEN:-}"
 	command -v curl >/dev/null 2>&1
 	command -v python3 >/dev/null 2>&1
 
-	buckets_json="$(curl -fsS -H "Authorization: Bearer $LINODE_TOKEN" "$linode_api/object-storage/buckets")"
+	buckets_json="$(linode_api_json GET /object-storage/buckets)"
 	bucket_info="$(BUCKETS_JSON="$buckets_json" DESIRED_BUCKET="${LINODE_OBJ_BUCKET:-}" python3 <<'PY'
 import json
 import os
@@ -73,7 +101,10 @@ else:
         sys.exit(2)
 
 print(selected.get("label", ""))
-print(selected.get("region") or selected.get("cluster") or "")
+region = selected.get("region") or selected.get("cluster") or ""
+if region.count("-") >= 2 and region.rsplit("-", 1)[-1].isdigit():
+    region = region.rsplit("-", 1)[0]
+print(region)
 print(selected.get("hostname") or selected.get("s3_endpoint") or "")
 PY
 	)"
@@ -86,7 +117,7 @@ PY
 		LINODE_OBJ_ENDPOINT="https://${bucket_hostname#${LINODE_OBJ_BUCKET}.}"
 	fi
 
-	key_label="realtek-connect-$version-$(date -u +%Y%m%d%H%M%S)"
+	key_label="realtek-connect-$(date -u +%Y%m%d%H%M%S)"
 	key_payload="$(python3 - "$key_label" "$LINODE_OBJ_BUCKET" "$bucket_region" <<'PY'
 import json
 import sys
@@ -102,11 +133,7 @@ print(json.dumps({
 }, separators=(",", ":")))
 PY
 	)"
-	key_json="$(curl -fsS -X POST \
-		-H "Authorization: Bearer $LINODE_TOKEN" \
-		-H "Content-Type: application/json" \
-		--data "$key_payload" \
-		"$linode_api/object-storage/keys")"
+	key_json="$(linode_api_json POST /object-storage/keys "$key_payload")"
 	key_info="$(KEY_JSON="$key_json" python3 <<'PY'
 import json
 import os
