@@ -20,14 +20,9 @@ env:
 
 jobs:
   verify:
-    runs-on: [self-hosted, rtk_cloud_frontend, go]
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Reset self-hosted workspace
-        shell: bash
-        run: |
-          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-
       - name: Check out repository
         uses: actions/checkout@v6
 
