@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,18 +12,31 @@ import (
 
 	"realtek-connect/internal/search"
 
+	cloudlogger "github.com/hkt999rtk/rtk_cloud_logger"
+	"go.uber.org/zap"
 	_ "modernc.org/sqlite"
 )
 
 func main() {
-	logger := log.New(os.Stdout, "", log.LstdFlags)
+	logger, err := newSearchIndexRootLogger()
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = logger.Sync()
+	}()
+
 	if err := run(logger); err != nil {
-		logger.Printf("search index failed: %v", err)
+		logSearchIndexError(logger, "run", "search_index_failed", err)
 		os.Exit(1)
 	}
 }
 
-func run(logger *log.Logger) error {
+func run(logger *zap.Logger) error {
+	if logger == nil {
+		logger = zap.NewNop()
+	}
+
 	repoRootDefault, err := os.Getwd()
 	if err != nil {
 		return err
@@ -62,10 +74,12 @@ func run(logger *log.Logger) error {
 		ContentRoot: contentDir,
 	})
 	if err != nil {
+		logSearchIndexError(logger, "collect_content", "content_load_failed", err)
 		return err
 	}
 	chunks, err := search.BuildIndexChunks(ctx, documents, embedder)
 	if err != nil {
+		logSearchIndexError(logger, "build_chunks", "embedding_failed", err)
 		return err
 	}
 
@@ -74,20 +88,24 @@ func run(logger *log.Logger) error {
 		dbPath = filepath.Join(root, dbPath)
 	}
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0o755); err != nil {
+		logSearchIndexError(logger, "prepare_database", "storage_failed", err)
 		return err
 	}
 
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
+		logSearchIndexError(logger, "open_database", "storage_failed", err)
 		return err
 	}
 	defer db.Close()
 
 	repository := search.NewRepository(db)
 	if err := repository.Init(ctx); err != nil {
+		logSearchIndexError(logger, "init_database", "storage_failed", err)
 		return err
 	}
 	if err := repository.Replace(ctx, chunks); err != nil {
+		logSearchIndexError(logger, "replace_index", "storage_failed", err)
 		return err
 	}
 
@@ -95,8 +113,59 @@ func run(logger *log.Logger) error {
 	for _, chunk := range chunks {
 		seenDocs[chunk.Document.ID] = true
 	}
-	logger.Printf("indexed %d documents and %d chunks into %s", len(seenDocs), len(chunks), dbPath)
+	logger.Info(
+		"search index complete",
+		zap.Int("documents", len(seenDocs)),
+		zap.Int("chunks", len(chunks)),
+		zap.String("database_path", dbPath),
+	)
 	return nil
+}
+
+func newSearchIndexRootLogger() (*zap.Logger, error) {
+	logger, err := cloudlogger.New(cloudlogger.Config{
+		Service: "realtek-connect",
+		Env:     envFirst("REALTEK_CONNECT_ENV", "APP_ENV", "ENVIRONMENT"),
+		Version: serviceVersion(),
+		Level:   envOrDefault("LOG_LEVEL", "info"),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return logger.With(zap.String("component", "search-index")), nil
+}
+
+func logSearchIndexError(logger *zap.Logger, operation, category string, err error) {
+	if logger == nil {
+		logger = zap.NewNop()
+	}
+	logger.Error(
+		"search index failed",
+		zap.String("operation", operation),
+		zap.String("error_category", category),
+		zap.Error(err),
+	)
+}
+
+func serviceVersion() string {
+	if version := envFirst("REALTEK_CONNECT_VERSION", "SERVICE_VERSION", "VERSION"); version != "" {
+		return version
+	}
+	if contents, err := os.ReadFile("VERSION"); err == nil {
+		if version := strings.TrimSpace(string(contents)); version != "" {
+			return version
+		}
+	}
+	return "dev"
+}
+
+func envFirst(keys ...string) string {
+	for _, key := range keys {
+		if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func envOrDefault(key, fallback string) string {

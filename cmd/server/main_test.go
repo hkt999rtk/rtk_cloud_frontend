@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"errors"
-	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type fakeServer struct {
@@ -49,7 +49,7 @@ func TestServeWithGracefulShutdownStopsServerOnContextCancel(t *testing.T) {
 
 	done := make(chan error, 1)
 	go func() {
-		done <- serveWithGracefulShutdown(ctx, server, log.New(io.Discard, "", 0), time.Second)
+		done <- serveWithGracefulShutdown(ctx, server, zap.NewNop(), time.Second)
 	}()
 
 	<-server.listenStarted
@@ -72,7 +72,7 @@ func TestServeWithGracefulShutdownReturnsListenErrors(t *testing.T) {
 
 	done := make(chan error, 1)
 	go func() {
-		done <- serveWithGracefulShutdown(ctx, server, log.New(io.Discard, "", 0), time.Second)
+		done <- serveWithGracefulShutdown(ctx, server, zap.NewNop(), time.Second)
 	}()
 
 	<-server.listenStarted
@@ -125,6 +125,25 @@ func TestCDWorkflowPackagesDataForServiceUser(t *testing.T) {
 	} {
 		if !strings.Contains(text, expected) {
 			t.Fatalf("cd workflow missing %q", expected)
+		}
+	}
+}
+
+func TestInstallScriptDefinesRuntimeLogForwarderLabels(t *testing.T) {
+	contents, err := os.ReadFile("../../deploy/install.sh")
+	if err != nil {
+		t.Fatalf("read install script: %v", err)
+	}
+
+	text := string(contents)
+	for _, expected := range []string{
+		"Environment=REALTEK_CONNECT_VERSION=$version",
+		"Environment=RTK_LOG_FORWARDER_JOURNAL_LABELS=service=realtek-connect,unit=realtek-connect.service,component=server",
+		"Environment=RTK_LOG_FORWARDER_NGINX_ACCESS_LABELS=service=realtek-connect,unit=nginx.service,component=nginx-access",
+		"Environment=RTK_LOG_FORWARDER_NGINX_ERROR_LABELS=service=realtek-connect,unit=nginx.service,component=nginx-error",
+	} {
+		if !strings.Contains(text, expected) {
+			t.Fatalf("install script missing %q", expected)
 		}
 	}
 }
