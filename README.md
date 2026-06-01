@@ -15,6 +15,9 @@ The homepage includes a locally hosted Realtek corporate brand film at `static/a
 Privacy readiness is intentionally lightweight for this prototype: `/privacy` describes contact form data, first-party SQLite analytics when `ANALYTICS_ENABLED=true`, OpenAI-backed documentation query behavior when search is enabled, the analytics event types collected, referrer-origin-only handling, ephemeral session ids, 90-day raw analytics event retention, the 24-month lead retention intent, data request handling, admin protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior. Replace the placeholder `privacy@example.com` contact before public launch and complete legal review.
 
 The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.md).
+The service logging migration to `rtk_cloud_logger` zap and central journald
+forwarding is documented in
+[`docs/SERVICE_LOGGING_MIGRATION.md`](docs/SERVICE_LOGGING_MIGRATION.md).
 
 Content classification terms for future project discussions:
 
