@@ -1,0 +1,756 @@
+openapi: 3.1.0
+info:
+  title: Realtek Connect+ Website API
+  version: 0.1.0
+  summary: HTTP API contract for the Realtek Connect+ marketing and documentation website.
+  description: >
+    This OpenAPI document covers the runtime endpoints implemented in
+    rtk_cloud_frontend. It documents the website-owned analytics, documentation
+    search, contact lead, health, and protected admin endpoints. It does not
+    describe the future IoT product control-plane APIs.
+servers:
+  - url: http://localhost:8080
+    description: Local development server.
+  - url: https://example.com
+    description: Deployed website origin. Replace with PUBLIC_BASE_URL.
+tags:
+  - name: Analytics
+    description: Privacy-minimal first-party website analytics.
+  - name: Search
+    description: OpenAI-backed documentation search scoped to website content.
+  - name: Contact
+    description: Contact and evaluation lead submission.
+  - name: Health
+    description: Runtime health endpoint.
+  - name: Admin
+    description: Token-protected internal website operations.
+paths:
+  /api/event:
+    post:
+      tags:
+        - Analytics
+      operationId: postAnalyticsEvent
+      summary: Record a first-party analytics event.
+      description: >
+        Stores an allowlisted website analytics event when analytics storage is
+        enabled. The endpoint ignores unknown JSON fields and does not accept
+        form data, raw URLs, user identifiers, cookies, or form field values.
+        When analytics is disabled, the endpoint returns 204 without storing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyticsEventRequest"
+            examples:
+              pageView:
+                summary: Page view event.
+                value:
+                  event: page_view
+                  page: home
+                  session_id: 2f3f4b7c-ephemeral
+              clickCTA:
+                summary: CTA click event.
+                value:
+                  event: click_cta
+                  page: home
+                  cta: contact_us
+                  session_id: 2f3f4b7c-ephemeral
+              scroll:
+                summary: Scroll milestone event.
+                value:
+                  event: scroll
+                  page: docs
+                  percent: 50
+                  session_id: 2f3f4b7c-ephemeral
+              engaged:
+                summary: Engagement duration event.
+                value:
+                  event: engaged
+                  page: features
+                  duration: 10
+                  session_id: 2f3f4b7c-ephemeral
+      responses:
+        "202":
+          description: Event accepted and stored.
+          headers:
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusOK"
+              examples:
+                accepted:
+                  value:
+                    status: ok
+        "204":
+          description: Analytics storage is disabled; no event is stored.
+          headers:
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+        "400":
+          description: Invalid JSON, unsupported event type, page, CTA, percent, duration, variant, or session id.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "413":
+          description: Request body exceeds the 4 KB analytics payload limit.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "415":
+          description: Content-Type is not application/json.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+  /api/search:
+    post:
+      tags:
+        - Search
+      operationId: postDocumentationSearch
+      summary: Query the website documentation search index.
+      description: >
+        Accepts a documentation question, embeds it, retrieves matching website
+        content from the local SQLite search index, and optionally asks the
+        configured answer model to generate a source-grounded answer. Raw query
+        text is not stored in the analytics event payload.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchRequest"
+            examples:
+              english:
+                value:
+                  query: How do I enable documentation search?
+                  locale: en
+              traditionalChinese:
+                value:
+                  query: 如何啟用文件搜尋？
+                  locale: zh-TW
+      responses:
+        "200":
+          description: Search completed. The response may still indicate no matching answer.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+              examples:
+                answered:
+                  value:
+                    answer_found: true
+                    answer: Build the index with cmd/search-index, then start the server with SEARCH_ENABLED=true.
+                    sources:
+                      - title: README
+                        url: ""
+                        snippet: Build the local website-only search index with OPENAI_API_KEY...
+                        locale: en
+                        source_type: file
+                        score: 0.82
+                noHit:
+                  value:
+                    answer_found: false
+                    answer: No matching documentation was found.
+                    sources: []
+        "400":
+          description: Invalid JSON or missing/too-long query.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchErrorResponse"
+              examples:
+                invalidQuery:
+                  value:
+                    answer_found: false
+                    answer: Enter a search question up to 500 characters.
+                    sources: []
+                    error: invalid_query
+        "429":
+          description: Too many search requests from the same client address.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchErrorResponse"
+              examples:
+                rateLimited:
+                  value:
+                    answer_found: false
+                    answer: Too many search requests. Please try again later.
+                    sources: []
+                    error: rate_limited
+        "502":
+          description: Search backend, embedding, answer model, or local index query failed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchErrorResponse"
+              examples:
+                unavailable:
+                  value:
+                    answer_found: false
+                    answer: Search is temporarily unavailable.
+                    sources: []
+                    error: search_unavailable
+        "503":
+          description: Search is disabled or no search service is configured.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchErrorResponse"
+              examples:
+                disabled:
+                  value:
+                    answer_found: false
+                    answer: Search is not enabled.
+                    sources: []
+                    error: search_disabled
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+  /contact:
+    get:
+      tags:
+        - Contact
+      operationId: getContactForm
+      summary: Render the English contact form.
+      responses:
+        "200":
+          description: HTML contact form.
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags:
+        - Contact
+      operationId: postContactForm
+      summary: Submit a contact or evaluation lead.
+      description: >
+        Validates and stores a lead in SQLite. Localized variants are available
+        at /zh-tw/contact and /zh-cn/contact and use the same form fields.
+        The hidden website field is a spam trap and must stay empty.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ContactFormRequest"
+            examples:
+              technicalQuestion:
+                value:
+                  name: Alex Chen
+                  company: Example Devices
+                  email: alex@example.com
+                  interest: technical-question
+                  message: We are evaluating OTA and private deployment options.
+                  website: ""
+      responses:
+        "200":
+          description: HTML confirmation page. Validation failures also render HTML with an error summary and a 400 status.
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Invalid form encoding, spam-trap hit, missing required fields, invalid email, invalid interest, or field length violation.
+          content:
+            text/html:
+              schema:
+                type: string
+        "429":
+          description: Too many contact submissions from the same client address.
+          content:
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: Lead storage failed.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+  /zh-tw/contact:
+    get:
+      tags:
+        - Contact
+      operationId: getTraditionalChineseContactForm
+      summary: Render the Traditional Chinese contact form.
+      responses:
+        "200":
+          description: HTML contact form.
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags:
+        - Contact
+      operationId: postTraditionalChineseContactForm
+      summary: Submit a Traditional Chinese contact or evaluation lead.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ContactFormRequest"
+      responses:
+        "200":
+          description: HTML confirmation page.
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Invalid form data.
+          content:
+            text/html:
+              schema:
+                type: string
+        "429":
+          description: Too many contact submissions from the same client address.
+          content:
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: Lead storage failed.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /zh-cn/contact:
+    get:
+      tags:
+        - Contact
+      operationId: getSimplifiedChineseContactForm
+      summary: Render the Simplified Chinese contact form.
+      responses:
+        "200":
+          description: HTML contact form.
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags:
+        - Contact
+      operationId: postSimplifiedChineseContactForm
+      summary: Submit a Simplified Chinese contact or evaluation lead.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ContactFormRequest"
+      responses:
+        "200":
+          description: HTML confirmation page.
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Invalid form data.
+          content:
+            text/html:
+              schema:
+                type: string
+        "429":
+          description: Too many contact submissions from the same client address.
+          content:
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: Lead storage failed.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /healthz:
+    get:
+      tags:
+        - Health
+      operationId: getHealthz
+      summary: Check website process health.
+      responses:
+        "200":
+          description: The website process is serving HTTP traffic.
+          headers:
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                ok:
+                  value: "ok\n"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+  /admin/leads:
+    get:
+      tags:
+        - Admin
+      operationId: getAdminLeads
+      summary: Render protected lead review page.
+      security:
+        - adminTokenHeader: []
+        - adminTokenQuery: []
+      parameters:
+        - $ref: "#/components/parameters/AdminTokenQuery"
+        - $ref: "#/components/parameters/LeadEmailFilter"
+        - $ref: "#/components/parameters/LeadCompanyFilter"
+        - $ref: "#/components/parameters/LeadInterestFilter"
+        - $ref: "#/components/parameters/PageQuery"
+      responses:
+        "200":
+          description: HTML lead review page with filtered, paginated leads.
+          content:
+            text/html:
+              schema:
+                type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Admin lead review is disabled because ADMIN_TOKEN is unset.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Lead storage query failed.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /admin/leads.csv:
+    get:
+      tags:
+        - Admin
+      operationId: getAdminLeadsCSV
+      summary: Export protected lead records as CSV.
+      security:
+        - adminTokenHeader: []
+        - adminTokenQuery: []
+      parameters:
+        - $ref: "#/components/parameters/AdminTokenQuery"
+        - $ref: "#/components/parameters/LeadEmailFilter"
+        - $ref: "#/components/parameters/LeadCompanyFilter"
+        - $ref: "#/components/parameters/LeadInterestFilter"
+      responses:
+        "200":
+          description: CSV export with id, name, company, email, interest, message, and created_at columns.
+          content:
+            text/csv:
+              schema:
+                type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Admin CSV export is disabled because ADMIN_TOKEN is unset.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Lead storage query failed.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /admin/reload-content:
+    post:
+      tags:
+        - Admin
+      operationId: postAdminReloadContent
+      summary: Reload docs and manual content from disk.
+      security:
+        - adminTokenHeader: []
+        - adminTokenQuery: []
+      parameters:
+        - $ref: "#/components/parameters/AdminTokenQuery"
+      responses:
+        "200":
+          description: Content cache reloaded.
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                reloaded:
+                  value: "content reloaded\n"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Admin reload is disabled because ADMIN_TOKEN is unset.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          description: Docs or manual content could not be reloaded.
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  securitySchemes:
+    adminTokenHeader:
+      type: apiKey
+      in: header
+      name: X-Admin-Token
+      description: ADMIN_TOKEN value configured on the website process.
+    adminTokenQuery:
+      type: apiKey
+      in: query
+      name: token
+      description: ADMIN_TOKEN query fallback. Prefer X-Admin-Token for manual or scripted requests.
+  headers:
+    NoStore:
+      description: Response must not be cached.
+      schema:
+        type: string
+        example: no-store
+  parameters:
+    AdminTokenQuery:
+      name: token
+      in: query
+      required: false
+      description: ADMIN_TOKEN query fallback.
+      schema:
+        type: string
+    LeadEmailFilter:
+      name: email
+      in: query
+      required: false
+      description: Case-insensitive partial email filter.
+      schema:
+        type: string
+    LeadCompanyFilter:
+      name: company
+      in: query
+      required: false
+      description: Case-insensitive partial company filter.
+      schema:
+        type: string
+    LeadInterestFilter:
+      name: interest
+      in: query
+      required: false
+      description: Exact contact interest slug filter.
+      schema:
+        $ref: "#/components/schemas/ContactInterest"
+    PageQuery:
+      name: page
+      in: query
+      required: false
+      description: One-based lead review page number.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+  responses:
+    MethodNotAllowed:
+      description: HTTP method is not allowed for this route.
+      headers:
+        Allow:
+          description: Comma-separated allowed methods.
+          schema:
+            type: string
+      content:
+        text/plain:
+          schema:
+            type: string
+    Unauthorized:
+      description: Missing or invalid admin token.
+      content:
+        text/plain:
+          schema:
+            type: string
+  schemas:
+    AnalyticsEventRequest:
+      type: object
+      additionalProperties: true
+      required:
+        - event
+        - page
+        - session_id
+      properties:
+        event:
+          type: string
+          enum:
+            - page_view
+            - click_cta
+            - scroll
+            - engaged
+        page:
+          type: string
+          description: Allowlisted canonical page key rendered by the website, not a raw URL.
+          examples:
+            - home
+            - docs
+            - features
+            - contact
+        cta:
+          type: string
+          description: Required for click_cta events and rejected for other event types.
+          examples:
+            - contact_us
+        percent:
+          type: integer
+          enum:
+            - 25
+            - 50
+            - 75
+            - 100
+          description: Required for scroll events and rejected for other event types.
+        duration:
+          type: integer
+          enum:
+            - 10
+            - 30
+            - 60
+          description: Required for engaged events and rejected for other event types.
+        variant:
+          type: string
+          description: Optional allowlisted experiment key.
+        session_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^[A-Za-z0-9._:-]+$"
+          description: Ephemeral in-memory browser session id.
+    StatusOK:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+    SearchRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Documentation search question.
+        locale:
+          type: string
+          enum:
+            - en
+            - zh-TW
+            - zh-CN
+          default: en
+    SearchResponse:
+      type: object
+      required:
+        - answer_found
+        - answer
+        - sources
+      properties:
+        answer_found:
+          type: boolean
+        answer:
+          type: string
+        sources:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/SearchSource"
+    SearchErrorResponse:
+      allOf:
+        - $ref: "#/components/schemas/SearchResponse"
+        - type: object
+          required:
+            - error
+          properties:
+            error:
+              type: string
+              enum:
+                - search_disabled
+                - rate_limited
+                - invalid_json
+                - invalid_query
+                - search_unavailable
+    SearchSource:
+      type: object
+      required:
+        - title
+        - url
+        - snippet
+        - locale
+        - source_type
+        - score
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+          description: Public path for website content sources; may be empty for repository files.
+        snippet:
+          type: string
+        locale:
+          type: string
+          enum:
+            - en
+            - zh-TW
+            - zh-CN
+        source_type:
+          type: string
+          examples:
+            - docs
+            - manual
+            - feature
+            - file
+        score:
+          type: number
+          format: double
+    ContactFormRequest:
+      type: object
+      required:
+        - name
+        - email
+        - interest
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        company:
+          type: string
+          maxLength: 160
+        email:
+          type: string
+          format: email
+        interest:
+          $ref: "#/components/schemas/ContactInterest"
+        message:
+          type: string
+          maxLength: 2000
+        website:
+          type: string
+          description: Spam trap field. Leave empty.
+          maxLength: 0
+    ContactInterest:
+      type: string
+      enum:
+        - evaluation-access
+        - commercial-deployment
+        - partnership
+        - technical-question
+        - other

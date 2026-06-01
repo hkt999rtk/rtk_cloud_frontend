@@ -18,6 +18,9 @@ The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.
 The service logging migration to `rtk_cloud_logger` zap and central journald
 forwarding is documented in
 [`docs/SERVICE_LOGGING_MIGRATION.md`](docs/SERVICE_LOGGING_MIGRATION.md).
+The implemented website HTTP API is documented in
+[`docs/API_REFERENCE.md`](docs/API_REFERENCE.md), with a machine-readable
+OpenAPI contract in [`docs/openapi.yaml`](docs/openapi.yaml).
 
 Content classification terms for future project discussions:
 
@@ -123,7 +126,8 @@ CDN readiness:
 - `GET /admin/leads.csv`, requires `ADMIN_TOKEN`
 - `GET /static/...`
 
-New public routes should be documented here and in `docs/SPEC.md`.
+New public routes should be documented here, in `docs/SPEC.md`, and in
+`docs/openapi.yaml` when they expose an API or form contract.
 
 ## Multilingual Public Site
 
