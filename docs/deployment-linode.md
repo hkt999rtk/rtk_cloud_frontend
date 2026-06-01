@@ -17,6 +17,9 @@ Realtek Connect+ uses an artifact-first deployment model:
   Linode Object Storage under `releases/realtek_connect-<version>/`.
 - The Linode deploy workflow installs a selected version onto the VM.
 - Rollback deploys a previous published artifact version.
+- Runtime Go service logs should emit `rtk_cloud_logger` zap JSON to
+  stdout/stderr for journald collection and central forwarding; see
+  `docs/SERVICE_LOGGING_MIGRATION.md`.
 
 Do not deploy production by copying a developer checkout to the VM.
 
