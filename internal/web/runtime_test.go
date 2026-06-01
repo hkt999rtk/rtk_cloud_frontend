@@ -2,12 +2,15 @@ package web
 
 import (
 	"bytes"
-	"log"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestNewHTTPServerAppliesDefaultTimeouts(t *testing.T) {
@@ -49,7 +52,7 @@ func TestNewHTTPServerUsesExplicitTimeouts(t *testing.T) {
 
 func TestLoggingMiddlewareLogsRequestOutcome(t *testing.T) {
 	var output bytes.Buffer
-	logger := log.New(&output, "", 0)
+	logger := jsonTestLogger(t, &output)
 
 	handler := LoggingMiddleware(logger)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/healthz" {
@@ -59,6 +62,9 @@ func TestLoggingMiddlewareLogsRequestOutcome(t *testing.T) {
 	}))
 
 	req := httptest.NewRequest(http.MethodGet, "/healthz?check=1", nil)
+	req.RemoteAddr = "203.0.113.10:54321"
+	req.Header.Set("X-Request-Id", "req-123")
+	req.Header.Set("X-Trace-Id", "trace-456")
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 
@@ -66,15 +72,28 @@ func TestLoggingMiddlewareLogsRequestOutcome(t *testing.T) {
 		t.Fatalf("status = %d, want 204", rec.Code)
 	}
 
-	logLine := output.String()
-	if !strings.Contains(logLine, "GET /healthz?check=1 204") {
-		t.Fatalf("log line = %q, want method, path, and status", logLine)
+	event := decodeRuntimeLogEvent(t, output.Bytes())
+	for key, want := range map[string]any{
+		"msg":         "http request",
+		"method":      http.MethodGet,
+		"path":        "/healthz?check=1",
+		"status":      float64(http.StatusNoContent),
+		"remote_addr": "203.0.113.10",
+		"request_id":  "req-123",
+		"trace_id":    "trace-456",
+	} {
+		if event[key] != want {
+			t.Fatalf("%s = %#v, want %#v in %#v", key, event[key], want, event)
+		}
+	}
+	if _, ok := event["duration_ms"].(float64); !ok {
+		t.Fatalf("duration_ms = %#v, want numeric field in %#v", event["duration_ms"], event)
 	}
 }
 
 func TestLoggingMiddlewareRedactsSensitiveQueryParameters(t *testing.T) {
 	var output bytes.Buffer
-	logger := log.New(&output, "", 0)
+	logger := jsonTestLogger(t, &output)
 
 	handler := LoggingMiddleware(logger)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -88,7 +107,26 @@ func TestLoggingMiddlewareRedactsSensitiveQueryParameters(t *testing.T) {
 	if strings.Contains(logLine, "secret") {
 		t.Fatalf("log line = %q, secret token leaked", logLine)
 	}
-	if !strings.Contains(logLine, "/admin/leads?token=REDACTED&view=full 200") {
-		t.Fatalf("log line = %q, want redacted token and preserved request details", logLine)
+	event := decodeRuntimeLogEvent(t, output.Bytes())
+	if event["path"] != "/admin/leads?token=[REDACTED]&view=full" {
+		t.Fatalf("path = %#v, want redacted token and preserved request details in %#v", event["path"], event)
 	}
+}
+
+func jsonTestLogger(t *testing.T, output *bytes.Buffer) *zap.Logger {
+	t.Helper()
+
+	encoderCfg := zap.NewProductionEncoderConfig()
+	core := zapcore.NewCore(zapcore.NewJSONEncoder(encoderCfg), zapcore.AddSync(output), zapcore.DebugLevel)
+	return zap.New(core)
+}
+
+func decodeRuntimeLogEvent(t *testing.T, line []byte) map[string]any {
+	t.Helper()
+
+	var event map[string]any
+	if err := json.Unmarshal(bytes.TrimSpace(line), &event); err != nil {
+		t.Fatalf("decode log event %q: %v", string(line), err)
+	}
+	return event
 }
