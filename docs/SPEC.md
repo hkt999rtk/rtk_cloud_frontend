@@ -458,6 +458,13 @@ SQLite stores website leads only. It does not store real IoT telemetry or device
 
 When analytics is enabled, first-party event telemetry uses a separate SQLite database so raw analytics data stays isolated from lead data.
 
+Redis-compatible caching is low priority for this repository. Leads, analytics,
+and documentation search should remain concrete SQLite repositories unless a
+specific runtime bottleneck appears. Any future cache work should document the
+need first and must not turn the public website into a product device-state or
+telemetry source of truth. The cross-repository roadmap is maintained in
+`../../docs/persistence-cache-refactor-roadmap.md`.
+
 Default database path:
 
 ```text
