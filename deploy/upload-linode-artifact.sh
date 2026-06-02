@@ -26,6 +26,55 @@ test -f "$bundle"
 test -f "$checksum"
 test -f "$manifest"
 
+(
+  cd "$dist_dir"
+  shasum -a 256 -c "realtek-connect-$version.tar.gz.sha256"
+)
+
+expected_source_commit="${GITHUB_SHA:-$(git -C "$repo_root" rev-parse HEAD 2>/dev/null || echo unknown)}"
+python3 - "$manifest" "$version" "$expected_source_commit" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+manifest_path, expected_version, expected_source_commit = sys.argv[1:]
+manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+required = {
+    "artifact_name",
+    "artifact_path",
+    "artifact_type",
+    "bundle",
+    "created_at",
+    "repo",
+    "run_attempt",
+    "run_id",
+    "sha256",
+    "source_commit",
+    "version",
+    "workflow",
+}
+missing = sorted(required - set(manifest))
+if missing:
+    raise SystemExit(f"object manifest missing keys: {', '.join(missing)}")
+if manifest["artifact_type"] != "release-bundle":
+    raise SystemExit("object manifest artifact_type must be release-bundle")
+if manifest["version"] != expected_version:
+    raise SystemExit("object manifest version does not match requested upload version")
+if manifest["source_commit"] != expected_source_commit:
+    raise SystemExit(
+        "object manifest source_commit does not match this workflow commit: "
+        f"{manifest['source_commit']} != {expected_source_commit}"
+    )
+expected_path = f"releases/{manifest['artifact_name']}-{expected_version}/{manifest['bundle']}"
+if manifest["artifact_path"] != expected_path:
+    raise SystemExit("object manifest artifact_path does not match release prefix")
+PY
+
+if [[ "${LINODE_UPLOAD_DRY_RUN:-false}" == "true" || "${LINODE_UPLOAD_DRY_RUN:-}" == "1" ]]; then
+  echo "dry-run: validated $bundle, $checksum, and $manifest"
+  exit 0
+fi
+
 linode_api="${LINODE_API_URL:-https://api.linode.com/v4}"
 temp_key_id=""
 bucket_region="${LINODE_OBJ_REGION:-${AWS_DEFAULT_REGION:-us-sea}}"
@@ -158,11 +207,6 @@ test -n "${LINODE_OBJ_BUCKET:-}"
 test -n "${LINODE_OBJ_ENDPOINT:-}"
 test -n "$bucket_region"
 command -v curl >/dev/null 2>&1
-
-(
-  cd "$dist_dir"
-  shasum -a 256 -c "realtek-connect-$version.tar.gz.sha256"
-)
 
 object_checksum_file="$(mktemp)"
 trap 'rm -f "$object_checksum_file"; delete_temp_key' EXIT

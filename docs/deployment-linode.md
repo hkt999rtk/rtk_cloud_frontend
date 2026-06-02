@@ -8,14 +8,12 @@ replace that test deployment.
 
 Realtek Connect+ uses an artifact-first deployment model:
 
-- CI builds `realtek-connect-ci-<shortsha>.tar.gz` for every PR and push.
-- CI uploads every deployable bundle as a GitHub Actions artifact named
-  `realtek-connect-ci-<shortsha>`.
-- On `main`, tags, and manual runs, CI also uploads the bundle, checksum, and
-  manifest to Linode Object Storage under `releases/realtek_connect-ci-<shortsha>/`.
+- CI validates source, tests, server build, and visual smoke evidence. It does
+  not publish deployable release bundles to Linode Object Storage.
 - The release workflow uploads explicit release bundles to GitHub Releases and
   Linode Object Storage under `releases/realtek_connect-<version>/`.
-- The Linode deploy workflow installs a selected version onto the VM.
+- The Linode deploy workflow downloads, verifies, and installs a selected
+  release version onto the VM. It does not build or publish release artifacts.
 - Rollback deploys a previous published artifact version.
 - Runtime Go service logs should emit `rtk_cloud_logger` zap JSON to
   stdout/stderr for journald collection and central forwarding; see
@@ -33,8 +31,8 @@ Do not deploy production by copying a developer checkout to the VM.
 
 Required secrets:
 
-- `LINODE_TOKEN`, used by CI to create a temporary bucket-scoped Object Storage
-  key for artifact upload.
+- `LINODE_TOKEN`, used by release upload to create a temporary bucket-scoped
+  Object Storage key when long-lived Object Storage credentials are not set.
 - Optional `LINODE_OBJ_ACCESS_KEY_ID` and `LINODE_OBJ_SECRET_ACCESS_KEY` if a
   long-lived bucket-scoped key is preferred over temporary keys.
 - `REALTEK_CONNECT_DEPLOY_HOST`
@@ -58,30 +56,24 @@ Optional variables:
 - `REALTEK_CONNECT_DEPLOY_DATA_DIR`, default `/var/lib/realtek-connect`
 - `REALTEK_CONNECT_DEPLOY_REMOTE_DIR`, default `/tmp/realtek-connect-deploy`
 
-## CI Artifact Contract
+## Release Artifact Contract
 
-Every CI run builds and verifies a deployment-ready bundle:
-
-```text
-realtek-connect-ci-<shortsha>
-realtek-connect-ci-<shortsha>.tar.gz
-realtek-connect-ci-<shortsha>.tar.gz.sha256
-realtek-connect-ci-<shortsha>.object-manifest.json
-```
-
-For `main`, tags, and manual CI runs, the same files are published to Linode
-Object Storage:
+Only the `Release Bundle` workflow publishes deployable release bundles to
+Linode Object Storage:
 
 ```text
-releases/realtek_connect-ci-<shortsha>/ci-<shortsha>.tar.gz
-releases/realtek_connect-ci-<shortsha>/ci-<shortsha>.tar.gz.sha256
-releases/realtek_connect-ci-<shortsha>/manifest.json
+releases/realtek_connect-<version>/<version>.tar.gz
+releases/realtek_connect-<version>/<version>.tar.gz.sha256
+releases/realtek_connect-<version>/manifest.json
 ```
 
-Pull request CI never uploads to Object Storage and does not require Linode
-secrets. The bundle includes the binary, `content/`, `templates/`, `static/`,
-`deploy/`, `VERSION`, and release manifests. Runtime SQLite database files must
-not be included.
+CI does not upload release artifacts and does not require Linode Object Storage
+secrets. The release bundle includes the binary, `content/`, `templates/`,
+`static/`, `deploy/`, `VERSION`, and release manifests. Runtime SQLite database
+files must not be included. The object manifest records
+`artifact_type: release-bundle`, source commit, workflow name, run id, run
+attempt, and checksum. Upload fails if the manifest source commit or version
+does not match the current release workflow run.
 
 The upload script supports two authentication modes. If
 `LINODE_OBJ_ACCESS_KEY_ID` and `LINODE_OBJ_SECRET_ACCESS_KEY` are present, it

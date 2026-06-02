@@ -500,6 +500,7 @@ Linode artifact deployment notes:
 
 - `deploy/package.sh <version>` builds `dist/realtek-connect-<version>.tar.gz`, `realtek-connect-<version>.tar.gz.sha256`, and `realtek-connect-<version>.object-manifest.json`.
 - Release artifacts contain the server binary, `content/`, `templates/`, `static/`, `deploy/`, `VERSION`, and release manifest metadata. SQLite runtime DB files are excluded; the only SQLite DB allowed in a release bundle is optional precomputed `data/search.db`.
+- CI validates source, tests, server build, and visual smoke evidence, but does not upload deployable release bundles to Linode Object Storage.
 - `.github/workflows/release.yml` publishes versioned artifacts to GitHub Releases and Linode Object Storage under `releases/realtek_connect-<version>/`.
 - `.github/workflows/deploy-linode.yml` installs a selected version to `/opt/realtek-connect/releases/<version>`, updates `/opt/realtek-connect/current`, restarts `realtek-connect.service`, and runs public readiness checks.
 - Linode host bootstrap, GoDaddy DNS, nginx reverse proxy, Let’s Encrypt TLS, rollback, and SQLite backup are documented in `docs/deployment-linode.md`, `docs/deployment-promotion-rollback.md`, and `docs/sqlite-backup-linode.md`.
