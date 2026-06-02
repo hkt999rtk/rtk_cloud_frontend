@@ -20,6 +20,12 @@ Realtek Connect+ uses an artifact-first deployment model:
 - Runtime Go service logs should emit `rtk_cloud_logger` zap JSON to
   stdout/stderr for journald collection and central forwarding; see
   `docs/SERVICE_LOGGING_MIGRATION.md`.
+- The generated `realtek-connect.service` sets low-cardinality forwarder labels
+  for the Go runtime unit and nginx access/error streams:
+  `service=realtek-connect`, `unit=realtek-connect.service`,
+  `component=server`; `service=realtek-connect`, `unit=nginx.service`,
+  `component=nginx-access`; and `service=realtek-connect`,
+  `unit=nginx.service`, `component=nginx-error`.
 
 Do not deploy production by copying a developer checkout to the VM.
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,24 +17,32 @@ import (
 	"realtek-connect/internal/search"
 	"realtek-connect/internal/web"
 
+	cloudlogger "github.com/hkt999rtk/rtk_cloud_logger"
+	"go.uber.org/zap"
 	_ "modernc.org/sqlite"
 )
 
 func main() {
-	logger := log.New(os.Stdout, "", log.LstdFlags)
+	logger, err := newServerLogger()
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = logger.Sync()
+	}()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	if err := run(ctx, logger); err != nil {
-		logger.Printf("server exited with error: %v", err)
+		logger.Error("server exited with error", zap.Error(err))
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context, logger *log.Logger) error {
+func run(ctx context.Context, logger *zap.Logger) error {
 	if logger == nil {
-		logger = log.New(os.Stdout, "", log.LstdFlags)
+		logger = zap.NewNop()
 	}
 
 	databasePath := envOrDefault("DATABASE_PATH", "/var/lib/realtek-connect/connectplus.db")
@@ -75,7 +82,11 @@ func run(ctx context.Context, logger *log.Logger) error {
 	if searchEnabled {
 		openAIAPIKey := os.Getenv("OPENAI_API_KEY")
 		if strings.TrimSpace(openAIAPIKey) == "" {
-			logger.Printf("SEARCH_ENABLED=true but OPENAI_API_KEY is empty; documentation search is disabled")
+			logger.Warn(
+				"documentation search disabled",
+				zap.String("component", "search"),
+				zap.String("reason", "missing_openai_api_key"),
+			)
 			searchEnabled = false
 		}
 	}
@@ -122,6 +133,12 @@ func run(ctx context.Context, logger *log.Logger) error {
 		SearchService:           searchService,
 	})
 	if err != nil {
+		logger.Error(
+			"content load failed",
+			zap.String("component", "content-load"),
+			zap.String("error_category", "content_load_failed"),
+			zap.Error(err),
+		)
 		return err
 	}
 
@@ -131,7 +148,7 @@ func run(ctx context.Context, logger *log.Logger) error {
 		Handler: web.LoggingMiddleware(logger)(application.Routes()),
 	})
 
-	logger.Printf("listening on %s", address)
+	logger.Info("listening", zap.String("addr", address))
 
 	return serveWithGracefulShutdown(ctx, server, logger, web.DefaultShutdownTimeout)
 }
@@ -141,9 +158,9 @@ type httpServerLifecycle interface {
 	Shutdown(context.Context) error
 }
 
-func serveWithGracefulShutdown(ctx context.Context, server httpServerLifecycle, logger *log.Logger, shutdownTimeout time.Duration) error {
+func serveWithGracefulShutdown(ctx context.Context, server httpServerLifecycle, logger *zap.Logger, shutdownTimeout time.Duration) error {
 	if logger == nil {
-		logger = log.New(os.Stdout, "", log.LstdFlags)
+		logger = zap.NewNop()
 	}
 
 	errCh := make(chan error, 1)
@@ -158,7 +175,7 @@ func serveWithGracefulShutdown(ctx context.Context, server httpServerLifecycle, 
 		}
 		return nil
 	case <-ctx.Done():
-		logger.Printf("shutdown requested")
+		logger.Info("shutdown requested")
 	}
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
@@ -172,8 +189,42 @@ func serveWithGracefulShutdown(ctx context.Context, server httpServerLifecycle, 
 		return err
 	}
 
-	logger.Printf("shutdown complete")
+	logger.Info("shutdown complete")
 	return nil
+}
+
+func newServerLogger() (*zap.Logger, error) {
+	logger, err := cloudlogger.New(cloudlogger.Config{
+		Service: "realtek-connect",
+		Env:     envFirst("REALTEK_CONNECT_ENV", "APP_ENV", "ENVIRONMENT"),
+		Version: serviceVersion(),
+		Level:   envOrDefault("LOG_LEVEL", "info"),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return logger.With(zap.String("component", "server")), nil
+}
+
+func serviceVersion() string {
+	if version := envFirst("REALTEK_CONNECT_VERSION", "SERVICE_VERSION", "VERSION"); version != "" {
+		return version
+	}
+	if contents, err := os.ReadFile("VERSION"); err == nil {
+		if version := strings.TrimSpace(string(contents)); version != "" {
+			return version
+		}
+	}
+	return "dev"
+}
+
+func envFirst(keys ...string) string {
+	for _, key := range keys {
+		if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func envOrDefault(key, fallback string) string {

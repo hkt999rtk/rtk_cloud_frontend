@@ -1,6 +1,6 @@
 # Service Logging Migration
 
-Status: implementation handoff.
+Status: implemented.
 
 Owner: `rtk_cloud_frontend`.
 
@@ -30,6 +30,21 @@ service logs as separate concerns.
 - `deploy/install.sh`
 - `deploy/*.service` templates or generated units
 - nginx access/error logs in Linode deployments
+
+## Forwarder Labels
+
+The Linode install script writes these low-cardinality label sets into the
+generated `realtek-connect.service` unit for the host log forwarder:
+
+- Go runtime journald records: `service=realtek-connect`,
+  `unit=realtek-connect.service`, `component=server`
+- nginx access log records: `service=realtek-connect`, `unit=nginx.service`,
+  `component=nginx-access`
+- nginx error log records: `service=realtek-connect`, `unit=nginx.service`,
+  `component=nginx-error`
+
+High-cardinality values such as request ids, trace ids, paths, and remote
+addresses remain structured log fields, not default forwarder labels.
 
 ## Acceptance Criteria
 

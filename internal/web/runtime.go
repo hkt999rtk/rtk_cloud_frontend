@@ -1,12 +1,14 @@
 package web
 
 import (
-	"io"
-	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	cloudlogger "github.com/hkt999rtk/rtk_cloud_logger"
+	"go.uber.org/zap"
 )
 
 const (
@@ -49,9 +51,9 @@ func NewHTTPServer(cfg HTTPServerConfig) *http.Server {
 	}
 }
 
-func LoggingMiddleware(logger *log.Logger) func(http.Handler) http.Handler {
+func LoggingMiddleware(logger *zap.Logger) func(http.Handler) http.Handler {
 	if logger == nil {
-		logger = log.New(io.Discard, "", 0)
+		logger = zap.NewNop()
 	}
 
 	return func(next http.Handler) http.Handler {
@@ -64,7 +66,21 @@ func LoggingMiddleware(logger *log.Logger) func(http.Handler) http.Handler {
 
 			next.ServeHTTP(recorder, r)
 
-			logger.Printf("%s %s %d %s", r.Method, sanitizedRequestURI(r.URL), recorder.status, time.Since(started).Round(time.Millisecond))
+			fields := []zap.Field{
+				zap.String("method", r.Method),
+				zap.String("path", sanitizedRequestURI(r.URL)),
+				zap.Int("status", recorder.status),
+				zap.Float64("duration_ms", float64(time.Since(started).Microseconds())/1000.0),
+				zap.String("remote_addr", remoteAddr(r.RemoteAddr)),
+			}
+			if requestID := strings.TrimSpace(r.Header.Get("X-Request-Id")); requestID != "" {
+				fields = append(fields, zap.String("request_id", requestID))
+			}
+			if traceID := strings.TrimSpace(r.Header.Get("X-Trace-Id")); traceID != "" {
+				fields = append(fields, zap.String("trace_id", traceID))
+			}
+
+			logger.Info("http request", fields...)
 		})
 	}
 }
@@ -73,39 +89,15 @@ func sanitizedRequestURI(requestURL *url.URL) string {
 	if requestURL == nil {
 		return ""
 	}
-	if requestURL.RawQuery == "" {
-		return requestURL.RequestURI()
-	}
-
-	values, err := url.ParseQuery(requestURL.RawQuery)
-	if err != nil {
-		return requestURL.EscapedPath()
-	}
-
-	redacted := false
-	for key := range values {
-		if !isSensitiveQueryParam(key) {
-			continue
-		}
-		values.Set(key, "REDACTED")
-		redacted = true
-	}
-	if !redacted {
-		return requestURL.RequestURI()
-	}
-
-	sanitized := *requestURL
-	sanitized.RawQuery = values.Encode()
-	return sanitized.RequestURI()
+	return cloudlogger.SanitizePath(requestURL.RequestURI())
 }
 
-func isSensitiveQueryParam(key string) bool {
-	switch strings.ToLower(key) {
-	case "token", "access_token", "api_key", "apikey":
-		return true
-	default:
-		return false
+func remoteAddr(addr string) string {
+	host, _, err := net.SplitHostPort(addr)
+	if err == nil {
+		return host
 	}
+	return addr
 }
 
 type statusRecorder struct {

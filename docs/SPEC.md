@@ -247,6 +247,8 @@ The website includes a first-version public documentation query tool scoped only
 
 - Public routes include `/search`, `/zh-tw/search`, and `/zh-cn/search`.
 - The query API is `POST /api/search` with JSON body `{ "query": "string", "locale": "en|zh-TW|zh-CN" }`.
+- The implemented website HTTP API contract is maintained in `docs/openapi.yaml`
+  and summarized for humans in `docs/API_REFERENCE.md`.
 - The search index is CLI-only and is not rebuilt during server startup. Run `OPENAI_API_KEY=... go run ./cmd/search-index` before enabling runtime search.
 - Release packaging can build a precomputed `data/search.db` into the deployable artifact when `OPENAI_API_KEY` is available. This keeps fixed website-document embeddings out of git while allowing deployment bundles to be search-ready.
 - The indexer scans website content from `content/`, `docs/`, `README.md`, feature/docs/manual catalog data, and localized public content, then stores documents, chunks, embeddings, and source metadata in SQLite.
@@ -359,6 +361,10 @@ Routes:
 - `GET /admin/leads`: protected lead review page, enabled only when `ADMIN_TOKEN` is set.
 - `GET /admin/leads.csv`: protected CSV export, enabled only when `ADMIN_TOKEN` is set.
 - `GET /static/...`: CSS and asset files.
+
+The OpenAPI contract in `docs/openapi.yaml` covers API/form/admin endpoints
+implemented by this website runtime. It intentionally does not describe the
+future IoT product control-plane APIs.
 
 Localized public route variants:
 

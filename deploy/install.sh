@@ -50,6 +50,10 @@ Wants=network-online.target
 [Service]
 Type=simple
 EnvironmentFile=$env_file
+Environment=REALTEK_CONNECT_VERSION=$version
+Environment=RTK_LOG_FORWARDER_JOURNAL_LABELS=service=realtek-connect,unit=realtek-connect.service,component=server
+Environment=RTK_LOG_FORWARDER_NGINX_ACCESS_LABELS=service=realtek-connect,unit=nginx.service,component=nginx-access
+Environment=RTK_LOG_FORWARDER_NGINX_ERROR_LABELS=service=realtek-connect,unit=nginx.service,component=nginx-error
 WorkingDirectory=$prefix/current
 ExecStart=$prefix/current/bin/realtek-connect
 Restart=on-failure
