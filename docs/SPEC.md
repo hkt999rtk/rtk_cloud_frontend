@@ -437,6 +437,13 @@ CDN-ready behavior:
   - `/robots.txt` and `/sitemap.xml`: `Cache-Control: public, max-age=300`.
 - The CD workflow intentionally does not enable the CDN env vars yet. CDN provider selection, DNS cutover, cache rules, purge strategy, compression, and TLS settings should be completed as a deployment decision.
 
+Persistence and cache boundaries:
+
+- Contact leads, first-party analytics events, and the precomputed documentation search index are website-local SQLite repositories.
+- Redis-compatible caching is not a first-priority dependency for this repository. Future application cache work must be justified by a measured website bottleneck or concrete operational requirement.
+- Website SQLite stores must not become authoritative storage for real IoT telemetry, product device state, customer account state, fleet inventory or control data, OTA campaign execution state, or production mobile app user state.
+- CDN/static cache headers, asset fingerprints, reverse proxy rules, and CDN provider configuration are deployment concerns separate from application Redis/cache work.
+
 Commands:
 
 - `go run ./cmd/server`
