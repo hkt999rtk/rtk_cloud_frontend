@@ -86,6 +86,7 @@ printf '%s  %s\n' "$bundle_sha" "$(basename "$bundle")" > "$checksum"
 
 python3 - "$object_manifest" "$version" "$source_commit" "$created_at" "$bundle_sha" <<'PY'
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -95,11 +96,16 @@ bundle = f"{version}.tar.gz"
 manifest = {
     "artifact_name": artifact_name,
     "artifact_path": f"releases/{artifact_name}-{version}/{bundle}",
+    "artifact_type": "release-bundle",
     "bundle": bundle,
     "created_at": created_at,
+    "repo": os.environ.get("GITHUB_REPOSITORY", "rtk_cloud_frontend"),
+    "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+    "run_id": os.environ.get("GITHUB_RUN_ID", ""),
     "sha256": bundle_sha,
     "source_commit": source_commit,
     "version": version,
+    "workflow": os.environ.get("GITHUB_WORKFLOW", ""),
 }
 Path(out).write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
 PY
