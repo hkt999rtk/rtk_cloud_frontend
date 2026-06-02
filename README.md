@@ -18,6 +18,9 @@ The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.
 The service logging migration to `rtk_cloud_logger` zap and central journald
 forwarding is documented in
 [`docs/SERVICE_LOGGING_MIGRATION.md`](docs/SERVICE_LOGGING_MIGRATION.md).
+Website-local SQLite persistence and the low-priority Redis/cache boundary are
+documented in
+[`docs/PERSISTENCE_CACHE_BOUNDARIES.md`](docs/PERSISTENCE_CACHE_BOUNDARIES.md).
 The implemented website HTTP API is documented in
 [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md), with a machine-readable
 OpenAPI contract in [`docs/openapi.yaml`](docs/openapi.yaml).
@@ -97,6 +100,13 @@ Documentation query:
 - Start the server with `SEARCH_ENABLED=true` only after `SEARCH_DATABASE_PATH` points at a built index and `OPENAI_API_KEY` is configured.
 - Search answers are generated only when retrieved website content clears the relevance threshold. No matching documentation returns a controlled no-hit answer without calling the answer model.
 - Search query text is sent to OpenAI for embeddings. When sources are found, the query and retrieved snippets are sent to the OpenAI Responses API to generate a source-grounded answer. Raw query text is not stored in the analytics event payload.
+
+Persistence and cache boundary:
+
+- Contact leads, first-party analytics, and the local documentation search index remain concrete SQLite repositories unless a measured website bottleneck or concrete operational need justifies different cache work.
+- Do not add Redis or Redis-compatible caching to this repository only because the broader platform may use it.
+- Website SQLite stores must not hold authoritative IoT telemetry, product device state, customer account state, fleet data, OTA execution state, or production mobile app user state.
+- CDN/static cache headers remain separate from application Redis/cache decisions.
 
 CDN readiness:
 
