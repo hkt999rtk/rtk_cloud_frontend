@@ -219,6 +219,7 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("/admin/analytics", s.handleAdminAnalytics)
 	mux.HandleFunc("/admin/reload-content", s.handleAdminReloadContent)
 	mux.HandleFunc("/healthz", s.handleHealthz)
+	mux.HandleFunc("/metrics/prometheus", s.handlePrometheusMetrics)
 	mux.HandleFunc("/api/event", s.handleAnalyticsEvent)
 	mux.HandleFunc("/api/search", s.handleSearchAPI)
 	mux.HandleFunc("/", s.handlePublic)

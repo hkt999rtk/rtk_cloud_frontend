@@ -166,13 +166,18 @@ final HTTPS URL.
 
 ## nginx And TLS
 
-The Go application stays HTTP-only on `127.0.0.1:8080`. nginx terminates public
-HTTP/HTTPS and proxies to the app:
+The Go application stays HTTP-only on port `8080`. nginx terminates public
+HTTP/HTTPS and proxies to the app over loopback; if this host is scraped by the
+central Video Cloud Prometheus, allow `8080/tcp` only from the private VPC CIDR.
 
 ```nginx
 server {
     listen 80;
     server_name example.com www.example.com;
+
+    location = /metrics/prometheus {
+        return 404;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:8080;
@@ -182,6 +187,10 @@ server {
     }
 }
 ```
+
+`GET /metrics/prometheus` is intended for private Prometheus scraping only. Do
+not proxy it through the public nginx server block; scrape the app over the
+private VPC IP and port `8080`.
 
 Enable the site, then issue TLS with Let’s Encrypt:
 
