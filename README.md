@@ -39,7 +39,7 @@ Navigation conventions:
 Tracked validation reports:
 
 - `docs/TEST_REPORT.md`: deterministic CI / PR validation report.
-- `docs/READINESS_TEST_REPORT.md`: deterministic CD / deployed readiness report.
+- `docs/READINESS_TEST_REPORT.md`: deterministic legacy website-test readiness report. Official LKE runtime rollout evidence is produced by the workspace deployment flow.
 - CI/CD generate sanitized candidates under `.artifacts/report-candidates/docs/` and upload them as the `report-candidates` artifact.
 - Use the `Import Report Candidate` workflow to import only `docs/TEST_REPORT.md` or `docs/READINESS_TEST_REPORT.md` from a selected workflow run into a target PR branch or explicit branch after heading, redaction, and path validation.
 
@@ -207,7 +207,7 @@ Notes:
 go build -o bin/realtek-connect ./cmd/server
 ```
 
-## Deployment Packaging
+## Kubernetes Deployment
 
 Build the container image:
 
@@ -224,22 +224,25 @@ docker run --rm -p 8080:8080 \
   realtek-connect
 ```
 
-Deployment notes:
+Kubernetes deployment notes:
 
 - The image keeps application state only in SQLite under `/data/connectplus.db`; mount `/data` to persist leads across restarts.
 - When analytics is enabled, the app also keeps first-party event data in `/data/analytics.db`.
-- The native CD bundle includes a writable `data/` directory for test-host defaults and may include precomputed `data/search.db` for documentation search. Production native deployments should still set `DATABASE_PATH` and `ANALYTICS_DATABASE_PATH` to a persistent service-owned directory; `SEARCH_DATABASE_PATH` can point at the immutable bundled index under `/opt/realtek-connect/current/data/search.db`.
-- The container serves HTTP on port `8080`. Production TLS termination should be handled by a reverse proxy, ingress, or deployment platform in front of the app.
-- Native builds remain supported for environments that prefer `go build` over containers.
+- The official LKE deployment entry is `rtk_cloud_workspace`; it builds this repository's `Dockerfile`, exports `LKE_FRONTEND_IMAGE`, and deploys that image into the `<stack>-frontend` namespace.
+- Keep Kubernetes `replicas: 1` while leads and analytics use SQLite. Do not horizontally scale the frontend until persistence moves to an external database or another multi-writer-safe design.
+- Mount `/data` from a PVC and set `DATABASE_PATH=/data/connectplus.db`, `ANALYTICS_DATABASE_PATH=/data/analytics.db`, and `SEARCH_DATABASE_PATH=/data/search.db` or an immutable bundled search index path.
+- The container serves HTTP on port `8080` and exposes `/healthz`. TLS termination, public routing, DNS, and certificates are handled by Ingress/Gateway, Linode NodeBalancer, cert-manager, and the selected CDN or reverse proxy layer.
+- The app logs to stdout/stderr; Kubernetes log collection and central forwarding are deployment concerns.
+- Native builds and release bundles remain supported only for local diagnostics, legacy website-test validation, or non-K8s recovery use. They are not the official staging or production rollout path.
 
-Artifact-based Linode deployment is also supported:
+Kubernetes runbooks:
 
-- CI validates source, tests, server build, and visual smoke evidence. It does not publish deployable release bundles to Linode Object Storage.
-- `deploy/package.sh <version>` creates `dist/realtek-connect-<version>.tar.gz`, a checksum, and an object-storage manifest. When `OPENAI_API_KEY` is present, the bundle includes `data/search.db` as a precomputed documentation search index.
-- `deploy/upload-linode-artifact.sh <version>` validates the release bundle, checksum, manifest version, and source commit before uploading to Linode Object Storage using the S3-compatible HTTP API directly; it does not require the AWS CLI. It requires either `LINODE_OBJ_ACCESS_KEY_ID` and `LINODE_OBJ_SECRET_ACCESS_KEY`, or `LINODE_TOKEN` so it can create a temporary bucket-scoped Object Storage key. `LINODE_OBJ_BUCKET` and `LINODE_OBJ_ENDPOINT` may be provided explicitly; when only one bucket exists, the script can infer both from the Linode API.
-- `.github/workflows/release.yml` publishes release bundles to GitHub Releases and Linode Object Storage under `releases/realtek_connect-<version>/`.
-- `.github/workflows/deploy-linode.yml` installs a selected version onto a standalone Linode VM and verifies public health.
-- Linode VM, GoDaddy DNS, nginx, TLS, rollback, and SQLite backup runbooks live in:
-  - `docs/deployment-linode.md`
-  - `docs/deployment-promotion-rollback.md`
-  - `docs/sqlite-backup-linode.md`
+- `docs/deployment-k8s.md`
+- `docs/deployment-promotion-rollback.md`
+- `docs/sqlite-backup-linode.md`
+
+Legacy/native artifact tools:
+
+- `deploy/package.sh <version>` creates `dist/realtek-connect-<version>.tar.gz`, a checksum, and a manifest. When `OPENAI_API_KEY` is present, the bundle includes `data/search.db` as a precomputed documentation search index.
+- `deploy/check-release.sh`, `deploy/install.sh`, and `deploy/verify.sh` validate or install native bundles for legacy website-test or recovery environments.
+- `deploy/upload-linode-artifact.sh <version>` remains available for archiving native bundles to Linode Object Storage, but Object Storage bundles are not the LKE runtime rollout artifact.

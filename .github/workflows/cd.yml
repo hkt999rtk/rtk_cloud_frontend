@@ -1,4 +1,4 @@
-name: CD
+name: Legacy Website-Test CD
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: realtek-connect-cd
+  group: realtek-connect-legacy-website-test-cd
   cancel-in-progress: false
 
 env:
@@ -17,7 +17,8 @@ env:
   PUBLIC_BASE_URL: https://webtest.mgmeet.io
 
 jobs:
-  deploy:
+  legacy-website-test:
+    name: Legacy website-test validation
     runs-on: [self-hosted, rtk_cloud_frontend, go, cd, website-test]
 
     steps:
@@ -66,7 +67,7 @@ jobs:
             exit 1
           fi
 
-      - name: Build deployment bundle
+      - name: Build legacy website-test bundle
         id: build_bundle
         shell: bash
         run: |
@@ -80,7 +81,7 @@ jobs:
           test -d dist/data
           test -w dist/data
 
-      - name: Deploy on website test host
+      - name: Deploy to legacy website test host
         id: deploy
         shell: bash
         run: |
@@ -145,7 +146,7 @@ jobs:
             exit 1
           fi
 
-      - name: Generate CD report candidate
+      - name: Generate legacy website-test readiness report candidate
         if: always()
         shell: bash
         env:

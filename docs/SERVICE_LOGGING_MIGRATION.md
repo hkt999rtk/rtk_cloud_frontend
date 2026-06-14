@@ -18,8 +18,8 @@ service logs as separate concerns.
 - Preserve `request_id` and `trace_id` for documentation/search requests when
   present.
 - Log search-index and content-load failures with structured fields.
-- Define forwarder labels for any non-Go web/runtime logs collected from nginx
-  or deployment-managed services.
+- Keep Kubernetes runtime logs on stdout/stderr for cluster log collection.
+- Treat host/nginx forwarder labels as legacy native deployment compatibility.
 - Do not log lead form raw payloads, cookies, OpenAI/API keys, SMTP secrets, or
   SQLite connection details with credentials.
 
@@ -27,20 +27,25 @@ service logs as separate concerns.
 
 - `cmd/server`
 - `cmd/search-index`
-- `deploy/install.sh`
-- `deploy/*.service` templates or generated units
-- nginx access/error logs in Linode deployments
+- `deploy/install.sh` legacy native unit generation
+- `deploy/*.service` templates or generated units, when native artifacts are used
 
 ## Forwarder Labels
 
-The Linode install script writes these low-cardinality label sets into the
-generated `realtek-connect.service` unit for the host log forwarder:
+The LKE path should collect the container's stdout/stderr records and attach
+Kubernetes metadata such as namespace, pod, container, image, and deployment
+labels. The app itself must not depend on host-local journald or reverse-proxy
+logs.
+
+For legacy native artifacts, the install script writes these low-cardinality
+label sets into the generated `realtek-connect.service` unit for the host log
+forwarder:
 
 - Go runtime journald records: `service=realtek-connect`,
   `unit=realtek-connect.service`, `component=server`
-- nginx access log records: `service=realtek-connect`, `unit=nginx.service`,
+- legacy nginx access log records: `service=realtek-connect`, `unit=nginx.service`,
   `component=nginx-access`
-- nginx error log records: `service=realtek-connect`, `unit=nginx.service`,
+- legacy nginx error log records: `service=realtek-connect`, `unit=nginx.service`,
   `component=nginx-error`
 
 High-cardinality values such as request ids, trace ids, paths, and remote
@@ -48,7 +53,9 @@ addresses remain structured log fields, not default forwarder labels.
 
 ## Acceptance Criteria
 
-- `realtek-connect.service` emits JSON zap logs from Go processes.
+- Kubernetes frontend pods emit JSON zap logs from Go processes on stdout/stderr.
+- Legacy `realtek-connect.service` emits the same JSON zap logs when native
+  artifacts are used.
 - HTTP request logs include status, latency, sanitized path, remote address,
   and request id.
 - Search-index runs can be traced by `service`, `component`, and build version.

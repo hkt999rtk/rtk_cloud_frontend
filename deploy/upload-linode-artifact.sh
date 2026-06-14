@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Optional archive uploader for legacy/native bundles. Linode Object Storage
+# bundles are not the official LKE runtime rollout artifact.
+
 version="${1:-${VERSION:-}}"
 if [[ -z "$version" ]]; then
   echo "usage: $0 <version>" >&2

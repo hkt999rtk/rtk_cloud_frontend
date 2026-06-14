@@ -7,9 +7,9 @@
 - Prepared by: GitHub Actions
 - Automation identity: github-actions
 - Repository: hkt999rtk/rtk_cloud_frontend
-- Report class: Readiness evidence
+- Report class: Legacy website-test readiness evidence
 - Overall result: PASS
-- Scope: CD validation for deployment bundle build, website-test deployment, public health check, homepage verification, video asset verification, and stale-copy checks.
+- Scope: Legacy CD validation for native bundle build, website-test deployment, public health check, homepage verification, video asset verification, and stale-copy checks. Official LKE rollout evidence is produced by the workspace deployment flow.
 
 ## Source Anchors
 
@@ -21,7 +21,7 @@
 - Contracts URL: https://github.com/hkt999rtk/rtk_cloud_contracts_doc/pull/24
 - Contract files referenced: TEST_REPORT.md
 - PR / issue / release: #95
-- Artifact version: N/A - this report validates website source and deployment readiness, not a release artifact version.
+- Artifact version: N/A - this report validates website source and legacy website-test readiness, not a release artifact version or LKE image.
 
 ## Environment
 
@@ -30,7 +30,7 @@
 - OS: Linux runner
 - Architecture: amd64
 - Toolchains: Go toolchain from runner PATH; bash; curl for readiness checks
-- Service dependencies: SQLite runtime for tests; website test host for CD readiness profile when applicable
+- Service dependencies: SQLite runtime for tests; legacy website test host for CD readiness profile when applicable
 - Network profile: repository CI/CD network
 - Credentials source: CI secret
 - Secret handling note: report candidates contain sanitized command names and result states only; raw logs stay in workflow logs or non-report artifacts.
@@ -64,8 +64,8 @@ grep -qv "Contact Sales" deployed homepage snapshot
 | ID | Check | Result | Evidence | Duration | Notes |
 | --- | --- | --- | --- | --- | --- |
 | CD-001 | Source brand film asset exists and is larger than 1 MB | PASS | static/assets/realtek-brand-film.mp4 size check | N/A | Prevents packaging a deployment without the local MP4. |
-| CD-002 | Deployment bundle builds | PASS | dist/bin/realtek-connect plus content/templates/static/data bundle | N/A | Produces the Linux amd64 server bundle. |
-| CD-003 | Deploy on website test host succeeds | PASS | /usr/local/sbin/deploy-realtek-connect | N/A | Deploys to the configured website-test host. |
+| CD-002 | Legacy website-test bundle builds | PASS | dist/bin/realtek-connect plus content/templates/static/data bundle | N/A | Produces the Linux amd64 native bundle for website-test validation. |
+| CD-003 | Legacy website-test deploy succeeds | PASS | /usr/local/sbin/deploy-realtek-connect | N/A | Deploys only to the configured legacy website-test host; this is not the official LKE rollout path. |
 | CD-004 | Public health check returns ok | PASS | https://webtest.mgmeet.io/healthz | N/A | Verifies the deployed service is responding. |
 | CD-005 | Public homepage contains expected product copy | PASS | https://webtest.mgmeet.io/ | N/A | Confirms deployed homepage contains Realtek Connect and Contact Us. |
 | CD-006 | Public video asset is served as MP4 and larger than 1 MB | PASS | https://webtest.mgmeet.io/static/assets/realtek-brand-film.mp4 | N/A | Confirms deployed local video asset is reachable. |
@@ -75,8 +75,8 @@ grep -qv "Contact Sales" deployed homepage snapshot
 
 | Behavior group | Required evidence | Representative test or command | Result | Notes |
 | --- | --- | --- | --- | --- |
-| Deployment bundle integrity | Linux amd64 binary and required runtime directories exist | Build deployment bundle step | PASS | Verifies server, content, templates, static assets, and writable data directory are packaged. |
-| Public deployment readiness | Health and homepage checks pass | curl healthz and homepage | PASS | Confirms the public URL serves the expected site. |
+| Native bundle integrity | Linux amd64 binary and required runtime directories exist | Build legacy website-test bundle step | PASS | Verifies server, content, templates, static assets, and writable data directory are packaged for legacy validation. |
+| Public website-test readiness | Health and homepage checks pass | curl healthz and homepage | PASS | Confirms the legacy website-test URL serves the expected site. |
 | Local video asset readiness | Source and deployed video checks pass | source size check and deployed HEAD request | PASS | Ensures the brand film remains first-party local media. |
 | Stale-copy prevention | Homepage no longer contains legacy CTA text | grep stale-copy check | PASS | Keeps Contact Us wording deployed. |
 

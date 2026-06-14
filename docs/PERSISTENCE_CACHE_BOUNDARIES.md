@@ -23,6 +23,12 @@ model. Future cache work must start from a measured bottleneck, such as observed
 query latency, lock contention, startup cost, operational restore pain, or a
 specific multi-instance deployment requirement.
 
+For the Kubernetes v1 deployment profile, `connectplus.db` and `analytics.db`
+must live on the `/data` PVC and the frontend Deployment must stay at
+`replicas: 1`. Do not horizontally scale the frontend while these writable
+stores remain SQLite-backed. A rolling update must avoid two active writers
+using the same SQLite files at the same time.
+
 ## Out-Of-Scope State
 
 The website SQLite stores must not become authoritative storage for IoT platform

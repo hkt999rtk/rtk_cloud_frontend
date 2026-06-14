@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Legacy/native installer for website-test or recovery hosts. Official LKE
+# deployments must not use host-local systemd installation.
+
 release_dir="${1:-}"
 prefix="${2:-/opt/realtek-connect}"
 etc_dir="${3:-/etc/realtek-connect}"

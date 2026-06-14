@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Legacy/native artifact helper. Official LKE runtime rollouts use the
+# workspace-built container image exported as LKE_FRONTEND_IMAGE.
+
 version="${1:-${VERSION:-}}"
 if [[ -z "$version" ]]; then
   echo "usage: $0 <version>" >&2
