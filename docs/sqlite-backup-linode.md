@@ -64,9 +64,9 @@ prefix such as `sqlite-backups/<hostname>/`. Do not use the public release
 artifact prefix for database backups.
 
 ```sh
-aws s3 cp "/var/lib/realtek-connect/backups/connectplus-$ts.db" \
-  "s3://$LINODE_OBJ_BUCKET/sqlite-backups/$(hostname)/connectplus-$ts.db" \
-  --endpoint-url "$LINODE_OBJ_ENDPOINT"
+go run ./cmd/linode-object-storage put \
+  --file "/var/lib/realtek-connect/backups/connectplus-$ts.db" \
+  --key "sqlite-backups/$(hostname)/connectplus-$ts.db"
 ```
 
 ## Restore Procedure
