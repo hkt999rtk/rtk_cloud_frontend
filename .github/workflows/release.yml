@@ -1,4 +1,4 @@
-name: Release Bundle
+name: Native Release Bundle
 
 on:
   push:
@@ -65,7 +65,7 @@ jobs:
       - name: Run tests
         run: go test ./...
 
-      - name: Build release bundle
+      - name: Build native release bundle
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -74,22 +74,18 @@ jobs:
           chmod +x deploy/*.sh
           deploy/package.sh "${{ steps.version.outputs.version }}"
 
-      - name: Verify release bundle
+      - name: Verify native release bundle
         run: deploy/check-release.sh "dist/realtek-connect-${{ steps.version.outputs.version }}"
 
-      - name: Upload release bundle to Linode Object Storage
+      - name: Summarize native bundle scope
         shell: bash
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.LINODE_OBJ_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.LINODE_OBJ_SECRET_ACCESS_KEY }}
-          LINODE_TOKEN: ${{ secrets.LINODE_TOKEN }}
-          AWS_DEFAULT_REGION: us-sea
-          AWS_EC2_METADATA_DISABLED: "true"
-          LINODE_OBJ_BUCKET: ${{ vars.LINODE_OBJ_BUCKET }}
-          LINODE_OBJ_ENDPOINT: ${{ vars.LINODE_OBJ_ENDPOINT }}
-          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          deploy/upload-linode-artifact.sh "$VERSION"
+          {
+            echo "Built native Realtek Connect+ bundle."
+            echo
+            echo "This bundle is for GitHub Releases, diagnostics, legacy website-test validation, or non-K8s recovery use."
+            echo "Official LKE runtime image artifacts are produced from rtk_cloud_workspace via .github/workflows/lke-image-artifacts.yml and exported as LKE_FRONTEND_IMAGE."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish GitHub release
         if: startsWith(github.ref, 'refs/tags/')

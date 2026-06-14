@@ -16,7 +16,7 @@ Implemented today:
 - Runtime entrypoint under `cmd/server` with request logging, graceful shutdown, and baseline read/write/idle timeouts.
 - Server-rendered pages using `html/template`.
 - Static CSS with a Realtek-style white, deep navy, and blue-green/teal visual system.
-- Artifact-first Linode deployment path with release bundles, Linode Object Storage publication, manual VM deploy workflow, rollback runbook, and SQLite backup policy.
+- Kubernetes-compatible container deployment path where `rtk_cloud_workspace` owns the official LKE rollout, this repository owns the frontend image/runtime contract, and native release bundles remain legacy website-test/recovery tooling.
 - Corporate hero/platform image stored in `static/assets/connectplus-hero-corporate-v2.jpg`.
 - Corporate feature and platform visuals stored under `static/assets/`, including the SDK sample ecosystem diagram at `static/assets/connectplus-sample-ecosystem-corporate-v2.jpg`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
@@ -95,13 +95,14 @@ Realtek Connect+ follows the shared test report policy from
   - `go test ./...`
   - `go build ./cmd/server`
   - `go run ./cmd/visual-smoke`
-- CD generates `.artifacts/report-candidates/docs/READINESS_TEST_REPORT.md` covering:
-  - deployment bundle build
-  - website-test deployment result
+- Legacy website-test CD generates `.artifacts/report-candidates/docs/READINESS_TEST_REPORT.md` covering:
+  - native website-test bundle build
+  - legacy website-test deployment result
   - public `/healthz`
   - public homepage verification
   - deployed video asset verification
   - stale-copy checks
+- Official LKE deployment readiness evidence is owned by the workspace flow and should record the frontend image reference, workspace LKE provision/deploy result, rollout status, public health/homepage checks, and video asset checks.
 - CI/CD upload report candidates as the `report-candidates` artifact and keep raw logs in workflow logs or separate artifacts.
 - Drift checks compare committed reports with generated candidates for the selected validation profile.
 - Manual report import is handled by the `Import Report Candidate` workflow. It can update only `docs/TEST_REPORT.md` or `docs/READINESS_TEST_REPORT.md` in a target PR branch or explicit branch after allowlist, heading, redaction, path, and whitespace validation.
@@ -492,18 +493,17 @@ Container default analytics database path:
 Container deployment notes:
 
 - `Dockerfile` copies the compiled server together with `templates/` and `static/`, which are runtime dependencies for page rendering and asset delivery.
-- The native CD bundle includes a writable `data/` directory so default `data/connectplus.db` and `data/analytics.db` paths can initialize on the website test host. When `OPENAI_API_KEY` is available during packaging, the bundle also includes precomputed `data/search.db` for documentation search. Production native hosts should set `DATABASE_PATH` and `ANALYTICS_DATABASE_PATH` to persistent service-owned storage while allowing `SEARCH_DATABASE_PATH` to point at the immutable bundled index if desired.
-- `/data` is declared as the persistent volume for SQLite-backed lead and analytics storage.
-- HTTPS is intentionally out of process and should be handled by the reverse proxy or deployment platform instead of the Go app directly.
+- The official LKE deployment entry is `rtk_cloud_workspace`, which builds this repository's `Dockerfile`, exports `LKE_FRONTEND_IMAGE`, and deploys it into the `<stack>-frontend` namespace.
+- The app listens on HTTP port `8080`, exposes `/healthz`, and leaves TLS, DNS, Ingress/Gateway, NodeBalancer, cert-manager, CDN behavior, and public host routing to the deployment layer.
+- `/data` is the required PVC mount for SQLite-backed lead and analytics storage in Kubernetes. Use `DATABASE_PATH=/data/connectplus.db`, `ANALYTICS_DATABASE_PATH=/data/analytics.db`, and `SEARCH_DATABASE_PATH=/data/search.db` or an immutable bundled search index path.
+- Keep Kubernetes `replicas: 1` while leads and analytics remain SQLite-backed. Do not horizontally scale until persistence moves to an external database or another multi-writer-safe design.
 
-Linode artifact deployment notes:
+Native artifact compatibility notes:
 
-- `deploy/package.sh <version>` builds `dist/realtek-connect-<version>.tar.gz`, `realtek-connect-<version>.tar.gz.sha256`, and `realtek-connect-<version>.object-manifest.json`.
-- Release artifacts contain the server binary, `content/`, `templates/`, `static/`, `deploy/`, `VERSION`, and release manifest metadata. SQLite runtime DB files are excluded; the only SQLite DB allowed in a release bundle is optional precomputed `data/search.db`.
-- CI validates source, tests, server build, and visual smoke evidence, but does not upload deployable release bundles to Linode Object Storage.
-- `.github/workflows/release.yml` publishes versioned artifacts to GitHub Releases and Linode Object Storage under `releases/realtek_connect-<version>/`.
-- `.github/workflows/deploy-linode.yml` installs a selected version to `/opt/realtek-connect/releases/<version>`, updates `/opt/realtek-connect/current`, restarts `realtek-connect.service`, and runs public readiness checks.
-- Linode host bootstrap, GoDaddy DNS, nginx reverse proxy, Let’s Encrypt TLS, rollback, and SQLite backup are documented in `docs/deployment-linode.md`, `docs/deployment-promotion-rollback.md`, and `docs/sqlite-backup-linode.md`.
+- `deploy/package.sh <version>` builds `dist/realtek-connect-<version>.tar.gz`, `realtek-connect-<version>.tar.gz.sha256`, and `realtek-connect-<version>.object-manifest.json` for legacy website-test, diagnostics, or non-K8s recovery use.
+- Native release artifacts contain the server binary, `content/`, `templates/`, `static/`, `deploy/`, `VERSION`, and release manifest metadata. SQLite runtime DB files are excluded; the only SQLite DB allowed in a release bundle is optional precomputed `data/search.db`.
+- `.github/workflows/release.yml` publishes native bundles to GitHub Releases for tags. LKE runtime image artifacts are produced by the workspace `.github/workflows/lke-image-artifacts.yml` flow.
+- K8s deployment and rollback are documented in `docs/deployment-k8s.md` and `docs/deployment-promotion-rollback.md`; SQLite backup notes remain in `docs/sqlite-backup-linode.md`.
 
 Schema:
 

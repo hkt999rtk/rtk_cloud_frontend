@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Validates legacy/native release bundles for website-test or recovery use.
+# It is not the official Kubernetes rollout gate.
+
 target="${1:-}"
 if [[ -z "$target" ]]; then
   echo "usage: $0 <release-dir|release-tar.gz>" >&2

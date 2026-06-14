@@ -78,7 +78,7 @@ write_common_header() {
 - Contracts URL: https://github.com/hkt999rtk/rtk_cloud_contracts_doc/pull/24
 - Contract files referenced: TEST_REPORT.md
 - PR / issue / release: #95
-- Artifact version: N/A - this report validates website source and deployment readiness, not a release artifact version.
+- Artifact version: ${REPORT_ARTIFACT_VERSION_NOTE:-N/A - this report validates website source and deployment readiness, not a release artifact version.}
 
 ## Environment
 
@@ -87,7 +87,7 @@ write_common_header() {
 - OS: ${REPORT_OS:-Linux runner}
 - Architecture: ${REPORT_ARCH:-amd64}
 - Toolchains: Go toolchain from runner PATH; bash; curl for readiness checks
-- Service dependencies: SQLite runtime for tests; website test host for CD readiness profile when applicable
+- Service dependencies: ${REPORT_SERVICE_DEPENDENCIES:-SQLite runtime for tests; website test host for CD readiness profile when applicable}
 - Network profile: ${REPORT_NETWORK_PROFILE:-repository CI/CD network}
 - Credentials source: CI secret
 - Secret handling note: report candidates contain sanitized command names and result states only; raw logs stay in workflow logs or non-report artifacts.
@@ -208,9 +208,11 @@ EOF
     deployed_video="$(result_or_pass "${REPORT_DEPLOYED_VIDEO_RESULT:-}")"
     stale="$(result_or_pass "${REPORT_STALE_COPY_RESULT:-}")"
     overall="$(overall_result "$source_video" "$bundle" "$deploy" "$health" "$homepage" "$deployed_video" "$stale")"
+    REPORT_ARTIFACT_VERSION_NOTE="N/A - this report validates website source and legacy website-test readiness, not a release artifact version or LKE image."
+    REPORT_SERVICE_DEPENDENCIES="SQLite runtime for tests; legacy website test host for CD readiness profile when applicable"
     REPORT_COMMANDS=$'test "$(wc -c < static/assets/realtek-brand-film.mp4)" -gt 1000000\nGOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o dist/bin/realtek-connect ./cmd/server\ntar -C dist -czf - bin content templates static data | sudo /usr/local/sbin/deploy-realtek-connect\ncurl -k -fsS --max-time 20 "${PUBLIC_BASE_URL}/healthz"\ncurl -k -fsS --max-time 20 "${PUBLIC_BASE_URL}/"\ncurl -k -fsSI --max-time 20 "${PUBLIC_BASE_URL}/static/assets/realtek-brand-film.mp4"\ngrep -qv "Contact Sales" deployed homepage snapshot'
     {
-      write_common_header "Realtek Connect+ Readiness Test Report" "Readiness evidence" "$overall" "CD validation for deployment bundle build, website-test deployment, public health check, homepage verification, video asset verification, and stale-copy checks."
+      write_common_header "Realtek Connect+ Readiness Test Report" "Legacy website-test readiness evidence" "$overall" "Legacy CD validation for native bundle build, website-test deployment, public health check, homepage verification, video asset verification, and stale-copy checks. Official LKE rollout evidence is produced by the workspace deployment flow."
       cat <<EOF
 | Category | PASS | FAIL | SKIP | BLOCKED | N/A |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -227,8 +229,8 @@ EOF
 | ID | Check | Result | Evidence | Duration | Notes |
 | --- | --- | --- | --- | --- | --- |
 | CD-001 | Source brand film asset exists and is larger than 1 MB | ${source_video} | static/assets/realtek-brand-film.mp4 size check | N/A | Prevents packaging a deployment without the local MP4. |
-| CD-002 | Deployment bundle builds | ${bundle} | dist/bin/realtek-connect plus content/templates/static/data bundle | N/A | Produces the Linux amd64 server bundle. |
-| CD-003 | Deploy on website test host succeeds | ${deploy} | /usr/local/sbin/deploy-realtek-connect | N/A | Deploys to the configured website-test host. |
+| CD-002 | Legacy website-test bundle builds | ${bundle} | dist/bin/realtek-connect plus content/templates/static/data bundle | N/A | Produces the Linux amd64 native bundle for website-test validation. |
+| CD-003 | Legacy website-test deploy succeeds | ${deploy} | /usr/local/sbin/deploy-realtek-connect | N/A | Deploys only to the configured legacy website-test host; this is not the official LKE rollout path. |
 | CD-004 | Public health check returns ok | ${health} | ${PUBLIC_BASE_URL:-https://webtest.mgmeet.io}/healthz | N/A | Verifies the deployed service is responding. |
 | CD-005 | Public homepage contains expected product copy | ${homepage} | ${PUBLIC_BASE_URL:-https://webtest.mgmeet.io}/ | N/A | Confirms deployed homepage contains Realtek Connect and Contact Us. |
 | CD-006 | Public video asset is served as MP4 and larger than 1 MB | ${deployed_video} | ${PUBLIC_BASE_URL:-https://webtest.mgmeet.io}/static/assets/realtek-brand-film.mp4 | N/A | Confirms deployed local video asset is reachable. |
@@ -238,8 +240,8 @@ EOF
 
 | Behavior group | Required evidence | Representative test or command | Result | Notes |
 | --- | --- | --- | --- | --- |
-| Deployment bundle integrity | Linux amd64 binary and required runtime directories exist | Build deployment bundle step | ${bundle} | Verifies server, content, templates, static assets, and writable data directory are packaged. |
-| Public deployment readiness | Health and homepage checks pass | curl healthz and homepage | $(overall_result "$health" "$homepage") | Confirms the public URL serves the expected site. |
+| Native bundle integrity | Linux amd64 binary and required runtime directories exist | Build legacy website-test bundle step | ${bundle} | Verifies server, content, templates, static assets, and writable data directory are packaged for legacy validation. |
+| Public website-test readiness | Health and homepage checks pass | curl healthz and homepage | $(overall_result "$health" "$homepage") | Confirms the legacy website-test URL serves the expected site. |
 | Local video asset readiness | Source and deployed video checks pass | source size check and deployed HEAD request | $(overall_result "$source_video" "$deployed_video") | Ensures the brand film remains first-party local media. |
 | Stale-copy prevention | Homepage no longer contains legacy CTA text | grep stale-copy check | ${stale} | Keeps Contact Us wording deployed. |
 

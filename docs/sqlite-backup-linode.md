@@ -1,9 +1,16 @@
-# Linode SQLite Backup Policy
+# SQLite Backup Policy
 
-Realtek Connect+ stores runtime website data in SQLite on the deployment host.
-Release artifacts must never include these files.
+Realtek Connect+ stores runtime website data in SQLite. In Kubernetes v1 these
+files live on the frontend `/data` PVC; in legacy native deployments they live
+on the deployment host. Release artifacts and container images must never
+include runtime database files.
 
-Default database paths:
+Kubernetes database paths:
+
+- `/data/connectplus.db`
+- `/data/analytics.db`
+
+Legacy native database paths:
 
 - `/var/lib/realtek-connect/connectplus.db`
 - `/var/lib/realtek-connect/analytics.db`
@@ -64,7 +71,10 @@ aws s3 cp "/var/lib/realtek-connect/backups/connectplus-$ts.db" \
 
 ## Restore Procedure
 
-Restores should be deliberate because they replace runtime data.
+Restores should be deliberate because they replace runtime data. For Kubernetes,
+scale the frontend Deployment to zero or otherwise ensure no pod is writing the
+SQLite files before replacing data on the PVC. The example below is the legacy
+native host form:
 
 ```sh
 sudo systemctl stop realtek-connect
@@ -82,7 +92,8 @@ restored.
 
 ## Operational Notes
 
-- Backups are runtime data management, not release packaging.
+- Backups are runtime data management, not release packaging or image creation.
+- Kubernetes v1 must keep one frontend replica while SQLite is writable.
 - Do not commit `.db`, `.db-wal`, `.db-shm`, or backup files to git.
 - Do not include database files in `realtek-connect-<version>.tar.gz`.
 - Redact lead emails and analytics data before attaching backup-derived output
