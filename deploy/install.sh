@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Legacy/native installer for website-test or recovery hosts. Official LKE
+# Legacy/native installer for manual diagnostics or recovery hosts. Official LKE
 # deployments must not use host-local systemd installation.
 
 release_dir="${1:-}"

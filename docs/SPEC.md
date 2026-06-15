@@ -16,7 +16,7 @@ Implemented today:
 - Runtime entrypoint under `cmd/server` with request logging, graceful shutdown, and baseline read/write/idle timeouts.
 - Server-rendered pages using `html/template`.
 - Static CSS with a Realtek-style white, deep navy, and blue-green/teal visual system.
-- Kubernetes-compatible container deployment path where `rtk_cloud_workspace` owns the official LKE rollout, this repository owns the frontend image/runtime contract, and native release bundles remain legacy website-test/recovery tooling.
+- Kubernetes-compatible container deployment path where `rtk_cloud_workspace` owns the official LKE rollout, this repository owns the frontend image/runtime contract, and native release bundles remain diagnostics/recovery tooling.
 - Corporate hero/platform image stored in `static/assets/connectplus-hero-corporate-v2.jpg`.
 - Corporate feature and platform visuals stored under `static/assets/`, including the SDK sample ecosystem diagram at `static/assets/connectplus-sample-ecosystem-corporate-v2.jpg`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
@@ -81,31 +81,23 @@ Current routes:
 
 This implementation is enough to demonstrate the Realtek Connect+ direction and collect leads. It is not yet content-complete as a full public IoT cloud platform website and documentation surface.
 
-## CI/CD Test Report Workflow
+## CI Test Report Workflow
 
 Realtek Connect+ follows the shared test report policy from
 `hkt999rtk/rtk_cloud_contracts_doc` PR #24.
 
 - Canonical tracked reports:
   - `docs/TEST_REPORT.md` for CI and PR validation.
-  - `docs/READINESS_TEST_REPORT.md` for CD and deployed readiness evidence.
 - CI generates `.artifacts/report-candidates/docs/TEST_REPORT.md` covering:
   - brand film asset check
   - Go formatting
   - `go test ./...`
   - `go build ./cmd/server`
   - `go run ./cmd/visual-smoke`
-- Legacy website-test CD generates `.artifacts/report-candidates/docs/READINESS_TEST_REPORT.md` covering:
-  - native website-test bundle build
-  - legacy website-test deployment result
-  - public `/healthz`
-  - public homepage verification
-  - deployed video asset verification
-  - stale-copy checks
 - Official LKE deployment readiness evidence is owned by the workspace flow and should record the frontend image reference, workspace LKE provision/deploy result, rollout status, public health/homepage checks, and video asset checks.
-- CI/CD upload report candidates as the `report-candidates` artifact and keep raw logs in workflow logs or separate artifacts.
+- CI uploads report candidates as the `report-candidates` artifact and keeps raw logs in workflow logs or separate artifacts.
 - Drift checks compare committed reports with generated candidates for the selected validation profile.
-- Manual report import is handled by the `Import Report Candidate` workflow. It can update only `docs/TEST_REPORT.md` or `docs/READINESS_TEST_REPORT.md` in a target PR branch or explicit branch after allowlist, heading, redaction, path, and whitespace validation.
+- Manual report import is handled by the `Import Report Candidate` workflow. It can update only `docs/TEST_REPORT.md` in a target PR branch or explicit branch after allowlist, heading, redaction, path, and whitespace validation.
 - Report candidates are deterministic. They intentionally avoid volatile timestamps, local absolute paths, and raw credentials so committed reports can be reviewed and drift-checked reliably.
 
 ## Visual Direction
@@ -436,7 +428,7 @@ CDN-ready behavior:
   - Public GET HTML pages: `Cache-Control: no-store`.
   - `POST /contact`, localized contact POST variants, `/admin/*`, and `/healthz`: `Cache-Control: no-store`.
   - `/robots.txt` and `/sitemap.xml`: `Cache-Control: public, max-age=300`.
-- The CD workflow intentionally does not enable the CDN env vars yet. CDN provider selection, DNS cutover, cache rules, purge strategy, compression, and TLS settings should be completed as a deployment decision.
+- CI intentionally does not enable the CDN env vars. CDN provider selection, DNS cutover, cache rules, purge strategy, compression, and TLS settings should be completed as a deployment decision in the workspace LKE rollout.
 
 Persistence and cache boundaries:
 
@@ -500,7 +492,7 @@ Container deployment notes:
 
 Native artifact compatibility notes:
 
-- `deploy/package.sh <version>` builds `dist/realtek-connect-<version>.tar.gz`, `realtek-connect-<version>.tar.gz.sha256`, and `realtek-connect-<version>.object-manifest.json` for legacy website-test, diagnostics, or non-K8s recovery use.
+- `deploy/package.sh <version>` builds `dist/realtek-connect-<version>.tar.gz`, `realtek-connect-<version>.tar.gz.sha256`, and `realtek-connect-<version>.object-manifest.json` for diagnostics or non-K8s recovery use.
 - Native release artifacts contain the server binary, `content/`, `templates/`, `static/`, `deploy/`, `VERSION`, and release manifest metadata. SQLite runtime DB files are excluded; the only SQLite DB allowed in a release bundle is optional precomputed `data/search.db`.
 - `.github/workflows/release.yml` publishes native bundles to GitHub Releases for tags. LKE runtime image artifacts are produced by the workspace `.github/workflows/lke-image-artifacts.yml` flow.
 - K8s deployment and rollback are documented in `docs/deployment-k8s.md` and `docs/deployment-promotion-rollback.md`; SQLite backup notes remain in `docs/sqlite-backup-linode.md`.

@@ -21,7 +21,7 @@
 - Contracts URL: https://github.com/hkt999rtk/rtk_cloud_contracts_doc/pull/24
 - Contract files referenced: TEST_REPORT.md
 - PR / issue / release: #95
-- Artifact version: N/A - this report validates website source and deployment readiness, not a release artifact version.
+- Artifact version: N/A - this report validates website source readiness, not a release artifact version.
 
 ## Environment
 
@@ -30,8 +30,8 @@
 - OS: Linux runner
 - Architecture: amd64
 - Toolchains: Go toolchain from runner PATH; bash; curl for readiness checks
-- Service dependencies: SQLite runtime for tests; website test host for CD readiness profile when applicable
-- Network profile: repository CI/CD network
+- Service dependencies: SQLite runtime for tests
+- Network profile: repository CI network
 - Credentials source: CI secret
 - Secret handling note: report candidates contain sanitized command names and result states only; raw logs stay in workflow logs or non-report artifacts.
 

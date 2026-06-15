@@ -87,7 +87,7 @@ jobs:
           {
             echo "Built native Realtek Connect+ bundle."
             echo
-            echo "This bundle is for GitHub Releases, diagnostics, legacy website-test validation, or non-K8s recovery use."
+            echo "This bundle is for GitHub Releases, diagnostics, or non-K8s recovery use."
             echo "Official LKE runtime image artifacts are produced from rtk_cloud_workspace via .github/workflows/lke-image-artifacts.yml and exported as LKE_FRONTEND_IMAGE."
           } >> "$GITHUB_STEP_SUMMARY"
 

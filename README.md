@@ -39,9 +39,8 @@ Navigation conventions:
 Tracked validation reports:
 
 - `docs/TEST_REPORT.md`: deterministic CI / PR validation report.
-- `docs/READINESS_TEST_REPORT.md`: deterministic legacy website-test readiness report. Official LKE runtime rollout evidence is produced by the workspace deployment flow.
-- CI/CD generate sanitized candidates under `.artifacts/report-candidates/docs/` and upload them as the `report-candidates` artifact.
-- Use the `Import Report Candidate` workflow to import only `docs/TEST_REPORT.md` or `docs/READINESS_TEST_REPORT.md` from a selected workflow run into a target PR branch or explicit branch after heading, redaction, and path validation.
+- CI generates sanitized candidates under `.artifacts/report-candidates/docs/` and uploads them as the `report-candidates` artifact.
+- Use the `Import Report Candidate` workflow to import only `docs/TEST_REPORT.md` from a selected workflow run into a target PR branch or explicit branch after heading, redaction, and path validation.
 
 ## Run
 
@@ -233,7 +232,7 @@ Kubernetes deployment notes:
 - Mount `/data` from a PVC and set `DATABASE_PATH=/data/connectplus.db`, `ANALYTICS_DATABASE_PATH=/data/analytics.db`, and `SEARCH_DATABASE_PATH=/data/search.db` or an immutable bundled search index path.
 - The container serves HTTP on port `8080` and exposes `/healthz`. TLS termination, public routing, DNS, and certificates are handled by Ingress/Gateway, Linode NodeBalancer, cert-manager, and the selected CDN or reverse proxy layer.
 - The app logs to stdout/stderr; Kubernetes log collection and central forwarding are deployment concerns.
-- Native builds and release bundles remain supported only for local diagnostics, legacy website-test validation, or non-K8s recovery use. They are not the official staging or production rollout path.
+- Native builds and release bundles remain supported only for local diagnostics or non-K8s recovery use. They are not the official staging or production rollout path.
 
 Kubernetes runbooks:
 
@@ -244,5 +243,5 @@ Kubernetes runbooks:
 Legacy/native artifact tools:
 
 - `deploy/package.sh <version>` creates `dist/realtek-connect-<version>.tar.gz`, a checksum, and a manifest. When `OPENAI_API_KEY` is present, the bundle includes `data/search.db` as a precomputed documentation search index.
-- `deploy/check-release.sh`, `deploy/install.sh`, and `deploy/verify.sh` validate or install native bundles for legacy website-test or recovery environments.
+- `deploy/check-release.sh`, `deploy/install.sh`, and `deploy/verify.sh` validate or install native bundles for manual diagnostics or recovery environments.
 - `deploy/upload-linode-artifact.sh <version>` remains available for archiving native bundles to Linode Object Storage, but Object Storage bundles are not the LKE runtime rollout artifact.

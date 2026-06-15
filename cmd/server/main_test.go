@@ -106,25 +106,13 @@ func TestDockerfileUsesPersistentSQLitePaths(t *testing.T) {
 	}
 }
 
-func TestCDWorkflowPackagesDataForServiceUser(t *testing.T) {
-	contents, err := os.ReadFile("../../.github/workflows/cd.yml")
-	if err != nil {
-		t.Fatalf("read cd workflow: %v", err)
-	}
-
-	text := string(contents)
-	for _, expected := range []string{
-		`service_user="$(systemctl show "$service_name" --property=User --value)"`,
-		`service_group="$(systemctl show "$service_name" --property=Group --value)"`,
-		`--owner="$service_user"`,
-		`--group="$service_group"`,
-		`--mode=u+rwX,go+rX`,
-		`cp -R content templates static dist/`,
-		`test -f dist/content/docs/en/docs.yaml`,
-		`tar "${tar_owner_args[@]}" -C dist -czf - bin content templates static data | sudo /usr/local/sbin/deploy-realtek-connect`,
+func TestRepositoryDoesNotDefineHostDeployWorkflows(t *testing.T) {
+	for _, path := range []string{
+		"../../.github/workflows/cd.yml",
+		"../../.github/workflows/deploy-linode.yml",
 	} {
-		if !strings.Contains(text, expected) {
-			t.Fatalf("cd workflow missing %q", expected)
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			t.Fatalf("host deployment workflow should not exist at %s: %v", path, err)
 		}
 	}
 }

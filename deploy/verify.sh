@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Legacy/native website verifier. K8s rollout verification should use the
+# Legacy/native endpoint verifier. K8s rollout verification should use the
 # workspace LKE flow plus public endpoint checks.
 
 base_url="${REALTEK_CONNECT_VERIFY_BASE_URL:-${PUBLIC_BASE_URL:-http://127.0.0.1:8080}}"

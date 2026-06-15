@@ -21,7 +21,6 @@ on:
         type: choice
         options:
           - docs/TEST_REPORT.md
-          - docs/READINESS_TEST_REPORT.md
 
 permissions:
   actions: read

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Validates legacy/native release bundles for website-test or recovery use.
+# Validates legacy/native release bundles for diagnostics or recovery use.
 # It is not the official Kubernetes rollout gate.
 
 target="${1:-}"

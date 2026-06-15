@@ -5,12 +5,12 @@ candidate="${1:-}"
 expected_path="${2:-}"
 
 if [[ -z "$candidate" || -z "$expected_path" ]]; then
-  echo "usage: $0 <candidate-file> <docs/TEST_REPORT.md|docs/READINESS_TEST_REPORT.md>" >&2
+  echo "usage: $0 <candidate-file> <docs/TEST_REPORT.md>" >&2
   exit 2
 fi
 
 case "$expected_path" in
-  docs/TEST_REPORT.md|docs/READINESS_TEST_REPORT.md)
+  docs/TEST_REPORT.md)
     ;;
   *)
     echo "report path is not allowlisted: $expected_path" >&2
