@@ -19,10 +19,10 @@ Realtek Connect+ frontend deploys to LKE through the workspace:
   Linode NodeBalancer, DNS, and cert-manager.
 - The Go app remains HTTP-only on port `8080` and exposes `/healthz`.
 
-Do not deploy staging or production by SSH, `scp`, host-local `systemd`, or a
-developer checkout. Native release bundles may still be built for local
-diagnostics or legacy website-test validation, but they are not the official LKE
-runtime rollout artifact.
+Do not deploy staging or production by SSH, `scp`, host-local `systemd`, a real
+machine, a VM, or a developer checkout. Native release bundles may still be
+built for local diagnostics or non-K8s recovery, but they are not the official
+LKE runtime rollout artifact.
 
 ## Runtime Contract
 
@@ -105,9 +105,10 @@ Frontend deployment evidence should include:
 ## Native Artifact Compatibility
 
 The `deploy/*.sh` scripts and `Release Bundle` workflow are native/legacy
-artifact tools. They are useful for website-test validation, local diagnostics,
-or a non-K8s recovery environment. They must not be documented or used as the
-official staging/production LKE rollout path.
+artifact tools. They are useful for local diagnostics or a non-K8s recovery
+environment. They must not be documented or used as the official
+staging/production LKE rollout path, and no repository workflow should deploy
+them to a real machine or VM.
 
 ## Related Runbooks
 

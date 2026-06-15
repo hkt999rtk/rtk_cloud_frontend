@@ -5,7 +5,7 @@ profile="${1:-}"
 output="${2:-}"
 
 if [[ -z "$profile" || -z "$output" ]]; then
-  echo "usage: $0 <ci|cd> <output-path>" >&2
+  echo "usage: $0 <ci> <output-path>" >&2
   exit 2
 fi
 
@@ -78,7 +78,7 @@ write_common_header() {
 - Contracts URL: https://github.com/hkt999rtk/rtk_cloud_contracts_doc/pull/24
 - Contract files referenced: TEST_REPORT.md
 - PR / issue / release: #95
-- Artifact version: ${REPORT_ARTIFACT_VERSION_NOTE:-N/A - this report validates website source and deployment readiness, not a release artifact version.}
+- Artifact version: ${REPORT_ARTIFACT_VERSION_NOTE:-N/A - this report validates website source readiness, not a release artifact version.}
 
 ## Environment
 
@@ -87,8 +87,8 @@ write_common_header() {
 - OS: ${REPORT_OS:-Linux runner}
 - Architecture: ${REPORT_ARCH:-amd64}
 - Toolchains: Go toolchain from runner PATH; bash; curl for readiness checks
-- Service dependencies: ${REPORT_SERVICE_DEPENDENCIES:-SQLite runtime for tests; website test host for CD readiness profile when applicable}
-- Network profile: ${REPORT_NETWORK_PROFILE:-repository CI/CD network}
+- Service dependencies: ${REPORT_SERVICE_DEPENDENCIES:-SQLite runtime for tests}
+- Network profile: ${REPORT_NETWORK_PROFILE:-repository CI network}
 - Credentials source: CI secret
 - Secret handling note: report candidates contain sanitized command names and result states only; raw logs stay in workflow logs or non-report artifacts.
 
@@ -159,7 +159,7 @@ case "$profile" in
     overall="$(overall_result "$asset" "$gofmt_result" "$tests" "$build" "$visual")"
     REPORT_COMMANDS=$'test "$(wc -c < static/assets/realtek-brand-film.mp4)" -gt 1000000\ngofmt -l $(git ls-files '\''*.go'\'')\ngo test ./...\ngo build ./cmd/server\nif Chrome is available: go run ./cmd/visual-smoke'
     if [[ "$visual" == "SKIP" ]]; then
-      EXTRA_SKIP_ROWS="| Visual smoke | SKIP | Chrome is not available on the selected CI runner; the check is recorded when the browser is available. | frontend | Install Chrome on the runner or keep browser smoke as local/CD evidence. |"
+      EXTRA_SKIP_ROWS="| Visual smoke | SKIP | Chrome is not available on the selected CI runner; the check is recorded when the browser is available. | frontend | Install Chrome on the runner or keep browser smoke as local evidence. |"
     else
       EXTRA_SKIP_ROWS=""
     fi
@@ -197,56 +197,6 @@ case "$profile" in
 
 EOF
       write_tail "docs/TEST_REPORT.md" ".artifacts/raw/ci" ".artifacts/report-candidates/docs"
-    } > "$output"
-    ;;
-  cd)
-    source_video="$(result_or_pass "${REPORT_SOURCE_VIDEO_RESULT:-}")"
-    bundle="$(result_or_pass "${REPORT_BUNDLE_RESULT:-}")"
-    deploy="$(result_or_pass "${REPORT_DEPLOY_RESULT:-}")"
-    health="$(result_or_pass "${REPORT_HEALTH_RESULT:-}")"
-    homepage="$(result_or_pass "${REPORT_HOMEPAGE_RESULT:-}")"
-    deployed_video="$(result_or_pass "${REPORT_DEPLOYED_VIDEO_RESULT:-}")"
-    stale="$(result_or_pass "${REPORT_STALE_COPY_RESULT:-}")"
-    overall="$(overall_result "$source_video" "$bundle" "$deploy" "$health" "$homepage" "$deployed_video" "$stale")"
-    REPORT_ARTIFACT_VERSION_NOTE="N/A - this report validates website source and legacy website-test readiness, not a release artifact version or LKE image."
-    REPORT_SERVICE_DEPENDENCIES="SQLite runtime for tests; legacy website test host for CD readiness profile when applicable"
-    REPORT_COMMANDS=$'test "$(wc -c < static/assets/realtek-brand-film.mp4)" -gt 1000000\nGOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o dist/bin/realtek-connect ./cmd/server\ntar -C dist -czf - bin content templates static data | sudo /usr/local/sbin/deploy-realtek-connect\ncurl -k -fsS --max-time 20 "${PUBLIC_BASE_URL}/healthz"\ncurl -k -fsS --max-time 20 "${PUBLIC_BASE_URL}/"\ncurl -k -fsSI --max-time 20 "${PUBLIC_BASE_URL}/static/assets/realtek-brand-film.mp4"\ngrep -qv "Contact Sales" deployed homepage snapshot'
-    {
-      write_common_header "Realtek Connect+ Readiness Test Report" "Legacy website-test readiness evidence" "$overall" "Legacy CD validation for native bundle build, website-test deployment, public health check, homepage verification, video asset verification, and stale-copy checks. Official LKE rollout evidence is produced by the workspace deployment flow."
-      cat <<EOF
-| Category | PASS | FAIL | SKIP | BLOCKED | N/A |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Formatting / static checks | $(count_status PASS "$source_video") | $(count_status FAIL "$source_video") | $(count_status SKIP "$source_video") | $(count_status BLOCKED "$source_video") | 0 |
-| Unit tests | 0 | 0 | 0 | 0 | 1 |
-| Integration tests | 0 | 0 | 0 | 0 | 1 |
-| Contract validation | 0 | 0 | 0 | 0 | 1 |
-| Build / packaging | $(count_status PASS "$bundle") | $(count_status FAIL "$bundle") | $(count_status SKIP "$bundle") | $(count_status BLOCKED "$bundle") | 0 |
-| Coverage / metrics | 0 | 0 | 0 | 0 | 1 |
-| Release / readiness / load / lab | $(count_status PASS "$deploy" "$health" "$homepage" "$deployed_video" "$stale") | $(count_status FAIL "$deploy" "$health" "$homepage" "$deployed_video" "$stale") | $(count_status SKIP "$deploy" "$health" "$homepage" "$deployed_video" "$stale") | $(count_status BLOCKED "$deploy" "$health" "$homepage" "$deployed_video" "$stale") | 0 |
-
-## Detailed Results
-
-| ID | Check | Result | Evidence | Duration | Notes |
-| --- | --- | --- | --- | --- | --- |
-| CD-001 | Source brand film asset exists and is larger than 1 MB | ${source_video} | static/assets/realtek-brand-film.mp4 size check | N/A | Prevents packaging a deployment without the local MP4. |
-| CD-002 | Legacy website-test bundle builds | ${bundle} | dist/bin/realtek-connect plus content/templates/static/data bundle | N/A | Produces the Linux amd64 native bundle for website-test validation. |
-| CD-003 | Legacy website-test deploy succeeds | ${deploy} | /usr/local/sbin/deploy-realtek-connect | N/A | Deploys only to the configured legacy website-test host; this is not the official LKE rollout path. |
-| CD-004 | Public health check returns ok | ${health} | ${PUBLIC_BASE_URL:-https://webtest.mgmeet.io}/healthz | N/A | Verifies the deployed service is responding. |
-| CD-005 | Public homepage contains expected product copy | ${homepage} | ${PUBLIC_BASE_URL:-https://webtest.mgmeet.io}/ | N/A | Confirms deployed homepage contains Realtek Connect and Contact Us. |
-| CD-006 | Public video asset is served as MP4 and larger than 1 MB | ${deployed_video} | ${PUBLIC_BASE_URL:-https://webtest.mgmeet.io}/static/assets/realtek-brand-film.mp4 | N/A | Confirms deployed local video asset is reachable. |
-| CD-007 | Stale public copy is absent | ${stale} | deployed homepage snapshot | N/A | Guards against stale Contact Sales copy. |
-
-## Correctness / Behavior Gates
-
-| Behavior group | Required evidence | Representative test or command | Result | Notes |
-| --- | --- | --- | --- | --- |
-| Native bundle integrity | Linux amd64 binary and required runtime directories exist | Build legacy website-test bundle step | ${bundle} | Verifies server, content, templates, static assets, and writable data directory are packaged for legacy validation. |
-| Public website-test readiness | Health and homepage checks pass | curl healthz and homepage | $(overall_result "$health" "$homepage") | Confirms the legacy website-test URL serves the expected site. |
-| Local video asset readiness | Source and deployed video checks pass | source size check and deployed HEAD request | $(overall_result "$source_video" "$deployed_video") | Ensures the brand film remains first-party local media. |
-| Stale-copy prevention | Homepage no longer contains legacy CTA text | grep stale-copy check | ${stale} | Keeps Contact Us wording deployed. |
-
-EOF
-      write_tail "docs/READINESS_TEST_REPORT.md" ".artifacts/raw/cd" ".artifacts/report-candidates/docs"
     } > "$output"
     ;;
   *)
