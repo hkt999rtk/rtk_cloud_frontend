@@ -20,8 +20,8 @@ github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e h1:ijClszYn+mADRFY17k
 github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e/go.mod h1:boTsfXsheKC2y+lKOCMpSfarhxDeIzfZG1jqGcPl3cA=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/hkt999rtk/rtk_cloud_logger v0.0.0-20260601023548-aa4fcf007af9 h1:6gW6Dj5GeMeQaoiilw+jJ1EkrmL+WDWrA2Izey4SEww=
-github.com/hkt999rtk/rtk_cloud_logger v0.0.0-20260601023548-aa4fcf007af9/go.mod h1:5EqPMyEMJd0rkF3fJWWPxmoZO7CTTxh95vQ/82iZMfU=
+github.com/hkt999rtk/rtk_cloud_logger v0.0.0-20260711233953-e13e79782aa8 h1:Flh9TgLhaVtzh7JmTMwOllSy7tEajiBGV9rROvRe9bE=
+github.com/hkt999rtk/rtk_cloud_logger v0.0.0-20260711233953-e13e79782aa8/go.mod h1:5EqPMyEMJd0rkF3fJWWPxmoZO7CTTxh95vQ/82iZMfU=
 github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80 h1:6Yzfa6GP0rIo/kULo2bwGEkFvCePZ3qHDDTC3/J9Swo=
 github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80/go.mod h1:imJHygn/1yfhB7XSJJKlFZKl/J+dCPAknuiaGOshXAs=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
