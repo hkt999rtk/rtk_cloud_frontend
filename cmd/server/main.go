@@ -196,8 +196,9 @@ func serveWithGracefulShutdown(ctx context.Context, server httpServerLifecycle, 
 func newServerLogger() (*zap.Logger, error) {
 	logger, err := cloudlogger.New(cloudlogger.Config{
 		Service: "realtek-connect",
-		Env:     envFirst("REALTEK_CONNECT_ENV", "APP_ENV", "ENVIRONMENT"),
+		Env:     envOrDefault("REALTEK_CONNECT_ENV", envOrDefault("APP_ENV", envOrDefault("ENVIRONMENT", "unknown"))),
 		Version: serviceVersion(),
+		Unit:    "realtek-connect-server.service",
 		Level:   envOrDefault("LOG_LEVEL", "info"),
 	})
 	if err != nil {
