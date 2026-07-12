@@ -6,7 +6,7 @@ toolchain go1.24.4
 
 require (
 	github.com/chromedp/chromedp v0.14.2
-	github.com/hkt999rtk/rtk_cloud_logger v0.0.0-20260601023548-aa4fcf007af9
+	github.com/hkt999rtk/rtk_cloud_logger v0.0.0-20260711233953-e13e79782aa8
 	github.com/yuin/goldmark v1.7.17
 	go.uber.org/zap v1.27.0
 	gopkg.in/yaml.v3 v3.0.1
