@@ -35,6 +35,11 @@ jobs:
       - name: Check Go toolchain
         run: go version
 
+      - name: Check SDK manual source
+        run: |
+          python3 -m pip install --user PyYAML
+          python3 -m unittest discover -s tools/tests -p 'test_build_sdk_docs.py'
+
       - name: Check Go formatting
         id: gofmt
         shell: bash

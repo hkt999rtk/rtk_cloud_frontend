@@ -153,6 +153,15 @@ func main() {
 			expectedTitle:    "Getting Started | Realtek Connect+",
 			expectedBodyText: "Set up your first device",
 		},
+		{
+			name:             "sdk-manual-en",
+			path:             "/manual/sdk/overview",
+			headingSelector:  ".feature-detail h1",
+			imageSelector:    ".manual-content img",
+			expectedHeading:  "SDK overview",
+			expectedTitle:    "SDK overview | Realtek Connect+",
+			expectedBodyText: "The RTK Cloud SDK provides",
+		},
 	}
 
 	fmt.Printf("Visual smoke checks against %s\n", targetURL)

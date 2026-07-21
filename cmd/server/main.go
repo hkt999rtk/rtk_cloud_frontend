@@ -131,6 +131,7 @@ func run(ctx context.Context, logger *zap.Logger) error {
 		EnableCDNCacheHeaders:   truthyEnv("ENABLE_CDN_CACHE_HEADERS"),
 		SearchEnabled:           searchEnabled,
 		SearchService:           searchService,
+		SDKDocsDir:              envOrDefault("SDK_DOCS_DIR", filepath.Join("dist", "sdk-docs", "current")),
 	})
 	if err != nil {
 		logger.Error(

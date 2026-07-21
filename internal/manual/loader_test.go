@@ -70,6 +70,28 @@ func TestRenderMarkdownWithPrefixLocalizesPublicLinks(t *testing.T) {
 	}
 }
 
+func TestLoaderReadsNestedSDKCollection(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "sdk", "packages"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	index := "title: SDK Manual\ndescription: SDK guidance.\nsections:\n  - slug: packages/native\n    title: Native\n    summary: Native SDK.\n"
+	if err := os.WriteFile(filepath.Join(root, "sdk", "index.en.yaml"), []byte(index), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	writeManualPage(t, filepath.Join(root, "sdk", "packages"), "en", "native", "Native", "Native SDK", "Use native APIs.")
+
+	loader := NewLoader(root)
+	collection, ok := loader.CollectionIndex(content.DefaultLocale(), "sdk")
+	if !ok || len(collection.Sections) != 1 || collection.Sections[0].Slug != "sdk/packages/native" {
+		t.Fatalf("unexpected SDK collection: %#v, ok=%v", collection, ok)
+	}
+	page, ok := loader.Page(content.DefaultLocale(), "sdk/packages/native")
+	if !ok || page.Title != "Native" {
+		t.Fatalf("unexpected SDK page: %#v, ok=%v", page, ok)
+	}
+}
+
 func TestReloadKeepsLoadedSectionsAndPages(t *testing.T) {
 	root := t.TempDir()
 	writeManualIndex(t, root, "en", "User Manual", "Manual description")

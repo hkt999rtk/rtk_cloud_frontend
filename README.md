@@ -121,6 +121,9 @@ CDN readiness:
 - `GET /docs/{slug}`
 - `GET /manual`
 - `GET /manual/{slug}`
+- `GET /manual/sdk` and nested SDK manual chapters
+- `GET /manual/sdk/reference/{package}/`
+- `GET /manual/sdk/downloads/{file}`
 - `GET /features`
 - `GET /features/{slug}`
 - `GET /contact`
@@ -137,6 +140,12 @@ CDN readiness:
 
 New public routes should be documented here, in `docs/SPEC.md`, and in
 `docs/openapi.yaml` when they expose an API or form contract.
+
+The SDK manual is authored once in `content/manual/sdk/`. Build its static HTML,
+generated API indexes, and PDF downloads with `tools/build_sdk_docs.py`; see
+[`docs/SDK_DOCUMENTATION.md`](docs/SDK_DOCUMENTATION.md). Set `SDK_DOCS_DIR` only
+when generated documentation is installed outside the default
+`dist/sdk-docs/current` path.
 
 ## Multilingual Public Site
 

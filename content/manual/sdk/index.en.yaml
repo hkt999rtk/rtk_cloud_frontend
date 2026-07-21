@@ -1,0 +1,51 @@
+title: "RTK Cloud SDK User Manual"
+description: "Installation, security, integration, API, media, and troubleshooting guidance for every RTK Cloud SDK package."
+sections:
+  - slug: overview
+    title: "SDK overview"
+    summary: "Choose the right package and understand support boundaries."
+  - slug: getting-started
+    title: "Getting started"
+    summary: "Install an SDK, configure a client, and complete a first request."
+  - slug: authentication-security
+    title: "Authentication and security"
+    summary: "Handle bearer tokens, PKI, TLS, keys, and sensitive media safely."
+  - slug: lifecycle-errors
+    title: "Lifecycle and errors"
+    summary: "Apply timeout, retry, cancellation, callback, and shutdown rules."
+  - slug: capability-workflows
+    title: "Capability workflows"
+    summary: "Integrate provisioning, devices, telemetry, OTA, commands, and signaling."
+  - slug: video-workflows
+    title: "Stored video workflows"
+    summary: "Upload encrypted clips and implement Android and iOS browsing and playback."
+  - slug: packages/native
+    package: native
+    title: "Native C and C++ SDK"
+    summary: "Use the stable C ABI, thin C++ wrapper, transports, and streaming uploads."
+  - slug: packages/android
+    package: android
+    title: "Android Kotlin SDK"
+    summary: "Use Kotlin APIs, coroutines, Media3 playback, and secure key providers."
+  - slug: packages/ios
+    package: ios
+    title: "iOS Swift SDK"
+    summary: "Use Swift APIs, async operations, AVPlayer, Keychain, and Secure Enclave boundaries."
+  - slug: packages/javascript
+    package: javascript
+    title: "JavaScript and TypeScript SDK"
+    summary: "Integrate the typed ESM package in browser and Node.js applications."
+  - slug: packages/go
+    package: go
+    title: "Go SDK"
+    summary: "Use the pure Go client for devices, tools, and automation."
+  - slug: packages/freertos-pro2
+    package: freertos-pro2
+    title: "FreeRTOS and Pro2 SDK"
+    summary: "Integrate board adapters, device transport, and WebRTC answerer boundaries."
+  - slug: sample-applications
+    title: "Sample applications"
+    summary: "Build and use the Android, iOS, Web, Linux, and Pro2 reference samples."
+  - slug: troubleshooting
+    title: "Troubleshooting and compatibility"
+    summary: "Diagnose common integration problems and identify deprecated behavior."

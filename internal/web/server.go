@@ -41,6 +41,7 @@ type Config struct {
 	TemplatesDir            string
 	StaticDir               string
 	ContentDir              string
+	SDKDocsDir              string
 	LeadStore               LeadStore
 	AnalyticsStore          *analytics.Repository
 	AdminToken              string
@@ -61,6 +62,7 @@ type Server struct {
 	staticDir               string
 	contentDir              string
 	contentRoot             string
+	sdkDocsDir              string
 	leadStore               LeadStore
 	analyticsStore          *analytics.Repository
 	manualLoader            *manual.Loader
@@ -176,6 +178,9 @@ func NewServer(cfg Config) (*Server, error) {
 	if cfg.ContentDir == "" {
 		cfg.ContentDir = "content/docs"
 	}
+	if cfg.SDKDocsDir == "" {
+		cfg.SDKDocsDir = filepath.Join("dist", "sdk-docs", "current")
+	}
 	contentRoot := filepath.Dir(cfg.ContentDir)
 	docsContent, err := docs.NewContentSource(cfg.ContentDir).Load()
 	if err != nil {
@@ -191,6 +196,7 @@ func NewServer(cfg Config) (*Server, error) {
 		staticDir:               cfg.StaticDir,
 		contentDir:              cfg.ContentDir,
 		contentRoot:             contentRoot,
+		sdkDocsDir:              cfg.SDKDocsDir,
 		leadStore:               cfg.LeadStore,
 		analyticsStore:          cfg.AnalyticsStore,
 		manualLoader:            manualLoader,
@@ -210,7 +216,10 @@ func NewServer(cfg Config) (*Server, error) {
 
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
+	mux.Handle("/manual/sdk/reference/", http.StripPrefix("/manual/sdk/reference/", s.sdkDocsHandler("html/reference")))
+	mux.Handle("/manual/sdk/downloads/", http.StripPrefix("/manual/sdk/downloads/", s.sdkDocsHandler("pdf")))
 	mux.Handle("/static/", http.StripPrefix("/static/", s.staticHandler()))
+	mux.Handle("/content-assets/manual/sdk/", http.StripPrefix("/content-assets/manual/sdk/", http.FileServer(http.Dir(filepath.Join(s.contentRoot, "manual", "sdk", "assets")))))
 	mux.Handle("/content-assets/", http.StripPrefix("/content-assets/", s.contentAssetsHandler()))
 	mux.HandleFunc("/robots.txt", s.handleRobotsTxt)
 	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
@@ -224,6 +233,27 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("/api/search", s.handleSearchAPI)
 	mux.HandleFunc("/", s.handlePublic)
 	return securityHeaders(s.searchIndexingHeaders(s.cacheHeaders(mux)))
+}
+
+func (s *Server) sdkDocsHandler(relative string) http.Handler {
+	root := filepath.Join(s.sdkDocsDir, filepath.FromSlash(relative))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cleanPath := path.Clean("/" + strings.TrimLeft(r.URL.Path, "/"))
+		filePath := filepath.Join(root, filepath.FromSlash(strings.TrimPrefix(cleanPath, "/")))
+		info, err := os.Stat(filePath)
+		if err == nil && info.IsDir() {
+			_, err = os.Stat(filepath.Join(filePath, "index.html"))
+		}
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		if strings.HasSuffix(strings.ToLower(r.URL.Path), ".pdf") {
+			w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%q", path.Base(r.URL.Path)))
+			w.Header().Set("Cache-Control", "public, max-age=3600")
+		}
+		http.FileServer(http.Dir(root)).ServeHTTP(w, r)
+	})
 }
 
 func (s *Server) staticHandler() http.Handler {
@@ -734,6 +764,12 @@ func (s *Server) handleManualPage(w http.ResponseWriter, r *http.Request, locale
 		http.Redirect(w, r, content.PathForLocale(locale, "/manual"), http.StatusSeeOther)
 		return
 	}
+	if index, ok := s.manualLoader.CollectionIndex(locale, slug); ok {
+		data := s.basePageData(r, locale, publicPath, index.Title+" | Realtek Connect+", index.Description)
+		data.ManualIndex = index
+		s.render(w, http.StatusOK, "manual_index.html", data)
+		return
+	}
 
 	page, ok := s.manualPageFor(locale, slug)
 	if !ok {
@@ -742,6 +778,15 @@ func (s *Server) handleManualPage(w http.ResponseWriter, r *http.Request, locale
 	}
 
 	index, _ := s.manualIndexFor(locale)
+	if separator := strings.LastIndex(slug, "/"); separator > 0 {
+		if collectionIndex, found := s.manualLoader.CollectionIndex(locale, slug[:separator]); found {
+			index = collectionIndex
+		} else if first := strings.Index(slug, "/"); first > 0 {
+			if collectionIndex, found := s.manualLoader.CollectionIndex(locale, slug[:first]); found {
+				index = collectionIndex
+			}
+		}
+	}
 	data := s.basePageData(r, locale, publicPath, page.Title+" | Realtek Connect+", page.Description)
 	data.ManualIndex = index
 	data.ManualPage = page
