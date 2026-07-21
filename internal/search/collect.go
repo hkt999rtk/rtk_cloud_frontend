@@ -93,6 +93,28 @@ func CollectWebsiteDocuments(cfg CollectionConfig) ([]Document, error) {
 				}
 			}
 		}
+		if index, ok := loader.CollectionIndex(locale, "sdk"); ok {
+			documents = append(documents, Document{
+				ID:         fmt.Sprintf("manual-sdk-index:%s", locale.Code),
+				Locale:     locale.Code,
+				SourceType: "manual",
+				Title:      index.Title,
+				URL:        content.PathForLocale(locale, "/manual/sdk"),
+				Body:       manualIndexBody(index),
+			})
+			for _, section := range index.Sections {
+				if page, ok := loader.Page(locale, section.Slug); ok {
+					documents = append(documents, Document{
+						ID:         fmt.Sprintf("manual:%s:%s", section.Slug, locale.Code),
+						Locale:     locale.Code,
+						SourceType: "manual",
+						Title:      page.Title,
+						URL:        content.PathForLocale(locale, "/manual/"+section.Slug),
+						Body:       page.Description + "\n" + htmlToText(string(page.BodyHTML)),
+					})
+				}
+			}
+		}
 	}
 	for _, rel := range append([]string{"README.md"}, markdownFiles(filepath.Join(repoRoot, "docs"))...) {
 		path := filepath.Join(repoRoot, rel)

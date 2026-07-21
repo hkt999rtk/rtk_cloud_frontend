@@ -226,6 +226,21 @@ func publicSitemapPaths() []string {
 		"/manual/deployment-notes",
 		"/manual/reference",
 		"/manual/sdk-samples",
+		"/manual/sdk",
+		"/manual/sdk/overview",
+		"/manual/sdk/getting-started",
+		"/manual/sdk/authentication-security",
+		"/manual/sdk/lifecycle-errors",
+		"/manual/sdk/capability-workflows",
+		"/manual/sdk/video-workflows",
+		"/manual/sdk/packages/native",
+		"/manual/sdk/packages/android",
+		"/manual/sdk/packages/ios",
+		"/manual/sdk/packages/javascript",
+		"/manual/sdk/packages/go",
+		"/manual/sdk/packages/freertos-pro2",
+		"/manual/sdk/sample-applications",
+		"/manual/sdk/troubleshooting",
 	}
 	for _, section := range catalog.Docs {
 		basePaths = append(basePaths, "/docs/"+section.Slug)

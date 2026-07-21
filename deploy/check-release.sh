@@ -36,6 +36,9 @@ fail() {
 [[ -x "$release_dir/deploy/install.sh" ]] || fail "missing executable deploy/install.sh"
 [[ -x "$release_dir/deploy/verify.sh" ]] || fail "missing executable deploy/verify.sh"
 [[ -d "$release_dir/data" ]] || fail "missing data/"
+[[ -f "$release_dir/dist/sdk-docs/current/html/index.html" ]] || fail "missing SDK manual HTML"
+[[ -f "$release_dir/dist/sdk-docs/current/pdf/rtk-cloud-sdk-user-manual.pdf" ]] || fail "missing SDK manual PDF"
+[[ -f "$release_dir/dist/sdk-docs/current/manifest.json" ]] || fail "missing SDK documentation manifest"
 
 while IFS= read -r sqlite_file; do
   rel="${sqlite_file#"$release_dir"/}"

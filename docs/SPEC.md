@@ -23,7 +23,7 @@ Implemented today:
 - Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
 - Feature overview and detail pages for Provision, OTA, Fleet Management, Smart Home Experience, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured end-user smart-home workflow story, App SDK reference sample application coverage, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
 - Public authorization wording is intentionally bounded: human product roles and permission assignments belong to the account-side product authorization contract, service bearer scopes remain integration credentials, and this marketing site does not claim to implement or expose the product ACL system.
-- File-backed manual routes for customer-facing guides, including `/manual/sdk-samples` for Android, iOS, WebApp, Linux simulator, and PRO2 device sample evaluation paths.
+- File-backed manual routes for customer-facing guides, including the single-source `/manual/sdk` handbook, generated API references, PDF downloads, and sample evaluation paths.
 - Locale-aware public site support for English, Traditional Chinese, and Simplified Chinese. English keeps the existing unprefixed URL structure; Traditional Chinese uses `/zh-tw/...`; Simplified Chinese uses `/zh-cn/...`.
 - Language switcher in the shared header that points to the same public page in each supported locale.
 - Localized public page metadata with canonical URLs, `hreflang` alternates, and localized sitemap entries.
@@ -43,6 +43,8 @@ Current routes:
 - `GET /docs/{slug}`
 - `GET /manual`
 - `GET /manual/{slug}`
+- `GET /manual/sdk/reference/{package}/`
+- `GET /manual/sdk/downloads/{file}`
 - `GET /features`
 - `GET /features/{slug}`
 - `GET /contact`
@@ -320,7 +322,7 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 | Matter / Ecosystem Integrations | Website Content Implemented | `/features/integrations` | The integrations page covers Matter Fabric positioning, voice assistants, MQTT over TLS, REST APIs, webhooks, and a structured integration-path comparison. This is public website content only: Matter, Alexa, and Google Assistant remain roadmap service capabilities per `SMART_HOME_ECOSYSTEM.md`; push alerts are integration-ready; scenes, schedules, and household sharing are not generally available platform features. |
 | Developer Docs Portal | Content Partial | `/docs`, `/docs/product-overview`, `/docs/development`, `/docs/deployment`, `/docs/release-notes` | The portal structure exists and is navigable, but follow-on work can deepen setup guides, architecture diagrams, and operational runbooks. |
 | APIs | Content Partial | `/docs/apis`, `/features/integrations` | API positioning exists and now separates product authorization roles from service bearer scopes. Website v1 still lacks reference-grade endpoint coverage, finalized auth flows, webhook payload examples, and error-model detail. |
-| SDK Reference | Content Partial | `/docs/sdks`, `/features/app-sdk`, `/manual/sdk-samples` | The docs, feature, and manual surfaces now include a sample matrix covering Android Home Automation, iOS Home Automation, WebApp Ops Lab, Linux simulator, and PRO2 camera device demo. Follow-on depth can add versioned install guides and language-specific code walkthroughs. |
+| SDK Reference | Implemented | `/manual/sdk`, `/manual/sdk/reference/{package}/`, `/manual/sdk/downloads/` | One canonical English manual covers Native, Android, iOS, JavaScript/TypeScript, Go, and FreeRTOS/Pro2. The reproducible generator emits versioned HTML, source-derived API symbol indexes, a combined PDF, package PDFs, checksums, and a source/version manifest. |
 | CLI | Content Partial | `/docs/cli` | The CLI section exists as part of the docs portal, but website v1 still needs command catalogs, auth/session examples, and operator workflow walkthroughs. |
 | SEO / Launch Readiness | Content Partial | Shared layout metadata, `/robots.txt`, `/sitemap.xml`, `go run ./cmd/visual-smoke` | Metadata, sitemap, robots, CI, deployment packaging, and desktop/mobile visual smoke checks for English, Traditional Chinese, and Simplified Chinese public pages now exist; remaining work is broader launch polish such as expanded product visuals plus final parity and documentation close-out. |
 | Real IoT Cloud Operations | Out of Scope for website v1 | Public marketing and docs copy only | The public website will describe platform capabilities, but it will not implement real device provisioning, OTA delivery, user auth, telemetry ingestion, or a production device-operations control plane in v1. |
@@ -340,7 +342,9 @@ Routes:
 - `GET /docs`: developer/documentation portal landing page.
 - `GET /docs/{slug}`: developer/documentation section detail pages.
 - `GET /manual`: file-backed customer manual landing page.
-- `GET /manual/{slug}`: file-backed customer manual detail pages, including `/manual/sdk-samples`.
+- `GET /manual/{slug}`: file-backed customer manual detail pages, including nested SDK chapters.
+- `GET /manual/sdk/reference/{package}/`: generated package API symbol reference.
+- `GET /manual/sdk/downloads/{file}`: generated complete and per-package PDF manuals.
 - `GET /features`: feature overview.
 - `GET /features/{slug}`: feature detail pages.
 - `GET /contact`: contact / early access registration form.

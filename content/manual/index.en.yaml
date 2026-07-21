@@ -13,3 +13,6 @@ sections:
   - slug: sdk-samples
     title: "SDK Sample Applications"
     summary: "Use app-side and device-side samples to validate Realtek Connect+ SDK flows."
+  - slug: sdk
+    title: "SDK User Manual"
+    summary: "Install and integrate every RTK Cloud SDK package with generated API references and PDF downloads."

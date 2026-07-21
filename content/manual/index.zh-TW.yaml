@@ -13,3 +13,6 @@ sections:
   - slug: sdk-samples
     title: "SDK 範例應用"
     summary: "使用 App 端與裝置端範例驗證 Realtek Connect+ SDK 流程。"
+  - slug: sdk
+    title: "SDK 使用手冊"
+    summary: "安裝並整合 RTK Cloud SDK 套件；目前顯示英文手冊、API 參考與 PDF 下載。"

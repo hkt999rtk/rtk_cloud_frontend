@@ -18,11 +18,41 @@ esac
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 dist_dir="$repo_root/dist"
+sdk_repo="${SDK_REPO:-$repo_root/../rtk_cloud_client}"
+sdk_docs_version="${SDK_DOCS_VERSION:-$version}"
+sdk_docs_current="$dist_dir/sdk-docs/current"
+sdk_docs_ready="false"
 release_name="realtek-connect-$version"
 release_dir="$dist_dir/$release_name"
 bundle="$dist_dir/$release_name.tar.gz"
 checksum="$bundle.sha256"
 object_manifest="$dist_dir/$release_name.object-manifest.json"
+
+if [[ -d "$sdk_docs_current/html" && -d "$sdk_docs_current/pdf" && -f "$sdk_docs_current/manifest.json" ]]; then
+  if python3 - "$sdk_docs_current/manifest.json" "$sdk_docs_version" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+manifest = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+raise SystemExit(0 if manifest.get("sdk_version") == sys.argv[2] else 1)
+PY
+  then
+    sdk_docs_ready="true"
+  fi
+fi
+
+if [[ "$sdk_docs_ready" != "true" ]]; then
+  [[ -d "$sdk_repo/.git" ]] || {
+    echo "SDK documentation is not built and SDK_REPO is unavailable: $sdk_repo" >&2
+    exit 1
+  }
+  python3 "$repo_root/tools/build_sdk_docs.py" build \
+    --source "$repo_root/content/manual/sdk" \
+    --sdk-repo "$sdk_repo" \
+    --version "$sdk_docs_version" \
+    --output "$dist_dir/sdk-docs"
+fi
 
 rm -rf "$release_dir" "$bundle" "$checksum" "$object_manifest"
 mkdir -p "$release_dir/bin" "$release_dir/data"
@@ -34,6 +64,8 @@ cp -R "$repo_root/content" "$release_dir/"
 cp -R "$repo_root/templates" "$release_dir/"
 cp -R "$repo_root/static" "$release_dir/"
 cp -R "$repo_root/deploy" "$release_dir/"
+mkdir -p "$release_dir/dist"
+cp -R "$dist_dir/sdk-docs" "$release_dir/dist/"
 chmod 0755 "$release_dir/bin/realtek-connect" "$release_dir/deploy/"*.sh
 chmod 0775 "$release_dir/data"
 printf '%s\n' "$version" > "$release_dir/VERSION"
@@ -63,7 +95,7 @@ import sys
 from pathlib import Path
 
 out, version, source_commit, created_at, binary_sha, search_index_included, search_index_sha = sys.argv[1:]
-includes = ["bin/realtek-connect", "content/", "templates/", "static/", "deploy/", "VERSION"]
+includes = ["bin/realtek-connect", "content/", "templates/", "static/", "deploy/", "dist/sdk-docs/", "VERSION"]
 search_index = {
     "included": search_index_included == "true",
     "path": "data/search.db" if search_index_included == "true" else "",

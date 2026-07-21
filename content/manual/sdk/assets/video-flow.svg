@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="540" viewBox="0 0 1200 540" role="img" aria-labelledby="title desc">
+  <title id="title">Stored video upload, browsing, and playback flow</title>
+  <desc id="desc">A device authorizes and uploads encrypted video, while a mobile application lists clips and requests a short-lived playback session.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0 L12 6 L0 12 z" fill="#0068b5"/></marker>
+    <style>.title{font:700 32px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#172033}.head{font:700 22px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#172033}.text{font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#465064}.box{fill:#f4f8fc;stroke:#9cb6ce;stroke-width:2}.flow{stroke:#0068b5;stroke-width:4;fill:none;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1200" height="540" rx="24" fill="#fff"/>
+  <text class="title" x="50" y="58">Stored video: two secure data paths</text>
+  <g transform="translate(50 105)"><rect class="box" width="260" height="115" rx="18"/><text class="head" x="22" y="40">Device SDK</text><text class="text" x="22" y="72">Encrypt and hash clip</text><text class="text" x="22" y="96">Stream bounded upload</text></g>
+  <g transform="translate(470 105)"><rect class="box" width="260" height="115" rx="18"/><text class="head" x="22" y="40">Video Cloud</text><text class="text" x="22" y="72">Authorize and verify</text><text class="text" x="22" y="96">Publish ready metadata</text></g>
+  <g transform="translate(890 105)"><rect class="box" width="260" height="115" rx="18"/><text class="head" x="22" y="40">Object storage</text><text class="text" x="22" y="72">Encrypted media only</text><text class="text" x="22" y="96">Signed HTTPS headers</text></g>
+  <path class="flow" d="M310 145 L470 145"/><text class="text" x="337" y="132">authorize</text>
+  <path class="flow" d="M470 190 L310 190"/><text class="text" x="342" y="212">presigned PUT</text>
+  <path class="flow" d="M310 175 C540 270 710 250 890 175"/><text class="text" x="560" y="255">ciphertext stream</text>
+  <g transform="translate(50 355)"><rect class="box" width="260" height="115" rx="18"/><text class="head" x="22" y="40">Android / iOS app</text><text class="text" x="22" y="72">Browse typed clip pages</text><text class="text" x="22" y="96">Own player lifecycle</text></g>
+  <g transform="translate(470 355)"><rect class="box" width="260" height="115" rx="18"/><text class="head" x="22" y="40">Playback session</text><text class="text" x="22" y="72">Validate wrapped keys</text><text class="text" x="22" y="96">Issue short-lived URL</text></g>
+  <g transform="translate(890 355)"><rect class="box" width="260" height="115" rx="18"/><text class="head" x="22" y="40">Media player</text><text class="text" x="22" y="72">HTTP range playback</text><text class="text" x="22" y="96">Refresh after expiry</text></g>
+  <path class="flow" d="M310 412 L470 412"/><text class="text" x="335" y="400">wrapped keys</text>
+  <path class="flow" d="M730 412 L890 412"/><text class="text" x="758" y="400">playback URL</text>
+</svg>

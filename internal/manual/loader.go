@@ -19,9 +19,10 @@ import (
 type Loader struct {
 	root string
 
-	mu      sync.RWMutex
-	indexes map[string]ManualIndex
-	pages   map[string]map[string]ManualPage
+	mu                sync.RWMutex
+	indexes           map[string]ManualIndex
+	collectionIndexes map[string]map[string]ManualIndex
+	pages             map[string]map[string]ManualPage
 }
 
 type indexFile struct {
@@ -52,11 +53,13 @@ func (l *Loader) Reload() error {
 	}
 
 	state := struct {
-		indexes map[string]ManualIndex
-		pages   map[string]map[string]ManualPage
+		indexes           map[string]ManualIndex
+		collectionIndexes map[string]map[string]ManualIndex
+		pages             map[string]map[string]ManualPage
 	}{
-		indexes: map[string]ManualIndex{},
-		pages:   map[string]map[string]ManualPage{},
+		indexes:           map[string]ManualIndex{},
+		collectionIndexes: map[string]map[string]ManualIndex{},
+		pages:             map[string]map[string]ManualPage{},
 	}
 
 	errs := make([]error, 0, 4)
@@ -65,6 +68,11 @@ func (l *Loader) Reload() error {
 	errs = append(errs, indexErrs...)
 	for locale, index := range indexes {
 		state.indexes[locale] = index
+	}
+	collectionIndexes, collectionErrs := l.loadCollectionIndexes()
+	errs = append(errs, collectionErrs...)
+	for collection, localized := range collectionIndexes {
+		state.collectionIndexes[collection] = localized
 	}
 
 	pages, pageErrs := l.loadPages()
@@ -94,13 +102,46 @@ func (l *Loader) Reload() error {
 			}
 		}
 	}
+	for _, localized := range state.collectionIndexes {
+		if enIndex, ok := localized["en"]; ok {
+			for _, locale := range []string{"zh-TW", "zh-CN"} {
+				if _, exists := localized[locale]; !exists {
+					localized[locale] = enIndex
+				}
+			}
+		}
+	}
 
 	l.mu.Lock()
 	l.indexes = state.indexes
+	l.collectionIndexes = state.collectionIndexes
 	l.pages = state.pages
 	l.mu.Unlock()
 
 	return joinErrors(errs)
+}
+
+func (l *Loader) CollectionIndex(locale content.Locale, collection string) (ManualIndex, bool) {
+	if l == nil {
+		return ManualIndex{}, false
+	}
+	collection = strings.Trim(strings.TrimSpace(collection), "/")
+	if collection == "" {
+		return l.Index(locale)
+	}
+
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	localized, ok := l.collectionIndexes[collection]
+	if !ok {
+		return ManualIndex{}, false
+	}
+	for _, code := range localeFallbacks(locale.Code) {
+		if index, ok := localized[code]; ok {
+			return index, true
+		}
+	}
+	return ManualIndex{}, false
 }
 
 func (l *Loader) Index(locale content.Locale) (ManualIndex, bool) {
@@ -154,6 +195,10 @@ func (l *Loader) loadIndexes() (map[string]ManualIndex, []error) {
 
 func (l *Loader) loadIndex(locale string) (ManualIndex, error) {
 	path := filepath.Join(l.root, "index."+locale+".yaml")
+	return loadIndexFile(path, locale, "")
+}
+
+func loadIndexFile(path, locale, collection string) (ManualIndex, error) {
 	body, err := os.ReadFile(path)
 	if err != nil {
 		return ManualIndex{}, err
@@ -178,6 +223,9 @@ func (l *Loader) loadIndex(locale string) (ManualIndex, error) {
 		if section.Slug == "" || section.Title == "" || section.Summary == "" {
 			return ManualIndex{}, fmt.Errorf("manual index %s contains an incomplete section entry", locale)
 		}
+		if collection != "" && !strings.HasPrefix(section.Slug, collection+"/") {
+			section.Slug = collection + "/" + section.Slug
+		}
 		sections = append(sections, section)
 	}
 
@@ -188,44 +236,93 @@ func (l *Loader) loadIndex(locale string) (ManualIndex, error) {
 	}, nil
 }
 
+func (l *Loader) loadCollectionIndexes() (map[string]map[string]ManualIndex, []error) {
+	result := map[string]map[string]ManualIndex{}
+	errs := []error{}
+	if _, err := os.Stat(l.root); os.IsNotExist(err) {
+		return result, nil
+	}
+	err := filepath.WalkDir(l.root, func(path string, entry os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			errs = append(errs, walkErr)
+			return nil
+		}
+		if entry.IsDir() || filepath.Dir(path) == l.root {
+			return nil
+		}
+		matches := regexp.MustCompile(`^index\.(en|zh-TW|zh-CN)\.yaml$`).FindStringSubmatch(entry.Name())
+		if matches == nil {
+			return nil
+		}
+		collection, relErr := filepath.Rel(l.root, filepath.Dir(path))
+		if relErr != nil {
+			errs = append(errs, relErr)
+			return nil
+		}
+		collection = filepath.ToSlash(collection)
+		index, loadErr := loadIndexFile(path, matches[1], collection)
+		if loadErr != nil {
+			errs = append(errs, loadErr)
+			return nil
+		}
+		if result[collection] == nil {
+			result[collection] = map[string]ManualIndex{}
+		}
+		result[collection][matches[1]] = index
+		return nil
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+	return result, errs
+}
+
 func (l *Loader) loadPages() (map[string]map[string]ManualPage, []error) {
 	result := map[string]map[string]ManualPage{}
 	errs := make([]error, 0, 3)
-
-	entries, err := os.ReadDir(l.root)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return result, nil
-		}
-		return result, []error{fmt.Errorf("read manual directory: %w", err)}
+	if _, err := os.Stat(l.root); os.IsNotExist(err) {
+		return result, nil
 	}
 
-	for _, entry := range entries {
+	err := filepath.WalkDir(l.root, func(path string, entry os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			errs = append(errs, walkErr)
+			return nil
+		}
 		if entry.IsDir() {
-			continue
+			return nil
 		}
 		matches := manualPagePattern.FindStringSubmatch(entry.Name())
 		if matches == nil {
-			continue
+			return nil
 		}
-		slug := matches[1]
+		relative, relErr := filepath.Rel(l.root, path)
+		if relErr != nil {
+			errs = append(errs, relErr)
+			return nil
+		}
+		slug := strings.TrimSuffix(filepath.ToSlash(relative), "."+matches[2]+".md")
 		locale := matches[2]
 		page, err := l.loadPage(locale, slug)
 		if err != nil {
 			errs = append(errs, err)
-			continue
+			return nil
 		}
 		if _, ok := result[locale]; !ok {
 			result[locale] = map[string]ManualPage{}
 		}
 		result[locale][slug] = page
+		return nil
+	})
+	if err != nil && !os.IsNotExist(err) {
+		errs = append(errs, fmt.Errorf("read manual directory: %w", err))
 	}
 
 	return result, errs
 }
 
 func (l *Loader) loadPage(locale, slug string) (ManualPage, error) {
-	path := filepath.Join(l.root, slug+"."+locale+".md")
+	path := filepath.Join(l.root, filepath.FromSlash(slug)+"."+locale+".md")
 	body, err := os.ReadFile(path)
 	if err != nil {
 		return ManualPage{}, err

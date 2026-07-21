@@ -106,6 +106,7 @@ func testConfig(store LeadStore) Config {
 		TemplatesDir: "../../templates",
 		StaticDir:    "../../static",
 		ContentDir:   "../../content/docs",
+		SDKDocsDir:   "testdata/sdk-docs",
 		LeadStore:    store,
 	}
 }
@@ -120,6 +121,9 @@ func testServerWithConfig(t *testing.T, cfg Config) http.Handler {
 	}
 	if cfg.ContentDir == "" {
 		cfg.ContentDir = "../../content/docs"
+	}
+	if cfg.SDKDocsDir == "" {
+		cfg.SDKDocsDir = "testdata/sdk-docs"
 	}
 	if cfg.LeadStore == nil {
 		cfg.LeadStore = &memoryLeadStore{}
@@ -142,11 +146,11 @@ func newTestServer(t *testing.T, cfg Config) *Server {
 
 func TestRoutesReturnOK(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
-	paths := []string{"/", "/docs", "/manual", "/features", "/contact", "/privacy", "/healthz", "/robots.txt", "/sitemap.xml", "/content-assets/manual/placeholder.png"}
+	paths := []string{"/", "/docs", "/manual", "/features", "/contact", "/privacy", "/healthz", "/robots.txt", "/sitemap.xml", "/content-assets/manual/placeholder.png", "/content-assets/manual/sdk/video-flow.png"}
 	for _, section := range docs.All() {
 		paths = append(paths, "/docs/"+section.Slug)
 	}
-	paths = append(paths, "/manual/getting-started", "/manual/deployment-notes", "/manual/reference", "/manual/sdk-samples")
+	paths = append(paths, "/manual/getting-started", "/manual/deployment-notes", "/manual/reference", "/manual/sdk-samples", "/manual/sdk", "/manual/sdk/overview", "/manual/sdk/packages/native")
 	for _, feature := range features.All() {
 		paths = append(paths, "/features/"+feature.Slug)
 	}
@@ -157,6 +161,39 @@ func TestRoutesReturnOK(t *testing.T) {
 		handler.ServeHTTP(rec, req)
 		if rec.Code != http.StatusOK {
 			t.Fatalf("%s returned %d, want 200", path, rec.Code)
+		}
+	}
+}
+
+func TestSDKReferenceAndPDFRoutesServeGeneratedArtifacts(t *testing.T) {
+	root := t.TempDir()
+	reference := filepath.Join(root, "html", "reference", "native")
+	pdfs := filepath.Join(root, "pdf")
+	if err := os.MkdirAll(reference, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(pdfs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(reference, "index.html"), []byte("<h1>Native reference</h1>"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(pdfs, "rtk-cloud-sdk-user-manual.pdf"), []byte("%PDF-test"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	handler := testServerWithConfig(t, Config{SDKDocsDir: root})
+	for _, test := range []struct {
+		path string
+		want string
+	}{
+		{path: "/manual/sdk/reference/native/", want: "Native reference"},
+		{path: "/manual/sdk/downloads/rtk-cloud-sdk-user-manual.pdf", want: "%PDF-test"},
+	} {
+		req := httptest.NewRequest(http.MethodGet, test.path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), test.want) {
+			t.Fatalf("%s returned %d %q", test.path, rec.Code, rec.Body.String())
 		}
 	}
 }
