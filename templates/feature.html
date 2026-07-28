@@ -55,6 +55,26 @@
   </article>
 </section>
 
+{{range .Feature.Flows}}
+<section class="section feature-flow-section">
+  <div class="section-heading">
+    <p class="eyebrow">{{.Eyebrow}}</p>
+    <h2>{{.Title}}</h2>
+    <p class="section-lede">{{.Intro}}</p>
+  </div>
+  <ol class="feature-flow">
+    {{range .Steps}}
+    <li class="feature-flow-step">
+      <div>
+        <h3>{{.Title}}</h3>
+        <p>{{.Body}}</p>
+      </div>
+    </li>
+    {{end}}
+  </ol>
+</section>
+{{end}}
+
 {{if .Feature.Table.Rows}}
 <section class="section">
   <div class="section-heading">
@@ -85,6 +105,24 @@
 </section>
 {{end}}
 
+{{range .Feature.Tables}}
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">{{.Eyebrow}}</p>
+    <h2>{{.Title}}</h2>
+    <p class="section-lede">{{.Intro}}</p>
+  </div>
+  <div class="table-wrap detail-table">
+    <table>
+      <thead><tr>{{range .Columns}}<th scope="col">{{.}}</th>{{end}}</tr></thead>
+      <tbody>
+        {{range .Rows}}<tr>{{range .Cells}}<td>{{.}}</td>{{end}}</tr>{{end}}
+      </tbody>
+    </table>
+  </div>
+</section>
+{{end}}
+
 {{if .Feature.Sections}}
 <section class="section">
   <div class="detail-grid supplemental-detail-grid">
@@ -102,6 +140,24 @@
         {{end}}
       </ul>
     </article>
+    {{end}}
+  </div>
+</section>
+{{end}}
+
+{{if .Feature.RelatedLinks}}
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">{{t . "feature.related"}}</p>
+    <h2>{{t . "feature.related.title"}}</h2>
+  </div>
+  <div class="feature-related-grid">
+    {{range .Feature.RelatedLinks}}
+    <a class="feature-related-card" href="{{localizedPath $ .Href}}">
+      <h3>{{.Title}}</h3>
+      <p>{{.Summary}}</p>
+      <span>{{icon "arrow-right"}}</span>
+    </a>
     {{end}}
   </div>
 </section>

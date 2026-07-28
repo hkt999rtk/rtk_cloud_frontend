@@ -12,12 +12,12 @@
 {{if eq .PublicPath "/manual/sdk"}}
 <section class="section">
   <div class="section-heading">
-    <p class="eyebrow">Offline documentation</p>
-    <h2>Use the same manual online or as a verified PDF.</h2>
+    <p class="eyebrow">{{t . "manual.offline"}}</p>
+    <h2>{{t . "manual.offline.title"}}</h2>
   </div>
   <div class="hero-actions">
-    <a class="button primary" href="/manual/sdk/downloads/rtk-cloud-sdk-user-manual.pdf"><span class="button-icon">{{icon "document"}}</span>Download complete PDF</a>
-    <a class="button secondary" href="/manual/sdk/reference/"><span class="button-icon">{{icon "document"}}</span>Open API references</a>
+    <a class="button primary" href="/manual/sdk/downloads/rtk-cloud-sdk-user-manual{{if ne .Locale.Code "en"}}.{{.Locale.Code}}{{end}}.pdf"><span class="button-icon">{{icon "document"}}</span>{{t . "manual.download"}}</a>
+    <a class="button secondary" href="/manual/sdk/reference/"><span class="button-icon">{{icon "document"}}</span>{{t . "manual.reference"}}</a>
   </div>
 </section>
 {{end}}

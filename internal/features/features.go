@@ -14,8 +14,23 @@ type Feature struct {
 	Highlights   []string
 	Capabilities []string
 	Outcomes     []string
+	Flows        []FeatureFlow
 	Sections     []FeatureSection
 	Table        FeatureTable
+	Tables       []FeatureTable
+	RelatedLinks []FeatureRelatedLink
+}
+
+type FeatureFlow struct {
+	Eyebrow string
+	Title   string
+	Intro   string
+	Steps   []FeatureFlowStep
+}
+
+type FeatureFlowStep struct {
+	Title string
+	Body  string
 }
 
 type FeatureSection struct {
@@ -36,6 +51,12 @@ type FeatureTable struct {
 
 type FeatureTableRow struct {
 	Cells []string
+}
+
+type FeatureRelatedLink struct {
+	Title   string
+	Summary string
+	Href    string
 }
 
 func All() []Feature {
@@ -323,7 +344,7 @@ func All() []Feature {
 					Items: []string{
 						"Use the rtk_cloud_client repository as the source of truth for sample code, specifications, and sample-specific README files; this website summarizes the customer evaluation path rather than hosting SDK source.",
 						"Use Android Home Automation, iOS Home Automation, and WebApp Ops Lab samples to validate provisioning, device list/detail, light and AC control, camera monitor, and debug report flows.",
-						"Use the Linux Simulator and PRO2 Device Demo to validate device-side command handling, sample MQTT payloads, snapshot upload, status/log/event reporting, and the WebRTC Video over TURN answerer and ICE/TURN boundary.",
+						"Use the Linux Simulator for command, state, report, and snapshot-metadata workflows; it does not model camera frames or WebRTC signaling. Use PRO2 host smoke for adapter and signaling lifecycle only, and a physical PRO2 media device for camera/audio validation.",
 						"Treat these as SDK usage references, not production app-store apps or white-label release packages.",
 					},
 				},
@@ -358,9 +379,123 @@ func All() []Feature {
 					{Cells: []string{"Android Home Automation sample", "App", "Provisioning adapter states, device list/detail, light and AC controls, camera monitor, and debug report.", "Native Kotlin reference; not an app-store deliverable."}},
 					{Cells: []string{"iOS Home Automation sample", "App", "Swift SDK usage for setup profiles, device control, camera boundaries, and debug evidence.", "Native Swift reference; customer product teams own release UX and signing."}},
 					{Cells: []string{"WebApp Ops Lab sample", "App", "Cloud-side onboarding, MQTT payload inspection, simulated controls, camera helpers, and debug report.", "Browser reference without BLE or SoftAP onboarding."}},
-					{Cells: []string{"Linux Simulator", "Device", "Light, AC, and camera command handling without hardware, including local state and validation output.", "Simulator for evidence and development; not a production device firmware package."}},
-					{Cells: []string{"PRO2 Device Demo", "Device", "Device-bound token, owner transport, snapshot upload, camera logs/events, and WebRTC Video over TURN answerer and ICE/TURN boundary.", "Firmware reference; concrete Realtek SDK calls stay firmware-owned."}},
+					{Cells: []string{"Linux Simulator", "Device", "Light, AC, meter, state, log, report, and snapshot-metadata workflows without hardware.", "Does not model camera frames or WebRTC signaling and is not a media-capable peer."}},
+					{Cells: []string{"PRO2 Device Demo", "Device", "Host smoke validates adapter wiring and signaling lifecycle; physical hardware can validate snapshot, camera/audio, and answerer behavior.", "Host smoke is not physical media validation; concrete vendor media calls remain firmware-owned."}},
 				},
+			},
+			RelatedLinks: []FeatureRelatedLink{
+				{Title: "Video Cloud", Summary: "Connect RTK signaling and stored-video SDK workflows to the product viewing experience.", Href: "/features/video-cloud"},
+				{Title: "SDK capability workflows", Summary: "Review package support and integration boundaries in the SDK Manual.", Href: "/manual/sdk/capability-workflows"},
+			},
+		},
+		{
+			Slug:         "video-cloud",
+			Title:        "Video Cloud",
+			Icon:         "cloud-lock",
+			Kicker:       "Live WebRTC and encrypted stored video are separate product paths.",
+			Summary:      "Cloud signaling, ICE/TURN, session lifecycle, encrypted clips, snapshots, playback URLs, and explicit app, SDK, cloud, and device responsibilities.",
+			Description:  "Realtek Connect+ provides Android and iOS SDKs for cloud signaling and stored-video workflows. Product apps integrate these SDKs with their platform WebRTC and media components to deliver the final viewing experience.",
+			ImagePath:    "/static/assets/connectplus-video-cloud-corporate-v1.png",
+			ImageAlt:     "A camera connected to separate live signaling and encrypted stored-video paths ending in mobile viewing surfaces.",
+			Highlights:   []string{"Live WebRTC uses HTTPS control APIs plus the current device owner's MQTT or WebSocket transport", "Recording, stored clips, and snapshots use an encrypted upload and playback lifecycle independent from live viewing", "Live media frames remain peer-to-peer or TURN-relayed and are not automatically stored by the cloud"},
+			Capabilities: []string{"HTTPS ICE, session create, answer retrieval, close, expiry, and failure-state helpers", "Current-owner MQTT or WebSocket delivery of the same webrtc_offer signaling payload; delivery does not fan out or automatically fall back to a non-owner transport", "Authorize, presigned upload, completion, listing, thumbnail, short-lived playback, URL refresh, and deletion workflows"},
+			Outcomes:     []string{"Integrate cloud signaling without building a separate signaling backend", "Keep platform WebRTC rendering and product UX under the app team's control", "Make live viewing, recording, clips, and snapshots operationally and technically distinct"},
+			Flows: []FeatureFlow{
+				{
+					Eyebrow: "Live WebRTC",
+					Title:   "One signaling lifecycle, with media owned by the endpoints",
+					Intro:   "Realtek Connect+ coordinates signaling and ICE/TURN access. The app and device connect and render the actual media.",
+					Steps: []FeatureFlowStep{
+						{Title: "Get ICE", Body: "The app calls the HTTPS ICE API through the RTK SDK."},
+						{Title: "Create offer", Body: "The app's platform WebRTC component creates the SDP offer."},
+						{Title: "Open session", Body: "The RTK SDK creates the signaling session over HTTPS."},
+						{Title: "Deliver offer", Body: "The cloud sends webrtc_offer through the current device owner's MQTT or WebSocket transport."},
+						{Title: "Build answer", Body: "Device SDK or firmware receives the offer, connects camera and audio tracks, and creates an answer."},
+						{Title: "Submit answer", Body: "The device returns its SDP answer through the HTTPS answer API."},
+						{Title: "Negotiate media", Body: "The app retrieves the answer through the RTK SDK and completes platform media negotiation."},
+						{Title: "Close", Body: "The app or device closes the session; expiry and timeout also terminate stale sessions."},
+					},
+				},
+				{
+					Eyebrow: "Stored video",
+					Title:   "Encrypt complete media objects before direct upload",
+					Intro:   "A stored clip is created by a separate recording and upload workflow. A live session never becomes a clip automatically.",
+					Steps: []FeatureFlowStep{
+						{Title: "Record", Body: "The product records a complete MP4 clip or captures a JPEG snapshot."},
+						{Title: "Encrypt", Body: "The client encrypts the media object and keeps wrapped-key material out of logs."},
+						{Title: "Authorize", Body: "The RTK SDK requests an upload lifecycle and a short-lived presigned PUT URL."},
+						{Title: "Upload", Body: "The client performs one direct object-storage PUT within the upload lifecycle."},
+						{Title: "Complete", Body: "The SDK marks the upload complete so the service can verify and expose the ready object."},
+						{Title: "Browse and play", Body: "Apps list, filter, page, show thumbnails, refresh short-lived range URLs, play, and delete."},
+					},
+				},
+			},
+			Sections: []FeatureSection{
+				{
+					Eyebrow: "Snapshot versus clip",
+					Title:   "Choose the media object that matches the user action",
+					Intro:   "Snapshots and clips share authorization and secure delivery concepts, but they are not interchangeable.",
+					Items: []string{
+						"A snapshot is one JPEG still image for a preview, alert, or point-in-time inspection; the current technical default limit is 5 MiB.",
+						"A clip is one completed MP4 media object for recorded playback; the current technical default limit is 256 MiB.",
+						"Neither object is produced by Live WebRTC unless the product explicitly records and runs the stored-video workflow.",
+					},
+				},
+				{
+					Eyebrow: "Retention and URL defaults",
+					Title:   "Treat current values as deployment configuration, not pricing or SLA",
+					Intro:   "Deployment operators select the applicable storage policy and must confirm commercial, regional, backup, and recovery requirements separately.",
+					Items: []string{
+						"Retention profiles are deployment-configurable at 1, 7, or 30 days.",
+						"Signed upload and playback URLs currently default to 10 minutes; clients refresh playback URLs instead of persisting them.",
+						"An authorized upload lifecycle currently defaults to 30 minutes and transitions to failed or expired when it cannot complete.",
+						"All limits on this page are current technical defaults, not a price, quota commitment, backup promise, region commitment, or SLA.",
+					},
+				},
+				{
+					Eyebrow: "Current release boundary",
+					Title:   "Know what product integration still owns",
+					Intro:   "The SDKs remove cloud workflow boilerplate while preserving explicit media and UX ownership.",
+					Items: []string{
+						"The current release does not bundle server-side transcoding, S3 multipart upload, simulcast negotiation, renegotiation, or a complete in-SDK WebRTC media renderer.",
+						"Product apps own the platform WebRTC component, media renderer, audio policy, foreground/background behavior, and the final viewing UX.",
+						"Device SDK or firmware owns offer handling, answer generation, camera and audio tracks, codecs, and device resource limits.",
+					},
+					Accent: true,
+				},
+			},
+			Table: FeatureTable{
+				Eyebrow: "Responsibility matrix",
+				Title:   "Connect each layer without hiding its boundary",
+				Intro:   "The same responsibility split applies to product architecture, SDK evaluation, and support troubleshooting.",
+				Columns: []string{"Layer", "Provided capability", "Integration boundary"},
+				Rows: []FeatureTableRow{
+					{Cells: []string{"Realtek Connect+ cloud", "HTTPS signaling, current-owner MQTT/WebSocket delivery, TURN credentials, session state, and stored-video lifecycle APIs.", "Coordinates control and storage workflows; does not receive or store Live media frames."}},
+					{Cells: []string{"RTK Android/iOS SDK", "Authentication, ICE, offer/answer/close helpers, stable errors, and clip workflow helpers.", "Returns session and media-object data to the product app; does not bundle a complete WebRTC renderer."}},
+					{Cells: []string{"Product app", "Product-specific live and recorded viewing experience.", "Integrates platform WebRTC, renderer, audio policy, lifecycle, controls, empty/error states, and playback URL refresh."}},
+					{Cells: []string{"Device SDK or firmware", "Offer handling, answer generation, camera/audio tracks, recording, encryption, and resource enforcement.", "Owns physical media validation, codecs, track attachment, and constrained-device behavior."}},
+				},
+			},
+			Tables: []FeatureTable{
+				{
+					Eyebrow: "Sample truth matrix",
+					Title:   "Use each sample for the validation it actually performs",
+					Intro:   "Fixture and host-smoke samples are useful integration evidence, but they are not physical media validation.",
+					Columns: []string{"Sample", "Visible status", "What it validates", "What it does not prove"},
+					Rows: []FeatureTableRow{
+						{Cells: []string{"Android playback", "Real SDK + Media3", "Stored clip list and playback integration.", "Live WebRTC rendering."}},
+						{Cells: []string{"iOS playback", "Real SDK + AVPlayer", "Stored clip list and playback integration.", "Live WebRTC rendering."}},
+						{Cells: []string{"Android/iOS Live", "RTK signaling integration / fixture UI", "Session data, offer/answer, close, and UI lifecycle.", "Complete media rendering or physical camera validation."}},
+						{Cells: []string{"WebApp Ops Lab", "Fixture-backed", "Signaling helper demonstration and operations workflow.", "A production WebRTC peer or native onboarding."}},
+						{Cells: []string{"Linux simulator", "Device workflow simulator", "Commands, state, reports, and validation evidence.", "Camera frames or WebRTC signaling."}},
+						{Cells: []string{"PRO2 host smoke", "Adapter + lifecycle smoke", "Adapter wiring and signaling lifecycle.", "Physical camera, audio, codec, or rendered-media validation."}},
+					},
+				},
+			},
+			RelatedLinks: []FeatureRelatedLink{
+				{Title: "App SDK", Summary: "Review the mobile integration surface and reference sample ecosystem.", Href: "/features/app-sdk"},
+				{Title: "Capability workflows", Summary: "Compare SDK package capability and responsibility boundaries.", Href: "/manual/sdk/capability-workflows"},
+				{Title: "Video workflows", Summary: "Follow live signaling and stored-video implementation guidance.", Href: "/manual/sdk/video-workflows"},
 			},
 		},
 		{

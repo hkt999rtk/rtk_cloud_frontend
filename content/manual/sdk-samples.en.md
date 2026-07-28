@@ -12,14 +12,14 @@ Realtek Connect+ customer evaluations should start with runnable reference sampl
 | Family | Samples | Purpose |
 | --- | --- | --- |
 | Home app reference clients | Android Home Automation sample, iOS Home Automation sample, WebApp Ops Lab sample | Validate app-side SDK usage for token setup, provisioning, device list/detail, light and AC control, camera monitor, debug report, and evidence collection. |
-| Device reference clients | Linux simulator, PRO2 camera device demo | Validate device-side command handling, sample MQTT payload behavior, status/log/event reporting, snapshot upload, and the WebRTC Video over TURN answerer and ICE/TURN boundary. |
+| Device reference clients | Linux simulator, PRO2 camera device demo | Linux validates command/state/report/snapshot metadata without camera frames or WebRTC signaling. PRO2 host smoke validates adapter and signaling lifecycle; physical hardware validates media. |
 
 ## Customer evaluation path
 
-1. Run the Linux simulator first to validate light, AC, and camera command handling without physical hardware.
+1. Run the Linux simulator first to validate light, AC, meter, state, report, and snapshot-metadata behavior without physical hardware. It does not simulate camera frames or WebRTC signaling.
 2. Use the WebApp Ops Lab sample to exercise cloud-side onboarding, device registry exploration, MQTT payload inspection, simulated controls, camera helper flows, and debug report generation.
 3. Run the Android and iOS Home Automation samples to verify native mobile flows, setup profiles, device control, camera monitor boundaries, and redacted debug evidence.
-4. Connect the PRO2 camera device demo when hardware is available to validate device-bound token flow, owner transport, snapshot upload, camera status/log/event reporting, and WebRTC Video over TURN answerer behavior.
+4. Use PRO2 host smoke for adapter and signaling-lifecycle evidence. Connect a physical PRO2 camera device to validate snapshot, camera/audio, codec, and WebRTC answerer media behavior.
 
 ## Boundaries
 
