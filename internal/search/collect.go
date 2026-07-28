@@ -180,17 +180,35 @@ func featureBody(feature features.Feature) string {
 	parts = append(parts, feature.Highlights...)
 	parts = append(parts, feature.Capabilities...)
 	parts = append(parts, feature.Outcomes...)
+	for _, flow := range feature.Flows {
+		parts = append(parts, flow.Eyebrow, flow.Title, flow.Intro)
+		for _, step := range flow.Steps {
+			parts = append(parts, step.Title, step.Body)
+		}
+	}
 	for _, section := range feature.Sections {
 		parts = append(parts, section.Eyebrow, section.Title, section.Intro)
 		parts = append(parts, section.Items...)
 	}
-	if feature.Table.Title != "" {
-		parts = append(parts, feature.Table.Eyebrow, feature.Table.Title, feature.Table.Intro)
-		for _, row := range feature.Table.Rows {
+	parts = appendFeatureTable(parts, feature.Table)
+	for _, table := range feature.Tables {
+		parts = appendFeatureTable(parts, table)
+	}
+	for _, link := range feature.RelatedLinks {
+		parts = append(parts, link.Title, link.Summary)
+	}
+	return strings.Join(parts, "\n")
+}
+
+func appendFeatureTable(parts []string, table features.FeatureTable) []string {
+	if table.Title != "" {
+		parts = append(parts, table.Eyebrow, table.Title, table.Intro)
+		parts = append(parts, table.Columns...)
+		for _, row := range table.Rows {
 			parts = append(parts, row.Cells...)
 		}
 	}
-	return strings.Join(parts, "\n")
+	return parts
 }
 
 func docBody(section docs.Section) string {

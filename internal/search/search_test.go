@@ -149,17 +149,38 @@ func TestCollectWebsiteDocumentsIncludesFeatureDocsAndManual(t *testing.T) {
 		t.Fatalf("collect documents: %v", err)
 	}
 	ids := map[string]bool{}
+	bodies := map[string]string{}
 	for _, doc := range docs {
 		ids[doc.ID] = true
+		bodies[doc.ID] = doc.Body
 	}
 	for _, id := range []string{
 		"feature:ota:en",
+		"feature:video-cloud:en",
+		"feature:video-cloud:zh-TW",
+		"feature:video-cloud:zh-CN",
 		"doc:sdks:en",
 		"manual:sdk-samples:en",
+		"manual:sdk/video-workflows:en",
+		"manual:sdk/video-workflows:zh-TW",
+		"manual:sdk/video-workflows:zh-CN",
+		"manual:sdk/packages/android:en",
+		"manual:sdk/packages/android:zh-TW",
+		"manual:sdk/packages/android:zh-CN",
 		"file:README.md:en",
 	} {
 		if !ids[id] {
 			t.Fatalf("missing collected document %s", id)
+		}
+	}
+	for _, want := range []string{
+		"Get ICE",
+		"Sample truth matrix",
+		"Linux simulator",
+		"does not bundle server-side transcoding",
+	} {
+		if !strings.Contains(bodies["feature:video-cloud:en"], want) {
+			t.Fatalf("Video Cloud search body missing %q", want)
 		}
 	}
 }
