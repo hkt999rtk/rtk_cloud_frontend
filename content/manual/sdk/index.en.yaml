@@ -17,8 +17,8 @@ sections:
     title: "Capability workflows"
     summary: "Integrate provisioning, devices, telemetry, OTA, commands, and signaling."
   - slug: video-workflows
-    title: "Stored video workflows"
-    summary: "Upload encrypted clips and implement Android and iOS browsing and playback."
+    title: "Video Cloud workflows"
+    summary: "Integrate Live WebRTC signaling and encrypted stored-video upload, browsing, and playback."
   - slug: packages/native
     package: native
     title: "Native C and C++ SDK"

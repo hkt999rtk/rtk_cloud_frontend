@@ -48,9 +48,10 @@ type pageTarget struct {
 
 func main() {
 	var (
-		baseURL    = flag.String("base-url", "", "existing base URL to check; defaults to an in-process local server")
-		chromePath = flag.String("chrome-path", "", "path to the Chrome executable")
-		timeout    = flag.Duration("timeout", 45*time.Second, "overall timeout for the smoke check")
+		baseURL       = flag.String("base-url", "", "existing base URL to check; defaults to an in-process local server")
+		chromePath    = flag.String("chrome-path", "", "path to the Chrome executable")
+		screenshotDir = flag.String("screenshot-dir", "", "optional directory for Video Cloud desktop, mobile, and Traditional Chinese review screenshots")
+		timeout       = flag.Duration("timeout", 45*time.Second, "overall timeout for the smoke check")
 	)
 	flag.Parse()
 
@@ -145,6 +146,24 @@ func main() {
 			expectedBodyText: "合约支撑的基础",
 		},
 		{
+			name:             "video-cloud-en",
+			path:             "/features/video-cloud",
+			headingSelector:  ".feature-detail h1",
+			imageSelector:    ".feature-visual img",
+			expectedHeading:  "Video Cloud",
+			expectedTitle:    "Video Cloud | Realtek Connect+",
+			expectedBodyText: "current device owner's MQTT or WebSocket transport",
+		},
+		{
+			name:             "video-cloud-zh-tw",
+			path:             "/zh-tw/features/video-cloud",
+			headingSelector:  ".feature-detail h1",
+			imageSelector:    ".feature-visual img",
+			expectedHeading:  "Video Cloud",
+			expectedTitle:    "Video Cloud | Realtek Connect+",
+			expectedBodyText: "目前 device owner 的 MQTT 或 WebSocket transport",
+		},
+		{
 			name:             "manual-en",
 			path:             "/manual/getting-started",
 			headingSelector:  ".feature-detail h1",
@@ -181,8 +200,51 @@ func main() {
 				result.ScrollWidth,
 				result.HeroImageLoaded,
 			)
+			if filename := screenshotFilename(target.name, vp.name); filename != "" && *screenshotDir != "" {
+				if err := os.MkdirAll(*screenshotDir, 0o755); err != nil {
+					fail(err)
+				}
+				if err := capturePage(
+					browserCtx,
+					targetURL+target.path,
+					vp,
+					filepath.Join(*screenshotDir, filename),
+				); err != nil {
+					fail(fmt.Errorf("%s %s screenshot failed: %w", target.name, vp.name, err))
+				}
+			}
 		}
 	}
+}
+
+func screenshotFilename(targetName, viewportName string) string {
+	switch {
+	case targetName == "video-cloud-en" && viewportName == "desktop":
+		return "desktop.png"
+	case targetName == "video-cloud-en" && viewportName == "mobile":
+		return "mobile.png"
+	case targetName == "video-cloud-zh-tw" && viewportName == "desktop":
+		return "zh-tw-desktop.png"
+	default:
+		return ""
+	}
+}
+
+func capturePage(parent context.Context, url string, vp viewport, output string) error {
+	tabCtx, cancel := chromedp.NewContext(parent)
+	defer cancel()
+	var screenshot []byte
+	if err := chromedp.Run(
+		tabCtx,
+		chromedp.EmulateViewport(vp.width, vp.height),
+		chromedp.Navigate(url),
+		chromedp.WaitVisible(`main#main-content`, chromedp.ByQuery),
+		chromedp.Sleep(300*time.Millisecond),
+		chromedp.CaptureScreenshot(&screenshot),
+	); err != nil {
+		return err
+	}
+	return os.WriteFile(output, screenshot, 0o644)
 }
 
 func checkPage(parent context.Context, baseURL string, target pageTarget, vp viewport) (pageCheck, error) {

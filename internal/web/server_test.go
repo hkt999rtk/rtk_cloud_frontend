@@ -1259,6 +1259,7 @@ func TestFooterSitemapRendersPublicNavigation(t *testing.T) {
 				`<nav class="footer-sitemap" aria-label="Footer sitemap">`,
 				"<h2>Platform</h2>",
 				`href="/features/ota"`,
+				`href="/features/video-cloud"`,
 				`href="/docs/apis"`,
 				`href="/manual/sdk-samples"`,
 				`href="/privacy"`,
@@ -1269,6 +1270,7 @@ func TestFooterSitemapRendersPublicNavigation(t *testing.T) {
 			want: []string{
 				"<h2>平台</h2>",
 				`href="/zh-tw/features/ota"`,
+				`href="/zh-tw/features/video-cloud"`,
 				`href="/zh-tw/docs/apis"`,
 				`href="/zh-tw/manual/sdk-samples"`,
 				`href="/zh-tw/privacy"`,
@@ -1279,6 +1281,7 @@ func TestFooterSitemapRendersPublicNavigation(t *testing.T) {
 			want: []string{
 				"<h2>平台</h2>",
 				`href="/zh-cn/features/ota"`,
+				`href="/zh-cn/features/video-cloud"`,
 				`href="/zh-cn/docs/apis"`,
 				`href="/zh-cn/manual/sdk-samples"`,
 				`href="/zh-cn/privacy"`,
@@ -1425,6 +1428,90 @@ func TestFeatureMetadataUsesFeatureSummary(t *testing.T) {
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
+func TestVideoCloudFeatureExplainsLiveStoredAndSDKBoundaries(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	tests := []struct {
+		path  string
+		wants []string
+	}{
+		{
+			path: "/features/video-cloud",
+			wants: []string{
+				"provides Android and iOS SDKs for cloud signaling and stored-video workflows.",
+				"The cloud sends webrtc_offer through the current device owner",
+				"does not fan out",
+				"live session never becomes a clip automatically",
+				"MP4 media object",
+				"256 MiB",
+				"10 minutes",
+				"server-side transcoding",
+				"S3 multipart upload",
+				"simulcast negotiation",
+				"renegotiation",
+				"complete in-SDK WebRTC media renderer",
+				"Real SDK",
+				"Fixture-backed",
+				`src="/static/assets/connectplus-video-cloud-corporate-v1.`,
+				`rel="canonical" href="http://example.com/features/video-cloud"`,
+				`hreflang="zh-Hant" href="http://example.com/zh-tw/features/video-cloud"`,
+				`hreflang="zh-Hans" href="http://example.com/zh-cn/features/video-cloud"`,
+			},
+		},
+		{
+			path: "/zh-tw/features/video-cloud",
+			wants: []string{
+				"提供 Android 與 iOS SDK",
+				"目前 device owner 的 MQTT 或 WebSocket transport",
+				"不 fan-out",
+				"目前版本不包含 server-side transcoding",
+				"Real SDK",
+			},
+		},
+		{
+			path: "/zh-cn/features/video-cloud",
+			wants: []string{
+				"提供 Android 与 iOS SDK",
+				"目前 device owner 的 MQTT 或 WebSocket transport",
+				"目前版本不包含 server-side transcoding",
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, test.path, nil)
+			rec := httptest.NewRecorder()
+			handler.ServeHTTP(rec, req)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", rec.Code)
+			}
+			for _, want := range test.wants {
+				if !strings.Contains(rec.Body.String(), want) {
+					t.Fatalf("%s missing %q", test.path, want)
+				}
+			}
+		})
+	}
+}
+
+func TestLocalizedSDKManualUsesLocalizedPDF(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	for _, test := range []struct {
+		path string
+		want string
+	}{
+		{path: "/manual/sdk", want: "/manual/sdk/downloads/rtk-cloud-sdk-user-manual.pdf"},
+		{path: "/zh-tw/manual/sdk", want: "/manual/sdk/downloads/rtk-cloud-sdk-user-manual.zh-TW.pdf"},
+		{path: "/zh-cn/manual/sdk", want: "/manual/sdk/downloads/rtk-cloud-sdk-user-manual.zh-CN.pdf"},
+	} {
+		req := httptest.NewRequest(http.MethodGet, test.path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), test.want) {
+			t.Fatalf("%s missing localized PDF %q", test.path, test.want)
 		}
 	}
 }
@@ -1969,7 +2056,8 @@ func TestAppSDKFeatureCoversMobileDeliveryPaths(t *testing.T) {
 		"<th scope=\"col\">Sample</th>",
 		"WebApp Ops Lab sample",
 		"PRO2 Device Demo",
-		"WebRTC Video over TURN answerer and ICE/TURN boundary",
+		"physical PRO2 media device",
+		"Does not model camera frames or WebRTC signaling",
 		"not a shipped mobile framework",
 	} {
 		if !strings.Contains(body, want) {
@@ -1986,15 +2074,15 @@ func TestPublicStreamingCopyUsesWebRTCVideoOverTURN(t *testing.T) {
 		want string
 	}{
 		{path: "/features/provision", want: "WebRTC Video over TURN activation"},
-		{path: "/features/app-sdk", want: "WebRTC Video over TURN answerer and ICE/TURN boundary"},
-		{path: "/docs/sdks", want: "WebRTC Video over TURN answerer and ICE/TURN boundary"},
-		{path: "/manual/sdk-samples", want: "WebRTC Video over TURN answerer and ICE/TURN boundary"},
-		{path: "/zh-tw/features/app-sdk", want: "WebRTC Video over TURN answerer / ICE/TURN"},
-		{path: "/zh-tw/docs/sdks", want: "WebRTC Video over TURN answerer / ICE/TURN"},
-		{path: "/zh-tw/manual/sdk-samples", want: "WebRTC Video over TURN answerer / ICE/TURN"},
-		{path: "/zh-cn/features/app-sdk", want: "WebRTC Video over TURN answerer / ICE/TURN"},
-		{path: "/zh-cn/docs/sdks", want: "WebRTC Video over TURN answerer / ICE/TURN"},
-		{path: "/zh-cn/manual/sdk-samples", want: "WebRTC Video over TURN answerer / ICE/TURN"},
+		{path: "/features/app-sdk", want: "physical PRO2 media device"},
+		{path: "/docs/sdks", want: "physical hardware is required for camera/audio media validation"},
+		{path: "/manual/sdk-samples", want: "physical PRO2 camera device"},
+		{path: "/zh-tw/features/app-sdk", want: "physical media 需使用實體 PRO2 device"},
+		{path: "/zh-tw/docs/sdks", want: "camera/audio media validation 需要實體硬體"},
+		{path: "/zh-tw/manual/sdk-samples", want: "實體 PRO2 camera device"},
+		{path: "/zh-cn/features/app-sdk", want: "physical media 需使用实体 PRO2 device"},
+		{path: "/zh-cn/docs/sdks", want: "camera/audio media validation 需要实体硬体"},
+		{path: "/zh-cn/manual/sdk-samples", want: "实体 PRO2 camera device"},
 	}
 
 	for _, tt := range tests {
@@ -2232,13 +2320,16 @@ func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 		`<loc>http://example.com/</loc>`,
 		`<loc>http://example.com/docs/product-overview</loc>`,
 		`<loc>http://example.com/features/ota</loc>`,
+		`<loc>http://example.com/features/video-cloud</loc>`,
 		`<loc>http://example.com/contact</loc>`,
 		`<loc>http://example.com/privacy</loc>`,
 		`<loc>http://example.com/manual/sdk-samples</loc>`,
 		`<loc>http://example.com/zh-tw/features/ota</loc>`,
+		`<loc>http://example.com/zh-tw/features/video-cloud</loc>`,
 		`<loc>http://example.com/zh-tw/manual/sdk-samples</loc>`,
 		`<loc>http://example.com/zh-tw/privacy</loc>`,
 		`<loc>http://example.com/zh-cn/docs/apis</loc>`,
+		`<loc>http://example.com/zh-cn/features/video-cloud</loc>`,
 		`<loc>http://example.com/zh-cn/manual/sdk-samples</loc>`,
 		`<loc>http://example.com/zh-cn/contact</loc>`,
 		`<loc>http://example.com/zh-cn/privacy</loc>`,

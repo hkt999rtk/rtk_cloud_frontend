@@ -1,9 +1,22 @@
 ---
-title: "Stored video workflows"
-description: "Upload encrypted video from a device and browse, delete, and play clips in Android and iOS applications."
+title: "Video Cloud workflows"
+description: "Integrate Live WebRTC signaling and upload, browse, delete, and play encrypted stored video."
 ---
 
 ![Stored video upload, browser, and playback flow](/content-assets/manual/sdk/video-flow.png)
+
+## Live WebRTC signaling
+
+1. The app calls the HTTPS ICE API through the RTK SDK.
+2. The app's platform WebRTC component creates the SDP offer.
+3. The RTK SDK creates the signaling session over HTTPS.
+4. The cloud sends `webrtc_offer` through the current device owner's MQTT or WebSocket transport.
+5. Device SDK or firmware receives the offer, attaches camera and audio tracks, and creates an answer.
+6. The device submits the answer through the HTTPS answer API.
+7. The app retrieves the answer through the RTK SDK and completes media negotiation.
+8. The app or device closes the session.
+
+Validate close, expiry, timeout, offline, busy, and unsupported-capability states. Signaling delivery does not fan out and does not automatically fall back to a non-owner transport. The cloud coordinates signaling but does not receive or store Live media frames. A Live WebRTC session never becomes a Stored Clip automatically.
 
 ## Direct device upload
 
@@ -16,6 +29,8 @@ description: "Upload encrypted video from a device and browse, delete, and play 
 7. Poll upload state until `ready`, `failed`, or `expired`.
 
 The native streaming PUT accepts a rewindable read callback, an exact body size, an optional progress callback, an optional cancellation check, and a configurable bounded buffer. The default implementation uses a small buffer suitable for memory-constrained devices. A zero-byte read before the declared body size is a protocol failure.
+
+Current technical defaults are 256 MiB for MP4 clips, 5 MiB for JPEG snapshots, 10 minutes for signed URLs, and 30 minutes for an upload lifecycle. Retention profiles are deployment-configurable at 1, 7, or 30 days. These values are not pricing, backup, region, quota, or SLA commitments.
 
 ## Browser pagination
 
@@ -38,3 +53,7 @@ The player belongs to the application. Release Android player instances with the
 ## Legacy behavior
 
 `uploadClip` and `/upload_clip` remain for source compatibility with pre-cutover deployments. Direct-upload-enabled servers return 410 for clip media. New device integrations must use authorize, presigned PUT, complete, and status operations. Snapshot upload remains a separate supported compatibility path.
+
+## Current release boundary
+
+The current release does not bundle server-side transcoding, S3 multipart upload, simulcast negotiation, renegotiation, or a complete in-SDK WebRTC media renderer.

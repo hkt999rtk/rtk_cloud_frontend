@@ -23,6 +23,15 @@ class BuildSDKDocsTest(unittest.TestCase):
         self.assertEqual(set(docs.PACKAGES), {page.package for page in pages if page.package})
         docs.validate_links(source, pages)
 
+        pages_by_locale = {}
+        for locale in docs.LOCALES:
+            locale_index, locale_pages = docs.load_pages(source, locale)
+            self.assertTrue(locale_index["title"])
+            self.assertEqual(set(docs.PACKAGES), {page.package for page in locale_pages if page.package})
+            docs.validate_links(source, locale_pages)
+            pages_by_locale[locale] = locale_pages
+        docs.validate_locale_parity(pages_by_locale)
+
     def test_frontmatter_requires_title_and_description(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "page.en.md"

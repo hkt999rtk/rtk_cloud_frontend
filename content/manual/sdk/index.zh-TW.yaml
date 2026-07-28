@@ -1,0 +1,17 @@
+title: "RTK Cloud SDK 使用手冊"
+description: "涵蓋所有 RTK Cloud SDK package 的安裝、安全、整合、API、Video Cloud 與除錯指引。"
+sections:
+  - {slug: overview, title: "SDK 總覽", summary: "選擇 package 並理解支援邊界。"}
+  - {slug: getting-started, title: "開始使用", summary: "安裝 SDK、設定 client 並完成第一次 request。"}
+  - {slug: authentication-security, title: "認證與安全", summary: "安全處理 token、PKI、TLS、key 與 media。"}
+  - {slug: lifecycle-errors, title: "生命週期與錯誤", summary: "處理 timeout、retry、cancel、callback 與 shutdown。"}
+  - {slug: capability-workflows, title: "能力工作流", summary: "整合 provisioning、device、telemetry、OTA、command 與 signaling。"}
+  - {slug: video-workflows, title: "Video Cloud 工作流", summary: "整合 Live WebRTC signaling 與 encrypted stored video。"}
+  - {slug: packages/native, package: native, title: "Native C/C++ SDK", summary: "使用 stable C ABI、C++ wrapper、transport 與 streaming upload。"}
+  - {slug: packages/android, package: android, title: "Android Kotlin SDK", summary: "使用 coroutine、signaling、Media3 與 secure key provider。"}
+  - {slug: packages/ios, package: ios, title: "iOS Swift SDK", summary: "使用 async API、signaling、AVPlayer、Keychain 與 Secure Enclave。"}
+  - {slug: packages/javascript, package: javascript, title: "JavaScript/TypeScript SDK", summary: "在 browser 與 Node.js 整合 typed ESM package。"}
+  - {slug: packages/go, package: go, title: "Go SDK", summary: "用 pure Go client 整合 device、tool 與 automation。"}
+  - {slug: packages/freertos-pro2, package: freertos-pro2, title: "FreeRTOS/Pro2 SDK", summary: "整合 board、transport、media 與 WebRTC answerer adapter。"}
+  - {slug: sample-applications, title: "Sample applications", summary: "正確使用 Android、iOS、Web、Linux 與 Pro2 sample。"}
+  - {slug: troubleshooting, title: "除錯與相容性", summary: "診斷認證、transport、upload、playback 與版本問題。"}

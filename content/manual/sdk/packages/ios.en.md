@@ -15,6 +15,10 @@ Create `RTKCloudClient` with the HTTPS base URL and required device context. Use
 
 Create `ClipQuery` with bearer token, optional filters, limit, and skip. `listClips` returns a typed `ClipPage`; display its `ClipSummary` values and follow `nextSkip`. Load thumbnails away from the main actor. Do not trust a cached clip URL as a playback session.
 
+## Live WebRTC
+
+The SDK supplies cloud authentication, ICE, offer/answer/close, stable errors, and signaling-session helpers. The product app connects that session data to its iOS WebRTC peer connection, tracks, renderer, audio-session policy, and UIKit or SwiftUI lifecycle. The SDK does not bundle a complete media renderer.
+
 ## Encrypted playback
 
 Implement `PlaybackKeyProvider` in code backed by Keychain and, where appropriate, Secure Enclave key operations. The provider receives the selected clip and current server key and returns wrapped clip key plus ephemeral public key. Give the `PlaybackSession.playbackURL` to a new `AVPlayerItem`. Request another session after expiry and replace the item when the selection changes.

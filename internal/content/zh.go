@@ -18,8 +18,11 @@ type localizedFeature struct {
 	Highlights   []string
 	Capabilities []string
 	Outcomes     []string
+	Flows        []features.FeatureFlow
 	Sections     []features.FeatureSection
 	Table        features.FeatureTable
+	Tables       []features.FeatureTable
+	RelatedLinks []features.FeatureRelatedLink
 }
 
 type localizedDoc struct {
@@ -214,6 +217,8 @@ func zhTWText() map[string]string {
 		"feature.capabilities.title":                "平台基礎能力",
 		"feature.outcomes":                          "成果",
 		"feature.outcomes.title":                    "產品團隊為何使用",
+		"feature.related":                           "相關內容",
+		"feature.related.title":                     "繼續整合路徑",
 		"feature.next":                              "下一步",
 		"feature.cta.prefix":                        "評估",
 		"feature.cta.suffix":                        "如何支援你的產品路線圖。",
@@ -247,6 +252,10 @@ func zhTWText() map[string]string {
 		"manual.eyebrow":                            "使用手冊",
 		"manual.chapter":                            "手冊章節",
 		"manual.open":                               "開啟章節",
+		"manual.offline":                            "離線文件",
+		"manual.offline.title":                      "線上閱讀或下載同語言、可驗證的完整 PDF。",
+		"manual.download":                           "下載完整 PDF",
+		"manual.reference":                          "開啟 API reference",
 		"manual.back":                               "返回使用手冊",
 		"manual.more":                               "其他手冊章節",
 		"manual.more.title":                         "繼續閱讀相關手冊章節。",
@@ -361,7 +370,7 @@ func zhTWFeatures() map[string]localizedFeature {
 			Outcomes:     []string{"縮短行動與裝置整合驗證時程", "對齊 App、韌體與產品團隊的範例邊界", "減少每條產品線的一次性 App/雲端/裝置整合工作"},
 			Sections: []features.FeatureSection{
 				{Eyebrow: "SDK 基礎", Title: "不用重建連網產品堆疊，也能交付品牌化行動 App", Intro: "此頁將行動 SDK 定位為可重用的平台層，而不是籠統宣稱已經有完整 App runtime。", Items: []string{"透過 iOS 與 Android SDK 層涵蓋導入、認證、裝置控制與帳號連結 primitive。", "協助行動團隊把常見裝置模型、配網狀態與控制介面映射到產品專屬體驗。", "保持清楚邊界：此 Go 網站描述 App enablement 範圍，不是 native mobile client runtime。"}},
-				{Eyebrow: "參考範例", Title: "參考範例應用先證明 SDK 用法，再進入產品整合", Intro: "範例生態系讓 App、韌體與產品團隊用具體的 App 端與裝置端 reference 驗證流程。", Items: []string{"以 rtk_cloud_client repository 作為 sample code、specification 與 sample README 的 source of truth；此網站只摘要客戶評估路徑，不 hosting SDK source。", "使用 Android 智慧家庭範例、iOS 智慧家庭範例與 WebApp Ops Lab 範例驗證配網、裝置列表/細節、燈具與空調控制、相機監看與 debug report。", "使用 Linux 模擬器與 PRO2 裝置範例驗證裝置端 command handling、sample MQTT payload、snapshot upload、狀態/log/event 回報與 WebRTC Video over TURN answerer / ICE/TURN 邊界。", "這些是 SDK usage references，不是正式 app-store app 或 white-label release package。"}},
+				{Eyebrow: "參考範例", Title: "參考範例應用先證明 SDK 用法，再進入產品整合", Intro: "範例生態系讓 App、韌體與產品團隊用具體的 App 端與裝置端 reference 驗證流程。", Items: []string{"以 rtk_cloud_client repository 作為 sample code、specification 與 sample README 的 source of truth；此網站只摘要客戶評估路徑，不 hosting SDK source。", "使用 Android 智慧家庭範例、iOS 智慧家庭範例與 WebApp Ops Lab 範例驗證配網、裝置列表/細節、燈具與空調控制、相機監看與 debug report。", "Linux 模擬器只驗證 command、state、report 與 snapshot metadata，不模擬 camera frame 或 WebRTC signaling。PRO2 host smoke 只驗證 adapter 與 signaling lifecycle；physical media 需使用實體 PRO2 device。", "這些是 SDK usage references，不是正式 app-store app 或 white-label release package。"}},
 				{Eyebrow: "通知", Title: "把提醒與生命週期訊息當成 App 產品介面的一部分", Intro: "推播與 in-app notification 流程需要行動、雲端與支援能力協同規劃。", Items: []string{"圍繞導入完成、分享事件、OTA 提醒、警報與支援流程規劃推播通知。", "將通知 payload 連接到產品 authorization decision、裝置所有權狀態與支援升級路徑。", "讓產品團隊可依市場與合規需求調整通知語氣、品牌與偏好設定。"}},
 				{Eyebrow: "發布", Title: "跨工程與產品團隊協調上架工作", Intro: "上架指引讓 App SDK 頁面與實際 release execution 連結，而不是停在 SDK 選型。", Items: []string{"協調 bundle identifier、簽章資產、商店 metadata、審核 checklist 與 App Store / Google Play staged rollout。", "用 contact path 讓 App 開發與產品團隊對齊品牌、release readiness 與後端能力範圍。", "產品團隊仍擁有 store ownership、privacy disclosure、crash monitoring 與 release approval。"}, Accent: true},
 			},
@@ -374,9 +383,89 @@ func zhTWFeatures() map[string]localizedFeature {
 					{Cells: []string{"Android 智慧家庭範例", "App", "配網 adapter 狀態、裝置列表/細節、燈具與空調控制、相機監看與 debug report。", "Native Kotlin reference；不是 app-store deliverable。"}},
 					{Cells: []string{"iOS 智慧家庭範例", "App", "Swift SDK 的設定 profile、裝置控制、相機邊界與 debug evidence。", "Native Swift reference；客戶產品團隊擁有 release UX 與簽章。"}},
 					{Cells: []string{"WebApp Ops Lab 範例", "App", "雲端側導入、MQTT payload inspection、模擬控制、相機輔助流程與 debug report。", "瀏覽器 reference，不包含 BLE 或 SoftAP onboarding。"}},
-					{Cells: []string{"Linux 模擬器", "裝置", "不需硬體即可驗證燈具、空調與相機 command handling、local state 與 validation output。", "供開發與 evidence 使用的模擬器；不是 production device firmware package。"}},
-					{Cells: []string{"PRO2 裝置範例", "裝置", "Device-bound token、owner transport、snapshot upload、相機 logs/events 與 WebRTC Video over TURN answerer / ICE/TURN 邊界。", "韌體 reference；具體 Realtek SDK calls 仍由 firmware 擁有。"}},
+					{Cells: []string{"Linux 模擬器", "裝置", "不需硬體即可驗證燈具、空調、meter、state、log、report 與 snapshot metadata。", "不模擬 camera frame 或 WebRTC signaling，也不是 media-capable peer。"}},
+					{Cells: []string{"PRO2 裝置範例", "裝置", "Host smoke 驗證 adapter wiring 與 signaling lifecycle；實體硬體才能驗證 snapshot、camera/audio 與 answerer。", "Host smoke 不等於 physical media validation；vendor media call 仍由 firmware 擁有。"}},
 				},
+			},
+			RelatedLinks: []features.FeatureRelatedLink{
+				{Title: "Video Cloud", Summary: "將 RTK signaling 與 stored-video SDK workflow 接到產品觀看體驗。", Href: "/features/video-cloud"},
+				{Title: "SDK 能力工作流", Summary: "在 SDK Manual 查看 package support 與整合邊界。", Href: "/manual/sdk/capability-workflows"},
+			},
+		},
+		"video-cloud": {
+			Title:        "Video Cloud",
+			Kicker:       "Live WebRTC 與加密 stored video 是兩條獨立產品路徑。",
+			Summary:      "清楚呈現雲端 signaling、ICE/TURN、session lifecycle、加密 clip、snapshot、playback URL，以及 App、SDK、Cloud 與 Device 權責。",
+			Description:  "Realtek Connect+ 提供 Android 與 iOS SDK，用於雲端 signaling 與 stored-video workflow。Product app 將這些 SDK 與平台 WebRTC 及 media component 整合，交付最終觀看體驗。",
+			ImageAlt:     "相機分別連接 Live signaling 與加密 stored-video 路徑，最後進入行動裝置觀看介面。",
+			Highlights:   []string{"Live WebRTC 使用 HTTPS control API 與目前 device owner 的 MQTT 或 WebSocket transport", "Recording、stored clip 與 snapshot 使用獨立於 live viewing 的加密上傳及播放 lifecycle", "Live media frame 保持在 peer-to-peer 或 TURN relay 路徑，不會由雲端自動保存"},
+			Capabilities: []string{"HTTPS ICE、session create、answer retrieval、close、expiry 與 failure-state helper", "透過 current-owner MQTT 或 WebSocket 傳送相同 webrtc_offer signaling payload；不 fan-out，也不自動 fallback 到非 owner transport", "Authorize、presigned upload、complete、list、thumbnail、短效播放、URL refresh 與 delete workflow"},
+			Outcomes:     []string{"整合雲端 signaling，不需另建 signaling backend", "由 App 團隊掌握 platform WebRTC rendering 與產品 UX", "讓 live viewing、recording、clip 與 snapshot 在營運和技術上保持清楚區隔"},
+			Flows: []features.FeatureFlow{
+				{
+					Eyebrow: "Live WebRTC",
+					Title:   "單一 signaling lifecycle，media 由兩端負責",
+					Intro:   "Realtek Connect+ 協調 signaling 與 ICE/TURN；App 與 Device 連接並呈現實際 media。",
+					Steps: []features.FeatureFlowStep{
+						{Title: "取得 ICE", Body: "App 透過 RTK SDK 呼叫 HTTPS ICE API。"},
+						{Title: "建立 offer", Body: "App 的 platform WebRTC component 建立 SDP offer。"},
+						{Title: "開啟 session", Body: "RTK SDK 透過 HTTPS 建立 signaling session。"},
+						{Title: "傳送 offer", Body: "Cloud 經目前 device owner 的 MQTT 或 WebSocket transport 送出 webrtc_offer。"},
+						{Title: "建立 answer", Body: "Device SDK 或 firmware 接收 offer、連接 camera/audio track 並建立 answer。"},
+						{Title: "提交 answer", Body: "Device 經 HTTPS answer API 回覆 SDP answer。"},
+						{Title: "協商 media", Body: "App 經 RTK SDK 取得 answer，完成 platform media negotiation。"},
+						{Title: "關閉", Body: "App 或 Device 關閉 session；expiry 與 timeout 也會終止 stale session。"},
+					},
+				},
+				{
+					Eyebrow: "Stored video",
+					Title:   "完整 media object 加密後直接上傳",
+					Intro:   "Stored clip 由獨立 recording 與 upload workflow 建立；live session 絕不會自動變成 clip。",
+					Steps: []features.FeatureFlowStep{
+						{Title: "錄製", Body: "產品錄製完整 MP4 clip 或擷取 JPEG snapshot。"},
+						{Title: "加密", Body: "Client 加密 media object，wrapped-key material 不寫入 log。"},
+						{Title: "授權", Body: "RTK SDK 取得 upload lifecycle 與短效 presigned PUT URL。"},
+						{Title: "上傳", Body: "Client 在 upload lifecycle 內執行一次 object-storage PUT。"},
+						{Title: "完成", Body: "SDK 標記 upload complete，service 驗證後公開 ready object。"},
+						{Title: "瀏覽與播放", Body: "App 進行 list、filter、pagination、thumbnail、短效 range URL refresh、playback 與 delete。"},
+					},
+				},
+			},
+			Sections: []features.FeatureSection{
+				{Eyebrow: "Snapshot 與 Clip", Title: "依使用者動作選擇正確 media object", Intro: "兩者共享授權和安全交付概念，但不能互換。", Items: []string{"Snapshot 是用於預覽、alert 或單一時間點檢視的 JPEG 靜態圖；目前 technical default 上限為 5 MiB。", "Clip 是用於 recorded playback 的完整 MP4 media object；目前 technical default 上限為 256 MiB。", "除非產品明確錄製並執行 stored-video workflow，否則 Live WebRTC 不會產生任何 stored object。"}},
+				{Eyebrow: "Retention 與 URL 預設值", Title: "將目前數值視為部署設定，不是價格或 SLA", Intro: "部署營運者選擇適用 storage policy；商務、region、backup 與 recovery 需求需另外確認。", Items: []string{"Retention profile 可依 deployment 設定為 1、7 或 30 天。", "Signed upload 與 playback URL 目前預設有效 10 分鐘；client 應更新 playback URL，不應永久保存。", "Authorized upload lifecycle 目前預設 30 分鐘，未完成時進入 failed 或 expired。", "本頁所有 limits 都是目前 technical defaults，不是價格、quota 承諾、backup 承諾、region 承諾或 SLA。"}},
+				{Eyebrow: "Current release boundary", Title: "清楚知道產品整合仍負責什麼", Intro: "SDK 減少 cloud workflow boilerplate，同時保留明確的 media 與 UX ownership。", Items: []string{"目前版本不包含 server-side transcoding、S3 multipart upload、simulcast negotiation、renegotiation，也不提供完整的 SDK 內建 WebRTC media renderer。", "Product app 負責 platform WebRTC component、media renderer、audio policy、foreground/background lifecycle 與最終觀看 UX。", "Device SDK 或 firmware 負責 offer handling、answer generation、camera/audio tracks、codec 與裝置 resource limits。"}, Accent: true},
+			},
+			Table: features.FeatureTable{
+				Eyebrow: "權責矩陣",
+				Title:   "連接每一層，同時保留清楚邊界",
+				Intro:   "同一組權責分工適用於產品架構、SDK 評估與支援除錯。",
+				Columns: []string{"層級", "提供能力", "整合邊界"},
+				Rows: []features.FeatureTableRow{
+					{Cells: []string{"Realtek Connect+ Cloud", "HTTPS signaling、current-owner MQTT/WebSocket delivery、TURN credential、session state 與 stored-video lifecycle API。", "協調 control 與 storage workflow；不接收或保存 Live media frame。"}},
+					{Cells: []string{"RTK Android/iOS SDK", "Authentication、ICE、offer/answer/close helper、stable error 與 clip workflow helper。", "將 session 與 media-object data 交給 product app；不包含完整 WebRTC renderer。"}},
+					{Cells: []string{"Product app", "產品專屬 live 與 recorded viewing experience。", "整合 platform WebRTC、renderer、audio policy、lifecycle、controls、empty/error states 與 playback URL refresh。"}},
+					{Cells: []string{"Device SDK / firmware", "Offer handling、answer generation、camera/audio tracks、recording、encryption 與 resource enforcement。", "負責 physical media validation、codec、track attachment 與 constrained-device behavior。"}},
+				},
+			},
+			Tables: []features.FeatureTable{{
+				Eyebrow: "Sample truth matrix",
+				Title:   "依各 sample 實際能力進行驗證",
+				Intro:   "Fixture 與 host-smoke sample 是有用的整合證據，但不等同 physical media validation。",
+				Columns: []string{"Sample", "可見狀態", "驗證內容", "不代表"},
+				Rows: []features.FeatureTableRow{
+					{Cells: []string{"Android playback", "Real SDK + Media3", "Stored clip list 與 playback integration。", "Live WebRTC rendering。"}},
+					{Cells: []string{"iOS playback", "Real SDK + AVPlayer", "Stored clip list 與 playback integration。", "Live WebRTC rendering。"}},
+					{Cells: []string{"Android/iOS Live", "RTK signaling integration / fixture UI", "Session data、offer/answer、close 與 UI lifecycle。", "完整 media rendering 或 physical camera validation。"}},
+					{Cells: []string{"WebApp Ops Lab", "Fixture-backed", "Signaling helper demonstration 與 operations workflow。", "Production WebRTC peer 或 native onboarding。"}},
+					{Cells: []string{"Linux simulator", "Device workflow simulator", "Command、state、report 與 validation evidence。", "Camera frame 或 WebRTC signaling。"}},
+					{Cells: []string{"PRO2 host smoke", "Adapter + lifecycle smoke", "Adapter wiring 與 signaling lifecycle。", "Physical camera、audio、codec 或 rendered-media validation。"}},
+				},
+			}},
+			RelatedLinks: []features.FeatureRelatedLink{
+				{Title: "App SDK", Summary: "查看 mobile integration surface 與 reference sample ecosystem。", Href: "/features/app-sdk"},
+				{Title: "Capability workflows", Summary: "比較 SDK package capability 與權責邊界。", Href: "/manual/sdk/capability-workflows"},
+				{Title: "Video workflows", Summary: "依照 live signaling 與 stored-video implementation guidance 整合。", Href: "/manual/sdk/video-workflows"},
 			},
 		},
 		"insights": {
@@ -461,8 +550,8 @@ func zhTWDocs() map[string]localizedDoc {
 					{Cells: []string{"Android 智慧家庭範例", "原生行動 App", "配網 adapter 狀態、裝置列表/細節、燈具與空調控制、相機監看、debug report 與 redacted evidence 收集。"}},
 					{Cells: []string{"iOS 智慧家庭範例", "原生行動 App", "使用 Swift SDK 驗證相同智慧家庭流程，包含設定 profile、裝置控制、相機邊界與 debug evidence。"}},
 					{Cells: []string{"WebApp Ops Lab 範例", "瀏覽器 App", "雲端側導入、裝置 registry 檢視、MQTT payload inspection、模擬控制、相機輔助流程與 debug report，不包含 BLE 或 SoftAP。"}},
-					{Cells: []string{"Linux 裝置模擬器", "裝置參考", "不需實體硬體即可驗證燈具、空調與相機 command handling、local state update、report 與 validation output。"}},
-					{Cells: []string{"PRO2 相機裝置範例", "裝置韌體參考", "device-bound token、owner transport、snapshot upload、相機狀態/log/event 回報與 WebRTC Video over TURN answerer / ICE/TURN 邊界。"}},
+					{Cells: []string{"Linux 裝置模擬器", "裝置參考", "驗證燈具、空調、meter、state、log、report 與 snapshot metadata；不模擬 camera frame 或 WebRTC signaling。"}},
+					{Cells: []string{"PRO2 相機裝置範例", "裝置韌體參考", "Host smoke 驗證 adapter 與 signaling lifecycle；camera/audio media validation 需要實體硬體。"}},
 				},
 			},
 		},
@@ -520,8 +609,13 @@ func localizedFeatures(overrides map[string]localizedFeature) []features.Feature
 			feature.Highlights = item.Highlights
 			feature.Capabilities = item.Capabilities
 			feature.Outcomes = item.Outcomes
+			feature.Flows = item.Flows
 			feature.Sections = item.Sections
 			feature.Table = item.Table
+			feature.Tables = item.Tables
+			if len(item.RelatedLinks) > 0 {
+				feature.RelatedLinks = item.RelatedLinks
+			}
 		}
 		out = append(out, feature)
 	}
@@ -579,8 +673,17 @@ func simplifiedFeatures(input []features.Feature) []features.Feature {
 		feature.Highlights = simplifiedSlice(feature.Highlights)
 		feature.Capabilities = simplifiedSlice(feature.Capabilities)
 		feature.Outcomes = simplifiedSlice(feature.Outcomes)
+		feature.Flows = simplifiedFeatureFlows(feature.Flows)
 		feature.Sections = simplifiedFeatureSections(feature.Sections)
 		feature.Table = simplifiedFeatureTable(feature.Table)
+		for tableIndex, table := range feature.Tables {
+			feature.Tables[tableIndex] = simplifiedFeatureTable(table)
+		}
+		for linkIndex, link := range feature.RelatedLinks {
+			link.Title = toSimplified(link.Title)
+			link.Summary = toSimplified(link.Summary)
+			feature.RelatedLinks[linkIndex] = link
+		}
 		out[index] = feature
 	}
 	return out
@@ -610,6 +713,22 @@ func simplifiedFeatureSections(input []features.FeatureSection) []features.Featu
 		section.Intro = toSimplified(section.Intro)
 		section.Items = simplifiedSlice(section.Items)
 		out[index] = section
+	}
+	return out
+}
+
+func simplifiedFeatureFlows(input []features.FeatureFlow) []features.FeatureFlow {
+	out := make([]features.FeatureFlow, len(input))
+	for index, flow := range input {
+		flow.Eyebrow = toSimplified(flow.Eyebrow)
+		flow.Title = toSimplified(flow.Title)
+		flow.Intro = toSimplified(flow.Intro)
+		for stepIndex, step := range flow.Steps {
+			step.Title = toSimplified(step.Title)
+			step.Body = toSimplified(step.Body)
+			flow.Steps[stepIndex] = step
+		}
+		out[index] = flow
 	}
 	return out
 }

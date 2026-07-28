@@ -12,14 +12,14 @@ Realtek Connect+ 客戶評估應先從可執行的參考範例開始，再決定
 | 家族 | 範例 | 目的 |
 | --- | --- | --- |
 | 家庭 App 參考客戶端 | Android 智慧家庭範例、iOS 智慧家庭範例、WebApp Ops Lab 範例 | 驗證 App 端 SDK 用法，包含 token setup、配網、裝置列表/細節、燈具與空調控制、相機監看、debug report 與 evidence collection。 |
-| 裝置參考客戶端 | Linux 模擬器、PRO2 相機裝置範例 | 驗證裝置端 command handling、sample MQTT payload 行為、狀態/log/event 回報、snapshot upload 與 WebRTC Video over TURN answerer / ICE/TURN 邊界。 |
+| 裝置參考客戶端 | Linux 模擬器、PRO2 相機裝置範例 | Linux 驗證 command/state/report/snapshot metadata，不模擬 camera frame 或 WebRTC signaling；PRO2 host smoke 驗證 adapter 與 signaling lifecycle，實體硬體才驗證 media。 |
 
 ## 客戶評估路徑
 
-1. 先跑 Linux simulator，在沒有實體硬體時驗證燈具、空調與相機 command handling。
+1. 先跑 Linux simulator，在沒有實體硬體時驗證燈具、空調、meter、state、report 與 snapshot metadata；它不模擬 camera frame 或 WebRTC signaling。
 2. 使用 WebApp Ops Lab 驗證雲端側 onboarding、device registry 檢視、MQTT payload inspection、模擬控制、相機 helper flow 與 debug report。
 3. 執行 Android 與 iOS 智慧家庭範例，驗證 native mobile flow、setup profile、裝置控制、相機監看邊界與 redacted debug evidence。
-4. 有 PRO2 硬體時接上 PRO2 camera device demo，驗證 device-bound token、owner transport、snapshot upload、相機 status/log/event 回報與 WebRTC Video over TURN answerer 行為。
+4. PRO2 host smoke 只驗證 adapter 與 signaling lifecycle；有實體 PRO2 camera device 時，再驗證 snapshot、camera/audio、codec 與 WebRTC answerer media 行為。
 
 ## 邊界
 

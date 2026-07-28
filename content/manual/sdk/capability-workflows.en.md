@@ -21,4 +21,8 @@ Firmware helpers expose campaign, rollout, report, and cancellation vocabulary. 
 
 ## WebRTC signaling
 
-SDK helpers exchange offers, answers, ICE data, and session lifecycle messages. The application owns the WebRTC peer connection, media engine, tracks, rendering, audio policy, TURN behavior, and user-visible call state. Stored-video playback is a separate HTTP workflow.
+Realtek Connect+ provides the signaling service: HTTPS APIs create and manage sessions, while the current device owner's MQTT or WebSocket transport receives the same `webrtc_offer` payload. SDK helpers exchange offers, answers, ICE data, and session lifecycle messages, so product teams do not need to build a separate signaling backend.
+
+The application owns the platform WebRTC peer connection, media engine, tracks, rendering, audio policy, and user-visible call state. Device SDK or firmware owns offer handling, answer generation, camera/audio tracks, codecs, and resource limits. Stored-video playback is a separate HTTP workflow.
+
+The current release does not bundle server-side transcoding, S3 multipart upload, simulcast negotiation, renegotiation, or a complete in-SDK WebRTC media renderer.

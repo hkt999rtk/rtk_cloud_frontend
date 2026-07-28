@@ -15,6 +15,10 @@ Create `RtkCloudClient` with the HTTPS base URL, device identifier where require
 
 Construct `ClipQuery` with bearer token, optional device and event filters, optional time range, positive limit, and non-negative skip. `listClips` and `listClipsAsync` return `ClipPage`, containing typed `ClipSummary` values, total count, and optional `nextSkip`. Use `downloadThumbnail` for preview bytes and `deleteClip` only after explicit confirmation.
 
+## Live WebRTC
+
+The SDK supplies cloud authentication, ICE, offer/answer/close, stable errors, and signaling-session helpers. The product app connects that session data to its Android WebRTC peer connection, tracks, renderer, audio policy, and lifecycle. The SDK does not bundle a complete media renderer.
+
 ## Encrypted playback
 
 Implement `PlaybackKeyProvider` behind Android Keystore-backed code. The provider receives `ClipSummary` and the server `PlaybackKey`, and returns `PlaybackKeyMaterial`. Pass the selected clip to `createPlaybackSession`; the SDK obtains the server key and submits only wrapped material. Give `playbackUrl` to Media3/ExoPlayer and release the player with the UI lifecycle.

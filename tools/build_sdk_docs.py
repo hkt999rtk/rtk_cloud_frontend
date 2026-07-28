@@ -20,7 +20,7 @@ from typing import Iterable
 import yaml
 
 
-LOCALES = ("en",)
+LOCALES = ("en", "zh-TW", "zh-CN")
 PACKAGES = ("native", "android", "ios", "javascript", "go", "freertos-pro2")
 REQUIRED_TOPICS = {
     "overview",
@@ -98,8 +98,10 @@ def parse_frontmatter(path: Path) -> tuple[dict[str, object], str]:
     return metadata, match.group(2).strip() + "\n"
 
 
-def load_pages(source: Path) -> tuple[dict[str, object], list[Page]]:
-    index_path = source / "index.en.yaml"
+def load_pages(source: Path, locale: str = "en") -> tuple[dict[str, object], list[Page]]:
+    if locale not in LOCALES:
+        raise DocsError(f"unsupported locale: {locale}")
+    index_path = source / f"index.{locale}.yaml"
     if not index_path.is_file():
         raise DocsError(f"manual index not found: {index_path}")
     index = yaml.safe_load(index_path.read_text(encoding="utf-8")) or {}
@@ -115,7 +117,7 @@ def load_pages(source: Path) -> tuple[dict[str, object], list[Page]]:
         if not slug or slug in seen or ".." in Path(slug).parts:
             raise DocsError(f"{index_path}: invalid or duplicate slug {slug!r}")
         seen.add(slug)
-        page_path = source / f"{slug}.en.md"
+        page_path = source / f"{slug}.{locale}.md"
         if not page_path.is_file():
             raise DocsError(f"indexed page not found: {page_path}")
         metadata, markdown = parse_frontmatter(page_path)
@@ -135,8 +137,8 @@ def load_pages(source: Path) -> tuple[dict[str, object], list[Page]]:
     if missing:
         raise DocsError(f"manual index is missing required topics: {', '.join(sorted(missing))}")
     unindexed = {
-        path.relative_to(source).as_posix().removesuffix(".en.md")
-        for path in source.rglob("*.en.md")
+        path.relative_to(source).as_posix().removesuffix(f".{locale}.md")
+        for path in source.rglob(f"*.{locale}.md")
     }.difference(seen)
     if unindexed:
         raise DocsError(f"manual pages are not indexed: {', '.join(sorted(unindexed))}")
@@ -162,7 +164,7 @@ def validate_links(source: Path, pages: Iterable[Page]) -> None:
                     relative = resolved.relative_to(source.resolve()).as_posix()
                 except ValueError:
                     relative = ""
-                slug = re.sub(r"\.(en\.)?md$", "", relative)
+                slug = re.sub(r"\.(?:en|zh-TW|zh-CN)\.md$", "", relative)
                 if slug in known:
                     continue
             if not resolved.exists():
@@ -316,7 +318,7 @@ def pandoc(markdown_path: Path, output: Path, *, title: str, css: Path, toc: boo
     run(command)
 
 
-def markdown_for_page(page: Page, pages: list[Page]) -> str:
+def markdown_for_page(page: Page, pages: list[Page], *, extra_asset_depth: int = 0) -> str:
     navigation = ["<nav><strong>SDK manual</strong><ul>"]
     root_depth = len(Path(page.slug).parts)
     prefix = "../" * root_depth
@@ -324,13 +326,25 @@ def markdown_for_page(page: Page, pages: list[Page]) -> str:
         target = prefix + candidate.slug + "/index.html"
         navigation.append(f'<li><a href="{html.escape(target)}">{html.escape(candidate.title)}</a></li>')
     navigation.append("</ul></nav>")
-    body = page.markdown.replace("](/content-assets/manual/sdk/", f"]({prefix}assets/manual/")
+    asset_prefix = "../" * extra_asset_depth
+    body = page.markdown.replace("](/content-assets/manual/sdk/", f"]({prefix}{asset_prefix}assets/manual/")
     return "\n".join(navigation) + "\n\n" + f"# {page.title}\n\n{page.description}\n\n" + body
 
 
+def validate_locale_parity(pages_by_locale: dict[str, list[Page]]) -> None:
+    expected = [(page.slug, page.package) for page in pages_by_locale["en"]]
+    for locale in LOCALES[1:]:
+        actual = [(page.slug, page.package) for page in pages_by_locale[locale]]
+        if actual != expected:
+            raise DocsError(f"{locale}: manual chapter order or package mapping differs from English")
+
+
 def build(source: Path, sdk_repo: Path, output_root: Path, version: str) -> Path:
-    index, pages = load_pages(source)
-    validate_links(source, pages)
+    loaded = {locale: load_pages(source, locale) for locale in LOCALES}
+    validate_locale_parity({locale: item[1] for locale, item in loaded.items()})
+    for _, locale_pages in loaded.values():
+        validate_links(source, locale_pages)
+    index, pages = loaded["en"]
     sdk_repo = sdk_repo.resolve()
     if not (sdk_repo / ".git").exists():
         raise DocsError(f"SDK repository is not a Git checkout: {sdk_repo}")
@@ -426,10 +440,86 @@ def build(source: Path, sdk_repo: Path, output_root: Path, version: str) -> Path
             pdf_root / f"rtk-cloud-{name}-sdk-{version}.pdf",
             pdf_root / f"rtk-cloud-{name}-sdk.pdf",
         )
+
+    for locale in LOCALES[1:]:
+        locale_index, locale_pages = loaded[locale]
+        locale_html_root = html_root / locale
+        locale_work_root = work_root / locale
+        locale_html_root.mkdir(parents=True, exist_ok=True)
+        locale_work_root.mkdir(parents=True, exist_ok=True)
+        locale_parts: list[str] = []
+        locale_package_parts: dict[str, list[str]] = {name: [] for name in PACKAGES}
+        for page in locale_pages:
+            target = locale_html_root / page.slug / "index.html"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            md_path = locale_work_root / f"{page.slug.replace('/', '-')}.md"
+            rendered_markdown = markdown_for_page(page, locale_pages, extra_asset_depth=1)
+            md_path.write_text(rendered_markdown, encoding="utf-8")
+            pandoc(md_path, target, title=f"{page.title} | RTK Cloud SDK", css=css)
+            printable_markdown = page.markdown.replace("](/content-assets/manual/sdk/", "](assets/")
+            locale_parts.append(f"# {page.title}\n\n{page.description}\n\n{printable_markdown}")
+            if page.package:
+                locale_package_parts[page.package].append(locale_parts[-1])
+
+        locale_landing = locale_work_root / "index.md"
+        locale_landing.write_text("\n".join([
+            f"# {locale_index.get('title', 'RTK Cloud SDK User Manual')}",
+            "",
+            str(locale_index.get("description", "")),
+            "",
+            *(f"- [{page.title}]({page.slug}/index.html) — {page.description}" for page in locale_pages),
+            "",
+        ]), encoding="utf-8")
+        pandoc(locale_landing, locale_html_root / "index.html", title=str(locale_index.get("title")), css=css)
+
+        locale_combined_md = locale_work_root / "combined.md"
+        locale_combined_md.write_text(
+            "\n\n".join(locale_parts + [reference_pages[name] for name in PACKAGES]),
+            encoding="utf-8",
+        )
+        locale_combined_html = locale_work_root / "combined.html"
+        pandoc(
+            locale_combined_md,
+            locale_combined_html,
+            title=f"{locale_index.get('title')} {version}",
+            css=css,
+            resource_path=source,
+            embed_resources=True,
+        )
+        locale_combined_pdf = pdf_root / f"rtk-cloud-sdk-user-manual-{version}.{locale}.pdf"
+        run(["weasyprint", str(locale_combined_html), str(locale_combined_pdf)])
+        shutil.copy2(locale_combined_pdf, pdf_root / f"rtk-cloud-sdk-user-manual.{locale}.pdf")
+
+        for name in PACKAGES:
+            package_md = locale_work_root / f"package-{name}.md"
+            shared = [
+                locale_parts[i]
+                for i, page in enumerate(locale_pages)
+                if page.slug in {"overview", "getting-started", "authentication-security", "lifecycle-errors", "troubleshooting"}
+            ]
+            package_md.write_text(
+                "\n\n".join(shared + locale_package_parts[name] + [reference_pages[name]]),
+                encoding="utf-8",
+            )
+            package_html = locale_work_root / f"package-{name}.html"
+            pandoc(
+                package_md,
+                package_html,
+                title=f"RTK Cloud {name.title()} SDK {version}",
+                css=css,
+                resource_path=source,
+                embed_resources=True,
+            )
+            versioned = pdf_root / f"rtk-cloud-{name}-sdk-{version}.{locale}.pdf"
+            run(["weasyprint", str(package_html), str(versioned)])
+            shutil.copy2(versioned, pdf_root / f"rtk-cloud-{name}-sdk.{locale}.pdf")
+
     download_index = pdf_root / "index.html"
     download_index.write_text("<!doctype html><html><head><meta charset=\"utf-8\"><title>SDK PDF downloads</title></head><body><h1>SDK PDF downloads</h1><ul>" + "".join([
         '<li><a href="rtk-cloud-sdk-user-manual.pdf">Complete SDK user manual</a></li>',
+        *(f'<li><a href="rtk-cloud-sdk-user-manual.{locale}.pdf">Complete SDK user manual ({locale})</a></li>' for locale in LOCALES[1:]),
         *(f'<li><a href="rtk-cloud-{name}-sdk.pdf">{html.escape(name.replace("-", " ").title())} SDK manual</a></li>' for name in PACKAGES),
+        *(f'<li><a href="rtk-cloud-{name}-sdk.{locale}.pdf">{html.escape(name.replace("-", " ").title())} SDK manual ({locale})</a></li>' for locale in LOCALES[1:] for name in PACKAGES),
     ]) + "</ul></body></html>\n", encoding="utf-8")
 
     validate_generated_html(html_root)
@@ -471,8 +561,10 @@ def build(source: Path, sdk_repo: Path, output_root: Path, version: str) -> Path
 
 
 def check(source: Path, sdk_repo: Path) -> None:
-    _, pages = load_pages(source)
-    validate_links(source, pages)
+    loaded = {locale: load_pages(source, locale) for locale in LOCALES}
+    validate_locale_parity({locale: item[1] for locale, item in loaded.items()})
+    for _, pages in loaded.values():
+        validate_links(source, pages)
     git_value(sdk_repo.resolve(), "rev-parse", "HEAD")
     references = build_references(sdk_repo.resolve())
     missing = set(PACKAGES).difference(reference.package for reference in references)
