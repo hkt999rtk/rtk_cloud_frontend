@@ -3117,8 +3117,9 @@ h1, h2, h3, .page-hero h1, .section-heading h2 {
   .mobile-only-login { display: flex; width: 100%; min-height: 50px; margin-bottom: 10px; }
   .section, .page-hero, .hero { width: min(100% - 40px,1200px); }
   .home-hero { height: auto; min-height: 0; grid-template-columns: 1fr; gap: 36px; padding: 52px 0 58px; }
-  .home-hero h1 { max-width: 100%; margin-top: 10px; font-size: 38px; line-height: 1.12; }
-  .home-hero h1 span:first-child { white-space: nowrap; font-size: .75em; letter-spacing: -.045em; }
+  .home-hero h1 { max-width: 100%; margin-top: 10px; font-size: clamp(28px, 7.7vw, 30px); line-height: 1.12; }
+  .home-hero h1 span:first-child { white-space: nowrap; font-size: .8em; letter-spacing: -.045em; }
+  html[lang^="zh"] .home-hero h1 { font-size: 38px; }
   html[lang^="zh"] .home-hero h1 span:first-child { font-size: .94em; letter-spacing: -.055em; }
   .home-hero h1 span + span { margin-top: 7px; }
   .home-hero .hero-lede { font-size: 1rem; line-height: 1.68; }
