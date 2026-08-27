@@ -32,16 +32,27 @@
       <span class="brand-divider"></span>
       <span class="brand-product">Connect+</span>
     </a>
-    <nav class="main-nav" aria-label="Main navigation">
-      <a href="{{localizedPath . "/docs"}}">{{t . "nav.docs"}}</a>
-      <a href="{{localizedPath . "/features"}}">{{t . "nav.features"}}</a>
-      <a href="{{localizedPath . "/search"}}">{{t . "nav.search"}}</a>
-      <a href="{{localizedPath . "/"}}#architecture">{{t . "nav.architecture"}}</a>
-      <a href="{{localizedPath . "/contact"}}" class="nav-cta" data-analytics-cta="nav_cta_contact">{{t . "nav.contact"}}</a>
-    </nav>
-    {{if .AlternateLinks}}<nav class="language-nav" aria-label="Language">
-      {{range .AlternateLinks}}{{if ne .HrefLang "x-default"}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}
-    </nav>{{end}}
+    <div class="mobile-header-controls">
+      {{if .AlternateLinks}}<details class="mobile-language-menu">
+        <summary aria-label="{{t . "nav.language"}}">{{.Lang}}</summary>
+        <nav aria-label="{{t . "nav.language"}}">
+          {{range .AlternateLinks}}{{if ne .HrefLang "x-default"}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}
+        </nav>
+      </details>{{end}}
+      <button class="menu-toggle" type="button" data-menu-toggle aria-controls="site-navigation" aria-expanded="false" aria-label="{{t . "nav.menu"}}"><span></span><span></span><span></span></button>
+    </div>
+    <div class="header-nav-shell" id="site-navigation">
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="{{localizedPath . "/docs"}}">{{t . "nav.docs"}}</a>
+        <a href="{{localizedPath . "/features"}}">{{t . "nav.features"}}</a>
+        <a href="{{localizedPath . "/search"}}">{{t . "nav.search"}}</a>
+        <a href="{{localizedPath . "/"}}#architecture">{{t . "nav.architecture"}}</a>
+        <a href="{{localizedPath . "/contact"}}" class="nav-cta" data-analytics-cta="nav_cta_contact">{{t . "nav.contact"}}</a>
+      </nav>
+      {{if .AlternateLinks}}<nav class="language-nav" aria-label="{{t . "nav.language"}}">
+        {{range .AlternateLinks}}{{if ne .HrefLang "x-default"}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}
+      </nav>{{end}}
+    </div>
   </header>
 
   <main id="main-content" tabindex="-1">
@@ -67,6 +78,7 @@
     </nav>
   </footer>
 
+  <script src="{{asset "/static/site.js"}}" defer></script>
   {{if .Analytics.Enabled}}
   <script>
     (function () {

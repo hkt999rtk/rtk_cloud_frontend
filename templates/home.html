@@ -1,279 +1,143 @@
 {{define "content"}}
-<section class="hero">
+<section class="hero home-hero">
   <div class="hero-copy">
     <p class="eyebrow">{{t . "home.eyebrow"}}</p>
-    <h1>Realtek Connect+</h1>
+    <h1>{{t . "home.hero.title"}}</h1>
     <p class="hero-lede">{{t . "home.lede"}}</p>
     <div class="hero-actions">
       <a class="button primary" href="{{.ServiceLoginURL}}" data-analytics-cta="home_cta_service_login"><span class="button-icon">{{icon "arrow-right"}}</span>{{t . "home.cta.primary"}}</a>
       <a class="button secondary" href="{{localizedPath . "/features/private-cloud"}}" data-analytics-cta="home_cta_secondary"><span class="button-icon">{{icon "cloud-lock"}}</span>{{t . "home.cta.secondary"}}</a>
     </div>
-    <div class="hero-points capability-strip" aria-label="Platform highlights">
-      <span><span class="hero-chip-icon">{{icon "chip"}}</span>{{t . "home.chip.silicon"}}</span>
-      <span><span class="hero-chip-icon">{{icon "device"}}</span>{{t . "home.chip.sdk"}}</span>
-      <span><span class="hero-chip-icon">{{icon "cloud-lock"}}</span>{{t . "home.chip.cloud"}}</span>
-      <span><span class="hero-chip-icon">{{icon "dashboard"}}</span>{{t . "home.chip.ops"}}</span>
-    </div>
+    <ul class="hero-benefits" aria-label="{{t . "home.benefits.aria"}}">
+      <li>{{icon "check"}}<span>{{t . "home.benefit.managed"}}</span></li>
+      <li>{{icon "check"}}<span>{{t . "home.benefit.usage"}}</span></li>
+      <li>{{icon "check"}}<span>{{t . "home.benefit.login"}}</span></li>
+    </ul>
   </div>
   <div class="hero-visual">
-    <img src="{{asset "/static/assets/connectplus-hero-corporate-v2.jpg"}}" alt="Realtek Connect+ chip, device, secure cloud, mobile app, and operations dashboard flow">
+    <img src="{{asset "/static/assets/connectplus-hero-corporate-v2.jpg"}}" width="1440" height="900" alt="{{t . "home.hero.image.alt"}}">
   </div>
 </section>
 
-<section class="section intro">
-  <div class="section-heading">
-    <p class="eyebrow">{{t . "home.overview.eyebrow"}}</p>
-    <h2>{{t . "home.overview.title"}}</h2>
-  </div>
-  <p class="section-lede">{{t . "home.overview.lede"}}</p>
-</section>
-
-<section class="section platform-showcase">
-  <div class="section-heading">
-    <p class="eyebrow">{{t . "home.surfaces.eyebrow"}}</p>
-    <h2>{{t . "home.surfaces.title"}}</h2>
-  </div>
-  <div class="platform-showcase-shell">
-    <div class="platform-showcase-copy">
-      <span class="icon-box panel-icon">{{icon "dashboard"}}</span>
-      <h3>{{t . "home.surfaces.card.title"}}</h3>
-      <p>{{t . "home.surfaces.card.body"}}</p>
-      <div class="surface-strip" aria-label="Platform surface highlights">
-        <span><span class="module-icon">{{icon "provision"}}</span>{{t . "home.surface.onboarding"}}</span>
-        <span><span class="module-icon">{{icon "ota"}}</span>{{t . "home.surface.rollouts"}}</span>
-        <span><span class="module-icon">{{icon "chart"}}</span>{{t . "home.surface.insights"}}</span>
-        <span><span class="module-icon">{{icon "cloud-lock"}}</span>{{t . "home.surface.security"}}</span>
-      </div>
-    </div>
-    <div class="platform-showcase-visual">
-      <img src="{{asset "/static/assets/connectplus-platform-surfaces-corporate-v2.jpg"}}" alt="Realtek Connect+ platform surfaces showing device onboarding, OTA rollout, and fleet insights dashboards">
-    </div>
-  </div>
-</section>
-
-<section class="section principles-section">
-  <div class="section-heading centered">
-    <p class="eyebrow">{{t . "home.principles.eyebrow"}}</p>
-    <h2>{{t . "home.principles.title"}}</h2>
-  </div>
-  <div class="principles-shell">
-    <div class="principle-tabs" aria-label="Realtek Connect+ design principles">
-      <span class="active"><span class="module-icon">{{icon "dashboard"}}</span>{{t . "home.principle.active"}}</span>
-      <span><span class="module-icon">{{icon "fleet"}}</span>{{t . "home.principle.scale"}}</span>
-      <span><span class="module-icon">{{icon "cloud-lock"}}</span>{{t . "home.principle.security"}}</span>
-      <span><span class="module-icon">{{icon "shield-user"}}</span>{{t . "home.principle.privacy"}}</span>
-      <span><span class="module-icon">{{icon "route"}}</span>{{t . "home.principle.cost"}}</span>
-      <span><span class="module-icon">{{icon "package"}}</span>{{t . "home.principle.custom"}}</span>
-    </div>
-    <article class="principle-panel">
-      <div>
-        <span class="icon-box page-hero-icon">{{icon "dashboard"}}</span>
-        <p class="eyebrow">{{t . "home.principle.active"}}</p>
-        <h3>{{t . "home.principle.panel"}}</h3>
-        <p>{{t . "home.principle.body"}}</p>
-      </div>
-      <div class="principle-metrics" aria-label="Platform management surfaces">
-        <span><strong>OTA</strong><small>campaigns</small></span>
-        <span><strong>Fleet</strong><small>registry</small></span>
-        <span><strong>SDK</strong><small>mobile app</small></span>
-        <span><strong>API</strong><small>integrations</small></span>
-      </div>
-    </article>
-  </div>
-</section>
-
-<section class="section" id="services">
-  <div class="section-heading">
-    <p class="eyebrow">{{t . "home.services.eyebrow"}}</p>
-    <h2>{{t . "home.services.title"}}</h2>
-  </div>
-  <div class="feature-grid home-feature-grid">
-    {{range .Features}}
-    <a class="feature-card feature-card-{{.Slug}}" href="{{localizedPath $ (printf "/features/%s" .Slug)}}">
-      <span class="icon-box feature-icon">{{icon .Icon}}</span>
-      {{if .ImagePath}}
-      <span class="feature-preview">
-        <img src="{{asset .ImagePath}}" alt="">
-      </span>
-      {{end}}
-      <h3>{{.Title}}</h3>
-      <p>{{.Summary}}</p>
-      <span class="text-link">{{t $ "home.feature.details"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
-    </a>
-    {{end}}
-  </div>
-</section>
-
-<section class="section sample-ecosystem-band">
-  <div class="sample-ecosystem-copy">
-    <span class="icon-box panel-icon">{{icon "package"}}</span>
-    <p class="eyebrow">{{t . "home.samples.eyebrow"}}</p>
-    <h2>{{t . "home.samples.title"}}</h2>
-    <p>{{t . "home.samples.body"}}</p>
-    <div class="sample-ecosystem-tags" aria-label="SDK sample surfaces">
-      <span><span class="module-icon">{{icon "phone-code"}}</span>{{t . "home.samples.app"}}</span>
-      <span><span class="module-icon">{{icon "device"}}</span>{{t . "home.samples.device"}}</span>
-    </div>
-    <a class="button secondary" href="{{localizedPath . "/manual/sdk-samples"}}"><span class="button-icon">{{icon "document"}}</span>{{t . "home.samples.cta"}}</a>
-  </div>
-  <div class="sample-ecosystem-visual">
-    <img src="{{asset "/static/assets/connectplus-sample-ecosystem-corporate-v2.jpg"}}" alt="Realtek Connect+ SDK sample ecosystem with app clients, device simulator, PRO2 demo, and cloud hub">
-  </div>
-</section>
-
-<section class="section architecture" id="architecture">
-  <div class="section-heading">
-    <p class="eyebrow">{{t . "home.arch.eyebrow"}}</p>
-    <h2>{{t . "home.arch.title"}}</h2>
-  </div>
-  <div class="flow" aria-label="Platform architecture flow">
-    <div class="flow-node">
-      <div class="flow-node-head">
-        <span class="icon-box flow-icon">{{icon "chip"}}</span>
-        <span class="flow-number">01</span>
-      </div>
-      <strong>{{t . "home.arch.device.title"}}</strong>
-      <p>{{t . "home.arch.device.body"}}</p>
-      <div class="node-modules" aria-label="Device SDK modules">
-        <span><span class="module-icon">{{icon "wifi"}}</span>Provision</span>
-        <span><span class="module-icon">{{icon "certificate"}}</span>Identity</span>
-        <span><span class="module-icon">{{icon "telemetry"}}</span>Telemetry</span>
-      </div>
-    </div>
-    <div class="flow-line"></div>
-    <div class="flow-node">
-      <div class="flow-node-head">
-        <span class="icon-box flow-icon">{{icon "cloud-lock"}}</span>
-        <span class="flow-number">02</span>
-      </div>
-      <strong>{{t . "home.arch.cloud.title"}}</strong>
-      <p>{{t . "home.arch.cloud.body"}}</p>
-      <div class="node-modules" aria-label="Secure Cloud modules">
-        <span><span class="module-icon">{{icon "registry"}}</span>Registry</span>
-        <span><span class="module-icon">{{icon "ota"}}</span>OTA</span>
-        <span><span class="module-icon">{{icon "api"}}</span>API</span>
-      </div>
-    </div>
-    <div class="flow-line"></div>
-    <div class="flow-node">
-      <div class="flow-node-head">
-        <span class="icon-box flow-icon">{{icon "dashboard"}}</span>
-        <span class="flow-number">03</span>
-      </div>
-      <strong>{{t . "home.arch.app.title"}}</strong>
-      <p>{{t . "home.arch.app.body"}}</p>
-      <div class="node-modules" aria-label="App and dashboard modules">
-        <span><span class="module-icon">{{icon "phone-code"}}</span>App SDK</span>
-        <span><span class="module-icon">{{icon "chart"}}</span>Insights</span>
-        <span><span class="module-icon">{{icon "support"}}</span>Support</span>
-      </div>
-    </div>
-  </div>
-  <div class="architecture-rails" aria-label="Architecture protocol paths">
-    <span><span class="module-icon">{{icon "route"}}</span>MQTT over TLS</span>
-    <span><span class="module-icon">{{icon "upload"}}</span>Signed firmware image</span>
-    <span><span class="module-icon">{{icon "nodes"}}</span>REST APIs and webhooks</span>
-  </div>
-</section>
-
-<section class="section brand-film">
-  <div class="brand-film-shell">
-    <div class="brand-film-copy">
-      <span class="icon-box panel-icon">{{icon "chip"}}</span>
-      <p class="eyebrow">{{t . "home.film.eyebrow"}}</p>
-      <h2>{{t . "home.film.title"}}</h2>
-      <p>{{t . "home.film.body"}}</p>
-      <div class="brand-film-points" aria-label="Realtek brand trust points">
-        <span><span class="module-icon">{{icon "chip"}}</span>{{t . "home.film.point.silicon"}}</span>
-        <span><span class="module-icon">{{icon "nodes"}}</span>{{t . "home.film.point.ecosystem"}}</span>
-        <span><span class="module-icon">{{icon "cloud-lock"}}</span>{{t . "home.film.point.enterprise"}}</span>
-      </div>
-    </div>
-    <div class="brand-film-frame" aria-label="{{t . "home.film.cta"}}">
-      <video controls preload="metadata" poster="{{asset "/static/assets/realtek-brand-film-poster.jpg"}}" title="{{t . "home.film.title.attr"}}">
-        <source src="{{asset "/static/assets/realtek-brand-film.mp4"}}" type="video/mp4">
-        {{t . "home.film.fallback"}}
-      </video>
-    </div>
-  </div>
-</section>
-
-<section class="section deployment-section">
+<section class="section home-plans" aria-labelledby="plans-title">
   <div class="section-heading centered">
     <p class="eyebrow">{{t . "home.deploy.eyebrow"}}</p>
-    <h2>{{t . "home.deploy.title"}}</h2>
+    <h2 id="plans-title">{{t . "home.deploy.title"}}</h2>
   </div>
-  <div class="deployment-grid">
-    <article>
-      <span class="icon-box panel-icon">{{icon "cloud-lock"}}</span>
-      <p class="card-kicker">{{t . "home.deploy.public"}}</p>
+  <div class="plan-grid">
+    <article class="plan-card plan-card-managed">
+      <div class="plan-card-topline"><span class="icon-box">{{icon "cloud-lock"}}</span><span class="recommendation-badge">{{t . "home.deploy.public"}}</span></div>
       <h3>{{t . "home.deploy.public.title"}}</h3>
       <p>{{t . "home.deploy.public.body"}}</p>
-      <a class="button secondary" href="{{localizedPath . "/features/private-cloud"}}"><span class="button-icon">{{icon "document"}}</span>{{t . "home.deploy.docs"}}</a>
+      <div class="card-actions">
+        <a class="button primary" href="{{.ServiceLoginURL}}" data-analytics-cta="home_cta_service_login">{{t . "home.cta.primary"}}</a>
+        <a class="text-link" href="{{localizedPath . "/features/private-cloud"}}" data-analytics-cta="home_cta_secondary">{{t . "home.deploy.docs"}} →</a>
+      </div>
     </article>
-    <article>
-      <span class="icon-box panel-icon">{{icon "certificate"}}</span>
-      <p class="card-kicker">{{t . "home.deploy.private"}}</p>
+    <article class="plan-card plan-card-private">
+      <span class="icon-box">{{icon "cloud-lock"}}</span>
+      <p class="eyebrow">{{t . "home.deploy.private"}}</p>
       <h3>{{t . "home.deploy.private.title"}}</h3>
       <p>{{t . "home.deploy.private.body"}}</p>
-      <a class="button primary" href="{{localizedPath . "/contact"}}" data-analytics-cta="home_cta_discuss"><span class="button-icon">{{icon "mail"}}</span>{{t . "home.deploy.discuss"}}</a>
+      <a class="text-link" href="{{localizedPath . "/contact"}}" data-analytics-cta="home_cta_contact">{{t . "home.deploy.discuss"}} →</a>
     </article>
   </div>
+</section>
+
+<section class="section home-trust-band" aria-labelledby="trust-title">
+  <div class="trust-heading">
+    <p class="eyebrow">{{t . "home.trust.eyebrow"}}</p>
+    <h2 id="trust-title">{{t . "home.trust.title"}}</h2>
+  </div>
+  <div class="trust-item">
+    <span class="module-icon">{{icon "dashboard"}}</span>
+    <div><h3>{{t . "home.trust.managed.title"}}</h3><p>{{t . "home.trust.managed.body"}}</p></div>
+  </div>
+  <div class="trust-item">
+    <span class="module-icon">{{icon "shield-user"}}</span>
+    <div><h3>{{t . "home.trust.security.title"}}</h3><p>{{t . "home.trust.security.body"}}</p></div>
+  </div>
+  <div class="trust-item">
+    <span class="module-icon">{{icon "route"}}</span>
+    <div><h3>{{t . "home.trust.flexible.title"}}</h3><p>{{t . "home.trust.flexible.body"}}</p></div>
+  </div>
+  <a class="film-entry" href="{{asset "/static/assets/realtek-brand-film.mp4"}}" target="_blank" rel="noopener" aria-label="{{t . "home.film.title.attr"}}">
+    <img src="{{asset "/static/assets/realtek-brand-film-poster.jpg"}}" width="480" height="270" loading="lazy" alt="">
+    <span class="film-entry-play">{{icon "external"}}</span>
+    <span>{{t . "home.film.cta"}}</span>
+  </a>
+</section>
+
+<section class="section home-core-services" id="services" aria-labelledby="core-title">
+  <div class="section-heading centered">
+    <p class="eyebrow">{{t . "home.core.eyebrow"}}</p>
+    <h2 id="core-title">{{t . "home.core.title"}}</h2>
+    <p class="section-lede">{{t . "home.core.lede"}}</p>
+  </div>
+  <div class="feature-tabs" data-feature-tabs>
+    <div class="feature-tablist" role="tablist" aria-label="{{t . "home.core.tabs.aria"}}">
+      <button type="button" id="tab-provision" role="tab" aria-selected="true" aria-controls="panel-provision" tabindex="0" data-tab-target="panel-provision"><span>{{icon "provision"}}</span><strong>{{t . "home.core.provision.title"}}</strong></button>
+      <button type="button" id="tab-ota" role="tab" aria-selected="false" aria-controls="panel-ota" tabindex="-1" data-tab-target="panel-ota"><span>{{icon "ota"}}</span><strong>{{t . "home.core.ota.title"}}</strong></button>
+      <button type="button" id="tab-fleet" role="tab" aria-selected="false" aria-controls="panel-fleet" tabindex="-1" data-tab-target="panel-fleet"><span>{{icon "fleet"}}</span><strong>{{t . "home.core.fleet.title"}}</strong></button>
+    </div>
+    <div class="feature-panels">
+      <article class="feature-panel" id="panel-provision" role="tabpanel" aria-labelledby="tab-provision" tabindex="0">
+        <div class="feature-panel-copy"><p class="eyebrow">01</p><h3>{{t . "home.core.provision.title"}}</h3><p>{{t . "home.core.provision.body"}}</p><a class="text-link" href="{{localizedPath . "/features/provision"}}">{{t . "home.feature.details"}} →</a></div>
+        <img src="{{asset "/static/assets/feature-provision-flow-realtek-blue-v2.webp"}}" width="1440" height="900" loading="lazy" alt="{{t . "home.core.provision.image.alt"}}">
+      </article>
+      <article class="feature-panel" id="panel-ota" role="tabpanel" aria-labelledby="tab-ota" tabindex="0">
+        <div class="feature-panel-copy"><p class="eyebrow">02</p><h3>{{t . "home.core.ota.title"}}</h3><p>{{t . "home.core.ota.body"}}</p><a class="text-link" href="{{localizedPath . "/features/ota"}}">{{t . "home.feature.details"}} →</a></div>
+        <img src="{{asset "/static/assets/feature-ota-rollout-realtek-blue-v2.webp"}}" width="1440" height="900" loading="lazy" alt="{{t . "home.core.ota.image.alt"}}">
+      </article>
+      <article class="feature-panel" id="panel-fleet" role="tabpanel" aria-labelledby="tab-fleet" tabindex="0">
+        <div class="feature-panel-copy"><p class="eyebrow">03</p><h3>{{t . "home.core.fleet.title"}}</h3><p>{{t . "home.core.fleet.body"}}</p><a class="text-link" href="{{localizedPath . "/features/fleet-management"}}">{{t . "home.feature.details"}} →</a></div>
+        <img src="{{asset "/static/assets/feature-fleet-operations-realtek-blue-v2.webp"}}" width="1440" height="900" loading="lazy" alt="{{t . "home.core.fleet.image.alt"}}">
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section home-platform" id="architecture" aria-labelledby="architecture-title">
+  <div class="section-heading">
+    <p class="eyebrow">{{t . "home.arch.eyebrow"}}</p>
+    <h2 id="architecture-title">{{t . "home.arch.title"}}</h2>
+    <p class="section-lede">{{t . "home.capabilities.lede"}}</p>
+  </div>
+  <div class="platform-flow" aria-label="{{t . "home.arch.aria"}}">
+    <article><span class="icon-box">{{icon "device"}}</span><h3>{{t . "home.arch.device.title"}}</h3><p>{{t . "home.arch.device.body"}}</p></article>
+    <span class="flow-arrow" aria-hidden="true">→</span>
+    <article><span class="icon-box">{{icon "cloud-lock"}}</span><h3>{{t . "home.arch.cloud.title"}}</h3><p>{{t . "home.arch.cloud.body"}}</p></article>
+    <span class="flow-arrow" aria-hidden="true">→</span>
+    <article><span class="icon-box">{{icon "dashboard"}}</span><h3>{{t . "home.arch.app.title"}}</h3><p>{{t . "home.arch.app.body"}}</p></article>
+  </div>
+  <div class="compact-capability-grid">
+    <a class="compact-capability" href="{{localizedPath . "/features/app-sdk"}}"><span class="module-icon">{{icon "phone-code"}}</span><h3>{{t . "home.capability.app.title"}}</h3><p>{{t . "home.capability.app.body"}}</p></a>
+    <a class="compact-capability" href="{{localizedPath . "/features/video-cloud"}}"><span class="module-icon">{{icon "dashboard"}}</span><h3>{{t . "home.capability.video.title"}}</h3><p>{{t . "home.capability.video.body"}}</p></a>
+    <a class="compact-capability" href="{{localizedPath . "/features/security"}}"><span class="module-icon">{{icon "shield-user"}}</span><h3>{{t . "home.capability.security.title"}}</h3><p>{{t . "home.capability.security.body"}}</p></a>
+    <a class="compact-capability" href="{{localizedPath . "/features/insights"}}"><span class="module-icon">{{icon "chart"}}</span><h3>{{t . "home.capability.insights.title"}}</h3><p>{{t . "home.capability.insights.body"}}</p></a>
+    <a class="compact-capability" href="{{localizedPath . "/features/user-management"}}"><span class="module-icon">{{icon "shield-user"}}</span><h3>{{t . "home.capability.users.title"}}</h3><p>{{t . "home.capability.users.body"}}</p></a>
+    <a class="compact-capability" href="{{localizedPath . "/features/integrations"}}"><span class="module-icon">{{icon "nodes"}}</span><h3>{{t . "home.capability.integrations.title"}}</h3><p>{{t . "home.capability.integrations.body"}}</p></a>
+  </div>
+  <aside class="developer-entry" id="docs">
+    <div><p class="eyebrow">{{t . "home.docs.eyebrow"}}</p><h3>{{t . "home.docs.title"}}</h3><p>{{t . "home.docs.body"}}</p></div>
+    <a class="button secondary" href="{{localizedPath . "/docs"}}">{{t . "home.docs.cta"}}</a>
+  </aside>
 </section>
 
 <section class="section use-cases" id="use-cases">
-  <div class="section-heading">
-    <p class="eyebrow">{{t . "home.use.eyebrow"}}</p>
-    <h2>{{t . "home.use.title"}}</h2>
-  </div>
+  <div class="section-heading centered"><p class="eyebrow">{{t . "home.use.eyebrow"}}</p><h2>{{t . "home.use.title"}}</h2></div>
   <div class="use-case-list">
-    <article>
-      <span class="icon-box use-case-icon">{{icon "home"}}</span>
-      <h3>Smart Home</h3>
-      <p>{{t . "home.use.smart.body"}}</p>
-    </article>
-    <article>
-      <span class="icon-box use-case-icon">{{icon "nodes"}}</span>
-      <h3>Industrial IoT</h3>
-      <p>{{t . "home.use.industrial.body"}}</p>
-    </article>
-    <article>
-      <span class="icon-box use-case-icon">{{icon "refresh"}}</span>
-      <h3>Appliance Makers</h3>
-      <p>{{t . "home.use.appliance.body"}}</p>
-    </article>
+    <article><span class="icon-box">{{icon "home"}}</span><h3>Smart Home</h3><p>{{t . "home.use.smart.body"}}</p></article>
+    <article><span class="icon-box">{{icon "fleet"}}</span><h3>Industrial IoT</h3><p>{{t . "home.use.industrial.body"}}</p></article>
+    <article><span class="icon-box">{{icon "device"}}</span><h3>Connected Appliances</h3><p>{{t . "home.use.appliance.body"}}</p></article>
   </div>
 </section>
 
-<section class="section docs-entry" id="docs">
-  <div class="section-heading">
-    <p class="eyebrow">{{t . "home.docs.eyebrow"}}</p>
-    <h2>{{t . "home.docs.title"}}</h2>
+<section class="section final-cta" id="contact">
+  <div><p class="eyebrow">{{t . "home.cta.eyebrow"}}</p><h2>{{t . "home.cta.title"}}</h2><p>{{t . "home.cta.body"}}</p></div>
+  <div class="hero-actions">
+    <a class="button primary" href="{{.ServiceLoginURL}}" data-analytics-cta="home_cta_service_login">{{t . "home.cta.primary"}}</a>
+    <a class="button secondary" href="{{localizedPath . "/contact"}}" data-analytics-cta="home_cta_contact">{{t . "home.contact.cta"}}</a>
   </div>
-  <div class="docs-entry-grid">
-    {{range .Docs}}
-    <a class="feature-card docs-card" href="{{localizedPath $ (printf "/docs/%s" .Slug)}}">
-      <span class="icon-box feature-icon">{{icon .Icon}}</span>
-      <p class="card-kicker">{{.Kicker}}</p>
-      <h3>{{.Title}}</h3>
-      <p>{{.Summary}}</p>
-      <span class="text-link">{{t $ "home.docs.open"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
-    </a>
-    {{end}}
-  </div>
-</section>
-
-<section class="cta-band" id="contact">
-  <div>
-    <p class="eyebrow">{{t . "home.cta.eyebrow"}}</p>
-    <h2>{{t . "home.cta.title"}}</h2>
-    <p>{{t . "home.cta.body"}}</p>
-    <div class="cta-interest-list" aria-label="Common early access interests">
-      <span><span class="module-icon">{{icon "provision"}}</span>Provision</span>
-      <span><span class="module-icon">{{icon "ota"}}</span>OTA</span>
-      <span><span class="module-icon">{{icon "cloud-lock"}}</span>Private Cloud</span>
-    </div>
-  </div>
-  <a class="button primary" href="{{localizedPath . "/contact"}}" data-analytics-cta="home_cta_band"><span class="button-icon">{{icon "mail"}}</span>{{t . "home.contact.cta"}}</a>
 </section>
 {{end}}

@@ -690,10 +690,10 @@ func cloudPlansFeature() Feature {
 		Description: "Realtek Managed Cloud is the recommended path for teams that want to launch without building and operating the cloud platform themselves. Realtek hosts, maintains, and operates the service while customers pay according to actual use. Private Cloud remains available for organizations that require their own infrastructure and operating boundary.",
 		ImagePath:   "/static/assets/connectplus-architecture-diagram-corporate-v2.jpg",
 		ImageAlt:    "Realtek Connect+ cloud plan comparison between a Realtek-managed service and a customer-controlled private cloud.",
-		Highlights:  []string{"Recommended Realtek-managed service with hosting and operations included", "Pay for actual use without a published rate commitment", "Customer-controlled Private Cloud remains available as a second path"},
+		Highlights:  []string{"Recommended Realtek-managed service with hosting and operations included", "Flexible payment based on actual usage", "Customer-controlled Private Cloud remains available as a second path"},
 		Capabilities: []string{
 			"Realtek-managed platform hosting, maintenance, and operational lifecycle",
-			"A usage-based commercial model whose final rates are defined separately",
+			"A managed service with flexible payment based on actual usage",
 			"Private deployment planning for customer cloud or on-premises infrastructure",
 		},
 		Outcomes: []string{"Start using the service without building a cloud operations team", "Align cloud cost with actual platform use", "Keep a path to customer-controlled infrastructure when governance requires it"},
@@ -704,7 +704,7 @@ func cloudPlansFeature() Feature {
 				Intro:   "Realtek operates the cloud platform so product teams can focus on devices, applications, and customers.",
 				Items: []string{
 					"Realtek handles cloud setup, hosting, maintenance, and day-to-day platform operations.",
-					"Customers pay according to actual service use; final rates and billing units are confirmed separately and are not published on this page.",
+					"Customers pay flexibly based on actual service use. Contact the Realtek team for service plan details.",
 					"This is the primary path for teams that want to start quickly without owning the underlying cloud operations stack.",
 				},
 				Accent: true,
@@ -724,9 +724,9 @@ func cloudPlansFeature() Feature {
 			Eyebrow: "Cloud options",
 			Title:   "Choose the operating model that fits your team",
 			Intro:   "Realtek Managed Cloud is the recommended starting point; Private Cloud remains available when customer control is the priority.",
-			Columns: []string{"Option", "Who operates it", "Commercial concept", "Best fit"},
+			Columns: []string{"Option", "Who operates it", "Service approach", "Best fit"},
 			Rows: []FeatureTableRow{
-				{Cells: []string{"Realtek Managed Cloud — recommended", "Hosted, maintained, and operated by Realtek.", "Pay according to actual use; rates are confirmed separately.", "Teams that want to launch without building their own cloud operations stack."}},
+				{Cells: []string{"Realtek Managed Cloud — recommended", "Hosted, maintained, and operated by Realtek.", "Flexible payment based on actual usage; contact Realtek for plan details.", "Teams that want to launch without building their own cloud operations stack."}},
 				{Cells: []string{"Private Cloud", "Customer-controlled infrastructure with an agreed Realtek support boundary.", "Customer-specific deployment and support agreement.", "Organizations with dedicated infrastructure, residency, or governance requirements."}},
 			},
 		},

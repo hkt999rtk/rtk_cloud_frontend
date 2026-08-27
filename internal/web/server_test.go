@@ -405,9 +405,9 @@ func TestClientSampleEcosystemContentRenders(t *testing.T) {
 
 	cases := map[string][]string{
 		"/": {
-			"SDK sample ecosystem",
-			"Run app and device reference samples before committing to product integration.",
-			`href="/manual/sdk-samples"`,
+			"Find platform concepts, integration guides, API references, and SDK samples in one place.",
+			`href="/docs"`,
+			"Go to developer docs",
 		},
 		"/features/app-sdk": {
 			"Reference sample applications",
@@ -822,35 +822,23 @@ func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
 
 	tests := []struct {
 		path       string
-		title      string
-		body       string
-		point      string
 		videoTitle string
-		fallback   string
+		label      string
 	}{
 		{
 			path:       "/",
-			title:      "Built on Realtek&#39;s connected intelligence.",
-			body:       "Realtek Connect&#43; extends a semiconductor and connectivity foundation into a cloud platform story",
-			point:      "Semiconductor foundation",
-			videoTitle: `title="Realtek corporate brand film"`,
-			fallback:   "Your browser does not support the video tag.",
+			videoTitle: `aria-label="Realtek corporate brand film"`,
+			label:      "Watch brand film",
 		},
 		{
 			path:       "/zh-tw/",
-			title:      "建立在 Realtek 的連網智慧之上。",
-			body:       "Realtek Connect&#43; 將半導體與連線技術基礎延伸為雲端平台敘事",
-			point:      "半導體技術基礎",
-			videoTitle: `title="Realtek 企業形象影片"`,
-			fallback:   "你的瀏覽器不支援 video 標籤。",
+			videoTitle: `aria-label="Realtek 企業形象影片"`,
+			label:      "觀看品牌影片",
 		},
 		{
 			path:       "/zh-cn/",
-			title:      "建立在 Realtek 的連网智能之上。",
-			body:       "Realtek Connect&#43; 将半导体与連线技术基础延伸为云端平台敘事",
-			point:      "半导体技术基础",
-			videoTitle: `title="Realtek 企业形象影片"`,
-			fallback:   "你的浏览器不支援 video 标签。",
+			videoTitle: `aria-label="Realtek 企业形象影片"`,
+			label:      "观看品牌影片",
 		},
 	}
 
@@ -865,14 +853,10 @@ func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
 
 		body := rec.Body.String()
 		for _, want := range []string{
-			`<section class="section brand-film">`,
-			`<video controls preload="metadata" poster="/static/assets/realtek-brand-film-poster.jpg"`,
-			`<source src="/static/assets/realtek-brand-film.mp4" type="video/mp4">`,
+			`class="film-entry" href="/static/assets/realtek-brand-film.mp4"`,
+			`src="/static/assets/realtek-brand-film-poster.jpg"`,
 			tc.videoTitle,
-			tc.title,
-			tc.body,
-			tc.point,
-			tc.fallback,
+			tc.label,
 		} {
 			if !strings.Contains(body, want) {
 				t.Fatalf("%s response does not contain %q: %s", tc.path, want, body)
@@ -888,14 +872,14 @@ func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
 			}
 		}
 
-		architectureIndex := strings.Index(body, `<section class="section architecture"`)
-		filmIndex := strings.Index(body, `<section class="section brand-film">`)
-		deploymentIndex := strings.Index(body, `<section class="section deployment-section">`)
-		if architectureIndex == -1 || filmIndex == -1 || deploymentIndex == -1 {
+		plansIndex := strings.Index(body, `<section class="section home-plans"`)
+		filmIndex := strings.Index(body, `class="film-entry"`)
+		servicesIndex := strings.Index(body, `<section class="section home-core-services"`)
+		if plansIndex == -1 || filmIndex == -1 || servicesIndex == -1 {
 			t.Fatalf("%s missing expected home sections", tc.path)
 		}
-		if !(architectureIndex < filmIndex && filmIndex < deploymentIndex) {
-			t.Fatalf("%s brand film section should be between architecture and deployment", tc.path)
+		if !(plansIndex < filmIndex && filmIndex < servicesIndex) {
+			t.Fatalf("%s brand film entry should be between plans and core services", tc.path)
 		}
 	}
 }
@@ -1047,8 +1031,13 @@ func TestPublicPagesDoNotEmitPersistentStorageOrThirdPartyAnalyticsScripts(t *te
 		}
 
 		body := rec.Body.String()
+		if !strings.Contains(body, `<script src="/static/site.js" defer></script>`) {
+			t.Fatalf("%s response should include the first-party interaction script: %s", path, body)
+		}
+		if strings.Count(strings.ToLower(body), "<script") != 1 {
+			t.Fatalf("%s response should contain only the first-party interaction script: %s", path, body)
+		}
 		for _, unwanted := range []string{
-			"<script",
 			"localStorage",
 			"sessionStorage",
 			"document.cookie",
@@ -1981,7 +1970,7 @@ func TestHomeDeploySectionPromotesManagedCloudFirst(t *testing.T) {
 	for _, want := range []string{
 		"Recommended · Realtek Managed Cloud",
 		"Use what you need and pay for what you use.",
-		"final rates and billing units are confirmed separately",
+		"Realtek builds, hosts, and operates the service while customers pay flexibly based on actual usage.",
 		"Private commercial cloud",
 		"See plans &amp; limits",
 		`href="/features/private-cloud"`,
@@ -1989,6 +1978,73 @@ func TestHomeDeploySectionPromotesManagedCloudFirst(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Fatalf("home page missing %q: %s", want, body)
 		}
+	}
+	for _, unwanted := range []string{
+		"final rates and billing units are confirmed separately",
+		"commercial concept",
+		"minimum commitment",
+	} {
+		if strings.Contains(body, unwanted) {
+			t.Fatalf("home page contains unapproved commercial wording %q: %s", unwanted, body)
+		}
+	}
+}
+
+func TestHomeRefreshRendersLocalizedManagedServiceAndAccessibleCoreFeatures(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	tests := []struct {
+		path      string
+		heading   string
+		managed   string
+		provision string
+		fleet     string
+	}{
+		{path: "/", heading: "A Realtek-managed IoT cloud, from device onboarding to continuous operations.", managed: "Realtek builds, hosts, and operates the service", provision: "Provisioning", fleet: "Fleet management"},
+		{path: "/zh-tw/", heading: "Realtek 託管的 IoT 雲端，從裝置上線到持續營運", managed: "由 Realtek 建置、託管與維運", provision: "Provision 配網", fleet: "裝置群管理"},
+		{path: "/zh-cn/", heading: "Realtek 托管的 IoT 云端，从装置上线到持续营运", managed: "由 Realtek 建置、托管与维运", provision: "Provision 配网", fleet: "装置群管理"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+			rec := httptest.NewRecorder()
+			handler.ServeHTTP(rec, req)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", rec.Code)
+			}
+			body := rec.Body.String()
+			for _, want := range []string{
+				tc.heading,
+				tc.managed,
+				tc.provision,
+				tc.fleet,
+				`href="https://admin.video-cloud-staging.realtekconnect.com/login"`,
+				`id="services"`,
+				`id="architecture"`,
+				`id="docs"`,
+				`role="tablist"`,
+				`role="tab"`,
+				`role="tabpanel"`,
+				`feature-provision-flow-realtek-blue-v2.webp`,
+				`feature-ota-rollout-realtek-blue-v2.webp`,
+				`feature-fleet-operations-realtek-blue-v2.webp`,
+			} {
+				if !strings.Contains(body, want) {
+					t.Fatalf("home page missing %q: %s", want, body)
+				}
+			}
+			if strings.Count(body, `role="tabpanel"`) != 3 {
+				t.Fatalf("home page should render all three core panels without JavaScript: %s", body)
+			}
+			if strings.Contains(body, `role="tabpanel" hidden`) {
+				t.Fatalf("home page should not hide core panels before progressive enhancement: %s", body)
+			}
+			managedIndex := strings.Index(body, "plan-card-managed")
+			privateIndex := strings.Index(body, "plan-card-private")
+			if managedIndex == -1 || privateIndex == -1 || managedIndex >= privateIndex {
+				t.Fatalf("managed service should render before Private Cloud: %s", body)
+			}
+		})
 	}
 }
 
@@ -2047,13 +2103,18 @@ func TestCloudPlansFeaturePromotesManagedServiceBeforePrivateCloud(t *testing.T)
 		"Realtek Managed Cloud is the recommended path",
 		"Realtek Managed Cloud — recommended",
 		"use what you need, pay for what you use",
-		"final rates and billing units are confirmed separately",
+		"Customers pay flexibly based on actual service use",
 		"Private Cloud remains available",
 		"Run inside infrastructure controlled by your organization",
 		"<th scope=\"col\">Option</th>",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+	for _, unwanted := range []string{"final rates", "billing units", "commercial concept"} {
+		if strings.Contains(strings.ToLower(body), unwanted) {
+			t.Fatalf("response contains unapproved internal pricing note %q: %s", unwanted, body)
 		}
 	}
 	if strings.Index(body, "Realtek Managed Cloud — recommended") > strings.Index(body, "<td>Private Cloud</td>") {
