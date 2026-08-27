@@ -62,6 +62,24 @@ func TestCloudPlansLeadWithRealtekManagedServiceInEveryLocale(t *testing.T) {
 	}
 }
 
+func TestManagedCloudSimplifiedChineseCopy(t *testing.T) {
+	feature, ok := CatalogFor(localeByCode(t, "zh-CN")).FeatureBySlug("private-cloud")
+	if !ok {
+		t.Fatal("zh-CN catalog missing cloud plans feature")
+	}
+	copy := strings.Join([]string{feature.Summary, feature.Description}, " ")
+	for _, want := range []string{"Realtek 托管", "客户", "实际使用量付费"} {
+		if !strings.Contains(copy, want) {
+			t.Fatalf("zh-CN managed cloud copy %q does not contain %q", copy, want)
+		}
+	}
+	for _, unwanted := range []string{"託管", "客戶", "實際", "付費"} {
+		if strings.Contains(copy, unwanted) {
+			t.Fatalf("zh-CN managed cloud copy %q still contains %q", copy, unwanted)
+		}
+	}
+}
+
 func TestOTACopyPromotesImplementedCampaignPolicies(t *testing.T) {
 	catalog := CatalogFor(DefaultLocale())
 	ota, ok := catalog.FeatureBySlug("ota")
