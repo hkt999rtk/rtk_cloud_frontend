@@ -374,6 +374,10 @@ func (s *Server) handlePrivacy(w http.ResponseWriter, r *http.Request, locale co
 }
 
 func (s *Server) handleSearchPage(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if !s.searchEnabled || s.searchService == nil {
+		http.NotFound(w, r)
+		return
+	}
 	if r.Method != http.MethodGet {
 		methodNotAllowed(w)
 		return
@@ -381,7 +385,6 @@ func (s *Server) handleSearchPage(w http.ResponseWriter, r *http.Request, locale
 	catalog := content.CatalogFor(locale)
 	page := catalog.Page("search")
 	data := s.basePageData(r, locale, publicPath, page.Title, page.Description)
-	data.SearchEnabled = s.searchEnabled && s.searchService != nil
 	s.render(w, http.StatusOK, "search.html", data)
 }
 
@@ -408,12 +411,7 @@ func (s *Server) handleSearchAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if !s.searchEnabled || s.searchService == nil {
-		writeSearchJSON(w, http.StatusServiceUnavailable, searchAPIErrorResponse{
-			AnswerFound: false,
-			Answer:      "Search is not enabled.",
-			Sources:     []search.Source{},
-			Error:       "search_disabled",
-		})
+		http.NotFound(w, r)
 		return
 	}
 	if !s.searchLimit.Allow(contactSubmissionKey(r)) {

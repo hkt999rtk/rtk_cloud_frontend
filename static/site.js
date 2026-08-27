@@ -41,27 +41,27 @@
     });
   }
 
-  function initFeatureTabs() {
-    document.querySelectorAll("[data-feature-tabs]").forEach(function (component) {
+  function initCoreShowcase() {
+    document.querySelectorAll("[data-core-showcase]").forEach(function (component) {
       const tabs = Array.from(component.querySelectorAll('[role="tab"]'));
-      const panels = Array.from(component.querySelectorAll('[role="tabpanel"]'));
+      const panels = Array.from(component.querySelectorAll('.core-panel'));
+      const accordions = Array.from(component.querySelectorAll('[data-core-accordion]'));
       if (!tabs.length || tabs.length !== panels.length) return;
-
       component.classList.add("is-enhanced");
 
-      function activate(tab, moveFocus) {
+      function activate(panelID, moveFocus) {
         tabs.forEach(function (candidate) {
-          const selected = candidate === tab;
+          const selected = candidate.getAttribute("aria-controls") === panelID;
           candidate.setAttribute("aria-selected", String(selected));
           candidate.tabIndex = selected ? 0 : -1;
-          const panel = component.querySelector("#" + candidate.getAttribute("aria-controls"));
-          if (panel) panel.hidden = !selected;
+          if (selected && moveFocus) candidate.focus();
         });
-        if (moveFocus) tab.focus();
+        panels.forEach(function (panel) { panel.hidden = panel.id !== panelID; });
+        accordions.forEach(function (button) { button.setAttribute("aria-expanded", String(button.getAttribute("data-core-accordion") === panelID)); });
       }
 
       tabs.forEach(function (tab, index) {
-        tab.addEventListener("click", function () { activate(tab, false); });
+        tab.addEventListener("click", function () { activate(tab.getAttribute("aria-controls"), false); });
         tab.addEventListener("keydown", function (event) {
           let nextIndex = index;
           if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (index + 1) % tabs.length;
@@ -70,17 +70,18 @@
           else if (event.key === "End") nextIndex = tabs.length - 1;
           else return;
           event.preventDefault();
-          activate(tabs[nextIndex], true);
+          activate(tabs[nextIndex].getAttribute("aria-controls"), true);
         });
       });
-
-      activate(tabs.find(function (tab) { return tab.getAttribute("aria-selected") === "true"; }) || tabs[0], false);
+      accordions.forEach(function (button) { button.addEventListener("click", function () { activate(button.getAttribute("data-core-accordion"), false); }); });
+      const selected = tabs.find(function (tab) { return tab.getAttribute("aria-selected") === "true"; }) || tabs[0];
+      activate(selected.getAttribute("aria-controls"), false);
     });
   }
 
   function init() {
     initHeader();
-    initFeatureTabs();
+    initCoreShowcase();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
