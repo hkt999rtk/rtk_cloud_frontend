@@ -46,6 +46,7 @@ func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath
 		},
 		AnalyticsEndpoint: "/api/event",
 		AnalyticsPage:     analyticsPageKey(publicPath),
+		ServiceLoginURL:   s.serviceLoginURL,
 		InterestOptions:   catalog.ContactInterestOptions(),
 	}
 	if s.disableSearchIndexing {

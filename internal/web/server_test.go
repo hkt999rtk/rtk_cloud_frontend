@@ -804,7 +804,7 @@ func TestHomeMetadataIncludesSocialTags(t *testing.T) {
 	body := rec.Body.String()
 	for _, want := range []string{
 		"<title>Realtek Connect&#43; | IoT Cloud Platform</title>",
-		`<meta name="description" content="Realtek Connect&#43; is an IoT cloud platform for provisioning, OTA, fleet management, app SDKs, insights, private cloud, and integrations.">`,
+		`<meta name="description" content="Realtek Connect&#43; is an IoT cloud platform with a Realtek-managed usage-based service, private cloud options, provisioning, OTA, fleet management, app SDKs, insights, and integrations.">`,
 		`<link rel="canonical" href="http://example.com/">`,
 		`<meta property="og:title" content="Realtek Connect&#43; | IoT Cloud Platform">`,
 		`<meta property="og:url" content="http://example.com/">`,
@@ -1110,6 +1110,55 @@ func TestPublicBaseURLOverridesGeneratedAbsoluteURLs(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), `<loc>https://webtest.mgmeet.io/zh-cn/contact</loc>`) {
 		t.Fatalf("sitemap does not use public base URL: %s", rec.Body.String())
+	}
+}
+
+func TestHomeUsesConfiguredServiceLoginURL(t *testing.T) {
+	handler := testServerWithConfig(t, Config{
+		LeadStore:       &memoryLeadStore{},
+		ServiceLoginURL: "https://portal.example.com/login?source=website",
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/zh-tw/", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	for _, want := range []string{
+		`href="https://portal.example.com/login?source=website"`,
+		`data-analytics-cta="home_cta_service_login"`,
+		"立即開始使用",
+		`href="/zh-tw/features/private-cloud"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("home response missing %q: %s", want, body)
+		}
+	}
+}
+
+func TestNewServerRejectsInvalidServiceLoginURL(t *testing.T) {
+	cfg := testConfig(&memoryLeadStore{})
+	cfg.ServiceLoginURL = "/relative-login"
+	if _, err := NewServer(cfg); err == nil || !strings.Contains(err.Error(), "SERVICE_LOGIN_URL") {
+		t.Fatalf("NewServer error = %v, want SERVICE_LOGIN_URL validation error", err)
+	}
+}
+
+func TestContactPagesDoNotExposeSQLiteImplementation(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	for _, path := range []string{"/contact", "/zh-tw/contact", "/zh-cn/contact"} {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", path, rec.Code)
+		}
+		if strings.Contains(strings.ToLower(rec.Body.String()), "sqlite") {
+			t.Fatalf("%s exposes SQLite implementation detail: %s", path, rec.Body.String())
+		}
 	}
 }
 
@@ -1697,7 +1746,7 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 		{
 			path: "/features/private-cloud",
 			src:  `/static/assets/connectplus-architecture-diagram-corporate-v2.jpg`,
-			alt:  `alt="Enterprise architecture diagram showing device identity, private cloud services, data stores, and integration endpoints."`,
+			alt:  `alt="Realtek Connect&#43; cloud plan comparison between a Realtek-managed service and a customer-controlled private cloud."`,
 		},
 		{
 			path: "/features/integrations",
@@ -1917,7 +1966,7 @@ func TestPublicAuthorizationCopyClarifiesProductContractBoundary(t *testing.T) {
 	}
 }
 
-func TestHomeDeploySectionDisclosesEvaluationLimits(t *testing.T) {
+func TestHomeDeploySectionPromotesManagedCloudFirst(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -1930,9 +1979,10 @@ func TestHomeDeploySectionDisclosesEvaluationLimits(t *testing.T) {
 
 	body := rec.Body.String()
 	for _, want := range []string{
-		"5 devices by default",
-		"raise up to 200 on request",
-		"No expiry",
+		"Recommended · Realtek Managed Cloud",
+		"Use what you need and pay for what you use.",
+		"final rates and billing units are confirmed separately",
+		"Private commercial cloud",
 		"See plans &amp; limits",
 		`href="/features/private-cloud"`,
 	} {
@@ -1980,7 +2030,7 @@ func TestContactFormRendersCanonicalInquiryOptions(t *testing.T) {
 	}
 }
 
-func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
+func TestCloudPlansFeaturePromotesManagedServiceBeforePrivateCloud(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/private-cloud", nil)
@@ -1993,41 +2043,25 @@ func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
 
 	body := rec.Body.String()
 	for _, want := range []string{
-		"Compare evaluation and private commercial operating models",
-		"VM/container deployment on GCP, Azure, AWS, or on-premises",
-		"Standard container and VM workloads",
-		"no serverless runtime requirement",
-		"Transition to a dedicated private deployment once product teams need tenant isolation, formal support processes, and customer-specific change windows.",
-		"Custom domains and branded entry points let the deployment align with the customer&#39;s DNS, certificate, and support model.",
-		"Choose regional placement around residency, latency, and operational coverage requirements",
-		"Use release promotion, maintenance windows, and rollback checkpoints to move from pilot tenants into production operations safely.",
-		"Is there a cloud vendor requirement? No.",
-		// Plans & Limits disclosure
-		"5-device default quota",
-		"up to 200 devices on request",
-		"Evaluation access does not expire",
-		"no minimum scale for the commercial tier",
-		// Pricing Factors disclosure (no price list, just the inputs)
-		"How commercial pricing is shaped",
-		"Fleet size",
-		"Deployment topology",
-		"Support coverage",
-		"Customization scope",
-		"Term length",
-		// SDK Licensing (split from Support)
-		"What you can build with",
-		"open-source SDK release is planned at general availability",
-		"platform backend stays a proprietary commercial product",
-		// Support tier (split from SDK)
-		"What support looks like at each tier",
-		"Evaluation support is community-tier",
-		"Commercial support is contract-defined",
-		"<th scope=\"col\">Model</th>",
-		"Managed private deployment",
-		"Customer-operated private region",
+		"Cloud Plans &amp; Usage",
+		"Realtek Managed Cloud is the recommended path",
+		"Realtek Managed Cloud — recommended",
+		"use what you need, pay for what you use",
+		"final rates and billing units are confirmed separately",
+		"Private Cloud remains available",
+		"Run inside infrastructure controlled by your organization",
+		"<th scope=\"col\">Option</th>",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+	if strings.Index(body, "Realtek Managed Cloud — recommended") > strings.Index(body, "<td>Private Cloud</td>") {
+		t.Fatal("managed cloud option must appear before Private Cloud")
+	}
+	for _, forbidden := range []string{"one-time license fee", "annual maintenance", "minimum scale"} {
+		if strings.Contains(body, forbidden) {
+			t.Fatalf("response contains unapproved pricing detail %q: %s", forbidden, body)
 		}
 	}
 }

@@ -36,6 +36,32 @@ func TestLocalizedCatalogsKeepFeatureAndDocSlugs(t *testing.T) {
 	}
 }
 
+func TestCloudPlansLeadWithRealtekManagedServiceInEveryLocale(t *testing.T) {
+	for _, locale := range SupportedLocales() {
+		feature, ok := CatalogFor(locale).FeatureBySlug("private-cloud")
+		if !ok {
+			t.Fatalf("%s catalog missing cloud plans feature", locale.Code)
+		}
+		if len(feature.Sections) < 2 {
+			t.Fatalf("%s cloud plans sections = %d, want at least 2", locale.Code, len(feature.Sections))
+		}
+		managed := strings.ToLower(feature.Sections[0].Title + " " + feature.Sections[0].Intro)
+		private := strings.ToLower(feature.Sections[1].Title + " " + feature.Sections[1].Intro)
+		if !strings.Contains(managed, "realtek") || !strings.Contains(managed, "managed") && !strings.Contains(managed, "託管") && !strings.Contains(managed, "托管") {
+			t.Fatalf("%s first cloud plan is not the Realtek-managed service: %s", locale.Code, managed)
+		}
+		if !strings.Contains(private, "private cloud") {
+			t.Fatalf("%s second cloud plan is not Private Cloud: %s", locale.Code, private)
+		}
+		copy := strings.ToLower(feature.Description + " " + strings.Join(feature.Highlights, " "))
+		for _, forbidden := range []string{"one-time license", "annual maintenance", "unit price"} {
+			if strings.Contains(copy, forbidden) {
+				t.Fatalf("%s cloud plans copy contains unapproved pricing detail %q: %s", locale.Code, forbidden, copy)
+			}
+		}
+	}
+}
+
 func TestOTACopyPromotesImplementedCampaignPolicies(t *testing.T) {
 	catalog := CatalogFor(DefaultLocale())
 	ota, ok := catalog.FeatureBySlug("ota")

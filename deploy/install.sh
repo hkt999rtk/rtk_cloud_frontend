@@ -35,6 +35,7 @@ ANALYTICS_DATABASE_PATH=$data_dir/analytics.db
 SEARCH_DATABASE_PATH=$prefix/current/data/search.db
 SEARCH_ENABLED=false
 PUBLIC_BASE_URL=
+SERVICE_LOGIN_URL=https://admin.video-cloud-staging.realtekconnect.com/login
 DISABLE_SEARCH_INDEXING=true
 ENABLE_ASSET_FINGERPRINTS=true
 ENABLE_CDN_CACHE_HEADERS=false

@@ -60,7 +60,7 @@ type FeatureRelatedLink struct {
 }
 
 func All() []Feature {
-	return []Feature{
+	all := []Feature{
 		{
 			Slug:         "provision",
 			Title:        "Provision",
@@ -511,127 +511,7 @@ func All() []Feature {
 			Capabilities: []string{"RSSI, memory, uptime, and reboot reason signals", "Version adoption and rollout health", "Support-oriented device history"},
 			Outcomes:     []string{"Find field issues earlier", "Support customers with evidence", "Measure firmware quality"},
 		},
-		{
-			Slug:         "private-cloud",
-			Title:        "Private Cloud",
-			Icon:         "cloud-lock",
-			Kicker:       "Any cloud or on-premises. No serverless lock-in.",
-			Summary:      "Realtek Connect+ private deployment runs as a container or VM workload on GCP, Azure, AWS, or your own data center — no cloud vendor dependency, no serverless runtime required.",
-			Description:  "Private Cloud explains the two deployment tiers and Realtek Connect+'s infrastructure model. The platform runs as a standard container or VM workload, giving customers full choice of cloud provider or on-premises infrastructure. This is explicitly different from serverless-native IoT platforms that tie private deployment to a single cloud account.",
-			ImagePath:    "/static/assets/connectplus-architecture-diagram-corporate-v2.jpg",
-			ImageAlt:     "Enterprise architecture diagram showing device identity, private cloud services, data stores, and integration endpoints.",
-			Highlights:   []string{"VM/container deployment on GCP, Azure, AWS, or on-premises — no cloud lock-in", "Free evaluation tier with up to 200 devices on request and no expiry", "Commercial tier with one-time license plus annual maintenance and no minimum scale"},
-			Capabilities: []string{"Container or VM workload deployment on any major cloud provider or on-premises data center", "Reverse-proxy TLS termination, network policy alignment, and branded service endpoints", "Release promotion and maintenance-window planning across evaluation and production environments"},
-			Outcomes:     []string{"Avoid cloud vendor lock-in for IoT infrastructure", "Keep ownership and residency boundaries explicit", "Create a credible path from pilot to production on your own terms"},
-			Sections: []FeatureSection{
-				{
-					Eyebrow: "Infrastructure Model",
-					Title:   "Standard container and VM workloads — no serverless dependency",
-					Intro:   "Realtek Connect+ private deployments run as conventional container or VM processes. There is no serverless runtime requirement and no dependency on a specific cloud provider's managed services.",
-					Items: []string{
-						"Deploy on GCP, Azure, AWS, or your own on-premises data center using standard container orchestration (Kubernetes, Docker Compose) or VM images.",
-						"Unlike serverless-native IoT platforms that require the customer to own a specific cloud account (e.g., AWS Lambda + DynamoDB), Realtek Connect+ has no infrastructure prerequisites beyond a host that can run containers or VMs.",
-						"This means regulated industries, enterprises with existing data center contracts, and teams with multi-cloud policies can deploy without restructuring their infrastructure strategy.",
-					},
-				},
-				{
-					Eyebrow: "Commercial Models",
-					Title:   "Start with evaluation, then move into owned deployment boundaries",
-					Intro:   "Public evaluation gives fast PoC access on shared infrastructure. Private commercial deployment is a dedicated environment on infrastructure you choose.",
-					Items: []string{
-						"Use the public evaluation environment to validate device flows, dashboards, and integration assumptions before committing to a customer-specific operating boundary.",
-						"Transition to a dedicated private deployment once product teams need tenant isolation, formal support processes, and customer-specific change windows.",
-						"The evaluation tier is suitable for development and pilot work; commercial products with real device fleets require a private commercial agreement.",
-					},
-				},
-				{
-					Eyebrow: "Plans & Limits",
-					Title:   "Evaluation tier limits and the path to commercial scale",
-					Intro:   "Concrete limits so developer teams can plan a pilot without surprises, and a clear handoff into the commercial conversation when the pilot grows.",
-					Items: []string{
-						"Evaluation accounts start with a 5-device default quota and can be raised up to 200 devices on request.",
-						"Evaluation access does not expire — request a quota raise or a commercial conversation when your fleet grows; we do not auto-cancel evaluation accounts.",
-						"Evaluation use is limited to development, proof-of-concept, and internal validation; commercial product shipments and customer-facing fleets require a private commercial agreement.",
-						"Self-service signup with email verification is on the roadmap; pre-launch evaluation accounts are issued by the Realtek Connect+ team via the contact form.",
-						"There is no minimum scale for the commercial tier; small fleets can move out of evaluation as soon as commercial use begins, even before they reach the 200-device evaluation ceiling.",
-					},
-				},
-				{
-					Eyebrow: "Pricing Factors",
-					Title:   "How commercial pricing is shaped",
-					Intro:   "We do not publish a price list — every commercial deployment is sized to the customer's actual scope. The factors below are the inputs the sales team uses when preparing a quote, so buyers can frame the conversation before getting on the phone.",
-					Items: []string{
-						"Fleet size — total addressable device count for the deployment, including planned expansion within the contract term.",
-						"Deployment topology — single-region managed deployment, multi-region, or fully customer-operated infrastructure across one or more clouds or on-premises sites.",
-						"Support coverage — the response-time, escalation, and on-call expectations the customer needs in their support agreement.",
-						"Customization scope — branding/white-label, custom domain handling, and any product-specific platform extensions beyond the standard release.",
-						"Term length — typical contract structure is a one-time platform license fee plus annual maintenance; multi-year terms are quoted separately.",
-					},
-				},
-				{
-					Eyebrow: "SDK Licensing",
-					Title:   "What you can build with",
-					Intro:   "SDK distribution today and the planned posture at general availability.",
-					Items: []string{
-						"Realtek Connect+ device SDK packages (Native C, Android, iOS, JavaScript/TypeScript, Go) are currently distributed under evaluation terms.",
-						"An open-source SDK release is planned at general availability, so commercial customers and the wider community can integrate without bespoke license negotiation.",
-						"The platform backend stays a proprietary commercial product; private deployments install signed builds rather than building from source.",
-					},
-				},
-				{
-					Eyebrow: "Support",
-					Title:   "What support looks like at each tier",
-					Intro:   "Support coverage is intentionally tiered: evaluation gets a self-serve community lane, commercial gets contracted accountability.",
-					Items: []string{
-						"Evaluation support is community-tier: documentation, integration guides, and the public issue tracker for the SDK once it is open. There is no response-time commitment on the evaluation tier.",
-						"Commercial support is contract-defined: response-time, uptime, and escalation paths live in the customer agreement rather than a published tier matrix.",
-						"Customers needing a specific SLA structure should raise it during the commercial conversation so it can be priced and committed inside the agreement.",
-					},
-				},
-				{
-					Eyebrow: "Ownership",
-					Title:   "Define where data lives and how the service is branded",
-					Intro:   "Private deployment gives customers control over data residency, access boundaries, and service identity.",
-					Items: []string{
-						"Device metadata, operator access logs, and retained support exports stay inside the customer-owned environment — no data crosses to a shared Realtek-operated region.",
-						"Custom domains and branded entry points let the deployment align with the customer's DNS, certificate, and support model.",
-						"Choose regional placement around residency, latency, and operational coverage requirements rather than accepting a fixed shared region.",
-					},
-					Accent: true,
-				},
-				{
-					Eyebrow: "Upgrade Path",
-					Title:   "Promote proven configurations into commercial production",
-					Intro:   "The upgrade path is an engineering and operations workflow, not a one-click migration promise.",
-					Items: []string{
-						"Carry validated device models, app configuration, and integration settings from evaluation into a dedicated deployment plan.",
-						"Use release promotion, maintenance windows, and rollback checkpoints to move from pilot tenants into production operations safely.",
-						"Align the commercial cutover with customer security review, support readiness, and staged onboarding of real fleets.",
-					},
-				},
-				{
-					Eyebrow: "Deployment FAQ",
-					Title:   "Questions enterprise buyers raise first",
-					Intro:   "Direct answers to infrastructure and procurement questions.",
-					Items: []string{
-						"What infrastructure does private deployment run on? Standard containers or VMs — bring your own GCP, Azure, AWS, or on-premises host.",
-						"Is there a cloud vendor requirement? No. Realtek Connect+ has no dependency on a specific cloud provider's managed services or serverless platform.",
-						"Commercial support covers deployment planning, environment hardening expectations, and the path for future platform customization requests.",
-					},
-				},
-			},
-			Table: FeatureTable{
-				Eyebrow: "Deployment Paths",
-				Title:   "Compare evaluation and private commercial operating models",
-				Intro:   "Realtek Connect+ positions deployment choice as a commercial decision. The infrastructure model stays the same — containers and VMs — regardless of which tier or cloud the customer chooses.",
-				Columns: []string{"Model", "Infrastructure", "Device quota & cost", "Best fit"},
-				Rows: []FeatureTableRow{
-					{Cells: []string{"Public evaluation", "Shared environment hosted by Realtek.", "5 devices by default, up to 200 on request. Free, non-commercial use only.", "Early evaluations, internal validation, and short proof-of-concept cycles."}},
-					{Cells: []string{"Managed private deployment", "Container/VM on customer-selected cloud (GCP, Azure, AWS) or on-premises, operated with agreed support windows.", "No device floor. Commercial agreement: one-time license fee plus annual maintenance — contact sales for quote.", "Teams that want private deployment outcomes without owning the day-to-day platform operations stack."}},
-					{Cells: []string{"Customer-operated private region", "Customer-owned container/VM infrastructure — any cloud or data center — with coordinated release and upgrade planning.", "No device floor. Commercial license + maintenance plus the customer's own infrastructure costs.", "Products with strict enterprise governance, regulated data boundaries, or multi-cloud / on-prem mandates."}},
-				},
-			},
-		},
+		cloudPlansFeature(),
 		{
 			Slug:         "integrations",
 			Title:        "Integrations",
@@ -794,6 +674,60 @@ func All() []Feature {
 					{Cells: []string{"OCSP responder", "Real-time certificate status endpoint used by relying parties to check revocation.", "Can be operated by the platform or delegated to a customer PKI service."}},
 					{Cells: []string{"CRL distribution", "Periodic revocation list published for clients that cache status offline.", "CRL publication interval and distribution points are configurable per deployment."}},
 				},
+			},
+		},
+	}
+	return all
+}
+
+func cloudPlansFeature() Feature {
+	return Feature{
+		Slug:        "private-cloud",
+		Title:       "Cloud Plans & Usage",
+		Icon:        "cloud-lock",
+		Kicker:      "Realtek-managed cloud first, private cloud when you need it.",
+		Summary:     "Start with a Realtek-hosted and operated cloud service designed around pay-for-what-you-use billing, or choose a customer-controlled private cloud deployment.",
+		Description: "Realtek Managed Cloud is the recommended path for teams that want to launch without building and operating the cloud platform themselves. Realtek hosts, maintains, and operates the service while customers pay according to actual use. Private Cloud remains available for organizations that require their own infrastructure and operating boundary.",
+		ImagePath:   "/static/assets/connectplus-architecture-diagram-corporate-v2.jpg",
+		ImageAlt:    "Realtek Connect+ cloud plan comparison between a Realtek-managed service and a customer-controlled private cloud.",
+		Highlights:  []string{"Recommended Realtek-managed service with hosting and operations included", "Pay for actual use without a published rate commitment", "Customer-controlled Private Cloud remains available as a second path"},
+		Capabilities: []string{
+			"Realtek-managed platform hosting, maintenance, and operational lifecycle",
+			"A usage-based commercial model whose final rates are defined separately",
+			"Private deployment planning for customer cloud or on-premises infrastructure",
+		},
+		Outcomes: []string{"Start using the service without building a cloud operations team", "Align cloud cost with actual platform use", "Keep a path to customer-controlled infrastructure when governance requires it"},
+		Sections: []FeatureSection{
+			{
+				Eyebrow: "Recommended",
+				Title:   "Realtek Managed Cloud — use what you need, pay for what you use",
+				Intro:   "Realtek operates the cloud platform so product teams can focus on devices, applications, and customers.",
+				Items: []string{
+					"Realtek handles cloud setup, hosting, maintenance, and day-to-day platform operations.",
+					"Customers pay according to actual service use; final rates and billing units are confirmed separately and are not published on this page.",
+					"This is the primary path for teams that want to start quickly without owning the underlying cloud operations stack.",
+				},
+				Accent: true,
+			},
+			{
+				Eyebrow: "Private Cloud",
+				Title:   "Run inside infrastructure controlled by your organization",
+				Intro:   "Private Cloud is the alternative for customers with dedicated infrastructure, residency, or governance requirements.",
+				Items: []string{
+					"Deploy to a customer-selected cloud or on-premises environment using standard container or VM workloads.",
+					"Keep infrastructure ownership, network policy, data location, and operating boundaries under customer control.",
+					"Deployment scope, support, and commercial terms are defined through a separate private-cloud engagement.",
+				},
+			},
+		},
+		Table: FeatureTable{
+			Eyebrow: "Cloud options",
+			Title:   "Choose the operating model that fits your team",
+			Intro:   "Realtek Managed Cloud is the recommended starting point; Private Cloud remains available when customer control is the priority.",
+			Columns: []string{"Option", "Who operates it", "Commercial concept", "Best fit"},
+			Rows: []FeatureTableRow{
+				{Cells: []string{"Realtek Managed Cloud — recommended", "Hosted, maintained, and operated by Realtek.", "Pay according to actual use; rates are confirmed separately.", "Teams that want to launch without building their own cloud operations stack."}},
+				{Cells: []string{"Private Cloud", "Customer-controlled infrastructure with an agreed Realtek support boundary.", "Customer-specific deployment and support agreement.", "Organizations with dedicated infrastructure, residency, or governance requirements."}},
 			},
 		},
 	}

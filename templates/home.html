@@ -5,7 +5,7 @@
     <h1>Realtek Connect+</h1>
     <p class="hero-lede">{{t . "home.lede"}}</p>
     <div class="hero-actions">
-      <a class="button primary" href="{{localizedPath . "/contact"}}" data-analytics-cta="home_cta_primary"><span class="button-icon">{{icon "mail"}}</span>{{t . "home.cta.primary"}}</a>
+      <a class="button primary" href="{{.ServiceLoginURL}}" data-analytics-cta="home_cta_service_login"><span class="button-icon">{{icon "arrow-right"}}</span>{{t . "home.cta.primary"}}</a>
       <a class="button secondary" href="{{localizedPath . "/features/private-cloud"}}" data-analytics-cta="home_cta_secondary"><span class="button-icon">{{icon "cloud-lock"}}</span>{{t . "home.cta.secondary"}}</a>
     </div>
     <div class="hero-points capability-strip" aria-label="Platform highlights">
@@ -209,7 +209,7 @@
       <p class="card-kicker">{{t . "home.deploy.public"}}</p>
       <h3>{{t . "home.deploy.public.title"}}</h3>
       <p>{{t . "home.deploy.public.body"}}</p>
-      <a class="button secondary" href="{{localizedPath . "/docs/deployment"}}"><span class="button-icon">{{icon "document"}}</span>{{t . "home.deploy.docs"}}</a>
+      <a class="button secondary" href="{{localizedPath . "/features/private-cloud"}}"><span class="button-icon">{{icon "document"}}</span>{{t . "home.deploy.docs"}}</a>
     </article>
     <article>
       <span class="icon-box panel-icon">{{icon "certificate"}}</span>
@@ -274,6 +274,6 @@
       <span><span class="module-icon">{{icon "cloud-lock"}}</span>Private Cloud</span>
     </div>
   </div>
-  <a class="button primary" href="{{localizedPath . "/contact"}}" data-analytics-cta="home_cta_band"><span class="button-icon">{{icon "mail"}}</span>{{t . "home.cta.primary"}}</a>
+  <a class="button primary" href="{{localizedPath . "/contact"}}" data-analytics-cta="home_cta_band"><span class="button-icon">{{icon "mail"}}</span>{{t . "home.contact.cta"}}</a>
 </section>
 {{end}}
