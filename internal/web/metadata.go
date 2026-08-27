@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	heroImagePath = "/static/assets/connectplus-hero-corporate-v2.jpg"
-	heroImageAlt  = "Realtek Connect+ device, cloud, mobile app, and dashboard platform flow"
+	heroImagePath = "/static/assets/portal-operations-healthy-desktop-v2.webp"
+	heroImageAlt  = "Sanitized Realtek Connect+ firmware and device operations portal"
 )
 
 type sitemapURLSet struct {
@@ -25,6 +25,7 @@ type sitemapURL struct {
 
 func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath, title, description string) pageData {
 	catalog := content.CatalogFor(locale)
+	searchEnabled := s.searchEnabled && s.searchService != nil
 	data := pageData{
 		Title:           title,
 		MetaDescription: description,
@@ -48,6 +49,7 @@ func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath
 		AnalyticsPage:     analyticsPageKey(publicPath),
 		ServiceLoginURL:   s.serviceLoginURL,
 		InterestOptions:   catalog.ContactInterestOptions(),
+		SearchEnabled:     searchEnabled,
 	}
 	if s.disableSearchIndexing {
 		data.MetaRobots = "noindex, nofollow, noarchive"
@@ -66,7 +68,6 @@ func (s *Server) footerSitemap(locale content.Locale, catalog content.Catalog) [
 				{Label: catalog.T("footer.features"), Href: content.PathForLocale(locale, "/features")},
 				{Label: catalog.T("footer.docs"), Href: content.PathForLocale(locale, "/docs")},
 				{Label: catalog.T("footer.manual"), Href: content.PathForLocale(locale, "/manual")},
-				{Label: catalog.T("footer.search"), Href: content.PathForLocale(locale, "/search")},
 			},
 		},
 		{
@@ -88,6 +89,9 @@ func (s *Server) footerSitemap(locale content.Locale, catalog content.Catalog) [
 				{Label: catalog.T("footer.privacy"), Href: content.PathForLocale(locale, "/privacy")},
 			},
 		},
+	}
+	if s.searchEnabled && s.searchService != nil {
+		groups[0].Links = append(groups[0].Links, footerSitemapLink{Label: catalog.T("footer.search"), Href: content.PathForLocale(locale, "/search")})
 	}
 
 	for _, feature := range catalog.Features {
@@ -190,7 +194,7 @@ func (s *Server) handleSitemapXML(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	paths := publicSitemapPaths()
+	paths := publicSitemapPaths(s.searchEnabled && s.searchService != nil)
 
 	payload := sitemapURLSet{
 		XMLNS: "http://www.sitemaps.org/schemas/sitemap/0.9",
@@ -213,7 +217,8 @@ func (s *Server) handleSitemapXML(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("\n"))
 }
 
-func publicSitemapPaths() []string {
+func publicSitemapPaths(searchOption ...bool) []string {
+	searchEnabled := len(searchOption) > 0 && searchOption[0]
 	catalog := content.CatalogFor(content.DefaultLocale())
 	basePaths := []string{
 		"/",
@@ -222,7 +227,6 @@ func publicSitemapPaths() []string {
 		"/features",
 		"/contact",
 		"/privacy",
-		"/search",
 		"/manual/getting-started",
 		"/manual/deployment-notes",
 		"/manual/reference",
@@ -242,6 +246,9 @@ func publicSitemapPaths() []string {
 		"/manual/sdk/packages/freertos-pro2",
 		"/manual/sdk/sample-applications",
 		"/manual/sdk/troubleshooting",
+	}
+	if searchEnabled {
+		basePaths = append(basePaths, "/search")
 	}
 	for _, section := range catalog.Docs {
 		basePaths = append(basePaths, "/docs/"+section.Slug)
