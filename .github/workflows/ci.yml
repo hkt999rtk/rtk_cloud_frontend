@@ -86,7 +86,10 @@ jobs:
         id: visual_smoke
         shell: bash
         run: |
-          if command -v google-chrome >/dev/null 2>&1 || command -v chromium >/dev/null 2>&1 || command -v chromium-browser >/dev/null 2>&1; then
+          if { [ -n "${CHROME_PATH:-}" ] && [ -x "$CHROME_PATH" ]; } || \
+            command -v google-chrome >/dev/null 2>&1 || \
+            command -v chromium >/dev/null 2>&1 || \
+            command -v chromium-browser >/dev/null 2>&1; then
             go run ./cmd/visual-smoke
             echo "result=PASS" >> "$GITHUB_OUTPUT"
           else
