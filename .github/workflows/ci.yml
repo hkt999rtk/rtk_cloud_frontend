@@ -32,6 +32,11 @@ jobs:
         run: |
           test "$(wc -c < static/assets/realtek-brand-film.mp4)" -gt 1000000
 
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
       - name: Check Go toolchain
         run: go version
 
