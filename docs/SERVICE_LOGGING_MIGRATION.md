@@ -20,7 +20,7 @@ service logs as separate concerns.
 - Log search-index and content-load failures with structured fields.
 - Keep Kubernetes runtime logs on stdout/stderr for cluster log collection.
 - Treat host/nginx forwarder labels as legacy native deployment compatibility.
-- Do not log lead form raw payloads, cookies, OpenAI/API keys, SMTP secrets, or
+- Do not log lead form raw payloads, cookies, OpenAI/API keys, email delivery secrets, or
   SQLite connection details with credentials.
 
 ## Entrypoints To Cover

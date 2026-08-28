@@ -188,7 +188,7 @@ content reloaded
 ## Privacy And Logging Notes
 
 The website API must not log or store raw lead payloads, cookies, OpenAI/API
-keys, SMTP secrets, credentialed connection details, or full referrer URLs.
+keys, email delivery secrets, credentialed connection details, or full referrer URLs.
 Search query text may be sent to OpenAI for embeddings and source-grounded
 answers when `SEARCH_ENABLED=true`, but raw query text is not stored in the
 analytics event payload.
