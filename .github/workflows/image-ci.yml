@@ -26,6 +26,20 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Detect available Docker daemon
+        id: docker
+        shell: bash
+        run: |
+          if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up job-local Docker
+        if: steps.docker.outputs.available != 'true'
+        uses: docker/setup-docker-action@v5
+
       - name: Build local image
         run: docker build --pull -t local/frontend:ci -f Dockerfile .
 
