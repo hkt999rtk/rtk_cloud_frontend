@@ -40,15 +40,16 @@ jobs:
       - name: Check Go toolchain
         run: go version
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.x"
+      - name: Ensure PyYAML is available
+        shell: bash
+        run: |
+          if ! python3 -c 'import yaml'; then
+            sudo -n apt-get update
+            sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y python3-yaml
+          fi
 
       - name: Check SDK manual source
-        run: |
-          python3 -m pip install PyYAML
-          python3 -m unittest discover -s tools/tests -p 'test_build_sdk_docs.py'
+        run: python3 -m unittest discover -s tools/tests -p 'test_build_sdk_docs.py'
 
       - name: Check Go formatting
         id: gofmt
