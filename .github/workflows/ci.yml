@@ -71,6 +71,20 @@ jobs:
         id: build
         run: go build ./cmd/server
 
+      - name: Ensure Chromium is available
+        shell: bash
+        run: |
+          if ! command -v google-chrome >/dev/null 2>&1 \
+            && ! command -v chromium >/dev/null 2>&1 \
+            && ! command -v chromium-browser >/dev/null 2>&1; then
+            sudo -n apt-get update
+            if apt-cache policy chromium | grep 'Candidate:' | grep -qv '(none)'; then
+              sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y chromium
+            else
+              sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y chromium-browser
+            fi
+          fi
+
       - name: Run visual smoke
         id: visual_smoke
         shell: bash
