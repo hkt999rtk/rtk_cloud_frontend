@@ -71,25 +71,31 @@ jobs:
         id: build
         run: go build ./cmd/server
 
-      - name: Ensure Chromium is available
+      - name: Ensure Chrome is available
         shell: bash
         run: |
           if ! command -v google-chrome >/dev/null 2>&1 \
             && ! command -v chromium >/dev/null 2>&1 \
             && ! command -v chromium-browser >/dev/null 2>&1; then
-            sudo -n apt-get update
-            if apt-cache policy chromium | grep 'Candidate:' | grep -qv '(none)'; then
-              sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y chromium
-            else
-              sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y chromium-browser
+            chrome_root="${RUNNER_TOOL_CACHE}/chrome-for-testing"
+            chrome_path="${chrome_root}/chrome-linux64/chrome"
+            if [ ! -x "$chrome_path" ]; then
+              chrome_version="$(curl -fsSL https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE)"
+              chrome_archive="${RUNNER_TEMP}/chrome-linux64.zip"
+              mkdir -p "$chrome_root"
+              curl -fsSL \
+                "https://storage.googleapis.com/chrome-for-testing-public/${chrome_version}/linux64/chrome-linux64.zip" \
+                -o "$chrome_archive"
+              python3 -m zipfile -e "$chrome_archive" "$chrome_root"
             fi
+            printf 'CHROME_PATH=%s\n' "$chrome_path" >> "$GITHUB_ENV"
           fi
 
       - name: Run visual smoke
         id: visual_smoke
         shell: bash
         run: |
-          if command -v google-chrome >/dev/null 2>&1 || command -v chromium >/dev/null 2>&1 || command -v chromium-browser >/dev/null 2>&1; then
+          if [ -x "${CHROME_PATH:-}" ] || command -v google-chrome >/dev/null 2>&1 || command -v chromium >/dev/null 2>&1 || command -v chromium-browser >/dev/null 2>&1; then
             go run ./cmd/visual-smoke
             echo "result=PASS" >> "$GITHUB_OUTPUT"
           else
