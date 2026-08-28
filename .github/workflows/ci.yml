@@ -88,6 +88,7 @@ jobs:
                 -o "$chrome_archive"
               python3 -m zipfile -e "$chrome_archive" "$chrome_root"
             fi
+            chmod +x "$chrome_path"
             printf 'CHROME_PATH=%s\n' "$chrome_path" >> "$GITHUB_ENV"
           fi
 
