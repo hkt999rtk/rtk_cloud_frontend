@@ -32,16 +32,29 @@
       <span class="brand-divider"></span>
       <span class="brand-product">Connect+</span>
     </a>
-    <nav class="main-nav" aria-label="Main navigation">
-      <a href="{{localizedPath . "/docs"}}">{{t . "nav.docs"}}</a>
-      <a href="{{localizedPath . "/features"}}">{{t . "nav.features"}}</a>
-      <a href="{{localizedPath . "/search"}}">{{t . "nav.search"}}</a>
-      <a href="{{localizedPath . "/"}}#architecture">{{t . "nav.architecture"}}</a>
-      <a href="{{localizedPath . "/contact"}}" class="nav-cta" data-analytics-cta="nav_cta_contact">{{t . "nav.contact"}}</a>
-    </nav>
-    {{if .AlternateLinks}}<nav class="language-nav" aria-label="Language">
-      {{range .AlternateLinks}}{{if ne .HrefLang "x-default"}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}
-    </nav>{{end}}
+    <div class="mobile-header-controls">
+      {{if .AlternateLinks}}<details class="mobile-language-menu">
+        <summary aria-label="{{t . "nav.language"}}">{{if eq .Locale.Code "zh-TW"}}繁中{{else if eq .Locale.Code "zh-CN"}}简中{{else}}EN{{end}}</summary>
+        <nav aria-label="{{t . "nav.language"}}">
+          {{range .AlternateLinks}}{{if ne .HrefLang "x-default"}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}
+        </nav>
+      </details>{{end}}
+      <button class="menu-toggle" type="button" data-menu-toggle aria-controls="site-navigation" aria-expanded="false" aria-label="{{t . "nav.menu"}}"><span></span><span></span><span></span></button>
+    </div>
+    <div class="header-nav-shell" id="site-navigation">
+      <nav class="main-nav" aria-label="Main navigation">
+        <a class="nav-service-login mobile-only-login" href="{{.ServiceLoginURL}}" data-analytics-cta="nav_cta_service_login">{{t . "home.cta.primary"}}</a>
+        <a href="{{localizedPath . "/docs"}}">{{t . "nav.docs"}}</a>
+        <a href="{{localizedPath . "/features"}}">{{t . "nav.features"}}</a>
+        {{if .SearchEnabled}}<a href="{{localizedPath . "/search"}}">{{t . "nav.search"}}</a>{{end}}
+        <a href="{{localizedPath . "/"}}#architecture">{{t . "nav.architecture"}}</a>
+        <a href="{{localizedPath . "/contact"}}" data-analytics-cta="nav_cta_contact">{{t . "nav.contact"}}</a>
+        <a class="nav-service-login desktop-login" href="{{.ServiceLoginURL}}" data-analytics-cta="nav_cta_service_login">{{t . "home.cta.primary"}}</a>
+      </nav>
+      {{if .AlternateLinks}}<nav class="language-nav" aria-label="{{t . "nav.language"}}">
+        {{range .AlternateLinks}}{{if ne .HrefLang "x-default"}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}{{end}}
+      </nav>{{end}}
+    </div>
   </header>
 
   <main id="main-content" tabindex="-1">
@@ -52,6 +65,7 @@
     <div class="footer-brand">
       <strong>Realtek Connect+</strong>
       <p>{{t . "footer.tagline"}}</p>
+      <a class="footer-film-link" href="{{asset "/static/assets/realtek-brand-film.mp4"}}" target="_blank" rel="noopener">{{t . "home.film.cta"}} →</a>
     </div>
     <nav class="footer-sitemap" aria-label="{{t . "footer.sitemap.label"}}">
       {{range .FooterSitemap}}
@@ -67,6 +81,7 @@
     </nav>
   </footer>
 
+  <script src="{{asset "/static/site.js"}}" defer></script>
   {{if .Analytics.Enabled}}
   <script>
     (function () {

@@ -47,6 +47,7 @@ type Config struct {
 	AdminToken              string
 	DisableSearchIndexing   bool
 	PublicBaseURL           string
+	ServiceLoginURL         string
 	EnableAssetFingerprints bool
 	EnableCDNCacheHeaders   bool
 	SearchEnabled           bool
@@ -69,6 +70,7 @@ type Server struct {
 	adminToken              string
 	disableSearchIndexing   bool
 	publicBaseURL           string
+	serviceLoginURL         string
 	enableAssetFingerprints bool
 	enableCDNCacheHeaders   bool
 	searchEnabled           bool
@@ -121,6 +123,7 @@ type pageData struct {
 	LeadFilters        adminLeadFilters
 	LeadPagination     adminLeadPagination
 	SearchEnabled      bool
+	ServiceLoginURL    string
 }
 
 type pageAnalyticsView struct {
@@ -181,6 +184,10 @@ func NewServer(cfg Config) (*Server, error) {
 	if cfg.SDKDocsDir == "" {
 		cfg.SDKDocsDir = filepath.Join("dist", "sdk-docs", "current")
 	}
+	serviceLoginURL, err := normalizeServiceLoginURL(cfg.ServiceLoginURL)
+	if err != nil {
+		return nil, err
+	}
 	contentRoot := filepath.Dir(cfg.ContentDir)
 	docsContent, err := docs.NewContentSource(cfg.ContentDir).Load()
 	if err != nil {
@@ -203,6 +210,7 @@ func NewServer(cfg Config) (*Server, error) {
 		adminToken:              cfg.AdminToken,
 		disableSearchIndexing:   cfg.DisableSearchIndexing,
 		publicBaseURL:           normalizePublicBaseURL(cfg.PublicBaseURL),
+		serviceLoginURL:         serviceLoginURL,
 		enableAssetFingerprints: cfg.EnableAssetFingerprints,
 		enableCDNCacheHeaders:   cfg.EnableCDNCacheHeaders,
 		searchEnabled:           cfg.SearchEnabled,
@@ -212,6 +220,20 @@ func NewServer(cfg Config) (*Server, error) {
 		searchLimit:             newSubmissionRateLimiter(20, 10*time.Minute),
 		docsContent:             docsContent,
 	}, nil
+}
+
+const defaultServiceLoginURL = "https://admin.video-cloud-staging.realtekconnect.com/login"
+
+func normalizeServiceLoginURL(value string) (string, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		value = defaultServiceLoginURL
+	}
+	parsed, err := url.Parse(value)
+	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.User != nil {
+		return "", fmt.Errorf("SERVICE_LOGIN_URL must be an absolute HTTP or HTTPS URL")
+	}
+	return parsed.String(), nil
 }
 
 func (s *Server) Routes() http.Handler {
@@ -352,6 +374,10 @@ func (s *Server) handlePrivacy(w http.ResponseWriter, r *http.Request, locale co
 }
 
 func (s *Server) handleSearchPage(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if !s.searchEnabled || s.searchService == nil {
+		http.NotFound(w, r)
+		return
+	}
 	if r.Method != http.MethodGet {
 		methodNotAllowed(w)
 		return
@@ -359,7 +385,6 @@ func (s *Server) handleSearchPage(w http.ResponseWriter, r *http.Request, locale
 	catalog := content.CatalogFor(locale)
 	page := catalog.Page("search")
 	data := s.basePageData(r, locale, publicPath, page.Title, page.Description)
-	data.SearchEnabled = s.searchEnabled && s.searchService != nil
 	s.render(w, http.StatusOK, "search.html", data)
 }
 
@@ -386,12 +411,7 @@ func (s *Server) handleSearchAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if !s.searchEnabled || s.searchService == nil {
-		writeSearchJSON(w, http.StatusServiceUnavailable, searchAPIErrorResponse{
-			AnswerFound: false,
-			Answer:      "Search is not enabled.",
-			Sources:     []search.Source{},
-			Error:       "search_disabled",
-		})
+		http.NotFound(w, r)
 		return
 	}
 	if !s.searchLimit.Allow(contactSubmissionKey(r)) {

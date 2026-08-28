@@ -3,8 +3,6 @@ package content
 import (
 	"strings"
 	"testing"
-
-	"realtek-connect/internal/features"
 )
 
 func TestLocalizedCatalogsKeepFeatureAndDocSlugs(t *testing.T) {
@@ -36,17 +34,53 @@ func TestLocalizedCatalogsKeepFeatureAndDocSlugs(t *testing.T) {
 	}
 }
 
-func TestOTACopyPromotesImplementedCampaignPolicies(t *testing.T) {
+func TestCloudPlansLeadWithRealtekManagedServiceInEveryLocale(t *testing.T) {
+	for _, locale := range SupportedLocales() {
+		feature, ok := CatalogFor(locale).FeatureBySlug("private-cloud")
+		if !ok {
+			t.Fatalf("%s catalog missing cloud plans feature", locale.Code)
+		}
+		managed := strings.ToLower(feature.Kicker + " " + feature.Summary + " " + feature.Description)
+		private := managed
+		if !strings.Contains(managed, "realtek") || !strings.Contains(managed, "managed") && !strings.Contains(managed, "託管") && !strings.Contains(managed, "托管") {
+			t.Fatalf("%s first cloud plan is not the Realtek-managed service: %s", locale.Code, managed)
+		}
+		if !strings.Contains(private, "private cloud") {
+			t.Fatalf("%s second cloud plan is not Private Cloud: %s", locale.Code, private)
+		}
+		copy := strings.ToLower(feature.Description + " " + strings.Join(feature.Highlights, " "))
+		for _, forbidden := range []string{"one-time license", "annual maintenance", "unit price"} {
+			if strings.Contains(copy, forbidden) {
+				t.Fatalf("%s cloud plans copy contains unapproved pricing detail %q: %s", locale.Code, forbidden, copy)
+			}
+		}
+	}
+}
+
+func TestManagedCloudSimplifiedChineseCopy(t *testing.T) {
+	feature, ok := CatalogFor(localeByCode(t, "zh-CN")).FeatureBySlug("private-cloud")
+	if !ok {
+		t.Fatal("zh-CN catalog missing cloud plans feature")
+	}
+	copy := strings.Join([]string{feature.Summary, feature.Description}, " ")
+	for _, want := range []string{"Realtek 托管", "客户", "实际使用量", "付费"} {
+		if !strings.Contains(copy, want) {
+			t.Fatalf("zh-CN managed cloud copy %q does not contain %q", copy, want)
+		}
+	}
+	for _, unwanted := range []string{"託管", "客戶", "實際", "付費"} {
+		if strings.Contains(copy, unwanted) {
+			t.Fatalf("zh-CN managed cloud copy %q still contains %q", copy, unwanted)
+		}
+	}
+}
+
+func TestOTACopyUsesCustomerFacingLanguage(t *testing.T) {
 	catalog := CatalogFor(DefaultLocale())
 	ota, ok := catalog.FeatureBySlug("ota")
 	if !ok {
 		t.Fatal("default catalog missing ota feature")
 	}
-
-	assertOTATableStatus(t, ota, "Scheduled policy", "Available foundation")
-	assertOTATableStatus(t, ota, "Time-window policy", "Available foundation")
-	assertOTATableStatus(t, ota, "User-consent policy", "Available foundation")
-	assertOTATableStatus(t, ota, "Archive", "Available foundation")
 
 	copy := strings.Join([]string{
 		ota.Summary,
@@ -54,30 +88,30 @@ func TestOTACopyPromotesImplementedCampaignPolicies(t *testing.T) {
 		strings.Join(ota.Highlights, " "),
 		strings.Join(ota.Capabilities, " "),
 	}, " ")
-	for _, want := range []string{
-		"available foundations",
-		"Available campaign policy surfaces",
-		"implemented",
-		"roadmap scope",
-	} {
+	for _, want := range []string{"roll out in stages", "monitor progress", "handle exceptions"} {
 		if !strings.Contains(copy, want) {
-			t.Fatalf("OTA copy does not contain availability boundary %q: %s", want, copy)
+			t.Fatalf("OTA copy does not contain customer benefit %q: %s", want, copy)
+		}
+	}
+	for _, forbidden := range []string{"contract boundary", "owner repo", "roadmap scope", "immutable", "target count"} {
+		if strings.Contains(strings.ToLower(copy), forbidden) {
+			t.Fatalf("OTA copy contains internal implementation language %q: %s", forbidden, copy)
 		}
 	}
 }
 
-func TestLocalizedOTACopyPromotesImplementedCampaignPolicies(t *testing.T) {
+func TestLocalizedOTACopyUsesCustomerBenefits(t *testing.T) {
 	tests := []struct {
 		localeCode string
 		wants      []string
 	}{
 		{
 			localeCode: "zh-TW",
-			wants:      []string{"現有基礎", "已可用的 campaign surface", "roadmap 範圍"},
+			wants:      []string{"分批發布", "掌握進度", "異常狀況"},
 		},
 		{
 			localeCode: "zh-CN",
-			wants:      []string{"现有基础", "已可用的 campaign surface", "roadmap 范圍"},
+			wants:      []string{"分批发布", "掌握进度", "异常状況"},
 		},
 	}
 
@@ -96,26 +130,11 @@ func TestLocalizedOTACopyPromotesImplementedCampaignPolicies(t *testing.T) {
 			}, " ")
 			for _, want := range tc.wants {
 				if !strings.Contains(copy, want) {
-					t.Fatalf("%s OTA copy does not contain availability boundary %q: %s", tc.localeCode, want, copy)
+					t.Fatalf("%s OTA copy does not contain customer benefit %q: %s", tc.localeCode, want, copy)
 				}
 			}
 		})
 	}
-}
-
-func assertOTATableStatus(t *testing.T, feature features.Feature, concept, status string) {
-	t.Helper()
-
-	for _, row := range feature.Table.Rows {
-		if len(row.Cells) < 2 || row.Cells[0] != concept {
-			continue
-		}
-		if row.Cells[1] != status {
-			t.Fatalf("OTA table status for %q = %q, want %q", concept, row.Cells[1], status)
-		}
-		return
-	}
-	t.Fatalf("OTA table missing concept %q", concept)
 }
 
 func localeByCode(t *testing.T, code string) Locale {

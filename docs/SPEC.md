@@ -410,6 +410,7 @@ Environment:
 - `SEARCH_EMBEDDING_MODEL`, optional and default `text-embedding-3-small`.
 - `SEARCH_ANSWER_MODEL`, optional and default `gpt-4.1-mini`.
 - `PUBLIC_BASE_URL`, optional. When empty, canonical URLs, social image URLs, `hreflang` alternates, robots sitemap references, and sitemap locations are generated from the incoming request host and forwarded headers. When set, generated public absolute URLs use this fixed base URL.
+- `SERVICE_LOGIN_URL`, optional. Supplies the absolute HTTP(S) service-login destination for the homepage CTA and defaults to the current staging Cloud Admin login. Invalid or relative values fail startup so the public CTA cannot silently render a broken destination.
 - `ENABLE_ASSET_FINGERPRINTS`, optional and disabled by default. When truthy, template-rendered `/static/...` URLs receive a `?v=<content-hash>` query string based on file contents.
 - `ENABLE_CDN_CACHE_HEADERS`, optional and disabled by default. When truthy, the app emits provider-neutral CDN cache headers.
 

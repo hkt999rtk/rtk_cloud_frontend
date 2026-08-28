@@ -79,6 +79,7 @@ Environment variables:
 - `SEARCH_ANSWER_MODEL`: OpenAI answer model, default `gpt-4.1-mini`.
 - `DISABLE_SEARCH_INDEXING`: set to `true` on private/test deployments to emit `X-Robots-Tag: noindex, nofollow, noarchive`, add page-level `robots` meta tags, disallow all crawling in `/robots.txt`, and hide `/sitemap.xml`.
 - `PUBLIC_BASE_URL`: optional public origin such as `https://webtest.mgmeet.io`. When empty, canonical URLs, social image URLs, `hreflang`, robots sitemap references, and sitemap locations are built from the incoming request host and forwarded headers.
+- `SERVICE_LOGIN_URL`: absolute HTTP(S) URL used by the homepage “Start using the service” CTA. Defaults to `https://admin.video-cloud-staging.realtekconnect.com/login`; production deployments should override it with the production service login URL.
 - `ENABLE_ASSET_FINGERPRINTS`: optional. Set to `true` to append content hashes to template-rendered static URLs, for example `/static/styles.css?v=<hash>`.
 - `ENABLE_CDN_CACHE_HEADERS`: optional. Set to `true` to emit CDN-friendly cache headers for static assets, public HTML, admin/contact POST responses, health, robots, and sitemap.
 

@@ -127,6 +127,7 @@ func run(ctx context.Context, logger *zap.Logger) error {
 		AdminToken:              os.Getenv("ADMIN_TOKEN"),
 		DisableSearchIndexing:   truthyEnv("DISABLE_SEARCH_INDEXING"),
 		PublicBaseURL:           os.Getenv("PUBLIC_BASE_URL"),
+		ServiceLoginURL:         os.Getenv("SERVICE_LOGIN_URL"),
 		EnableAssetFingerprints: truthyEnv("ENABLE_ASSET_FINGERPRINTS"),
 		EnableCDNCacheHeaders:   truthyEnv("ENABLE_CDN_CACHE_HEADERS"),
 		SearchEnabled:           searchEnabled,
