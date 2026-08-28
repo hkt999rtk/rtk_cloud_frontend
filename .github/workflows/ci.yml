@@ -37,7 +37,8 @@ jobs:
 
       - name: Check SDK manual source
         run: |
-          python3 -m pip install --user PyYAML
+          sudo apt-get update
+          sudo apt-get install -y python3-yaml
           python3 -m unittest discover -s tools/tests -p 'test_build_sdk_docs.py'
 
       - name: Check Go formatting
