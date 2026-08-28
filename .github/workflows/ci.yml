@@ -32,13 +32,14 @@ jobs:
         run: |
           test "$(wc -c < static/assets/realtek-brand-film.mp4)" -gt 1000000
 
-      - name: Prepare job-local Linux dependencies
+      - name: Prepare Linux dependencies
         run: |
           curl -fsSLo "$RUNNER_TEMP/google-chrome.deb" \
             https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          mkdir -p "$RUNNER_TEMP/google-chrome"
-          dpkg-deb -x "$RUNNER_TEMP/google-chrome.deb" "$RUNNER_TEMP/google-chrome"
-          echo "CHROME_PATH=$RUNNER_TEMP/google-chrome/opt/google/chrome/google-chrome" >> "$GITHUB_ENV"
+          sudo apt-get -o DPkg::Lock::Timeout=300 update
+          sudo apt-get -o DPkg::Lock::Timeout=300 install -y \
+            "$RUNNER_TEMP/google-chrome.deb"
+          echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
 
           curl -fsSLo "$RUNNER_TEMP/pyyaml.tar.gz" \
             https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-6.0.2.tar.gz
