@@ -33,7 +33,7 @@ concurrency:
 
 jobs:
   import:
-    runs-on: [self-hosted, rtk_cloud_frontend, go]
+    runs-on: [self-hosted, Linux, X64]
 
     steps:
       - name: Reset self-hosted workspace
