@@ -40,9 +40,14 @@ jobs:
       - name: Check Go toolchain
         run: go version
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
       - name: Check SDK manual source
         run: |
-          python3 -m pip install --user PyYAML
+          python3 -m pip install PyYAML
           python3 -m unittest discover -s tools/tests -p 'test_build_sdk_docs.py'
 
       - name: Check Go formatting
