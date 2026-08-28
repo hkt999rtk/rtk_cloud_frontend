@@ -32,17 +32,19 @@ jobs:
         run: |
           test "$(wc -c < static/assets/realtek-brand-film.mp4)" -gt 1000000
 
-      - name: Install Linux dependencies
+      - name: Prepare job-local Linux dependencies
         run: |
-          sudo dpkg --remove --force-remove-reinstreq chromium-browser || true
-          sudo dpkg --configure -a
-          sudo apt-get update
-          sudo apt-get install -y ca-certificates curl python3-yaml
-          if ! command -v google-chrome >/dev/null 2>&1; then
-            curl -fsSLo /tmp/google-chrome-stable_current_amd64.deb \
-              https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-            sudo apt-get install -y /tmp/google-chrome-stable_current_amd64.deb
-          fi
+          curl -fsSLo "$RUNNER_TEMP/google-chrome.deb" \
+            https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          mkdir -p "$RUNNER_TEMP/google-chrome"
+          dpkg-deb -x "$RUNNER_TEMP/google-chrome.deb" "$RUNNER_TEMP/google-chrome"
+          echo "CHROME_PATH=$RUNNER_TEMP/google-chrome/opt/google/chrome/google-chrome" >> "$GITHUB_ENV"
+
+          curl -fsSLo "$RUNNER_TEMP/pyyaml.tar.gz" \
+            https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-6.0.2.tar.gz
+          mkdir -p "$RUNNER_TEMP/pyyaml"
+          tar -xzf "$RUNNER_TEMP/pyyaml.tar.gz" -C "$RUNNER_TEMP/pyyaml"
+          echo "PYTHONPATH=$RUNNER_TEMP/pyyaml/pyyaml-6.0.2/lib" >> "$GITHUB_ENV"
 
       - name: Set up Go
         run: |
