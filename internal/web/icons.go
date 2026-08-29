@@ -15,6 +15,7 @@ var iconPaths = map[string]string{
 	"arrow-right": `<path d="M5 12h13"/><path d="m13 6 6 6-6 6"/>`,
 	"certificate": `<path d="M7 4h10v16H7z"/><path d="M10 8h4"/><path d="M10 12h4"/><circle cx="12" cy="16" r="1.5"/><path d="m10.8 17.2-.8 2.3"/><path d="m13.2 17.2.8 2.3"/>`,
 	"chart":       `<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12 15V8"/><path d="M16 15v-6"/><path d="M7 7h2l2 3 2-5 2 8 2-4h2"/>`,
+	"check":       `<path d="m5 12 4 4L19 6"/>`,
 	"chip":        `<rect x="7" y="7" width="10" height="10" rx="2"/><path d="M9 1v4"/><path d="M15 1v4"/><path d="M9 19v4"/><path d="M15 19v4"/><path d="M1 9h4"/><path d="M1 15h4"/><path d="M19 9h4"/><path d="M19 15h4"/><rect x="10" y="10" width="4" height="4" rx="1"/>`,
 	"cloud-lock":  `<path d="M7 18h10a4 4 0 0 0 .4-7.98A6 6 0 0 0 6.2 8.4 4.8 4.8 0 0 0 7 18Z"/><rect x="9" y="12" width="6" height="5" rx="1"/><path d="M10.5 12v-1.2a1.5 1.5 0 0 1 3 0V12"/>`,
 	"dashboard":   `<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16"/><path d="M8 15h3"/><path d="M14 15h2"/><path d="M8 7.5h.01"/><path d="M11 7.5h.01"/>`,

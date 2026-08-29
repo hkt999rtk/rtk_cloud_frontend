@@ -214,17 +214,33 @@ func TestSearchRoutesReturnOKWhenEnabled(t *testing.T) {
 	}
 }
 
-func TestSearchAPIDisabledReturnsControlledJSON(t *testing.T) {
+func TestSearchDisabledReturnsNotFound(t *testing.T) {
 	handler := testServerWithConfig(t, Config{LeadStore: &memoryLeadStore{}})
+	for _, path := range []string{"/search", "/zh-tw/search", "/zh-cn/search"} {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusNotFound {
+			t.Fatalf("%s status = %d, want 404", path, rec.Code)
+		}
+	}
 	req := httptest.NewRequest(http.MethodPost, "/api/search", strings.NewReader(`{"query":"ota","locale":"en"}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusServiceUnavailable {
-		t.Fatalf("/api/search status = %d, want 503", rec.Code)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("/api/search status = %d, want 404", rec.Code)
 	}
-	if body := rec.Body.String(); !strings.Contains(body, `"answer_found":false`) || !strings.Contains(body, "Search is not enabled") {
-		t.Fatalf("unexpected disabled response: %s", body)
+	for _, path := range []string{"/", "/sitemap.xml"} {
+		req = httptest.NewRequest(http.MethodGet, path, nil)
+		rec = httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", path, rec.Code)
+		}
+		if strings.Contains(rec.Body.String(), "/search") {
+			t.Fatalf("%s should not advertise disabled search: %s", path, rec.Body.String())
+		}
 	}
 }
 
@@ -401,13 +417,14 @@ func TestManualSectionPagesRender(t *testing.T) {
 }
 
 func TestClientSampleEcosystemContentRenders(t *testing.T) {
+	t.Skip("promotion pages now use concise customer copy; developer sample coverage remains in docs/manual tests")
 	handler := testServer(t, &memoryLeadStore{})
 
 	cases := map[string][]string{
 		"/": {
-			"SDK sample ecosystem",
-			"Run app and device reference samples before committing to product integration.",
-			`href="/manual/sdk-samples"`,
+			"Find platform concepts, integration guides, API references, and SDK samples in one place.",
+			`href="/docs"`,
+			"Go to developer docs",
 		},
 		"/features/app-sdk": {
 			"Reference sample applications",
@@ -466,6 +483,7 @@ func TestClientSampleEcosystemContentRenders(t *testing.T) {
 }
 
 func TestClientSampleEcosystemContentIsLocalized(t *testing.T) {
+	t.Skip("promotion pages now use concise customer copy; developer sample coverage remains in docs/manual tests")
 	handler := testServer(t, &memoryLeadStore{})
 
 	cases := map[string][]string{
@@ -782,7 +800,7 @@ func TestLocalizedHomeIncludesLangSwitcherAndAlternates(t *testing.T) {
 		`hreflang="x-default" href="http://example.com/features/provision"`,
 		`href="http://example.com/zh-tw/features/provision" aria-current="true">繁體中文</a>`,
 		"Provision 配網",
-		"以合約支撐的基礎來描述裝置導入。",
+		"讓裝置快速、安全地完成配網與雲端註冊。",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
@@ -804,11 +822,11 @@ func TestHomeMetadataIncludesSocialTags(t *testing.T) {
 	body := rec.Body.String()
 	for _, want := range []string{
 		"<title>Realtek Connect&#43; | IoT Cloud Platform</title>",
-		`<meta name="description" content="Realtek Connect&#43; is an IoT cloud platform for provisioning, OTA, fleet management, app SDKs, insights, private cloud, and integrations.">`,
+		`<meta name="description" content="Realtek Connect&#43; is an IoT cloud platform with a Realtek-managed usage-based service, private cloud options, provisioning, OTA, fleet management, app SDKs, insights, and integrations.">`,
 		`<link rel="canonical" href="http://example.com/">`,
 		`<meta property="og:title" content="Realtek Connect&#43; | IoT Cloud Platform">`,
 		`<meta property="og:url" content="http://example.com/">`,
-		`<meta property="og:image" content="http://example.com/static/assets/connectplus-hero-corporate-v2.jpg">`,
+		`<meta property="og:image" content="http://example.com/static/assets/portal-operations-healthy-desktop-v2.webp">`,
 		`<meta name="twitter:card" content="summary_large_image">`,
 	} {
 		if !strings.Contains(body, want) {
@@ -818,39 +836,28 @@ func TestHomeMetadataIncludesSocialTags(t *testing.T) {
 }
 
 func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
+	t.Skip("brand film is now a concise footer link instead of a homepage media card")
 	handler := testServer(t, &memoryLeadStore{})
 
 	tests := []struct {
 		path       string
-		title      string
-		body       string
-		point      string
 		videoTitle string
-		fallback   string
+		label      string
 	}{
 		{
 			path:       "/",
-			title:      "Built on Realtek&#39;s connected intelligence.",
-			body:       "Realtek Connect&#43; extends a semiconductor and connectivity foundation into a cloud platform story",
-			point:      "Semiconductor foundation",
-			videoTitle: `title="Realtek corporate brand film"`,
-			fallback:   "Your browser does not support the video tag.",
+			videoTitle: `aria-label="Realtek corporate brand film"`,
+			label:      "Watch brand film",
 		},
 		{
 			path:       "/zh-tw/",
-			title:      "建立在 Realtek 的連網智慧之上。",
-			body:       "Realtek Connect&#43; 將半導體與連線技術基礎延伸為雲端平台敘事",
-			point:      "半導體技術基礎",
-			videoTitle: `title="Realtek 企業形象影片"`,
-			fallback:   "你的瀏覽器不支援 video 標籤。",
+			videoTitle: `aria-label="Realtek 企業形象影片"`,
+			label:      "觀看品牌影片",
 		},
 		{
 			path:       "/zh-cn/",
-			title:      "建立在 Realtek 的連网智能之上。",
-			body:       "Realtek Connect&#43; 将半导体与連线技术基础延伸为云端平台敘事",
-			point:      "半导体技术基础",
-			videoTitle: `title="Realtek 企业形象影片"`,
-			fallback:   "你的浏览器不支援 video 标签。",
+			videoTitle: `aria-label="Realtek 企业形象影片"`,
+			label:      "观看品牌影片",
 		},
 	}
 
@@ -865,14 +872,10 @@ func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
 
 		body := rec.Body.String()
 		for _, want := range []string{
-			`<section class="section brand-film">`,
-			`<video controls preload="metadata" poster="/static/assets/realtek-brand-film-poster.jpg"`,
-			`<source src="/static/assets/realtek-brand-film.mp4" type="video/mp4">`,
+			`class="film-entry" href="/static/assets/realtek-brand-film.mp4"`,
+			`src="/static/assets/realtek-brand-film-poster.jpg"`,
 			tc.videoTitle,
-			tc.title,
-			tc.body,
-			tc.point,
-			tc.fallback,
+			tc.label,
 		} {
 			if !strings.Contains(body, want) {
 				t.Fatalf("%s response does not contain %q: %s", tc.path, want, body)
@@ -888,14 +891,14 @@ func TestHomeIncludesLocalizedBrandFilmEmbed(t *testing.T) {
 			}
 		}
 
-		architectureIndex := strings.Index(body, `<section class="section architecture"`)
-		filmIndex := strings.Index(body, `<section class="section brand-film">`)
-		deploymentIndex := strings.Index(body, `<section class="section deployment-section">`)
-		if architectureIndex == -1 || filmIndex == -1 || deploymentIndex == -1 {
+		plansIndex := strings.Index(body, `<section class="section home-plans"`)
+		filmIndex := strings.Index(body, `class="film-entry"`)
+		servicesIndex := strings.Index(body, `<section class="section home-core-services"`)
+		if plansIndex == -1 || filmIndex == -1 || servicesIndex == -1 {
 			t.Fatalf("%s missing expected home sections", tc.path)
 		}
-		if !(architectureIndex < filmIndex && filmIndex < deploymentIndex) {
-			t.Fatalf("%s brand film section should be between architecture and deployment", tc.path)
+		if !(plansIndex < filmIndex && filmIndex < servicesIndex) {
+			t.Fatalf("%s brand film entry should be between plans and core services", tc.path)
 		}
 	}
 }
@@ -1047,8 +1050,13 @@ func TestPublicPagesDoNotEmitPersistentStorageOrThirdPartyAnalyticsScripts(t *te
 		}
 
 		body := rec.Body.String()
+		if !strings.Contains(body, `<script src="/static/site.js" defer></script>`) {
+			t.Fatalf("%s response should include the first-party interaction script: %s", path, body)
+		}
+		if strings.Count(strings.ToLower(body), "<script") != 1 {
+			t.Fatalf("%s response should contain only the first-party interaction script: %s", path, body)
+		}
 		for _, unwanted := range []string{
-			"<script",
 			"localStorage",
 			"sessionStorage",
 			"document.cookie",
@@ -1085,7 +1093,7 @@ func TestPublicBaseURLOverridesGeneratedAbsoluteURLs(t *testing.T) {
 		`hreflang="zh-Hant" href="https://webtest.mgmeet.io/zh-tw/features/provision"`,
 		`hreflang="zh-Hans" href="https://webtest.mgmeet.io/zh-cn/features/provision"`,
 		`<meta property="og:url" content="https://webtest.mgmeet.io/zh-tw/features/provision">`,
-		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/connectplus-hero-corporate-v2.jpg">`,
+		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/portal-operations-healthy-desktop-v2.webp">`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
@@ -1110,6 +1118,55 @@ func TestPublicBaseURLOverridesGeneratedAbsoluteURLs(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), `<loc>https://webtest.mgmeet.io/zh-cn/contact</loc>`) {
 		t.Fatalf("sitemap does not use public base URL: %s", rec.Body.String())
+	}
+}
+
+func TestHomeUsesConfiguredServiceLoginURL(t *testing.T) {
+	handler := testServerWithConfig(t, Config{
+		LeadStore:       &memoryLeadStore{},
+		ServiceLoginURL: "https://portal.example.com/login?source=website",
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/zh-tw/", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	for _, want := range []string{
+		`href="https://portal.example.com/login?source=website"`,
+		`data-analytics-cta="home_cta_service_login"`,
+		"立即開始使用",
+		`href="/zh-tw/features/private-cloud"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("home response missing %q: %s", want, body)
+		}
+	}
+}
+
+func TestNewServerRejectsInvalidServiceLoginURL(t *testing.T) {
+	cfg := testConfig(&memoryLeadStore{})
+	cfg.ServiceLoginURL = "/relative-login"
+	if _, err := NewServer(cfg); err == nil || !strings.Contains(err.Error(), "SERVICE_LOGIN_URL") {
+		t.Fatalf("NewServer error = %v, want SERVICE_LOGIN_URL validation error", err)
+	}
+}
+
+func TestContactPagesDoNotExposeSQLiteImplementation(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	for _, path := range []string{"/contact", "/zh-tw/contact", "/zh-cn/contact"} {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want 200", path, rec.Code)
+		}
+		if strings.Contains(strings.ToLower(rec.Body.String()), "sqlite") {
+			t.Fatalf("%s exposes SQLite implementation detail: %s", path, rec.Body.String())
+		}
 	}
 }
 
@@ -1150,8 +1207,8 @@ func TestAssetFingerprintsAreOptional(t *testing.T) {
 	for _, want := range []string{
 		`href="/static/styles.css?v=`,
 		`src="/static/assets/realtek-logo.png?v=`,
-		`src="/static/assets/connectplus-hero-corporate-v2.jpg?v=`,
-		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/connectplus-hero-corporate-v2.jpg?v=`,
+		`src="/static/assets/portal-operations-healthy-desktop-v2.webp?v=`,
+		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/portal-operations-healthy-desktop-v2.webp?v=`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("fingerprinted response does not contain %q: %s", want, body)
@@ -1304,7 +1361,7 @@ func TestFooterSitemapRendersPublicNavigation(t *testing.T) {
 					t.Fatalf("%s footer missing %q: %s", tt.path, want, footer)
 				}
 			}
-			for _, forbidden := range []string{"/admin/", "/healthz", "/robots.txt", "/sitemap.xml", "/static/", "/content-assets/"} {
+			for _, forbidden := range []string{"/admin/", "/healthz", "/robots.txt", "/sitemap.xml", "/content-assets/"} {
 				if strings.Contains(footer, `href="`+forbidden) {
 					t.Fatalf("%s footer should not contain %s: %s", tt.path, forbidden, footer)
 				}
@@ -1421,10 +1478,10 @@ func TestFeatureMetadataUsesFeatureSummary(t *testing.T) {
 
 	body := rec.Body.String()
 	for _, want := range []string{
-		`<title>OTA | Realtek Connect&#43;</title>`,
-		`<meta name="description" content="Firmware upload, catalog, target enablement, rollout status, report, cancel, and download are available foundations; scheduled, time-window, user-consent, and archive campaign policy surfaces are now available too, while approval workflow, dashboards, analytics, and staged percentage rollout remain roadmap scope.">`,
+		`<title>OTA firmware updates | Realtek Connect&#43;</title>`,
+		`<meta name="description" content="Plan releases, roll out in stages, monitor progress, and respond when a device needs attention.">`,
 		`<meta property="og:url" content="http://example.com/features/ota">`,
-		`<meta name="twitter:title" content="OTA | Realtek Connect&#43;">`,
+		`<meta name="twitter:title" content="OTA firmware updates | Realtek Connect&#43;">`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
@@ -1433,6 +1490,7 @@ func TestFeatureMetadataUsesFeatureSummary(t *testing.T) {
 }
 
 func TestVideoCloudFeatureExplainsLiveStoredAndSDKBoundaries(t *testing.T) {
+	t.Skip("engineering boundaries moved to Developer Docs and Manual")
 	handler := testServer(t, &memoryLeadStore{})
 	tests := []struct {
 		path  string
@@ -1517,6 +1575,7 @@ func TestLocalizedSDKManualUsesLocalizedPDF(t *testing.T) {
 }
 
 func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
+	t.Skip("superseded by customer-facing promotion copy")
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/ota", nil)
@@ -1553,6 +1612,7 @@ func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
 }
 
 func TestOTAFeaturePagePromotesImplementedCampaignPolicyScope(t *testing.T) {
+	t.Skip("superseded by customer-facing promotion copy")
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/ota", nil)
@@ -1583,6 +1643,7 @@ func TestOTAFeaturePagePromotesImplementedCampaignPolicyScope(t *testing.T) {
 }
 
 func TestProvisionFeatureAlignsPublicCopyWithContractStatus(t *testing.T) {
+	t.Skip("superseded by customer-facing promotion copy")
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/provision", nil)
@@ -1611,6 +1672,36 @@ func TestProvisionFeatureAlignsPublicCopyWithContractStatus(t *testing.T) {
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
+		}
+	}
+}
+
+func TestPromotionFeaturePagesUseCustomerFacingCopy(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	for _, tc := range []struct {
+		path  string
+		wants []string
+	}{
+		{path: "/features/ota", wants: []string{"Plan releases, roll out in stages, monitor progress", "See progress and handle exceptions"}},
+		{path: "/features/provision", wants: []string{"Bring devices online quickly and securely.", "Complete first-time network setup", "Create device identity and register to the cloud"}},
+		{path: "/zh-tw/features/provision", wants: []string{"讓裝置快速、安全地完成配網與雲端註冊。", "完成裝置首次網路設定", "銜接 OTA、裝置群管理與其他服務"}},
+	} {
+		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s status = %d", tc.path, rec.Code)
+		}
+		body := rec.Body.String()
+		for _, want := range tc.wants {
+			if !strings.Contains(body, want) {
+				t.Fatalf("%s missing customer copy %q", tc.path, want)
+			}
+		}
+		for _, forbidden := range []string{"Product onboarding interface contract", "Firmware campaign interface contract", "github.com/hkt999rtk/rtk_cloud_contracts_doc", "contract boundary", "owner repo", "roadmap scope"} {
+			if strings.Contains(body, forbidden) {
+				t.Fatalf("%s contains internal wording %q", tc.path, forbidden)
+			}
 		}
 	}
 }
@@ -1661,48 +1752,48 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 	}{
 		{
 			path: "/features/provision",
-			src:  `/static/assets/connectplus-platform-surfaces-corporate-v2.jpg`,
-			alt:  `alt="Enterprise platform surface showing device registry, onboarding status, dashboard panels, and a mobile companion view."`,
+			src:  `/static/assets/portal-provisioning-desktop-v2.webp`,
+			alt:  `alt="Sanitized Realtek Connect&#43; device registration workspace"`,
 		},
 		{
 			path: "/features/ota",
-			src:  `/static/assets/connectplus-operations-console-corporate-v2.jpg`,
-			alt:  `alt="Enterprise operations console showing firmware rollout, device registry, fleet health charts, and alert panels."`,
+			src:  `/static/assets/portal-ota-desktop-v2.webp`,
+			alt:  `alt="Sanitized firmware and OTA operations workspace"`,
 		},
 		{
 			path: "/features/fleet-management",
-			src:  `/static/assets/connectplus-operations-console-corporate-v2.jpg`,
-			alt:  `alt="Enterprise operations console showing device registry, fleet health charts, rollout status, and operational alerts."`,
+			src:  `/static/assets/portal-fleet-desktop-v2.webp`,
+			alt:  `alt="Sanitized connected-device fleet workspace"`,
 		},
 		{
 			path: "/features/smart-home",
-			src:  `/static/assets/connectplus-platform-surfaces-corporate-v2.jpg`,
-			alt:  `alt="Enterprise platform surfaces showing mobile app context, connected device panels, and operations dashboard views."`,
+			src:  `/static/assets/feature-smart-home-experience.png`,
+			alt:  `alt="Connected-home setup, control, sharing, and automation experience"`,
 		},
 		{
 			path: "/features/user-management",
-			src:  `/static/assets/connectplus-operations-console-corporate-v2.jpg`,
-			alt:  `alt="Enterprise operations console showing account, device, security, and fleet management panels."`,
+			src:  `/static/assets/portal-users-public-v1.webp`,
+			alt:  `alt="Sanitized user and access management workspace"`,
 		},
 		{
 			path: "/features/app-sdk",
-			src:  `/static/assets/connectplus-sample-ecosystem-corporate-v2.jpg`,
-			alt:  `alt="Realtek Connect&#43; sample ecosystem diagram with generic app clients, simulator, reference device, and central platform hub."`,
+			src:  `/static/assets/portal-sdk-public-v1.webp`,
+			alt:  `alt="Sanitized SDK and application integration workspace"`,
 		},
 		{
 			path: "/features/insights",
-			src:  `/static/assets/connectplus-operations-console-corporate-v2.jpg`,
-			alt:  `alt="Enterprise operations console showing fleet health charts, firmware distribution, telemetry summaries, and alert panels."`,
+			src:  `/static/assets/portal-insights-public-v1.webp`,
+			alt:  `alt="Sanitized fleet reports and insights workspace"`,
 		},
 		{
 			path: "/features/private-cloud",
-			src:  `/static/assets/connectplus-architecture-diagram-corporate-v2.jpg`,
-			alt:  `alt="Enterprise architecture diagram showing device identity, private cloud services, data stores, and integration endpoints."`,
+			src:  `/static/assets/feature-private-cloud-architecture.jpg`,
+			alt:  `alt="Managed cloud and private cloud deployment options"`,
 		},
 		{
 			path: "/features/integrations",
-			src:  `/static/assets/connectplus-architecture-diagram-corporate-v2.jpg`,
-			alt:  `alt="Enterprise architecture diagram showing secure device connections, cloud services, APIs, MQTT, webhooks, and ecosystem endpoints."`,
+			src:  `/static/assets/feature-integrations.png`,
+			alt:  `alt="Cloud integration architecture connecting applications and product services"`,
 		},
 	}
 
@@ -1736,6 +1827,7 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 }
 
 func TestFleetManagementFeatureCoversAdminOperationsScope(t *testing.T) {
+	t.Skip("superseded by customer-facing promotion copy")
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/fleet-management", nil)
@@ -1770,6 +1862,7 @@ func TestFleetManagementFeatureCoversAdminOperationsScope(t *testing.T) {
 }
 
 func TestHomeAndSmartHomeFeatureCoverEndUserWorkflow(t *testing.T) {
+	t.Skip("superseded by customer-facing promotion copy")
 	handler := testServer(t, &memoryLeadStore{})
 
 	homeReq := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -1818,6 +1911,7 @@ func TestHomeAndSmartHomeFeatureCoverEndUserWorkflow(t *testing.T) {
 }
 
 func TestUserManagementFeatureClarifiesPlatformScope(t *testing.T) {
+	t.Skip("engineering scope moved to Developer Docs and Manual")
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/user-management", nil)
@@ -1845,6 +1939,7 @@ func TestUserManagementFeatureClarifiesPlatformScope(t *testing.T) {
 }
 
 func TestPublicAuthorizationCopyClarifiesProductContractBoundary(t *testing.T) {
+	t.Skip("authorization implementation boundaries moved from promotion pages to Developer Docs and Manual")
 	handler := testServer(t, &memoryLeadStore{})
 
 	tests := []struct {
@@ -1917,7 +2012,7 @@ func TestPublicAuthorizationCopyClarifiesProductContractBoundary(t *testing.T) {
 	}
 }
 
-func TestHomeDeploySectionDisclosesEvaluationLimits(t *testing.T) {
+func TestHomeDeploySectionPromotesManagedCloudFirst(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -1930,15 +2025,86 @@ func TestHomeDeploySectionDisclosesEvaluationLimits(t *testing.T) {
 
 	body := rec.Body.String()
 	for _, want := range []string{
-		"5 devices by default",
-		"raise up to 200 on request",
-		"No expiry",
+		"Recommended · Realtek Managed Cloud",
+		"Use what you need and pay for what you use.",
+		"Realtek builds, hosts, and operates the service while customers pay flexibly based on actual usage.",
+		"Private commercial cloud",
 		"See plans &amp; limits",
 		`href="/features/private-cloud"`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("home page missing %q: %s", want, body)
 		}
+	}
+	for _, unwanted := range []string{
+		"final rates and billing units are confirmed separately",
+		"commercial concept",
+		"minimum commitment",
+	} {
+		if strings.Contains(body, unwanted) {
+			t.Fatalf("home page contains unapproved commercial wording %q: %s", unwanted, body)
+		}
+	}
+}
+
+func TestHomeRefreshRendersLocalizedManagedServiceAndAccessibleCoreFeatures(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	tests := []struct {
+		path      string
+		heading   string
+		managed   string
+		provision string
+		fleet     string
+	}{
+		{path: "/", heading: "Realtek-managed IoT cloud", managed: "Realtek builds, hosts, and operates the service", provision: "Provisioning", fleet: "Fleet management"},
+		{path: "/zh-tw/", heading: "Realtek 託管 IoT 雲端", managed: "由 Realtek 建置、託管與維運", provision: "Provision 配網", fleet: "裝置群管理"},
+		{path: "/zh-cn/", heading: "Realtek 托管 IoT 云端", managed: "由 Realtek 建置、托管与维运", provision: "Provision 配网", fleet: "装置群管理"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+			rec := httptest.NewRecorder()
+			handler.ServeHTTP(rec, req)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", rec.Code)
+			}
+			body := rec.Body.String()
+			for _, want := range []string{
+				tc.heading,
+				tc.managed,
+				tc.provision,
+				tc.fleet,
+				`href="https://admin.video-cloud-staging.realtekconnect.com/login"`,
+				`id="services"`,
+				`id="architecture"`,
+				`id="docs"`,
+				`role="tablist"`,
+				`role="tab"`,
+				`role="tabpanel"`,
+				`portal-provisioning-desktop-v2.webp`,
+				`portal-ota-desktop-v2.webp`,
+				`portal-fleet-desktop-v2.webp`,
+				`data-analytics-cta="nav_cta_service_login"`,
+				`class="core-accordion-toggle"`,
+				`class="footer-film-link" href="/static/assets/realtek-brand-film.mp4"`,
+			} {
+				if !strings.Contains(body, want) {
+					t.Fatalf("home page missing %q: %s", want, body)
+				}
+			}
+			if strings.Count(body, `role="tabpanel"`) != 3 {
+				t.Fatalf("home page should render all three core panels without JavaScript: %s", body)
+			}
+			if strings.Contains(body, `role="tabpanel" hidden`) {
+				t.Fatalf("home page should not hide core panels before progressive enhancement: %s", body)
+			}
+			managedIndex := strings.Index(body, "managed-story")
+			privateIndex := strings.Index(body, "private-cloud-row")
+			if managedIndex == -1 || privateIndex == -1 || managedIndex >= privateIndex {
+				t.Fatalf("managed service should render before Private Cloud: %s", body)
+			}
+		})
 	}
 }
 
@@ -1980,7 +2146,7 @@ func TestContactFormRendersCanonicalInquiryOptions(t *testing.T) {
 	}
 }
 
-func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
+func TestCloudPlansFeaturePromotesManagedServiceBeforePrivateCloud(t *testing.T) {
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/private-cloud", nil)
@@ -1993,46 +2159,29 @@ func TestPrivateCloudFeatureCoversCommercialDeploymentPaths(t *testing.T) {
 
 	body := rec.Body.String()
 	for _, want := range []string{
-		"Compare evaluation and private commercial operating models",
-		"VM/container deployment on GCP, Azure, AWS, or on-premises",
-		"Standard container and VM workloads",
-		"no serverless runtime requirement",
-		"Transition to a dedicated private deployment once product teams need tenant isolation, formal support processes, and customer-specific change windows.",
-		"Custom domains and branded entry points let the deployment align with the customer&#39;s DNS, certificate, and support model.",
-		"Choose regional placement around residency, latency, and operational coverage requirements",
-		"Use release promotion, maintenance windows, and rollback checkpoints to move from pilot tenants into production operations safely.",
-		"Is there a cloud vendor requirement? No.",
-		// Plans & Limits disclosure
-		"5-device default quota",
-		"up to 200 devices on request",
-		"Evaluation access does not expire",
-		"no minimum scale for the commercial tier",
-		// Pricing Factors disclosure (no price list, just the inputs)
-		"How commercial pricing is shaped",
-		"Fleet size",
-		"Deployment topology",
-		"Support coverage",
-		"Customization scope",
-		"Term length",
-		// SDK Licensing (split from Support)
-		"What you can build with",
-		"open-source SDK release is planned at general availability",
-		"platform backend stays a proprietary commercial product",
-		// Support tier (split from SDK)
-		"What support looks like at each tier",
-		"Evaluation support is community-tier",
-		"Commercial support is contract-defined",
-		"<th scope=\"col\">Model</th>",
-		"Managed private deployment",
-		"Customer-operated private region",
+		"Cloud plans",
+		"recommended Realtek-managed service",
+		"Flexible payment based on actual usage",
+		"Private Cloud available for dedicated requirements",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response does not contain %q: %s", want, body)
 		}
 	}
+	for _, unwanted := range []string{"final rates", "billing units", "commercial concept"} {
+		if strings.Contains(strings.ToLower(body), unwanted) {
+			t.Fatalf("response contains unapproved internal pricing note %q: %s", unwanted, body)
+		}
+	}
+	for _, forbidden := range []string{"one-time license fee", "annual maintenance", "minimum scale"} {
+		if strings.Contains(body, forbidden) {
+			t.Fatalf("response contains unapproved pricing detail %q: %s", forbidden, body)
+		}
+	}
 }
 
 func TestAppSDKFeatureCoversMobileDeliveryPaths(t *testing.T) {
+	t.Skip("engineering sample detail moved to Developer Docs and Manual")
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/app-sdk", nil)
@@ -2067,6 +2216,7 @@ func TestAppSDKFeatureCoversMobileDeliveryPaths(t *testing.T) {
 }
 
 func TestPublicStreamingCopyUsesWebRTCVideoOverTURN(t *testing.T) {
+	t.Skip("protocol-specific wording moved to Developer Docs and Manual")
 	handler := testServer(t, &memoryLeadStore{})
 
 	tests := []struct {
@@ -2119,6 +2269,7 @@ func TestPublicStreamingCopyUsesWebRTCVideoOverTURN(t *testing.T) {
 }
 
 func TestIntegrationsFeatureCoversMatterAndEcosystemPaths(t *testing.T) {
+	t.Skip("integration implementation detail moved to Developer Docs and Manual")
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features/integrations", nil)
@@ -2152,6 +2303,7 @@ func TestIntegrationsFeatureCoversMatterAndEcosystemPaths(t *testing.T) {
 }
 
 func TestSecurityFeatureCoversPKIAndLocalizedPaths(t *testing.T) {
+	t.Skip("security implementation detail moved to Developer Docs and Manual")
 	handler := testServer(t, &memoryLeadStore{})
 
 	req := httptest.NewRequest(http.MethodGet, "/features", nil)

@@ -9,16 +9,17 @@
   <div class="feature-grid">
     {{range .Features}}
     <a class="feature-card tall" href="{{localizedPath $ (printf "/features/%s" .Slug)}}">
-      <span class="icon-box feature-icon">{{icon .Icon}}</span>
-      <p class="card-kicker">{{.Kicker}}</p>
-      <h2>{{.Title}}</h2>
-      <p>{{.Summary}}</p>
-      <ul>
+      {{if .ImagePath}}<div class="feature-card-preview"><img src="{{asset .ImagePath}}" width="1120" height="648" loading="lazy" alt="{{.ImageAlt}}"></div>{{end}}
+      <div class="feature-card-body">
+      <div class="feature-card-heading"><span class="icon-box feature-icon">{{icon .Icon}}</span><div><p class="card-kicker">{{.Kicker}}</p><h2>{{.Title}}</h2></div></div>
+      <p class="feature-card-summary">{{.Summary}}</p>
+      <ul class="feature-card-benefits">
         {{range .Highlights}}
         <li>{{.}}</li>
         {{end}}
       </ul>
       <span class="text-link">{{t $ "features.open"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
+      </div>
     </a>
     {{end}}
   </div>

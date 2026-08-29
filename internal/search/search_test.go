@@ -174,10 +174,9 @@ func TestCollectWebsiteDocumentsIncludesFeatureDocsAndManual(t *testing.T) {
 		}
 	}
 	for _, want := range []string{
-		"Get ICE",
-		"Sample truth matrix",
-		"Linux simulator",
-		"does not bundle server-side transcoding",
+		"live video",
+		"device and cloud viewing paths",
+		"operations visible",
 	} {
 		if !strings.Contains(bodies["feature:video-cloud:en"], want) {
 			t.Fatalf("Video Cloud search body missing %q", want)
