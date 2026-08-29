@@ -36,6 +36,8 @@ func TestOpenInitializesSQLiteSchema(t *testing.T) {
 		"analytics_events",
 		"idx_analytics_events_ts",
 		"idx_analytics_events_event_page",
+		"sdk_download_acceptances",
+		"idx_sdk_download_acceptances_time",
 	} {
 		var count int
 		if err := db.QueryRowContext(context.Background(), `
@@ -51,6 +53,40 @@ WHERE name = ?`, name).Scan(&count); err != nil {
 
 	if got := repository.RetentionDays(); got != DefaultRetentionDays {
 		t.Fatalf("retention days = %d, want %d", got, DefaultRetentionDays)
+	}
+}
+
+func TestInsertSDKDownloadAcceptanceStoresAnonymousRecord(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "analytics.db")
+	repository, err := Open(context.Background(), analyticsTestConfig(dbPath))
+	if err != nil {
+		t.Fatalf("open analytics store: %v", err)
+	}
+	defer repository.Close()
+
+	acceptedAt := time.Date(2026, 8, 29, 9, 30, 0, 0, time.UTC)
+	if err := repository.InsertSDKDownloadAcceptance(context.Background(), SDKDownloadAcceptance{
+		AcceptedAt:   acceptedAt,
+		SessionID:    "anonymous-session",
+		TermsVersion: "evaluation-2026-08",
+		SDKVersion:   "0.1.0-rc.2",
+		Package:      "javascript",
+		RequestID:    "request-123",
+	}); err != nil {
+		t.Fatalf("insert SDK download acceptance: %v", err)
+	}
+
+	db := openSQLiteTestDB(t, dbPath)
+	defer db.Close()
+	var got [6]string
+	if err := db.QueryRowContext(context.Background(), `
+SELECT accepted_at, session_id, terms_version, sdk_version, package, request_id
+FROM sdk_download_acceptances`).Scan(&got[0], &got[1], &got[2], &got[3], &got[4], &got[5]); err != nil {
+		t.Fatalf("query SDK download acceptance: %v", err)
+	}
+	want := [6]string{"2026-08-29T09:30:00Z", "anonymous-session", "evaluation-2026-08", "0.1.0-rc.2", "javascript", "request-123"}
+	if got != want {
+		t.Fatalf("acceptance = %#v, want %#v", got, want)
 	}
 }
 

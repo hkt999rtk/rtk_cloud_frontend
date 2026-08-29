@@ -45,6 +45,22 @@ manifest is missing.
 - Keep credentials, keys, presigned URLs, and customer data out of examples.
 - Regenerate after any exported SDK API change and review the symbol counts.
 
+## SDK Package Downloads
+
+`/manual/sdk` also renders the latest five-package public-evaluation catalog.
+The Portal reads the private `sdk/latest.json` and versioned catalog from
+Linode Object Storage, requires acceptance of the catalog's evaluation terms,
+records an anonymous acceptance row, and redirects to a ten-minute presigned
+URL. SDK binaries are not copied into the Portal image.
+
+Enable this surface with `SDK_DOWNLOADS_ENABLED=true` and a read-only,
+`sdk/`-scoped credential in `SDK_ARTIFACT_ACCESS_KEY_ID` and
+`SDK_ARTIFACT_SECRET_ACCESS_KEY`. Set `SDK_ARTIFACT_BUCKET`,
+`SDK_ARTIFACT_ENDPOINT`, `SDK_ARTIFACT_REGION`, and optionally
+`SDK_LATEST_OBJECT_KEY` (default `sdk/latest.json`). If the pointer, catalog,
+terms, or credentials are invalid, the rest of the site remains available and
+the SDK cards fail closed.
+
 ## Verification
 
 Run the Python unit tests, Go tests, documentation build, `pdfinfo`, PDF text
