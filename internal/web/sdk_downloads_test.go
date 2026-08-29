@@ -83,3 +83,118 @@ func TestSDKDownloadRequiresAcceptance(t *testing.T) {
 		t.Fatalf("status = %d, want 400", response.Code)
 	}
 }
+
+func TestSDKDownloadUnavailableAndMalformedRequests(t *testing.T) {
+	tests := []struct {
+		name        string
+		method      string
+		body        string
+		service     *sdkdownloads.Service
+		wantStatus  int
+		wantMessage string
+	}{
+		{name: "method", method: http.MethodGet, wantStatus: http.StatusMethodNotAllowed},
+		{name: "unavailable", method: http.MethodPost, body: "accepted=true", wantStatus: http.StatusServiceUnavailable, wantMessage: "SDK downloads are unavailable"},
+		{name: "malformed form", method: http.MethodPost, body: "%zz", service: sdkDownloadTestService(t), wantStatus: http.StatusBadRequest, wantMessage: "invalid download request"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			handler := testServerWithConfig(t, Config{SDKDownloads: test.service})
+			request := httptest.NewRequest(test.method, "/manual/sdk/download", strings.NewReader(test.body))
+			request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			response := httptest.NewRecorder()
+			handler.ServeHTTP(response, request)
+			if response.Code != test.wantStatus {
+				t.Fatalf("status = %d, want %d", response.Code, test.wantStatus)
+			}
+			if test.wantMessage != "" && !strings.Contains(response.Body.String(), test.wantMessage) {
+				t.Fatalf("body = %q, want %q", response.Body.String(), test.wantMessage)
+			}
+		})
+	}
+}
+
+func TestSDKCatalogAndTermsReportUnavailableService(t *testing.T) {
+	brokenService := sdkdownloads.NewService(webSDKStore{}, "", time.Minute)
+	handler := testServerWithConfig(t, Config{SDKDownloads: brokenService})
+	for _, path := range []string{"/manual/sdk", "/legal/sdk-evaluation-terms"} {
+		request := httptest.NewRequest(http.MethodGet, path, nil)
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, request)
+		if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "temporarily unavailable") {
+			t.Fatalf("GET %s = %d, body = %q", path, response.Code, response.Body.String())
+		}
+	}
+
+	request := httptest.NewRequest(http.MethodPost, "/legal/sdk-evaluation-terms", nil)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("POST terms status = %d, want 405", response.Code)
+	}
+}
+
+func TestSDKDownloadRateLimitAndMetrics(t *testing.T) {
+	server := newTestServer(t, Config{
+		TemplatesDir: "../../templates",
+		StaticDir:    "../../static",
+		ContentDir:   "../../content/docs",
+		SDKDocsDir:   "testdata/sdk-docs",
+		LeadStore:    &memoryLeadStore{},
+		SDKDownloads: sdkDownloadTestService(t),
+	})
+	server.sdkDownloadLimit = newSubmissionRateLimiter(1, time.Hour)
+	handler := server.Routes()
+	form := url.Values{"package": {"native"}, "version": {"0.1.0-rc.2"}, "terms_version": {"eval-v1"}, "accepted": {"true"}}
+
+	firstRequest := httptest.NewRequest(http.MethodPost, "/manual/sdk/download", strings.NewReader(form.Encode()))
+	firstRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	firstResponse := httptest.NewRecorder()
+	handler.ServeHTTP(firstResponse, firstRequest)
+	if firstResponse.Code != http.StatusSeeOther {
+		t.Fatalf("first status = %d, want 303", firstResponse.Code)
+	}
+	var sessionCookie *http.Cookie
+	for _, cookie := range firstResponse.Result().Cookies() {
+		if cookie.Name == sdkSessionCookie {
+			sessionCookie = cookie
+			break
+		}
+	}
+	if sessionCookie == nil {
+		t.Fatal("missing SDK session cookie")
+	}
+
+	secondRequest := httptest.NewRequest(http.MethodPost, "/manual/sdk/download", strings.NewReader(form.Encode()))
+	secondRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	secondRequest.AddCookie(sessionCookie)
+	secondResponse := httptest.NewRecorder()
+	handler.ServeHTTP(secondResponse, secondRequest)
+	if secondResponse.Code != http.StatusTooManyRequests {
+		t.Fatalf("second status = %d, want 429", secondResponse.Code)
+	}
+
+	metricsRequest := httptest.NewRequest(http.MethodGet, "/metrics/prometheus", nil)
+	metricsResponse := httptest.NewRecorder()
+	handler.ServeHTTP(metricsResponse, metricsRequest)
+	for _, want := range []string{
+		`rtk_cloud_frontend_sdk_download_acceptances_total{version="0.1.0-rc.2",package="native"} 1`,
+		`rtk_cloud_frontend_sdk_download_redirects_total{version="0.1.0-rc.2",package="native"} 1`,
+		"rtk_cloud_frontend_sdk_download_errors_total 1",
+	} {
+		if !strings.Contains(metricsResponse.Body.String(), want) {
+			t.Fatalf("metrics missing %q", want)
+		}
+	}
+}
+
+func TestFormatBytes(t *testing.T) {
+	for _, test := range []struct {
+		size int64
+		want string
+	}{{512, "512 B"}, {1024, "1.0 KB"}, {1024 * 1024, "1.0 MB"}, {1024 * 1024 * 1024, "1.0 GB"}} {
+		if got := formatBytes(test.size); got != test.want {
+			t.Fatalf("formatBytes(%d) = %q, want %q", test.size, got, test.want)
+		}
+	}
+}
