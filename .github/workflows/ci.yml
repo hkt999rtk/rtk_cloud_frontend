@@ -20,7 +20,7 @@ env:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
 
     steps:
       - name: Check out repository
@@ -32,12 +32,35 @@ jobs:
         run: |
           test "$(wc -c < static/assets/realtek-brand-film.mp4)" -gt 1000000
 
+      - name: Prepare Linux dependencies
+        run: |
+          curl -fsSLo "$RUNNER_TEMP/google-chrome.deb" \
+            https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get -o DPkg::Lock::Timeout=300 update
+          sudo apt-get -o DPkg::Lock::Timeout=300 install -y \
+            "$RUNNER_TEMP/google-chrome.deb"
+          echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+
+          curl -fsSLo "$RUNNER_TEMP/pyyaml.tar.gz" \
+            https://files.pythonhosted.org/packages/source/P/PyYAML/pyyaml-6.0.2.tar.gz
+          mkdir -p "$RUNNER_TEMP/pyyaml"
+          tar -xzf "$RUNNER_TEMP/pyyaml.tar.gz" -C "$RUNNER_TEMP/pyyaml"
+          echo "PYTHONPATH=$RUNNER_TEMP/pyyaml/pyyaml-6.0.2/lib" >> "$GITHUB_ENV"
+
+      - name: Set up Go
+        run: |
+          go_version="$(awk '/^toolchain go/ { sub(/^go/, "", $2); print $2 }' go.mod)"
+          mkdir -p "$RUNNER_TEMP/go-toolchain"
+          curl -fsSLo "$RUNNER_TEMP/go.tar.gz" \
+            "https://go.dev/dl/go${go_version}.linux-amd64.tar.gz"
+          tar -xzf "$RUNNER_TEMP/go.tar.gz" -C "$RUNNER_TEMP/go-toolchain"
+          echo "$RUNNER_TEMP/go-toolchain/go/bin" >> "$GITHUB_PATH"
+
       - name: Check Go toolchain
         run: go version
 
       - name: Check SDK manual source
         run: |
-          python3 -m pip install --user PyYAML
           python3 -m unittest discover -s tools/tests -p 'test_build_sdk_docs.py'
 
       - name: Check Go formatting
@@ -64,7 +87,10 @@ jobs:
         id: visual_smoke
         shell: bash
         run: |
-          if command -v google-chrome >/dev/null 2>&1 || command -v chromium >/dev/null 2>&1 || command -v chromium-browser >/dev/null 2>&1; then
+          if { [ -n "${CHROME_PATH:-}" ] && [ -x "$CHROME_PATH" ]; } || \
+            command -v google-chrome >/dev/null 2>&1 || \
+            command -v chromium >/dev/null 2>&1 || \
+            command -v chromium-browser >/dev/null 2>&1; then
             go run ./cmd/visual-smoke
             echo "result=PASS" >> "$GITHUB_OUTPUT"
           else
