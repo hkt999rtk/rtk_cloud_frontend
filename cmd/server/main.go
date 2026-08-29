@@ -14,6 +14,7 @@ import (
 
 	"realtek-connect/internal/analytics"
 	"realtek-connect/internal/leads"
+	"realtek-connect/internal/sdkdownloads"
 	"realtek-connect/internal/search"
 	"realtek-connect/internal/web"
 
@@ -90,6 +91,24 @@ func run(ctx context.Context, logger *zap.Logger) error {
 			searchEnabled = false
 		}
 	}
+
+	var sdkDownloadService *sdkdownloads.Service
+	if truthyEnv("SDK_DOWNLOADS_ENABLED") {
+		if analyticsStore == nil {
+			return errors.New("SDK downloads require ANALYTICS_ENABLED=true to record terms acceptance")
+		}
+		store, err := sdkdownloads.NewS3Store(sdkdownloads.StoreConfig{
+			Bucket:    os.Getenv("SDK_ARTIFACT_BUCKET"),
+			Endpoint:  os.Getenv("SDK_ARTIFACT_ENDPOINT"),
+			Region:    envOrDefault("SDK_ARTIFACT_REGION", "us-sea"),
+			AccessKey: os.Getenv("SDK_ARTIFACT_ACCESS_KEY_ID"),
+			SecretKey: os.Getenv("SDK_ARTIFACT_SECRET_ACCESS_KEY"),
+		})
+		if err != nil {
+			return err
+		}
+		sdkDownloadService = sdkdownloads.NewService(store, envOrDefault("SDK_LATEST_OBJECT_KEY", "sdk/latest.json"), 5*time.Minute)
+	}
 	if searchEnabled {
 		searchDatabasePath := envOrDefault("SEARCH_DATABASE_PATH", "data/search.db")
 		if !filepath.IsAbs(searchDatabasePath) {
@@ -133,6 +152,8 @@ func run(ctx context.Context, logger *zap.Logger) error {
 		SearchEnabled:           searchEnabled,
 		SearchService:           searchService,
 		SDKDocsDir:              envOrDefault("SDK_DOCS_DIR", filepath.Join("dist", "sdk-docs", "current")),
+		SDKDownloads:            sdkDownloadService,
+		SDKDownloadURLTTL:       10 * time.Minute,
 	})
 	if err != nil {
 		logger.Error(

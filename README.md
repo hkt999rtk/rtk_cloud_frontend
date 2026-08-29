@@ -71,6 +71,7 @@ Environment variables:
 - `ANALYTICS_ENABLED`: analytics toggle, default `true`.
 - `ANALYTICS_DATABASE_PATH`: SQLite analytics database path, default `data/analytics.db`.
 - `ANALYTICS_RETENTION_DAYS`: raw analytics retention window, default `90`.
+- Public SDK downloads require analytics to remain enabled so each anonymous evaluation-terms acceptance is recorded.
 - `ADMIN_TOKEN`: enables protected lead viewing and CSV export.
 - `OPENAI_API_KEY`: required by `cmd/search-index` and by runtime search answering when `SEARCH_ENABLED=true`.
 - `SEARCH_DATABASE_PATH`: SQLite documentation search database path, default `data/search.db`.
@@ -125,6 +126,8 @@ CDN readiness:
 - `GET /manual/sdk` and nested SDK manual chapters
 - `GET /manual/sdk/reference/{package}/`
 - `GET /manual/sdk/downloads/{file}`
+- `POST /manual/sdk/download` — accept the current evaluation terms and redirect to a short-lived SDK package URL.
+- `GET /legal/sdk-evaluation-terms` — render the legal-approved terms referenced by the current SDK catalog.
 - `GET /features`
 - `GET /features/{slug}`
 - `GET /contact`

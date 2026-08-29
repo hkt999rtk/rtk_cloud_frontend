@@ -15,6 +15,15 @@ type Repository struct {
 	retentionDays int
 }
 
+type SDKDownloadAcceptance struct {
+	AcceptedAt   time.Time
+	SessionID    string
+	TermsVersion string
+	SDKVersion   string
+	Package      string
+	RequestID    string
+}
+
 func Open(ctx context.Context, cfg Config) (*Repository, error) {
 	if !cfg.Enabled {
 		return nil, nil
@@ -108,7 +117,38 @@ CREATE INDEX IF NOT EXISTS idx_analytics_events_ts
 
 CREATE INDEX IF NOT EXISTS idx_analytics_events_event_page
   ON analytics_events(event, page);
+
+CREATE TABLE IF NOT EXISTS sdk_download_acceptances (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  accepted_at TEXT NOT NULL,
+  session_id TEXT NOT NULL,
+  terms_version TEXT NOT NULL,
+  sdk_version TEXT NOT NULL,
+  package TEXT NOT NULL,
+  request_id TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_sdk_download_acceptances_time
+  ON sdk_download_acceptances(accepted_at);
 `)
+	return err
+}
+
+func (r *Repository) InsertSDKDownloadAcceptance(ctx context.Context, acceptance SDKDownloadAcceptance) error {
+	if r == nil || r.db == nil {
+		return nil
+	}
+	_, err := r.db.ExecContext(ctx, `
+INSERT INTO sdk_download_acceptances (
+  accepted_at, session_id, terms_version, sdk_version, package, request_id
+) VALUES (?, ?, ?, ?, ?, ?)`,
+		acceptance.AcceptedAt.UTC().Format(time.RFC3339),
+		acceptance.SessionID,
+		acceptance.TermsVersion,
+		acceptance.SDKVersion,
+		acceptance.Package,
+		acceptance.RequestID,
+	)
 	return err
 }
 
@@ -161,7 +201,15 @@ func (r *Repository) CleanupExpiredEvents(ctx context.Context, now time.Time) (i
 	if err != nil {
 		return 0, err
 	}
-	return rowsAffected, nil
+	acceptanceResult, err := r.db.ExecContext(ctx, `DELETE FROM sdk_download_acceptances WHERE accepted_at < ?`, time.Unix(cutoff, 0).UTC().Format(time.RFC3339))
+	if err != nil {
+		return 0, err
+	}
+	acceptanceRows, err := acceptanceResult.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return rowsAffected + acceptanceRows, nil
 }
 
 func nullString(value string) any {

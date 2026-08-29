@@ -10,6 +10,49 @@
 </section>
 
 {{if eq .PublicPath "/manual/sdk"}}
+<section class="section sdk-downloads" id="sdk-downloads">
+  <div class="section-heading">
+    <p class="eyebrow">{{t . "sdk.downloads.eyebrow"}}</p>
+    <h2>{{t . "sdk.downloads.title"}}</h2>
+    {{if .SDKDownloadsEnabled}}<p>{{t . "sdk.downloads.body"}} <strong>{{.SDKCatalog.Version}}</strong></p>{{end}}
+  </div>
+  {{if .SDKDownloadError}}
+  <p class="form-error">{{.SDKDownloadError}}</p>
+  {{else if .SDKDownloadsEnabled}}
+  <div class="docs-entry-grid">
+    {{range .SDKCatalog.Packages}}
+    <article class="feature-card docs-card tall sdk-download-card">
+      <p class="card-kicker">{{.ValidationStatus}}</p>
+      <h3>{{.Title}}</h3>
+      <p>{{.Description}}</p>
+      <p class="sdk-artifact-meta">{{formatBytes .SizeBytes}} · SHA-256 <code>{{.SHA256}}</code></p>
+      <form method="post" action="/manual/sdk/download">
+        <input type="hidden" name="package" value="{{.Slug}}">
+        <input type="hidden" name="version" value="{{$.SDKCatalog.Version}}">
+        <input type="hidden" name="terms_version" value="{{$.SDKCatalog.TermsVersion}}">
+        <label class="sdk-terms-check"><input type="checkbox" name="accepted" value="true" required> {{t $ "sdk.downloads.accept"}} <a href="{{localizedPath $ "/legal/sdk-evaluation-terms"}}" target="_blank" rel="noopener">{{t $ "sdk.downloads.terms"}}</a></label>
+        <button class="button primary" type="submit">{{t $ "sdk.downloads.package"}}</button>
+      </form>
+    </article>
+    {{end}}
+    <article class="feature-card docs-card tall sdk-download-card accent-card">
+      <p class="card-kicker">{{.SDKCatalog.CompleteBundle.ValidationStatus}}</p>
+      <h3>{{.SDKCatalog.CompleteBundle.Title}}</h3>
+      <p>{{.SDKCatalog.CompleteBundle.Description}}</p>
+      <p class="sdk-artifact-meta">{{formatBytes .SDKCatalog.CompleteBundle.SizeBytes}} · SHA-256 <code>{{.SDKCatalog.CompleteBundle.SHA256}}</code></p>
+      <form method="post" action="/manual/sdk/download">
+        <input type="hidden" name="package" value="all">
+        <input type="hidden" name="version" value="{{.SDKCatalog.Version}}">
+        <input type="hidden" name="terms_version" value="{{.SDKCatalog.TermsVersion}}">
+        <label class="sdk-terms-check"><input type="checkbox" name="accepted" value="true" required> {{t . "sdk.downloads.accept"}} <a href="{{localizedPath . "/legal/sdk-evaluation-terms"}}" target="_blank" rel="noopener">{{t . "sdk.downloads.terms"}}</a></label>
+        <button class="button primary" type="submit">{{t . "sdk.downloads.bundle"}}</button>
+      </form>
+    </article>
+  </div>
+  <p class="sdk-release-note">{{t . "sdk.downloads.latest"}} · {{t . "sdk.downloads.unsigned"}} · Terms {{.SDKCatalog.TermsVersion}}</p>
+  {{end}}
+</section>
+
 <section class="section">
   <div class="section-heading">
     <p class="eyebrow">{{t . "manual.offline"}}</p>

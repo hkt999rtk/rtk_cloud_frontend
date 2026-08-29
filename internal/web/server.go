@@ -28,6 +28,7 @@ import (
 	"realtek-connect/internal/features"
 	"realtek-connect/internal/leads"
 	"realtek-connect/internal/manual"
+	"realtek-connect/internal/sdkdownloads"
 	"realtek-connect/internal/search"
 )
 
@@ -52,6 +53,8 @@ type Config struct {
 	EnableCDNCacheHeaders   bool
 	SearchEnabled           bool
 	SearchService           SearchService
+	SDKDownloads            *sdkdownloads.Service
+	SDKDownloadURLTTL       time.Duration
 }
 
 type SearchService interface {
@@ -75,55 +78,64 @@ type Server struct {
 	enableCDNCacheHeaders   bool
 	searchEnabled           bool
 	searchService           SearchService
+	sdkDownloads            *sdkdownloads.Service
+	sdkDownloadURLTTL       time.Duration
 	assetVersions           map[string]string
 	contactLimit            *submissionRateLimiter
 	searchLimit             *submissionRateLimiter
+	sdkDownloadLimit        *submissionRateLimiter
+	sdkDownloadMetrics      *sdkDownloadMetrics
 	docsContentMu           sync.RWMutex
 	docsContent             map[string]docs.ContentPage
 }
 
 type pageData struct {
-	Title              string
-	MetaDescription    string
-	CanonicalURL       string
-	SocialImageURL     string
-	SocialImageAlt     string
-	MetaRobots         string
-	CurrentPath        string
-	PublicPath         string
-	Lang               string
-	Locale             content.Locale
-	LocalePrefix       string
-	Text               map[string]string
-	AlternateLinks     []content.AlternateLink
-	FooterSitemap      []footerSitemapGroup
-	Docs               []docs.Section
-	DocsPage           docs.ContentPage
-	Doc                docs.Section
-	RelatedDocs        []docs.Section
-	ManualIndex        manual.ManualIndex
-	ManualPage         manual.ManualPage
-	RelatedManual      []manual.ManualSection
-	Analytics          pageAnalyticsView
-	AnalyticsEndpoint  string
-	AnalyticsPage      string
-	AdminAnalytics     adminAnalyticsView
-	Features           []features.Feature
-	Feature            features.Feature
-	InterestOptions    []content.ContactInterestOption
-	Form               contactForm
-	Errors             map[string]string
-	Success            bool
-	SubmittedFor       string
-	Leads              []leads.LeadRecord
-	AdminEnabled       bool
-	AdminCSVHref       string
-	AdminLeadsHref     string
-	AdminAnalyticsHref string
-	LeadFilters        adminLeadFilters
-	LeadPagination     adminLeadPagination
-	SearchEnabled      bool
-	ServiceLoginURL    string
+	Title               string
+	MetaDescription     string
+	CanonicalURL        string
+	SocialImageURL      string
+	SocialImageAlt      string
+	MetaRobots          string
+	CurrentPath         string
+	PublicPath          string
+	Lang                string
+	Locale              content.Locale
+	LocalePrefix        string
+	Text                map[string]string
+	AlternateLinks      []content.AlternateLink
+	FooterSitemap       []footerSitemapGroup
+	Docs                []docs.Section
+	DocsPage            docs.ContentPage
+	Doc                 docs.Section
+	RelatedDocs         []docs.Section
+	ManualIndex         manual.ManualIndex
+	ManualPage          manual.ManualPage
+	RelatedManual       []manual.ManualSection
+	Analytics           pageAnalyticsView
+	AnalyticsEndpoint   string
+	AnalyticsPage       string
+	AdminAnalytics      adminAnalyticsView
+	Features            []features.Feature
+	Feature             features.Feature
+	InterestOptions     []content.ContactInterestOption
+	Form                contactForm
+	Errors              map[string]string
+	Success             bool
+	SubmittedFor        string
+	Leads               []leads.LeadRecord
+	AdminEnabled        bool
+	AdminCSVHref        string
+	AdminLeadsHref      string
+	AdminAnalyticsHref  string
+	LeadFilters         adminLeadFilters
+	LeadPagination      adminLeadPagination
+	SearchEnabled       bool
+	ServiceLoginURL     string
+	SDKCatalog          sdkdownloads.Catalog
+	SDKDownloadsEnabled bool
+	SDKDownloadError    string
+	SDKTerms            string
+	SDKTermsVersion     string
 }
 
 type pageAnalyticsView struct {
@@ -188,6 +200,9 @@ func NewServer(cfg Config) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+	if cfg.SDKDownloadURLTTL <= 0 || cfg.SDKDownloadURLTTL > 15*time.Minute {
+		cfg.SDKDownloadURLTTL = 10 * time.Minute
+	}
 	contentRoot := filepath.Dir(cfg.ContentDir)
 	docsContent, err := docs.NewContentSource(cfg.ContentDir).Load()
 	if err != nil {
@@ -215,9 +230,13 @@ func NewServer(cfg Config) (*Server, error) {
 		enableCDNCacheHeaders:   cfg.EnableCDNCacheHeaders,
 		searchEnabled:           cfg.SearchEnabled,
 		searchService:           cfg.SearchService,
+		sdkDownloads:            cfg.SDKDownloads,
+		sdkDownloadURLTTL:       cfg.SDKDownloadURLTTL,
 		assetVersions:           assetVersions,
 		contactLimit:            newSubmissionRateLimiter(5, 10*time.Minute),
 		searchLimit:             newSubmissionRateLimiter(20, 10*time.Minute),
+		sdkDownloadLimit:        newSubmissionRateLimiter(20, 10*time.Minute),
+		sdkDownloadMetrics:      newSDKDownloadMetrics(),
 		docsContent:             docsContent,
 	}, nil
 }
@@ -243,6 +262,7 @@ func (s *Server) Routes() http.Handler {
 	mux.Handle("/static/", http.StripPrefix("/static/", s.staticHandler()))
 	mux.Handle("/content-assets/manual/sdk/", http.StripPrefix("/content-assets/manual/sdk/", http.FileServer(http.Dir(filepath.Join(s.contentRoot, "manual", "sdk", "assets")))))
 	mux.Handle("/content-assets/", http.StripPrefix("/content-assets/", s.contentAssetsHandler()))
+	mux.HandleFunc("/manual/sdk/download", s.handleSDKDownload)
 	mux.HandleFunc("/robots.txt", s.handleRobotsTxt)
 	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
@@ -308,6 +328,8 @@ func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
 		s.handleManualIndex(w, r, locale, publicPath)
 	case strings.HasPrefix(publicPath, "/manual/"):
 		s.handleManualPage(w, r, locale, publicPath)
+	case publicPath == "/legal/sdk-evaluation-terms":
+		s.handleSDKTerms(w, r, locale, publicPath)
 	case publicPath == "/features":
 		s.handleFeatures(w, r, locale, publicPath)
 	case strings.HasPrefix(publicPath, "/features/"):
@@ -787,6 +809,9 @@ func (s *Server) handleManualPage(w http.ResponseWriter, r *http.Request, locale
 	if index, ok := s.manualLoader.CollectionIndex(locale, slug); ok {
 		data := s.basePageData(r, locale, publicPath, index.Title+" | Realtek Connect+", index.Description)
 		data.ManualIndex = index
+		if slug == "sdk" {
+			s.attachSDKCatalog(r, &data)
+		}
 		s.render(w, http.StatusOK, "manual_index.html", data)
 		return
 	}
@@ -973,6 +998,7 @@ func (s *Server) render(w http.ResponseWriter, status int, name string, data pag
 		"t":             templateText,
 		"localizedPath": localizedPath,
 		"asset":         s.assetPath,
+		"formatBytes":   formatBytes,
 	}).ParseFiles(files...)
 	if err != nil {
 		http.Error(w, "template parse error", http.StatusInternalServerError)
