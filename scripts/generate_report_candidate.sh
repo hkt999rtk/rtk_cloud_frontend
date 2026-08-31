@@ -82,7 +82,7 @@ write_common_header() {
 
 ## Environment
 
-- Host: ${REPORT_HOST:-GitHub Actions self-hosted runner}
+- Host: ${REPORT_HOST:-GitHub Actions Linux validation runner; see run metadata}
 - Host role: ${REPORT_HOST_ROLE:-rtk_cloud_frontend validation runner}
 - OS: ${REPORT_OS:-Linux runner}
 - Architecture: ${REPORT_ARCH:-amd64}

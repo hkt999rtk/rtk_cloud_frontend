@@ -25,7 +25,7 @@
 
 ## Environment
 
-- Host: GitHub Actions self-hosted runner
+- Host: GitHub Actions Linux validation runner; see run metadata
 - Host role: rtk_cloud_frontend validation runner
 - OS: Linux runner
 - Architecture: amd64
