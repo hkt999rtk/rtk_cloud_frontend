@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -14,6 +15,10 @@ import (
 )
 
 const sdkSessionCookie = "rtk_sdk_session"
+
+// SDK IDs use base64url, which can start with '-' or '_'. Keep accepting the
+// existing cookie alphabet without applying the analytics first-character rule.
+var sdkSessionIDPattern = regexp.MustCompile(`^[A-Za-z0-9_-][A-Za-z0-9._:-]{0,63}$`)
 
 func (s *Server) attachSDKCatalog(r *http.Request, data *pageData) {
 	if data == nil || s.sdkDownloads == nil {
@@ -108,7 +113,7 @@ func (s *Server) handleSDKDownload(w http.ResponseWriter, r *http.Request) {
 }
 
 func sdkSessionID(w http.ResponseWriter, r *http.Request) string {
-	if cookie, err := r.Cookie(sdkSessionCookie); err == nil && analyticsSessionIDPattern.MatchString(cookie.Value) {
+	if cookie, err := r.Cookie(sdkSessionCookie); err == nil && sdkSessionIDPattern.MatchString(cookie.Value) {
 		return cookie.Value
 	}
 	value := newOpaqueID()

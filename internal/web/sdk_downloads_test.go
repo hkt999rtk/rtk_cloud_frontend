@@ -135,6 +135,15 @@ func TestSDKCatalogAndTermsReportUnavailableService(t *testing.T) {
 }
 
 func TestSDKDownloadRateLimitAndMetrics(t *testing.T) {
+	for _, sessionID := range []string{"", "-" + strings.Repeat("a", 23), "_" + strings.Repeat("a", 23)} {
+		t.Run("session="+sessionID, func(t *testing.T) {
+			testSDKDownloadRateLimitAndMetrics(t, sessionID)
+		})
+	}
+}
+
+func testSDKDownloadRateLimitAndMetrics(t *testing.T, sessionID string) {
+	t.Helper()
 	server := newTestServer(t, Config{
 		TemplatesDir: "../../templates",
 		StaticDir:    "../../static",
@@ -149,14 +158,21 @@ func TestSDKDownloadRateLimitAndMetrics(t *testing.T) {
 
 	firstRequest := httptest.NewRequest(http.MethodPost, "/manual/sdk/download", strings.NewReader(form.Encode()))
 	firstRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	var sessionCookie *http.Cookie
+	if sessionID != "" {
+		sessionCookie = &http.Cookie{Name: sdkSessionCookie, Value: sessionID}
+		firstRequest.AddCookie(sessionCookie)
+	}
 	firstResponse := httptest.NewRecorder()
 	handler.ServeHTTP(firstResponse, firstRequest)
 	if firstResponse.Code != http.StatusSeeOther {
 		t.Fatalf("first status = %d, want 303", firstResponse.Code)
 	}
-	var sessionCookie *http.Cookie
 	for _, cookie := range firstResponse.Result().Cookies() {
 		if cookie.Name == sdkSessionCookie {
+			if sessionID != "" {
+				t.Fatal("valid SDK session cookie was replaced")
+			}
 			sessionCookie = cookie
 			break
 		}
