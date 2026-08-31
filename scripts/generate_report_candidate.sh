@@ -76,13 +76,13 @@ write_common_header() {
 - Contracts repository: hkt999rtk/rtk_cloud_contracts_doc
 - Contracts commit: ${REPORT_CONTRACTS_COMMIT:-policy source PR #24}
 - Contracts URL: https://github.com/hkt999rtk/rtk_cloud_contracts_doc/pull/24
-- Contract files referenced: TEST_REPORT.md
+- Contract files referenced: test_report.md
 - PR / issue / release: #95
 - Artifact version: ${REPORT_ARTIFACT_VERSION_NOTE:-N/A - this report validates website source readiness, not a release artifact version.}
 
 ## Environment
 
-- Host: ${REPORT_HOST:-GitHub Actions self-hosted runner}
+- Host: ${REPORT_HOST:-GitHub Actions Linux validation runner; see run metadata}
 - Host role: ${REPORT_HOST_ROLE:-rtk_cloud_frontend validation runner}
 - OS: ${REPORT_OS:-Linux runner}
 - Architecture: ${REPORT_ARCH:-amd64}
@@ -196,7 +196,7 @@ case "$profile" in
 | Static asset integrity | Brand film asset check | wc -c static/assets/realtek-brand-film.mp4 | ${asset} | Keeps the local MP4 asset present for the brand film section. |
 
 EOF
-      write_tail "docs/TEST_REPORT.md" ".artifacts/raw/ci" ".artifacts/report-candidates/docs"
+      write_tail "docs/test_report.md" ".artifacts/raw/ci" ".artifacts/report-candidates/docs"
     } > "$output"
     ;;
   *)

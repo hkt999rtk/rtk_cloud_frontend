@@ -19,13 +19,13 @@
 - Contracts repository: hkt999rtk/rtk_cloud_contracts_doc
 - Contracts commit: policy source PR #24
 - Contracts URL: https://github.com/hkt999rtk/rtk_cloud_contracts_doc/pull/24
-- Contract files referenced: TEST_REPORT.md
+- Contract files referenced: test_report.md
 - PR / issue / release: #95
 - Artifact version: N/A - this report validates website source readiness, not a release artifact version.
 
 ## Environment
 
-- Host: GitHub Actions self-hosted runner
+- Host: GitHub Actions Linux validation runner; see run metadata
 - Host role: rtk_cloud_frontend validation runner
 - OS: Linux runner
 - Architecture: amd64
@@ -94,7 +94,7 @@ gofmt -l $(git ls-files '*.go')\ngo test ./...\ngo build ./cmd/server\nif Chrome
 
 ## Artifacts And Logs
 
-- Report path: docs/TEST_REPORT.md
+- Report path: docs/test_report.md
 - Raw log directory: .artifacts/raw/ci
 - Sanitized artifact directory: .artifacts/report-candidates/docs
 - CI artifact URL: GitHub Actions artifact named report-candidates

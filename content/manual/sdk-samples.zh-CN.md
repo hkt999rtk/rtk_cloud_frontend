@@ -5,7 +5,7 @@ description: "使用 Realtek Connect+ SDK 范例生态系验证 App 与装置流
 
 ![Realtek Connect+ 范例生态系](/static/assets/connectplus-sample-ecosystem-corporate-v2.jpg)
 
-Realtek Connect+ 客户评估应先从可执行的参考范例开始，再决定正式品牌 App、量产韧体或私有部署计划。详细 source of truth 仍在 [`rtk_cloud_client`](https://github.com/hkt999rtk/rtk_cloud_client) repository，尤其是 [`docs/SAMPLE_APPLICATIONS.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_APPLICATIONS.md) 与各 sample README。
+Realtek Connect+ 客户评估应先从可执行的参考范例开始，再决定正式品牌 App、量产韧体或私有部署计划。详细 source of truth 仍在 [`rtk_cloud_client`](https://github.com/hkt999rtk/rtk_cloud_client) repository，尤其是 [`docs/sample_applications.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/sample_applications.md) 与各 sample README。
 
 ## 范例家族
 
@@ -33,9 +33,9 @@ Realtek Connect+ 客户评估应先从可执行的参考范例开始，再决定
 
 | 主题 | 来源 |
 | --- | --- |
-| 范例生态系总览 | [`docs/SAMPLE_APPLICATIONS.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_APPLICATIONS.md) |
-| Home app 行为 | [`docs/SAMPLE_HOME_APP_SPEC.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_HOME_APP_SPEC.md) |
-| Device reference 行为 | [`docs/SAMPLE_DEVICE_APP_SPEC.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_DEVICE_APP_SPEC.md) |
+| 范例生态系总览 | [`docs/sample_applications.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/sample_applications.md) |
+| Home app 行为 | [`docs/sample_home_app_spec.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/sample_home_app_spec.md) |
+| Device reference 行为 | [`docs/sample_device_app_spec.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/sample_device_app_spec.md) |
 | Android sample | [`samples/android/README.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/samples/android/README.md) |
 | iOS sample | [`samples/ios/README.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/samples/ios/README.md) |
 | WebApp sample | [`samples/webapp/README.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/samples/webapp/README.md) |
