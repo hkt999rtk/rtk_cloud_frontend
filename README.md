@@ -8,21 +8,21 @@ Current status: **v0.1 Marketing Foundation**.
 
 This repository currently contains a working marketing website foundation, a developer docs portal structure, feature pages for provisioning, OTA, fleet management, smart home experience, user management, app SDK, insights, private cloud, and integrations, a file-backed manual surface with SDK sample application guidance, multilingual public routes for English, Traditional Chinese, and Simplified Chinese, per-page SEO/social metadata, sitemap and robots endpoints, a privacy notice, contact lead capture, SQLite storage, admin lead review with filtering and pagination, filtered CSV export, health check, and a container deployment recipe. It is not yet a complete IoT console, user authentication service, real OTA service, device provisioning backend, telemetry platform, or production mobile app package.
 
-The App SDK, SDK docs, homepage, and manual now summarize the `rtk_cloud_client` sample ecosystem: Android and iOS Home Automation samples, WebApp Ops Lab, Linux device simulator, and PRO2 camera device demo. The website treats those samples as customer-facing SDK usage references, describes video streaming as WebRTC Video over TURN, and points to `rtk_cloud_client/docs/SAMPLE_APPLICATIONS.md` plus the sample README files as the deeper source of truth.
+The App SDK, SDK docs, homepage, and manual now summarize the `rtk_cloud_client` sample ecosystem: Android and iOS Home Automation samples, WebApp Ops Lab, Linux device simulator, and PRO2 camera device demo. The website treats those samples as customer-facing SDK usage references, describes video streaming as WebRTC Video over TURN, and points to `rtk_cloud_client/docs/sample_applications.md` plus the sample README files as the deeper source of truth.
 
 The homepage includes a locally hosted Realtek corporate brand film at `static/assets/realtek-brand-film.mp4`, with a generated poster image and `preload="metadata"`. The video supports brand trust after the platform architecture section and is not used as autoplay hero media.
 
 Privacy readiness is intentionally lightweight for this prototype: `/privacy` describes contact form data, first-party SQLite analytics when `ANALYTICS_ENABLED=true`, OpenAI-backed documentation query behavior when search is enabled, the analytics event types collected, referrer-origin-only handling, ephemeral session ids, 90-day raw analytics event retention, the 24-month lead retention intent, data request handling, admin protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior. Replace the placeholder `privacy@example.com` contact before public launch and complete legal review.
 
-The full roadmap and developer issue backlog live in [`docs/SPEC.md`](docs/SPEC.md).
+The full roadmap and developer issue backlog live in [`docs/spec.md`](docs/spec.md).
 The service logging migration to `rtk_cloud_logger` zap and central journald
 forwarding is documented in
-[`docs/SERVICE_LOGGING_MIGRATION.md`](docs/SERVICE_LOGGING_MIGRATION.md).
+[`docs/service_logging_migration.md`](docs/service_logging_migration.md).
 Website-local SQLite persistence and the low-priority Redis/cache boundary are
 documented in
-[`docs/PERSISTENCE_CACHE_BOUNDARIES.md`](docs/PERSISTENCE_CACHE_BOUNDARIES.md).
+[`docs/persistence_cache_boundaries.md`](docs/persistence_cache_boundaries.md).
 The implemented website HTTP API is documented in
-[`docs/API_REFERENCE.md`](docs/API_REFERENCE.md), with a machine-readable
+[`docs/api_reference.md`](docs/api_reference.md), with a machine-readable
 OpenAPI contract in [`docs/openapi.yaml`](docs/openapi.yaml).
 
 Content classification terms for future project discussions:
@@ -38,9 +38,9 @@ Navigation conventions:
 
 Tracked validation reports:
 
-- `docs/TEST_REPORT.md`: deterministic CI / PR validation report.
+- `docs/test_report.md`: deterministic CI / PR validation report.
 - CI generates sanitized candidates under `.artifacts/report-candidates/docs/` and uploads them as the `report-candidates` artifact.
-- Use the `Import Report Candidate` workflow to import only `docs/TEST_REPORT.md` from a selected workflow run into a target PR branch or explicit branch after heading, redaction, and path validation.
+- Use the `Import Report Candidate` workflow to import only `docs/test_report.md` from a selected workflow run into a target PR branch or explicit branch after heading, redaction, and path validation.
 
 ## Run
 
@@ -142,12 +142,12 @@ CDN readiness:
 - `GET /admin/leads.csv`, requires `ADMIN_TOKEN`
 - `GET /static/...`
 
-New public routes should be documented here, in `docs/SPEC.md`, and in
+New public routes should be documented here, in `docs/spec.md`, and in
 `docs/openapi.yaml` when they expose an API or form contract.
 
 The SDK manual is authored once in `content/manual/sdk/`. Build its static HTML,
 generated API indexes, and PDF downloads with `tools/build_sdk_docs.py`; see
-[`docs/SDK_DOCUMENTATION.md`](docs/SDK_DOCUMENTATION.md). Set `SDK_DOCS_DIR` only
+[`docs/sdk_documentation.md`](docs/sdk_documentation.md). Set `SDK_DOCS_DIR` only
 when generated documentation is installed outside the default
 `dist/sdk-docs/current` path.
 

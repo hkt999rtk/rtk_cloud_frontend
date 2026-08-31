@@ -109,10 +109,10 @@ jobs:
           REPORT_VISUAL_SMOKE_RESULT: ${{ steps.visual_smoke.outputs.result || 'FAIL' }}
         run: |
           chmod +x scripts/generate_report_candidate.sh scripts/validate_report_candidate.sh
-          scripts/generate_report_candidate.sh ci .artifacts/report-candidates/docs/TEST_REPORT.md
-          scripts/validate_report_candidate.sh .artifacts/report-candidates/docs/TEST_REPORT.md docs/TEST_REPORT.md
+          scripts/generate_report_candidate.sh ci .artifacts/report-candidates/docs/test_report.md
+          scripts/validate_report_candidate.sh .artifacts/report-candidates/docs/test_report.md docs/test_report.md
 
       - name: Check CI report drift
         shell: bash
         run: |
-          diff -u docs/TEST_REPORT.md .artifacts/report-candidates/docs/TEST_REPORT.md
+          diff -u docs/test_report.md .artifacts/report-candidates/docs/test_report.md

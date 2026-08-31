@@ -133,7 +133,7 @@ paths:
                   locale: en
               traditionalChinese:
                 value:
-                  query: 如何啟用文件搜尋？
+                  query: How do I enable documentation search?
                   locale: zh-TW
       responses:
         "200":

@@ -89,8 +89,8 @@ Realtek Connect+ follows the shared test report policy from
 `hkt999rtk/rtk_cloud_contracts_doc` PR #24.
 
 - Canonical tracked reports:
-  - `docs/TEST_REPORT.md` for CI and PR validation.
-- CI generates `.artifacts/report-candidates/docs/TEST_REPORT.md` covering:
+  - `docs/test_report.md` for CI and PR validation.
+- CI generates `.artifacts/report-candidates/docs/test_report.md` covering:
   - brand film asset check
   - Go formatting
   - `go test ./...`
@@ -99,7 +99,7 @@ Realtek Connect+ follows the shared test report policy from
 - Official LKE deployment readiness evidence is owned by the workspace flow and should record the frontend image reference, workspace LKE provision/deploy result, rollout status, public health/homepage checks, and video asset checks.
 - CI uploads report candidates as the `report-candidates` artifact and keeps raw logs in workflow logs or separate artifacts.
 - Drift checks compare committed reports with generated candidates for the selected validation profile.
-- Manual report import is handled by the `Import Report Candidate` workflow. It can update only `docs/TEST_REPORT.md` in a target PR branch or explicit branch after allowlist, heading, redaction, path, and whitespace validation.
+- Manual report import is handled by the `Import Report Candidate` workflow. It can update only `docs/test_report.md` in a target PR branch or explicit branch after allowlist, heading, redaction, path, and whitespace validation.
 - Report candidates are deterministic. They intentionally avoid volatile timestamps, local absolute paths, and raw credentials so committed reports can be reviewed and drift-checked reliably.
 
 ## Visual Direction
@@ -243,7 +243,7 @@ The website includes a first-version public documentation query tool scoped only
 - Public routes include `/search`, `/zh-tw/search`, and `/zh-cn/search`.
 - The query API is `POST /api/search` with JSON body `{ "query": "string", "locale": "en|zh-TW|zh-CN" }`.
 - The implemented website HTTP API contract is maintained in `docs/openapi.yaml`
-  and summarized for humans in `docs/API_REFERENCE.md`.
+  and summarized for humans in `docs/api_reference.md`.
 - The search index is CLI-only and is not rebuilt during server startup. Run `OPENAI_API_KEY=... go run ./cmd/search-index` before enabling runtime search.
 - Release packaging can build a precomputed `data/search.db` into the deployable artifact when `OPENAI_API_KEY` is available. This keeps fixed website-document embeddings out of git while allowing deployment bundles to be search-ready.
 - The indexer scans website content from `content/`, `docs/`, `README.md`, feature/docs/manual catalog data, and localized public content, then stores documents, chunks, embeddings, and source metadata in SQLite.
@@ -294,7 +294,7 @@ The website summarizes the `rtk_cloud_client` sample ecosystem as a customer ena
 - Device-side samples: Linux simulator and PRO2 camera device demo.
 - Validation scope: provisioning adapter states, token/session setup, device list/detail, light and AC command flow, camera monitor, snapshot upload, WebRTC Video over TURN signaling and ICE/TURN boundary, MQTT payload inspection, status/log/event reporting, and redacted debug reports.
 - Boundaries: samples are SDK usage references, not production app-store apps, white-label release packages, customer release artifacts, or formal cloud wire contracts. The WebApp sample does not implement BLE or SoftAP onboarding. Public streaming copy must describe WebRTC Video over TURN only; TURN and coturn wording is allowed only as WebRTC ICE infrastructure, not as a standalone relay product.
-- Source of truth: deeper sample details remain in `rtk_cloud_client/docs/SAMPLE_APPLICATIONS.md`, `rtk_cloud_client/docs/SAMPLE_HOME_APP_SPEC.md`, `rtk_cloud_client/docs/SAMPLE_DEVICE_APP_SPEC.md`, and the sample README files under `rtk_cloud_client/samples/...` plus `rtk_cloud_client/packages/freertos/pro2_demo/README.md`.
+- Source of truth: deeper sample details remain in `rtk_cloud_client/docs/sample_applications.md`, `rtk_cloud_client/docs/sample_home_app_spec.md`, `rtk_cloud_client/docs/sample_device_app_spec.md`, and the sample README files under `rtk_cloud_client/samples/...` plus `rtk_cloud_client/packages/freertos/pro2_demo/README.md`.
 
 ## Platform Completion Gap
 
@@ -310,16 +310,16 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 | Capability | Website v1 Status | Current Surface | Website v1 Notes |
 | --- | --- | --- | --- |
 | Platform Overview | Content Partial | Homepage, `/features`, docs landing page | The site now explains the device-cloud-app-dashboard story, but follow-on work can deepen security, scalability, cost, and deployment comparison narratives. |
-| Provision | Content Partial | `/features/provision`, [`PRODUCT_ONBOARDING.md`](https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/PRODUCT_ONBOARDING.md) | Provisioning copy now distinguishes the contract-backed cloud registry, cross-service activation, service-scoped provisioning credential, and transport-readiness foundation from integration-ready claim material interfaces and roadmap local onboarding work. Local Wi-Fi/BLE setup, QR/SoftAP UX, ownership transfer, factory reset policy, and aggregate product readiness are not described as generally available until the owner repositories land those implementations. |
-| OTA | Content Partial | `/features/ota`, [`FIRMWARE_CAMPAIGN.md`](https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/FIRMWARE_CAMPAIGN.md) | OTA copy now distinguishes the available firmware lifecycle foundation for upload, catalog, target enablement, rollout status, report, cancel, and download from the implemented campaign policy surfaces for scheduled, time-window, user-consent, and archive. Approval workflow, dashboards, analytics, and staged percentage rollout remain roadmap scope rather than generally available phase-one implementation. |
+| Provision | Content Partial | `/features/provision`, [`product_onboarding.md`](https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/product_onboarding.md) | Provisioning copy now distinguishes the contract-backed cloud registry, cross-service activation, service-scoped provisioning credential, and transport-readiness foundation from integration-ready claim material interfaces and roadmap local onboarding work. Local Wi-Fi/BLE setup, QR/SoftAP UX, ownership transfer, factory reset policy, and aggregate product readiness are not described as generally available until the owner repositories land those implementations. |
+| OTA | Content Partial | `/features/ota`, [`firmware_campaign.md`](https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/firmware_campaign.md) | OTA copy now distinguishes the available firmware lifecycle foundation for upload, catalog, target enablement, rollout status, report, cancel, and download from the implemented campaign policy surfaces for scheduled, time-window, user-consent, and archive. Approval workflow, dashboards, analytics, and staged percentage rollout remain roadmap scope rather than generally available phase-one implementation. |
 | Fleet Management | Implemented | `/features/fleet-management` | The fleet page covers node registration, bootstrap certificates, registry, groups, metadata, OTA jobs, firmware images, batch operations, and operator statistics widgets as website content without claiming a live console implementation. |
 | Admin Operations | Content Partial | `/features/fleet-management`, `/admin/leads`, `/admin/leads.csv` | Website v1 ships lead-review tooling plus admin-operations product copy, but it does not ship the full fleet console described by the marketing content. |
 | User Management | Content Partial | `/features/user-management` | The feature page covers sign up, sign in, OTP verification, third-party login, forgot/change password, delete account, and account lifecycle boundaries; follow-on work can add deeper session behavior, support workflows, and visuals. |
 | End-user Smart Home Features | Content Partial | `/features/smart-home` | The smart-home page now covers remote control, local fallback, scheduling, scenes, grouping, node sharing, push notifications, alerts, and household workflow boundaries, with room for richer mobile personas and control-state diagrams. |
-| Mobile App SDK | Implemented | `/features/app-sdk`, `/manual/sdk-samples` | The app SDK page and manual now cover iOS and Android SDK layers, Android/iOS/WebApp reference samples, Linux simulator, PRO2 camera device demo, push notifications, and App Store/Google Play publishing guidance without introducing a client-side framework into the website itself. The website summarizes `rtk_cloud_client`; deeper sample specs remain in `rtk_cloud_client/docs/SAMPLE_APPLICATIONS.md` and the sample README files. |
+| Mobile App SDK | Implemented | `/features/app-sdk`, `/manual/sdk-samples` | The app SDK page and manual now cover iOS and Android SDK layers, Android/iOS/WebApp reference samples, Linux simulator, PRO2 camera device demo, push notifications, and App Store/Google Play publishing guidance without introducing a client-side framework into the website itself. The website summarizes `rtk_cloud_client`; deeper sample specs remain in `rtk_cloud_client/docs/sample_applications.md` and the sample README files. |
 | Insights | Content Partial | `/features/insights` | Insights copy covers activation statistics, firmware distribution, logs, crash reports, reboot reasons, RSSI, and memory signals, but the website still needs stronger dashboard visuals and deeper support/metrics storytelling. |
 | Private Cloud / Deployment | Implemented | `/features/private-cloud`, `/docs/deployment` | Website v1 now compares public evaluation, managed private deployment, and customer-operated private regions with coverage for VM/container deployment substrate, GCP/Azure/AWS/on-premises targets, evaluation device limits (5 default / 200 max), commercial pricing structure (license + maintenance, no minimum scale, contact sales for figures), SDK licensing posture, and tier-aware support boundaries. The page mirrors `rtk_cloud_workspace/docs/business-model.md`; self-service signup is owned by `rtk_cloud_admin` and `rtk_account_manager` and is referred to from the marketing site rather than implemented inside it. |
-| Matter / Ecosystem Integrations | Website Content Implemented | `/features/integrations` | The integrations page covers Matter Fabric positioning, voice assistants, MQTT over TLS, REST APIs, webhooks, and a structured integration-path comparison. This is public website content only: Matter, Alexa, and Google Assistant remain roadmap service capabilities per `SMART_HOME_ECOSYSTEM.md`; push alerts are integration-ready; scenes, schedules, and household sharing are not generally available platform features. |
+| Matter / Ecosystem Integrations | Website Content Implemented | `/features/integrations` | The integrations page covers Matter Fabric positioning, voice assistants, MQTT over TLS, REST APIs, webhooks, and a structured integration-path comparison. This is public website content only: Matter, Alexa, and Google Assistant remain roadmap service capabilities per `smart_home_ecosystem.md`; push alerts are integration-ready; scenes, schedules, and household sharing are not generally available platform features. |
 | Developer Docs Portal | Content Partial | `/docs`, `/docs/product-overview`, `/docs/development`, `/docs/deployment`, `/docs/release-notes` | The portal structure exists and is navigable, but follow-on work can deepen setup guides, architecture diagrams, and operational runbooks. |
 | APIs | Content Partial | `/docs/apis`, `/features/integrations` | API positioning exists and now separates product authorization roles from service bearer scopes. Website v1 still lacks reference-grade endpoint coverage, finalized auth flows, webhook payload examples, and error-model detail. |
 | SDK Reference | Implemented | `/manual/sdk`, `/manual/sdk/reference/{package}/`, `/manual/sdk/downloads/` | One canonical English manual covers Native, Android, iOS, JavaScript/TypeScript, Go, and FreeRTOS/Pro2. The reproducible generator emits versioned HTML, source-derived API symbol indexes, a combined PDF, package PDFs, checksums, and a source/version manifest. |
@@ -579,7 +579,7 @@ For any future issue that changes website behavior or public content:
 - Go source is formatted with `gofmt`.
 - Desktop and mobile visual smoke checks confirm no blank page, missing representative image asset, localized route regression, or horizontal overflow.
 - No npm, React, Tailwind, or frontend build step is introduced.
-- Any new public route is documented in both `docs/SPEC.md` and `README.md`.
+- Any new public route is documented in both `docs/spec.md` and `README.md`.
 - Any new public page or public text string is added to every supported locale.
 - Any new feature or docs item keeps stable English slugs across locales and is covered by catalog parity tests.
 - Runtime SQLite files are not committed.

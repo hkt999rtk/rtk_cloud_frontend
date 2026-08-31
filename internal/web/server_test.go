@@ -459,7 +459,7 @@ func TestClientSampleEcosystemContentRenders(t *testing.T) {
 			"Linux simulator",
 			"WebApp Ops Lab",
 			"PRO2 camera device demo",
-			`href="https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_APPLICATIONS.md"`,
+			`href="https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/sample_applications.md"`,
 			`href="https://github.com/hkt999rtk/rtk_cloud_client/blob/main/samples/android/README.md"`,
 			`href="https://github.com/hkt999rtk/rtk_cloud_client/blob/main/packages/freertos/pro2_demo/README.md"`,
 			`href="/contact"`,
@@ -1590,7 +1590,7 @@ func TestOTAFeaturePageIncludesProductionDetail(t *testing.T) {
 	for _, want := range []string{
 		"Firmware upload, catalog, target enablement, rollout status, report, cancel, and download are available foundations; scheduled, time-window, user-consent, and archive campaign policy surfaces are now available too, while approval workflow, dashboards, analytics, and staged percentage rollout remain roadmap scope.",
 		"Firmware campaign interface contract",
-		`href="https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/FIRMWARE_CAMPAIGN.md"`,
+		`href="https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/firmware_campaign.md"`,
 		"Use the current firmware lifecycle as the implementation boundary",
 		"Describe publish, enablement, whitelist, rollout query/report, cancel, and download behavior as the available firmware lifecycle foundation.",
 		"Promote the campaign policy surfaces that are now implemented",
@@ -1658,7 +1658,7 @@ func TestProvisionFeatureAlignsPublicCopyWithContractStatus(t *testing.T) {
 	for _, want := range []string{
 		"Cloud registry and activation foundations are contract-backed; local Wi-Fi/BLE onboarding, claim UX, transfer/reset policy, and product readiness remain integration or roadmap scope.",
 		"Product onboarding interface contract",
-		`href="https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/PRODUCT_ONBOARDING.md"`,
+		`href="https://github.com/hkt999rtk/rtk_cloud_contracts_doc/blob/main/product_onboarding.md"`,
 		"Cloud-side provisioning is the implemented contract boundary",
 		"Account-side device registration, cross-service provisioning requests, WebRTC Video over TURN activation results, service-scoped credential issuance, and owner transport readiness are the public cloud-side behaviors to discuss today.",
 		"Claim material has a defined interface, not final ownership policy",

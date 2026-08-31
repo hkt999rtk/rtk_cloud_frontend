@@ -20,7 +20,7 @@ on:
         required: true
         type: choice
         options:
-          - docs/TEST_REPORT.md
+          - docs/test_report.md
 
 permissions:
   actions: read

@@ -5,7 +5,7 @@ description: "Validate app and device flows with the Realtek Connect+ SDK sample
 
 ![Realtek Connect+ sample ecosystem](/static/assets/connectplus-sample-ecosystem-corporate-v2.jpg)
 
-Realtek Connect+ customer evaluations should start with runnable reference samples before product teams commit to a branded app, production firmware, or a private deployment plan. The detailed source of truth stays in the [`rtk_cloud_client`](https://github.com/hkt999rtk/rtk_cloud_client) repository, especially [`docs/SAMPLE_APPLICATIONS.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_APPLICATIONS.md) and the sample-specific README files.
+Realtek Connect+ customer evaluations should start with runnable reference samples before product teams commit to a branded app, production firmware, or a private deployment plan. The detailed source of truth stays in the [`rtk_cloud_client`](https://github.com/hkt999rtk/rtk_cloud_client) repository, especially [`docs/sample_applications.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/sample_applications.md) and the sample-specific README files.
 
 ## Sample families
 
@@ -33,9 +33,9 @@ Realtek Connect+ customer evaluations should start with runnable reference sampl
 
 | Topic | Source |
 | --- | --- |
-| Sample ecosystem overview | [`docs/SAMPLE_APPLICATIONS.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_APPLICATIONS.md) |
-| Home app behavior | [`docs/SAMPLE_HOME_APP_SPEC.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_HOME_APP_SPEC.md) |
-| Device reference behavior | [`docs/SAMPLE_DEVICE_APP_SPEC.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/SAMPLE_DEVICE_APP_SPEC.md) |
+| Sample ecosystem overview | [`docs/sample_applications.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/sample_applications.md) |
+| Home app behavior | [`docs/sample_home_app_spec.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/sample_home_app_spec.md) |
+| Device reference behavior | [`docs/sample_device_app_spec.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/docs/sample_device_app_spec.md) |
 | Android sample | [`samples/android/README.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/samples/android/README.md) |
 | iOS sample | [`samples/ios/README.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/samples/ios/README.md) |
 | WebApp sample | [`samples/webapp/README.md`](https://github.com/hkt999rtk/rtk_cloud_client/blob/main/samples/webapp/README.md) |
