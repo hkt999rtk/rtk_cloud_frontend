@@ -1,5 +1,24 @@
 # SQLite Backup Policy
 
+Status: active service-local procedure.
+
+Owner: rtk_cloud_frontend.
+
+Last reviewed: 2026-08-31.
+
+For coordinated workspace/LKE recovery, follow
+[Core Backup and Restore](../../../docs/backup-restore.md). That v1 procedure
+uses a manual maintenance window and a matched encrypted core archive with
+both frontend databases, Cloud Admin, PostgreSQL, OpenBao and durable Redis
+state. Restore after deployment remains fenced until verification and explicit
+resume. Object payloads and independent escrow are outside its core scope.
+
+The online SQLite/native-host commands below are **service-local alternatives**,
+not the workspace backup entry point and not evidence of cross-service
+consistency. Do not copy live database/WAL files independently. Workspace v1
+stops all writers, archives the dedicated PVC and checks restored copies with
+`PRAGMA integrity_check`.
+
 Realtek Connect+ stores runtime website data in SQLite. In Kubernetes v1 these
 files live on the frontend `/data` PVC; in legacy native deployments they live
 on the deployment host. Release artifacts and container images must never
@@ -43,13 +62,14 @@ The expected output is `ok`.
 
 ## Retention
 
-Recommended first-version retention:
+Service-local retention suggestions (workspace v1 has no automatic pruning):
 
 - keep daily backups for 14 days
 - keep weekly backups for 8 weeks
 - keep monthly backups for 6 months if the environment is used for real leads
 
-Local retention cleanup can start with:
+Only for the legacy native-host directory, after reviewing the exact inventory
+and independent recovery copy, local cleanup can start with:
 
 ```sh
 sudo find /var/lib/realtek-connect/backups -type f -name '*.db' -mtime +60 -delete
@@ -59,7 +79,13 @@ Adjust retention before public launch based on privacy and legal requirements.
 
 ## Optional Object Storage Copy
 
-For production, copy verified backups to a private Linode Object Storage bucket
+For a service-local deployment, encrypt verified backups before transferring
+them to an independently protected private bucket. The native helper example
+below shows transfer syntax only, **not encryption**; do not use it to upload
+plaintext production lead data. For workspace production, use the matched
+encrypted archive and private destination in the workspace recovery procedure.
+
+The legacy transfer example uses a private Linode Object Storage bucket
 prefix such as `sqlite-backups/<hostname>/`. Do not use the public release
 artifact prefix for database backups.
 
