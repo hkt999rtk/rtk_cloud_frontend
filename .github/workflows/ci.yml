@@ -20,7 +20,8 @@ env:
 
 jobs:
   verify:
-    runs-on: [self-hosted, Linux, X64]
+    # PR validation uses a fresh VM; retain existing runners for other events.
+    runs-on: ${{ fromJSON(github.event_name == 'pull_request' && '["ubuntu-latest"]' || '["self-hosted", "Linux", "X64"]') }}
 
     steps:
       - name: Check out repository
