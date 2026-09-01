@@ -50,6 +50,7 @@ func main() {
 	var (
 		baseURL       = flag.String("base-url", "", "existing base URL to check; defaults to an in-process local server")
 		chromePath    = flag.String("chrome-path", "", "path to the Chrome executable")
+		noSandbox     = flag.Bool("no-sandbox", false, "disable the Chrome sandbox for isolated CI runners")
 		screenshotDir = flag.String("screenshot-dir", "", "optional directory for Video Cloud desktop, mobile, and Traditional Chinese review screenshots")
 		timeout       = flag.Duration("timeout", 45*time.Second, "overall timeout for the smoke check")
 	)
@@ -78,18 +79,21 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 	defer cancel()
 
-	allocatorCtx, cancelAllocator := chromedp.NewExecAllocator(
-		ctx,
-		append(
-			chromedp.DefaultExecAllocatorOptions[:],
-			chromedp.ExecPath(chromeExec),
-			chromedp.Flag("headless", true),
-			chromedp.Flag("disable-gpu", true),
-			chromedp.Flag("hide-scrollbars", false),
-			chromedp.NoDefaultBrowserCheck,
-			chromedp.NoFirstRun,
-		)...,
+	allocatorOptions := append(
+		chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.ExecPath(chromeExec),
+		chromedp.Flag("headless", true),
+		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("hide-scrollbars", false),
+		chromedp.NoDefaultBrowserCheck,
+		chromedp.NoFirstRun,
+		chromedp.CombinedOutput(os.Stderr),
 	)
+	if *noSandbox {
+		allocatorOptions = append(allocatorOptions, chromedp.Flag("no-sandbox", true))
+	}
+
+	allocatorCtx, cancelAllocator := chromedp.NewExecAllocator(ctx, allocatorOptions...)
 	defer cancelAllocator()
 
 	browserCtx, cancelBrowser := chromedp.NewContext(allocatorCtx)
