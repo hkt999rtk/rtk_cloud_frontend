@@ -4,7 +4,7 @@ Status: active
 
 Owner: rtk_cloud_frontend
 
-Last reviewed: 2026-07-21
+Last reviewed: 2026-09-03
 
 The canonical SDK user manual lives in `content/manual/sdk/`. Do not copy its
 prose into package READMEs or another website directory. The website renders
@@ -60,6 +60,31 @@ Enable this surface with `SDK_DOWNLOADS_ENABLED=true` and a read-only,
 `SDK_LATEST_OBJECT_KEY` (default `sdk/latest.json`). If the pointer, catalog,
 terms, or credentials are invalid, the rest of the site remains available and
 the SDK cards fail closed.
+
+### Safe catalog projection
+
+The Portal additionally exposes `GET /api/sdk/catalog` as the public,
+read-only projection consumed by Cloud Admin. It validates the same private
+latest pointer, release catalog, package count, checksums, and terms object used
+by `/manual/sdk`, then removes every `object_key` before serialization. It never
+returns Object Storage credentials, internal paths, or presigned URLs.
+
+The response contains exactly five packages plus the complete bundle. Each
+artifact includes its stable slug, title, description, filename, byte size,
+SHA-256, `PASS` validation status, capability labels, and explicit limitations.
+Android, iOS, JavaScript/TypeScript, and Native identify WebRTC signaling
+support; FreeRTOS/Pro2 identifies its answerer integration boundary. None may
+claim an in-SDK media engine, renderer, peer connection, or media-track runtime.
+
+The endpoint returns `503` when downloads are disabled or the complete catalog
+cannot be validated. It does not expose a partial release. Catalog metadata may
+be cached briefly; download submissions and presigned redirects remain
+`no-store`. The normative cross-service behavior is defined by
+`rtk_cloud_contracts_doc/sdk_distribution.md`.
+
+Cloud Admin uses this endpoint through its authenticated BFF and directs the
+developer to the Portal's existing terms/download form. The Portal remains the
+only service that reads SDK Object Storage or issues download URLs.
 
 ## Verification
 

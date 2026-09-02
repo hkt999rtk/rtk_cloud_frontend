@@ -126,6 +126,8 @@ CDN readiness:
 - `GET /manual/sdk` and nested SDK manual chapters
 - `GET /manual/sdk/reference/{package}/`
 - `GET /manual/sdk/downloads/{file}`
+- `GET /api/sdk/catalog` — safe public metadata for the latest validated
+  five-package SDK release; never includes Object Storage keys or download URLs.
 - `POST /manual/sdk/download` — accept the current evaluation terms and redirect to a short-lived SDK package URL.
 - `GET /legal/sdk-evaluation-terms` — render the legal-approved terms referenced by the current SDK catalog.
 - `GET /features`
