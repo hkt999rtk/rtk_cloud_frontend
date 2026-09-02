@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Realtek Connect+ Website API
-  version: 0.1.0
+  version: 0.2.0
   summary: HTTP API contract for the Realtek Connect+ marketing and documentation website.
   description: >
     This OpenAPI document covers the runtime endpoints implemented in
@@ -24,7 +24,67 @@ tags:
     description: Runtime health endpoint.
   - name: Admin
     description: Token-protected internal website operations.
+  - name: SDK
+    description: Public SDK release metadata and terms-gated downloads.
 paths:
+  /api/sdk/catalog:
+    get:
+      tags:
+        - SDK
+      operationId: getSDKCatalog
+      summary: Return the latest safe public Cloud Client SDK catalog.
+      description: >
+        Validates the private latest pointer, catalog, five SDK packages,
+        complete bundle, checksums, and evaluation terms. The response never
+        contains Object Storage keys, credentials, presigned URLs, or internal
+        validation paths.
+      responses:
+        "200":
+          description: Latest complete public-evaluation release metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSDKCatalog"
+        "503":
+          description: SDK downloads are disabled or the complete catalog is unavailable.
+          headers:
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+          content:
+            text/plain:
+              schema:
+                type: string
+  /manual/sdk/download:
+    post:
+      tags:
+        - SDK
+      operationId: downloadSDKPackage
+      summary: Accept the current evaluation terms and download one SDK artifact.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PublicSDKDownloadRequest"
+      responses:
+        "303":
+          description: Redirect to a presigned SDK artifact URL valid for no more than ten minutes.
+          headers:
+            Location:
+              required: true
+              schema:
+                type: string
+                format: uri
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+        "400":
+          description: Terms were not accepted or the requested version, terms, or package is invalid or stale.
+        "429":
+          description: Download rate limit exceeded.
+        "500":
+          description: Terms acceptance could not be recorded.
+        "503":
+          description: SDK downloads are disabled.
   /api/event:
     post:
       tags:
@@ -577,6 +637,104 @@ components:
           schema:
             type: string
   schemas:
+    PublicSDKArtifact:
+      type: object
+      additionalProperties: false
+      required:
+        - slug
+        - title
+        - description
+        - filename
+        - sha256
+        - size_bytes
+        - validation_status
+        - capabilities
+        - limitations
+      properties:
+        slug:
+          type: string
+          enum: [native, android, javascript, ios, freertos-pro2, all]
+        title:
+          type: string
+        description:
+          type: string
+        filename:
+          type: string
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 1
+        validation_status:
+          type: string
+          const: PASS
+        capabilities:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+        limitations:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+    PublicSDKCatalog:
+      type: object
+      additionalProperties: false
+      required:
+        - schema
+        - version
+        - release_train
+        - created_at
+        - distribution
+        - signing_status
+        - terms_version
+        - packages
+        - complete_bundle
+      properties:
+        schema:
+          type: string
+          const: rtk-portal-sdk-public-catalog/v1
+        version:
+          type: string
+        release_train:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        distribution:
+          type: string
+          const: public-evaluation
+        signing_status:
+          type: string
+          enum: [not_configured, signed]
+        terms_version:
+          type: string
+        packages:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/PublicSDKArtifact"
+        complete_bundle:
+          $ref: "#/components/schemas/PublicSDKArtifact"
+    PublicSDKDownloadRequest:
+      type: object
+      additionalProperties: false
+      required: [accepted, version, package, terms_version]
+      properties:
+        accepted:
+          type: string
+          const: "true"
+        version:
+          type: string
+        package:
+          type: string
+          enum: [native, android, javascript, ios, freertos-pro2, all]
+        terms_version:
+          type: string
     AnalyticsEventRequest:
       type: object
       additionalProperties: true

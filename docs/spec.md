@@ -322,7 +322,7 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 | Matter / Ecosystem Integrations | Website Content Implemented | `/features/integrations` | The integrations page covers Matter Fabric positioning, voice assistants, MQTT over TLS, REST APIs, webhooks, and a structured integration-path comparison. This is public website content only: Matter, Alexa, and Google Assistant remain roadmap service capabilities per `smart_home_ecosystem.md`; push alerts are integration-ready; scenes, schedules, and household sharing are not generally available platform features. |
 | Developer Docs Portal | Content Partial | `/docs`, `/docs/product-overview`, `/docs/development`, `/docs/deployment`, `/docs/release-notes` | The portal structure exists and is navigable, but follow-on work can deepen setup guides, architecture diagrams, and operational runbooks. |
 | APIs | Content Partial | `/docs/apis`, `/features/integrations` | API positioning exists and now separates product authorization roles from service bearer scopes. Website v1 still lacks reference-grade endpoint coverage, finalized auth flows, webhook payload examples, and error-model detail. |
-| SDK Reference | Implemented | `/manual/sdk`, `/manual/sdk/reference/{package}/`, `/manual/sdk/downloads/` | One canonical English manual covers Native, Android, iOS, JavaScript/TypeScript, Go, and FreeRTOS/Pro2. The reproducible generator emits versioned HTML, source-derived API symbol indexes, a combined PDF, package PDFs, checksums, and a source/version manifest. |
+| SDK Reference | Implemented | `/manual/sdk`, `/api/sdk/catalog`, `/manual/sdk/reference/{package}/`, `/manual/sdk/downloads/` | One canonical English manual covers Native, Android, iOS, JavaScript/TypeScript, Go, and FreeRTOS/Pro2. The Portal owns terms-gated package downloads and exposes a safe five-package catalog projection for Cloud Admin without Object Storage keys or presigned URLs. The reproducible generator emits versioned HTML, source-derived API symbol indexes, a combined PDF, package PDFs, checksums, and a source/version manifest. |
 | CLI | Content Partial | `/docs/cli` | The CLI section exists as part of the docs portal, but website v1 still needs command catalogs, auth/session examples, and operator workflow walkthroughs. |
 | SEO / Launch Readiness | Content Partial | Shared layout metadata, `/robots.txt`, `/sitemap.xml`, `go run ./cmd/visual-smoke` | Metadata, sitemap, robots, CI, deployment packaging, and desktop/mobile visual smoke checks for English, Traditional Chinese, and Simplified Chinese public pages now exist; remaining work is broader launch polish such as expanded product visuals plus final parity and documentation close-out. |
 | Real IoT Cloud Operations | Out of Scope for website v1 | Public marketing and docs copy only | The public website will describe platform capabilities, but it will not implement real device provisioning, OTA delivery, user auth, telemetry ingestion, or a production device-operations control plane in v1. |
@@ -345,6 +345,8 @@ Routes:
 - `GET /manual/{slug}`: file-backed customer manual detail pages, including nested SDK chapters.
 - `GET /manual/sdk/reference/{package}/`: generated package API symbol reference.
 - `GET /manual/sdk/downloads/{file}`: generated complete and per-package PDF manuals.
+- `GET /api/sdk/catalog`: validated public metadata for the latest five-package
+  Cloud Client SDK release and complete bundle; no storage key or download URL.
 - `GET /features`: feature overview.
 - `GET /features/{slug}`: feature detail pages.
 - `GET /contact`: contact / early access registration form.
@@ -362,6 +364,11 @@ Routes:
 The OpenAPI contract in `docs/openapi.yaml` covers API/form/admin endpoints
 implemented by this website runtime. It intentionally does not describe the
 future IoT product control-plane APIs.
+
+The public SDK catalog is global and independent of Brand Cloud, Product, and
+ChipSet-provider state. Cloud Admin may display it beside Account Manager's
+ChipSet resources, but the Portal remains the source of truth for release
+metadata, evaluation terms, acceptance records, and presigned downloads.
 
 Localized public route variants:
 
