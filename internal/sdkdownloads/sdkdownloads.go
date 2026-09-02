@@ -21,22 +21,39 @@ import (
 )
 
 const (
-	LatestSchema  = "rtk-portal-sdk-latest/v1"
-	CatalogSchema = "rtk-portal-sdk-release/v1"
+	LatestSchema        = "rtk-portal-sdk-latest/v1"
+	CatalogSchema       = "rtk-portal-sdk-release/v1"
+	PublicCatalogSchema = "rtk-portal-sdk-public-catalog/v1"
 )
 
 var sha256Pattern = regexp.MustCompile(`^[a-f0-9]{64}$`)
 var versionPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`)
 
 type Artifact struct {
-	Slug             string `json:"slug"`
-	Title            string `json:"title"`
-	Description      string `json:"description"`
-	Filename         string `json:"filename"`
-	ObjectKey        string `json:"object_key"`
-	SHA256           string `json:"sha256"`
-	SizeBytes        int64  `json:"size_bytes"`
-	ValidationStatus string `json:"validation_status"`
+	Slug             string   `json:"slug"`
+	Title            string   `json:"title"`
+	Description      string   `json:"description"`
+	Filename         string   `json:"filename"`
+	ObjectKey        string   `json:"object_key"`
+	SHA256           string   `json:"sha256"`
+	SizeBytes        int64    `json:"size_bytes"`
+	ValidationStatus string   `json:"validation_status"`
+	Capabilities     []string `json:"capabilities"`
+	Limitations      []string `json:"limitations"`
+}
+
+// PublicArtifact deliberately has no Object Storage key. Keep this as a
+// separate wire type so adding private catalog fields cannot expose them.
+type PublicArtifact struct {
+	Slug             string   `json:"slug"`
+	Title            string   `json:"title"`
+	Description      string   `json:"description"`
+	Filename         string   `json:"filename"`
+	SHA256           string   `json:"sha256"`
+	SizeBytes        int64    `json:"size_bytes"`
+	ValidationStatus string   `json:"validation_status"`
+	Capabilities     []string `json:"capabilities"`
+	Limitations      []string `json:"limitations"`
 }
 
 type Catalog struct {
@@ -52,6 +69,18 @@ type Catalog struct {
 	TermsObjectKey  string     `json:"terms_object_key"`
 	Packages        []Artifact `json:"packages"`
 	CompleteBundle  Artifact   `json:"complete_bundle"`
+}
+
+type PublicCatalog struct {
+	Schema         string           `json:"schema"`
+	Version        string           `json:"version"`
+	ReleaseTrain   string           `json:"release_train"`
+	CreatedAt      string           `json:"created_at"`
+	Distribution   string           `json:"distribution"`
+	SigningStatus  string           `json:"signing_status"`
+	TermsVersion   string           `json:"terms_version"`
+	Packages       []PublicArtifact `json:"packages"`
+	CompleteBundle PublicArtifact   `json:"complete_bundle"`
 }
 
 type latestPointer struct {
@@ -132,6 +161,42 @@ func (s *Service) Catalog(ctx context.Context) (Catalog, error) {
 	return catalog, nil
 }
 
+func (s *Service) PublicCatalog(ctx context.Context) (PublicCatalog, error) {
+	catalog, err := s.Catalog(ctx)
+	if err != nil {
+		return PublicCatalog{}, err
+	}
+	packages := make([]PublicArtifact, 0, len(catalog.Packages))
+	for _, artifact := range catalog.Packages {
+		packages = append(packages, publicArtifact(artifact))
+	}
+	return PublicCatalog{
+		Schema:         PublicCatalogSchema,
+		Version:        catalog.Version,
+		ReleaseTrain:   catalog.ReleaseTrain,
+		CreatedAt:      catalog.CreatedAt,
+		Distribution:   catalog.Distribution,
+		SigningStatus:  catalog.SigningStatus,
+		TermsVersion:   catalog.TermsVersion,
+		Packages:       packages,
+		CompleteBundle: publicArtifact(catalog.CompleteBundle),
+	}, nil
+}
+
+func publicArtifact(artifact Artifact) PublicArtifact {
+	return PublicArtifact{
+		Slug:             artifact.Slug,
+		Title:            artifact.Title,
+		Description:      artifact.Description,
+		Filename:         artifact.Filename,
+		SHA256:           artifact.SHA256,
+		SizeBytes:        artifact.SizeBytes,
+		ValidationStatus: artifact.ValidationStatus,
+		Capabilities:     append([]string(nil), artifact.Capabilities...),
+		Limitations:      append([]string(nil), artifact.Limitations...),
+	}
+}
+
 func (s *Service) Terms(ctx context.Context) (string, string, error) {
 	catalog, err := s.Catalog(ctx)
 	if err != nil {
@@ -180,6 +245,15 @@ func validateCatalog(catalog Catalog, latest latestPointer) error {
 	if catalog.Schema != CatalogSchema || catalog.Distribution != "public-evaluation" {
 		return errors.New("invalid SDK catalog schema or distribution")
 	}
+	if strings.TrimSpace(catalog.ReleaseTrain) == "" || strings.TrimSpace(catalog.CreatedAt) == "" {
+		return errors.New("SDK catalog is missing release metadata")
+	}
+	if _, err := time.Parse(time.RFC3339, catalog.CreatedAt); err != nil {
+		return errors.New("SDK catalog contains an invalid release timestamp")
+	}
+	if catalog.SigningStatus != "not_configured" && catalog.SigningStatus != "signed" {
+		return errors.New("SDK catalog contains an invalid signing status")
+	}
 	if catalog.Version != latest.Version || catalog.TermsVersion != latest.TermsVersion {
 		return errors.New("SDK latest pointer and catalog do not match")
 	}
@@ -191,8 +265,9 @@ func validateCatalog(catalog Catalog, latest latestPointer) error {
 	}
 	prefix := "sdk/releases/" + catalog.Version + "/"
 	seen := map[string]bool{}
+	wantSlugs := map[string]bool{"native": true, "android": true, "javascript": true, "ios": true, "freertos-pro2": true, "all": true}
 	for _, artifact := range append(append([]Artifact{}, catalog.Packages...), catalog.CompleteBundle) {
-		if artifact.Slug == "" || seen[artifact.Slug] || artifact.Filename == "" || artifact.SizeBytes <= 0 || artifact.ValidationStatus != "PASS" {
+		if !wantSlugs[artifact.Slug] || seen[artifact.Slug] || strings.TrimSpace(artifact.Title) == "" || strings.TrimSpace(artifact.Description) == "" || artifact.Filename == "" || artifact.SizeBytes <= 0 || artifact.ValidationStatus != "PASS" || !validLabels(artifact.Capabilities) || !validLabels(artifact.Limitations) {
 			return errors.New("SDK catalog contains an invalid artifact")
 		}
 		if !strings.HasPrefix(artifact.ObjectKey, prefix) || strings.Contains(artifact.ObjectKey, "..") || !sha256Pattern.MatchString(artifact.SHA256) {
@@ -204,6 +279,21 @@ func validateCatalog(catalog Catalog, latest latestPointer) error {
 		return errors.New("SDK catalog contains an unsafe terms object")
 	}
 	return nil
+}
+
+func validLabels(values []string) bool {
+	if len(values) == 0 {
+		return false
+	}
+	seen := make(map[string]bool, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" || seen[value] {
+			return false
+		}
+		seen[value] = true
+	}
+	return true
 }
 
 type StoreConfig struct {

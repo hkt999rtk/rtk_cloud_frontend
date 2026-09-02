@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -19,6 +20,34 @@ const sdkSessionCookie = "rtk_sdk_session"
 // SDK IDs use base64url, which can start with '-' or '_'. Keep accepting the
 // existing cookie alphabet without applying the analytics first-character rule.
 var sdkSessionIDPattern = regexp.MustCompile(`^[A-Za-z0-9_-][A-Za-z0-9._:-]{0,63}$`)
+
+func (s *Server) handleSDKCatalogAPI(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/api/sdk/catalog" {
+		http.NotFound(w, r)
+		return
+	}
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", http.MethodGet)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if s.sdkDownloads == nil {
+		w.Header().Set("Cache-Control", "no-store")
+		http.Error(w, "SDK catalog is unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+	catalog, err := s.sdkDownloads.PublicCatalog(ctx)
+	if err != nil {
+		w.Header().Set("Cache-Control", "no-store")
+		http.Error(w, "SDK catalog is unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=60")
+	_ = json.NewEncoder(w).Encode(catalog)
+}
 
 func (s *Server) attachSDKCatalog(r *http.Request, data *pageData) {
 	if data == nil || s.sdkDownloads == nil {

@@ -263,6 +263,7 @@ func (s *Server) Routes() http.Handler {
 	mux.Handle("/content-assets/manual/sdk/", http.StripPrefix("/content-assets/manual/sdk/", http.FileServer(http.Dir(filepath.Join(s.contentRoot, "manual", "sdk", "assets")))))
 	mux.Handle("/content-assets/", http.StripPrefix("/content-assets/", s.contentAssetsHandler()))
 	mux.HandleFunc("/manual/sdk/download", s.handleSDKDownload)
+	mux.HandleFunc("/api/sdk/catalog", s.handleSDKCatalogAPI)
 	mux.HandleFunc("/robots.txt", s.handleRobotsTxt)
 	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)

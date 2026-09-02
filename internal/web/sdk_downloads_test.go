@@ -25,12 +25,53 @@ func sdkDownloadTestService(t *testing.T) *sdkdownloads.Service {
 	t.Helper()
 	packages := []sdkdownloads.Artifact{}
 	for _, slug := range []string{"native", "android", "javascript", "ios", "freertos-pro2"} {
-		packages = append(packages, sdkdownloads.Artifact{Slug: slug, Title: strings.ToUpper(slug), Description: slug + " SDK", Filename: slug + ".tgz", ObjectKey: "sdk/releases/0.1.0-rc.2/artifacts/" + slug + ".tgz", SHA256: strings.Repeat("a", 64), SizeBytes: 1024, ValidationStatus: "PASS"})
+		packages = append(packages, sdkdownloads.Artifact{Slug: slug, Title: strings.ToUpper(slug), Description: slug + " SDK", Filename: slug + ".tgz", ObjectKey: "sdk/releases/0.1.0-rc.2/artifacts/" + slug + ".tgz", SHA256: strings.Repeat("a", 64), SizeBytes: 1024, ValidationStatus: "PASS", Capabilities: []string{"WebRTC signaling"}, Limitations: []string{"No media runtime"}})
 	}
-	catalog := sdkdownloads.Catalog{Schema: sdkdownloads.CatalogSchema, Version: "0.1.0-rc.2", Distribution: "public-evaluation", TermsVersion: "eval-v1", TermsObjectKey: "sdk/releases/0.1.0-rc.2/EVALUATION_LICENSE.txt", Packages: packages, CompleteBundle: sdkdownloads.Artifact{Slug: "all", Title: "Complete", Description: "All SDKs", Filename: "all.tgz", ObjectKey: "sdk/releases/0.1.0-rc.2/artifacts/all.tgz", SHA256: strings.Repeat("b", 64), SizeBytes: 2048, ValidationStatus: "PASS"}}
+	catalog := sdkdownloads.Catalog{Schema: sdkdownloads.CatalogSchema, Version: "0.1.0-rc.2", ReleaseTrain: "rtk-cloud-client-0.1.0-rc.2", CreatedAt: "2026-08-29T00:00:00Z", Distribution: "public-evaluation", SigningStatus: "not_configured", TermsVersion: "eval-v1", TermsObjectKey: "sdk/releases/0.1.0-rc.2/EVALUATION_LICENSE.txt", Packages: packages, CompleteBundle: sdkdownloads.Artifact{Slug: "all", Title: "Complete", Description: "All SDKs", Filename: "all.tgz", ObjectKey: "sdk/releases/0.1.0-rc.2/artifacts/all.tgz", SHA256: strings.Repeat("b", 64), SizeBytes: 2048, ValidationStatus: "PASS", Capabilities: []string{"All packages"}, Limitations: []string{"No media runtime"}}}
 	catalogJSON, _ := json.Marshal(catalog)
 	latestJSON := []byte(`{"schema":"rtk-portal-sdk-latest/v1","version":"0.1.0-rc.2","catalog_object_key":"sdk/releases/0.1.0-rc.2/catalog.json","terms_version":"eval-v1"}`)
 	return sdkdownloads.NewService(webSDKStore{objects: map[string][]byte{"sdk/latest.json": latestJSON, "sdk/releases/0.1.0-rc.2/catalog.json": catalogJSON, catalog.TermsObjectKey: []byte("Approved evaluation terms")}}, "", time.Minute)
+}
+
+func TestSDKCatalogAPIIsPublicAndRedacted(t *testing.T) {
+	handler := testServerWithConfig(t, Config{SDKDownloads: sdkDownloadTestService(t)})
+	request := httptest.NewRequest(http.MethodGet, "/api/sdk/catalog", nil)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %q", response.Code, response.Body.String())
+	}
+	if got := response.Header().Get("Cache-Control"); got != "public, max-age=60" {
+		t.Fatalf("Cache-Control = %q", got)
+	}
+	for _, forbidden := range []string{"object_key", "terms_object_key", "X-Amz-", "sdk/releases/"} {
+		if strings.Contains(response.Body.String(), forbidden) {
+			t.Fatalf("catalog leaked %q: %s", forbidden, response.Body.String())
+		}
+	}
+	var catalog sdkdownloads.PublicCatalog
+	if err := json.Unmarshal(response.Body.Bytes(), &catalog); err != nil {
+		t.Fatal(err)
+	}
+	if catalog.Schema != sdkdownloads.PublicCatalogSchema || len(catalog.Packages) != 5 || catalog.CompleteBundle.Slug != "all" {
+		t.Fatalf("unexpected catalog: %#v", catalog)
+	}
+}
+
+func TestSDKCatalogAPIUnavailableAndMethod(t *testing.T) {
+	handler := testServerWithConfig(t, Config{})
+	request := httptest.NewRequest(http.MethodGet, "/api/sdk/catalog", nil)
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusServiceUnavailable || response.Header().Get("Cache-Control") != "no-store" {
+		t.Fatalf("unavailable response = %d %q", response.Code, response.Header().Get("Cache-Control"))
+	}
+	request = httptest.NewRequest(http.MethodPost, "/api/sdk/catalog", nil)
+	response = httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusMethodNotAllowed || response.Header().Get("Allow") != http.MethodGet {
+		t.Fatalf("method response = %d Allow=%q", response.Code, response.Header().Get("Allow"))
+	}
 }
 
 func TestSDKCatalogAndTermsArePublic(t *testing.T) {
