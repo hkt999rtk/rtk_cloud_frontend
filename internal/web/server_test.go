@@ -310,7 +310,7 @@ func TestDocsLandingRendersFileBackedContent(t *testing.T) {
 	body := rec.Body.String()
 	for _, expected := range []string{
 		"File-owned landing content",
-		`<img class="docs-content-image" src="/static/assets/connectplus-platform-surfaces-corporate-v2.jpg" alt="Documentation architecture preview">`,
+		`class="docs-hero-media-label">Realtek Connect+ / Documentation</div>`,
 		`<meta property="og:image" content="http://example.com/static/assets/connectplus-platform-surfaces-corporate-v2.jpg">`,
 	} {
 		if !strings.Contains(body, expected) {
@@ -1752,8 +1752,8 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 	}{
 		{
 			path: "/features/provision",
-			src:  `/static/assets/portal-provisioning-desktop-v2.webp`,
-			alt:  `alt="Sanitized Realtek Connect&#43; device registration workspace"`,
+			src:  `/static/assets/portal-fleet-onboarding-promotional-v1.webp`,
+			alt:  `alt="Fleet onboarding workspace for Northstar Camera Pro devices"`,
 		},
 		{
 			path: "/features/ota",
@@ -1762,8 +1762,8 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 		},
 		{
 			path: "/features/fleet-management",
-			src:  `/static/assets/portal-fleet-desktop-v2.webp`,
-			alt:  `alt="Sanitized connected-device fleet workspace"`,
+			src:  `/static/assets/portal-fleet-management-promotional-v1.webp`,
+			alt:  `alt="Fleet device management workspace for Northstar Devices"`,
 		},
 		{
 			path: "/features/smart-home",
@@ -1787,8 +1787,8 @@ func TestFeaturePagesUseLocalVisualAssets(t *testing.T) {
 		},
 		{
 			path: "/features/private-cloud",
-			src:  `/static/assets/feature-private-cloud-architecture.jpg`,
-			alt:  `alt="Managed cloud and private cloud deployment options"`,
+			src:  `/static/assets/feature-cloud-operating-models-promotional-v1.webp`,
+			alt:  `alt="Realtek Managed Cloud and Private Cloud operating models"`,
 		},
 		{
 			path: "/features/integrations",
@@ -2082,9 +2082,9 @@ func TestHomeRefreshRendersLocalizedManagedServiceAndAccessibleCoreFeatures(t *t
 				`role="tablist"`,
 				`role="tab"`,
 				`role="tabpanel"`,
-				`portal-provisioning-desktop-v2.webp`,
+				`portal-fleet-onboarding-promotional-v1.webp`,
 				`portal-ota-desktop-v2.webp`,
-				`portal-fleet-desktop-v2.webp`,
+				`portal-fleet-management-promotional-v1.webp`,
 				`data-analytics-cta="nav_cta_service_login"`,
 				`class="core-accordion-toggle"`,
 				`class="footer-film-link" href="/static/assets/realtek-brand-film.mp4"`,

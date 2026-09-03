@@ -1,24 +1,21 @@
 {{define "content"}}
-<section class="page-hero docs-hero">
-  <p class="eyebrow">{{t . "docs.eyebrow"}}</p>
-  <h1>{{.DocsPage.Title}}</h1>
-  <p>{{.DocsPage.Subtitle}}</p>
-  <div class="hero-actions">
-    <a class="button primary" href="{{localizedPath . "/contact"}}" data-analytics-cta="docs_cta_primary"><span class="button-icon">{{icon "mail"}}</span>{{t . "docs.cta.primary"}}</a>
-    <a class="button secondary" href="{{localizedPath . "/features/app-sdk"}}"><span class="button-icon">{{icon "phone-code"}}</span>{{t . "docs.cta.secondary"}}</a>
+<section class="page-hero docs-hero docs-hero-redesign">
+  <div class="docs-hero-copy">
+    <p class="eyebrow">{{t . "docs.eyebrow"}}</p>
+    <h1>{{.DocsPage.Title}}</h1>
+    <p class="docs-hero-subtitle">{{.DocsPage.Subtitle}}</p>
+    <div class="hero-actions">
+      <a class="button primary" href="{{localizedPath . "/contact"}}" data-analytics-cta="docs_cta_primary"><span class="button-icon">{{icon "mail"}}</span>{{t . "docs.cta.primary"}}</a>
+      <a class="button secondary" href="{{localizedPath . "/features/app-sdk"}}"><span class="button-icon">{{icon "phone-code"}}</span>{{t . "docs.cta.secondary"}}</a>
+    </div>
   </div>
   {{if .DocsPage.HeroImage}}
   <figure class="docs-hero-media">
+    <div class="docs-hero-media-label">Realtek Connect+ / Documentation</div>
     <img src="{{asset .DocsPage.HeroImage}}" alt="{{.DocsPage.HeroImageAlt}}">
   </figure>
   {{end}}
 </section>
-
-{{if .DocsPage.BodyHTML}}
-<section class="section docs-content">
-  {{.DocsPage.BodyHTML}}
-</section>
-{{end}}
 
 <section class="section">
   <div class="section-heading">
@@ -26,14 +23,14 @@
     <h2>{{t . "docs.portal.title"}}</h2>
   </div>
   <div class="docs-entry-grid">
-    {{range .Docs}}
-    <a class="feature-card docs-card tall" href="{{localizedPath $ (printf "/docs/%s" .Slug)}}">
-      <span class="icon-box feature-icon">{{icon .Icon}}</span>
-      <p class="card-kicker">{{.Kicker}}</p>
-      <h2>{{.Title}}</h2>
-      <p>{{.Summary}}</p>
+    {{range $index, $doc := .Docs}}
+    <a class="docs-entry-card" href="{{localizedPath $ (printf "/docs/%s" $doc.Slug)}}">
+      <div class="docs-card-topline"><span class="icon-box feature-icon">{{icon $doc.Icon}}</span><span class="docs-card-index">{{printf "%02d" $index}}</span></div>
+      <p class="card-kicker">{{$doc.Kicker}}</p>
+      <h3>{{$doc.Title}}</h3>
+      <p class="docs-card-summary">{{$doc.Summary}}</p>
       <ul>
-        {{range .Highlights}}
+        {{range $doc.Highlights}}
         <li>{{.}}</li>
         {{end}}
       </ul>
@@ -44,7 +41,7 @@
 </section>
 
 {{if .DocsPage.Sections}}
-<section class="section docs-structure">
+<section class="section docs-structure docs-why-section">
   <div class="use-case-list">
     {{range .DocsPage.Sections}}
     <article>
