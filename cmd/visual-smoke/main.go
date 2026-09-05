@@ -51,7 +51,8 @@ func main() {
 		baseURL       = flag.String("base-url", "", "existing base URL to check; defaults to an in-process local server")
 		chromePath    = flag.String("chrome-path", "", "path to the Chrome executable")
 		noSandbox     = flag.Bool("no-sandbox", false, "disable the Chrome sandbox for isolated CI runners")
-		screenshotDir = flag.String("screenshot-dir", "", "optional directory for Video Cloud desktop, mobile, and Traditional Chinese review screenshots")
+		screenshotDir = flag.String("screenshot-dir", "", "optional directory for page review screenshots")
+		portalReview  = flag.Bool("portal-review", false, "also review public Portal page families in three locales at four viewport widths")
 		timeout       = flag.Duration("timeout", 45*time.Second, "overall timeout for the smoke check")
 	)
 	flag.Parse()
@@ -98,6 +99,10 @@ func main() {
 
 	browserCtx, cancelBrowser := chromedp.NewContext(allocatorCtx)
 	defer cancelBrowser()
+	// Keep one browser alive for the read-only page checks.
+	if err := chromedp.Run(browserCtx); err != nil {
+		fail(err)
+	}
 
 	viewports := []viewport{
 		{name: "desktop", width: 1440, height: 1100},
@@ -187,6 +192,18 @@ func main() {
 		},
 	}
 
+	if *portalReview {
+		viewports = append(viewports, viewport{name: "tablet", width: 768, height: 1024}, viewport{name: "narrow", width: 320, height: 780})
+		for _, prefix := range []string{"", "/zh-tw", "/zh-cn"} {
+			for _, path := range []string{"/features", "/docs", "/docs/apis", "/manual", "/manual/sdk", "/manual/sdk/authentication-security", "/contact", "/privacy", "/legal/sdk-evaluation-terms"} {
+				targets = append(targets, pageTarget{
+					name: strings.ReplaceAll(strings.Trim(prefix+path, "/"), "/", "-"), path: prefix + path,
+					headingSelector: "main h1", imageSelector: ".brand-logo",
+				})
+			}
+		}
+	}
+
 	fmt.Printf("Visual smoke checks against %s\n", targetURL)
 	for _, target := range targets {
 		for _, vp := range viewports {
@@ -219,6 +236,12 @@ func main() {
 			}
 		}
 	}
+	if *portalReview {
+		if err := checkPortalInteractions(browserCtx, targetURL); err != nil {
+			fail(err)
+		}
+		fmt.Println("- Portal interactions ok: menu, Escape, tabs, accordion, manual navigation, contact validation")
+	}
 }
 
 func screenshotFilename(targetName, viewportName string) string {
@@ -230,16 +253,14 @@ func screenshotFilename(targetName, viewportName string) string {
 	case targetName == "video-cloud-zh-tw" && viewportName == "desktop":
 		return "zh-tw-desktop.png"
 	default:
-		return ""
+		return targetName + "-" + viewportName + ".png"
 	}
 }
 
 func capturePage(parent context.Context, url string, vp viewport, output string) error {
-	tabCtx, cancel := chromedp.NewContext(parent)
-	defer cancel()
 	var screenshot []byte
 	if err := chromedp.Run(
-		tabCtx,
+		parent,
 		chromedp.EmulateViewport(vp.width, vp.height),
 		chromedp.Navigate(url),
 		chromedp.WaitVisible(`main#main-content`, chromedp.ByQuery),
@@ -252,9 +273,6 @@ func capturePage(parent context.Context, url string, vp viewport, output string)
 }
 
 func checkPage(parent context.Context, baseURL string, target pageTarget, vp viewport) (pageCheck, error) {
-	tabCtx, cancel := chromedp.NewContext(parent)
-	defer cancel()
-
 	var result pageCheck
 	script := fmt.Sprintf(`(() => {
 		const root = document.documentElement;
@@ -274,7 +292,7 @@ func checkPage(parent context.Context, baseURL string, target pageTarget, vp vie
 	})()`, target.headingSelector, target.imageSelector)
 
 	if err := chromedp.Run(
-		tabCtx,
+		parent,
 		chromedp.EmulateViewport(vp.width, vp.height),
 		chromedp.Navigate(baseURL+target.path),
 		chromedp.WaitVisible(`main#main-content`, chromedp.ByQuery),
@@ -295,7 +313,7 @@ func checkPage(parent context.Context, baseURL string, target pageTarget, vp vie
 	if target.expectedTitle != "" && result.Title != target.expectedTitle {
 		return result, fmt.Errorf("unexpected title %q", result.Title)
 	}
-	if result.HeroHeading != target.expectedHeading {
+	if result.HeroHeading == "" || (target.expectedHeading != "" && result.HeroHeading != target.expectedHeading) {
 		return result, fmt.Errorf("unexpected heading %q", result.HeroHeading)
 	}
 	if target.expectedBodyText != "" && !containsText(result, target.expectedBodyText) {

@@ -58,6 +58,7 @@ var (
 		"contact_submit":           {},
 		"doc_cta_primary":          {},
 		"docs_cta_primary":         {},
+		"docs_cta_manual":          {},
 		"feature_cta_all":          {},
 		"feature_cta_primary":      {},
 		"home_cta_band":            {},

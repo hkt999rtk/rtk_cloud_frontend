@@ -1,4 +1,5 @@
 {{define "content"}}
+<nav class="portal-breadcrumb" aria-label="{{t . "portal.breadcrumb"}}"><a href="{{localizedPath . "/features"}}">{{t . "nav.features"}}</a><span aria-hidden="true">/</span><span aria-current="page">{{.Feature.Title}}</span></nav>
 <section class="page-hero feature-detail">
   <div class="feature-hero-grid{{if not .Feature.ImagePath}} feature-hero-grid-single{{end}}">
     <div class="feature-hero-copy">

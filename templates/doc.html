@@ -1,4 +1,5 @@
 {{define "content"}}
+<nav class="portal-breadcrumb" aria-label="{{t . "portal.breadcrumb"}}"><a href="{{localizedPath . "/docs"}}">{{t . "nav.docs"}}</a><span aria-hidden="true">/</span><span aria-current="page">{{.Doc.Title}}</span></nav>
 <section class="page-hero feature-detail">
   <span class="icon-box page-hero-icon">{{icon .Doc.Icon}}</span>
   <p class="eyebrow">{{.Doc.Kicker}}</p>
