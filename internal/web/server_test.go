@@ -309,8 +309,8 @@ func TestDocsLandingRendersFileBackedContent(t *testing.T) {
 
 	body := rec.Body.String()
 	for _, expected := range []string{
-		"File-owned landing content",
-		`class="docs-hero-media-label">Realtek Connect+ / Documentation</div>`,
+		"Understand the platform",
+		`class="docs-hero-media-label">Realtek Connect+ / Docs</div>`,
 		`<meta property="og:image" content="http://example.com/static/assets/connectplus-platform-surfaces-corporate-v2.jpg">`,
 	} {
 		if !strings.Contains(body, expected) {
@@ -1206,6 +1206,7 @@ func TestAssetFingerprintsAreOptional(t *testing.T) {
 	body = rec.Body.String()
 	for _, want := range []string{
 		`href="/static/styles.css?v=`,
+		`href="/static/portal-ui.css?v=`,
 		`src="/static/assets/realtek-logo.png?v=`,
 		`src="/static/assets/portal-operations-healthy-desktop-v2.webp?v=`,
 		`<meta property="og:image" content="https://webtest.mgmeet.io/static/assets/portal-operations-healthy-desktop-v2.webp?v=`,

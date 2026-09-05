@@ -1000,6 +1000,7 @@ func (s *Server) render(w http.ResponseWriter, status int, name string, data pag
 		"localizedPath": localizedPath,
 		"asset":         s.assetPath,
 		"formatBytes":   formatBytes,
+		"hasPrefix":     strings.HasPrefix,
 	}).ParseFiles(files...)
 	if err != nil {
 		http.Error(w, "template parse error", http.StatusInternalServerError)

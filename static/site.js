@@ -79,9 +79,37 @@
     });
   }
 
+  function initManualNavigation() {
+    const article = document.querySelector("[data-manual-article]");
+    const toc = document.querySelector("[data-manual-toc]");
+    if (!article || !toc) return;
+    const headings = Array.from(article.querySelectorAll("h2"));
+    if (headings.length < 2) return;
+    const list = toc.querySelector("ol");
+    headings.forEach(function (heading, index) {
+      if (!heading.id) {
+        let id = "manual-section-" + (index + 1);
+        while (document.getElementById(id)) id += "-section";
+        heading.id = id;
+      }
+      const item = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = "#" + encodeURIComponent(heading.id);
+      link.textContent = heading.textContent;
+      link.addEventListener("click", function () {
+        heading.tabIndex = -1;
+        heading.focus({ preventScroll: true });
+      });
+      item.appendChild(link);
+      list.appendChild(item);
+    });
+    toc.hidden = false;
+  }
+
   function init() {
     initHeader();
     initCoreShowcase();
+    initManualNavigation();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });

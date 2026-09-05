@@ -1,4 +1,5 @@
 {{define "content"}}
+<nav class="portal-breadcrumb" aria-label="{{t . "portal.breadcrumb"}}"><a href="{{localizedPath . "/docs"}}">{{t . "nav.docs"}}</a><span aria-hidden="true">/</span><a href="{{localizedPath . "/manual"}}">{{t . "footer.manual"}}</a><span aria-hidden="true">/</span><span aria-current="page">{{.ManualPage.Title}}</span></nav>
 <section class="page-hero feature-detail">
   <span class="icon-box page-hero-icon">{{icon "document"}}</span>
   <p class="eyebrow">{{t . "manual.eyebrow"}}</p>
@@ -10,9 +11,14 @@
   </div>
 </section>
 
-<section class="section manual-content">
+<div class="section portal-manual-layout">
+<article class="manual-content" data-manual-article>
   {{.ManualPage.BodyHTML}}
-</section>
+</article>
+<aside class="portal-toc" data-manual-toc hidden>
+  <nav aria-label="{{t . "portal.toc"}}"><h2>{{t . "portal.toc"}}</h2><ol></ol></nav>
+</aside>
+</div>
 
 {{if .RelatedManual}}
 <section class="section doc-navigation">

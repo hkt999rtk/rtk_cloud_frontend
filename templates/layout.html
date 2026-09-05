@@ -23,8 +23,9 @@
   {{end}}
   {{if .MetaRobots}}<meta name="robots" content="{{.MetaRobots}}">{{end}}
   <link rel="stylesheet" href="{{asset "/static/styles.css"}}">
+  {{if not (hasPrefix .PublicPath "/admin")}}<link rel="stylesheet" href="{{asset "/static/portal-ui.css"}}">{{end}}
 </head>
-<body>
+<body{{if not (hasPrefix .PublicPath "/admin")}} class="portal-ui"{{end}}>
   <a class="skip-link" href="#main-content">{{t . "skip.main"}}</a>
   <header class="site-header">
     <a class="brand" href="{{localizedPath . "/"}}" aria-label="{{t . "brand.home"}}">
@@ -44,11 +45,12 @@
     <div class="header-nav-shell" id="site-navigation">
       <nav class="main-nav" aria-label="Main navigation">
         <a class="nav-service-login mobile-only-login" href="{{.ServiceLoginURL}}" data-analytics-cta="nav_cta_service_login">{{t . "home.cta.primary"}}</a>
-        <a href="{{localizedPath . "/docs"}}">{{t . "nav.docs"}}</a>
-        <a href="{{localizedPath . "/features"}}">{{t . "nav.features"}}</a>
+        <a href="{{localizedPath . "/docs"}}"{{if hasPrefix .PublicPath "/docs"}} aria-current="page"{{end}}>{{t . "nav.docs"}}</a>
+        <a href="{{localizedPath . "/manual"}}"{{if hasPrefix .PublicPath "/manual"}} aria-current="page"{{end}}>{{t . "footer.manual"}}</a>
+        <a href="{{localizedPath . "/features"}}"{{if hasPrefix .PublicPath "/features"}} aria-current="page"{{end}}>{{t . "nav.features"}}</a>
         {{if .SearchEnabled}}<a href="{{localizedPath . "/search"}}">{{t . "nav.search"}}</a>{{end}}
         <a href="{{localizedPath . "/"}}#architecture">{{t . "nav.architecture"}}</a>
-        <a href="{{localizedPath . "/contact"}}" data-analytics-cta="nav_cta_contact">{{t . "nav.contact"}}</a>
+        <a href="{{localizedPath . "/contact"}}" data-analytics-cta="nav_cta_contact"{{if eq .PublicPath "/contact"}} aria-current="page"{{end}}>{{t . "nav.contact"}}</a>
         <a class="nav-service-login desktop-login" href="{{.ServiceLoginURL}}" data-analytics-cta="nav_cta_service_login">{{t . "home.cta.primary"}}</a>
       </nav>
       {{if .AlternateLinks}}<nav class="language-nav" aria-label="{{t . "nav.language"}}">

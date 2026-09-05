@@ -1,0 +1,260 @@
+/* Public Portal design layer. Admin screens retain styles.css unchanged.
+   See docs/portal-ui-style-guideline.md for tokens and page conventions. */
+.portal-ui {
+  --bg-soft: #f6f8fa;
+  --bg-panel: #edf5fb;
+  --text: #242f3e;
+  --navy: #162b40;
+  --muted: #526172;
+  --line: #dce3ea;
+  --brand: #0068b7;
+  --brand-dark: #035390;
+  --brand-cyan: #6dcedd;
+  --shadow: 0 8px 24px rgb(22 43 64 / 7%);
+  --shadow-soft: 0 2px 6px rgb(22 43 64 / 4%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+}
+.portal-ui :where(h1, h2, h3) { font-weight: 650; text-wrap: pretty; overflow-wrap: anywhere; }
+.portal-ui :where(a, button, input, select, textarea, summary):focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
+.portal-ui :where(h2, h3, section[id], div[id]) { scroll-margin-top: 100px; }
+.portal-ui .site-header { height: 72px; min-height: 72px; flex-direction: row; align-items: center; padding-inline: max(24px, calc((100vw - 1240px) / 2)); gap: 24px; background: #fff; backdrop-filter: none; }
+.portal-ui .brand { flex-shrink: 0; gap: 12px; }
+.portal-ui .brand-logo { width: 112px; }
+.portal-ui .brand-product { font-size: 16px; font-weight: 600; }
+.portal-ui .header-nav-shell { gap: 18px; }
+.portal-ui .main-nav { gap: 20px; font-size: 14px; font-weight: 500; }
+.portal-ui .main-nav > a:not(.nav-service-login) { position: relative; padding-block: 23px; }
+.portal-ui .main-nav a[aria-current="page"] { color: var(--brand); }
+.portal-ui .main-nav a[aria-current="page"]::after { content: ""; position: absolute; height: 2px; inset: auto 0 0; background: var(--brand); }
+.portal-ui .language-nav a { font-size: 12px; font-weight: 500; }
+.portal-ui :where(.button, .nav-service-login) { min-height: 44px; padding: 10px 18px; border-radius: 6px; box-shadow: none; font-size: 14px; font-weight: 600; line-height: 1.5; transform: none; }
+.portal-ui :where(.button, .nav-service-login):hover { transform: none; box-shadow: none; }
+.portal-ui .button.secondary { background: #fff; border: 1px solid #b8c7d4; color: var(--brand-dark); }
+.portal-ui .button.secondary:hover { background: var(--bg-panel); border-color: var(--brand); }
+.portal-ui .text-link { color: var(--brand-dark); font-weight: 600; font-size: 14px; }
+.portal-ui .text-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.portal-ui :where(.section, .page-hero, .hero, .contact-section, .portal-breadcrumb) { width: min(1200px, calc(100% - 64px)); margin-inline: auto; }
+.portal-ui .section { padding-block: 64px; }
+.portal-ui .section + .section { padding-top: 24px; }
+.portal-ui .eyebrow { font-size: 12px; font-weight: 650; letter-spacing: .09em; }
+.portal-ui .section-heading { max-width: 780px; margin-bottom: 32px; }
+.portal-ui .section-heading.centered { margin-bottom: 32px; }
+.portal-ui .section-heading h2 { font-size: clamp(28px, 3vw, 36px); line-height: 1.25; letter-spacing: -.025em; }
+.portal-ui .section-lede { font-size: 16px; }
+.portal-ui .hero-actions { gap: 12px; }
+
+/* Product overview: content-led, with uncropped demonstration imagery. */
+.portal-ui .home-hero { height: auto; min-height: 540px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; padding-block: 72px; }
+.portal-ui .home-hero h1 { max-width: 580px; font-size: clamp(36px, 3.5vw, 48px); line-height: 1.15; letter-spacing: -.035em; }
+.portal-ui .home-hero h1 span:first-child { font-size: .7em; white-space: normal; letter-spacing: -.02em; color: var(--navy); }
+.portal-ui .home-hero h1 span + span { margin-top: 16px; color: var(--brand-dark); }
+.portal-ui .home-hero .hero-lede { font-size: 16px; line-height: 1.75; }
+.portal-ui .hero-benefits { display: grid; gap: 8px; margin-top: 24px; }
+.portal-ui .hero-benefits li { font-size: 13px; }
+.portal-ui .hero-product-frame { width: 100%; transform: none; border-radius: 8px; box-shadow: var(--shadow); }
+.portal-ui .hero-product-frame img { width: 100%; height: auto; aspect-ratio: auto; object-fit: contain; }
+.portal-ui .product-frame-bar { height: 36px; padding-inline: 12px; }
+.portal-ui .product-frame-bar strong { font-size: 11px; font-weight: 500; letter-spacing: .01em; }
+.portal-ui .home-plans { padding-top: 40px; border-top: 1px solid var(--line); }
+.portal-ui .managed-story { min-height: 0; grid-template-columns: 1fr 1fr; border-radius: 8px; box-shadow: none; background: var(--brand-dark); }
+.portal-ui .managed-story-copy { padding: 36px; }
+.portal-ui .managed-story-copy h3 { font-size: 30px; line-height: 1.25; }
+.portal-ui .managed-story-copy > p { font-size: 15px; }
+.portal-ui .managed-story-copy .recommendation-badge { border-radius: 4px; font-size: 12px; font-weight: 500; }
+.portal-ui .managed-benefits { font-size: 14px; gap: 8px; }
+.portal-ui .managed-actions { flex-wrap: wrap; gap: 16px; }
+.portal-ui .managed-story-visual { padding: 24px; background: var(--bg-panel); }
+.portal-ui .managed-story-visual picture { width: 100%; }
+.portal-ui .managed-story-visual img { width: 100%; height: auto; min-height: 0; object-fit: contain; border-radius: 6px; box-shadow: var(--shadow-soft); }
+.portal-ui :where(.private-cloud-row, .trust-strip, .core-panel, .architecture-visual, .developer-entry, .final-cta) { border-radius: 8px; box-shadow: none; }
+.portal-ui .private-cloud-row { padding: 24px; gap: 20px; }
+.portal-ui .trust-strip > div { padding: 22px; font-size: 13px; }
+.portal-ui .trust-strip strong { font-size: 14px; }
+.portal-ui .home-core-services { width: 100%; padding: 64px max(32px, calc((100vw - 1200px) / 2)); }
+.portal-ui .core-tabs { gap: 0; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
+.portal-ui .core-tabs button { min-height: 56px; border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: transparent; box-shadow: none; font-size: 15px; font-weight: 600; }
+.portal-ui .core-tabs button[aria-selected="true"] { color: var(--brand-dark); background: transparent; border-bottom-color: var(--brand); }
+.portal-ui .core-panel-content { grid-template-columns: minmax(0, 1fr) minmax(0, 1.65fr); min-height: 360px; }
+.portal-ui .core-panel-copy { padding: 32px; }
+.portal-ui .core-panel-copy h3 { font-size: 26px; }
+.portal-ui .core-panel-copy .text-link { margin-top: 8px; }
+.portal-ui .core-ui-frame { padding: 24px; background: var(--bg-panel); }
+.portal-ui .core-ui-frame picture { width: 100%; min-width: 0; }
+.portal-ui .core-ui-frame img { width: 100%; min-width: 0; height: auto; object-fit: contain; border-radius: 6px; box-shadow: none; }
+.portal-ui .architecture-visual { min-height: 0; padding: 24px; grid-template-columns: 1fr 40px 1fr 40px 1fr; background: var(--bg-soft); }
+.portal-ui .architecture-stage { padding: 24px; min-height: 0; border-radius: 6px; }
+.portal-ui .architecture-stage h3 { font-size: 20px; }
+.portal-ui .architecture-arrow span { width: 24px; }
+.portal-ui .architecture-links a { border-radius: 6px; }
+.portal-ui .architecture-links a:hover { transform: none; }
+.portal-ui .architecture-portal img { width: 100%; height: auto; margin: 20px 0 0; object-fit: contain; }
+.portal-ui .use-case-list article { min-height: 0; padding: 28px; border-radius: 8px; box-shadow: none; }
+.portal-ui .final-cta { padding: 40px; margin-bottom: 64px; background: var(--bg-panel); }
+
+/* Interior pages share the same grid, hierarchy, and understated surfaces. */
+.portal-ui .page-hero { max-width: 1200px; padding-block: 52px 36px; }
+.portal-ui .page-hero.compact { max-width: 1200px; margin-inline: auto; }
+.portal-ui .page-hero h1 { max-width: 900px; margin-block: 12px 18px; font-size: clamp(32px, 3.5vw, 44px); line-height: 1.2; letter-spacing: -.03em; }
+.portal-ui .page-hero p { max-width: 72ch; font-size: 16px; }
+.portal-ui .page-hero .eyebrow { font-size: 12px; }
+.portal-ui .page-hero + .section { padding-top: 24px; }
+.portal-ui .page-hero-icon { width: 40px; height: 40px; border-radius: 6px; }
+.portal-ui .portal-breadcrumb { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 24px; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.portal-ui .portal-breadcrumb a { color: var(--brand-dark); }
+.portal-ui .portal-breadcrumb a:hover { text-decoration: underline; }
+.portal-ui .portal-breadcrumb + .page-hero { padding-top: 28px; }
+.portal-ui .feature-grid { gap: 24px; }
+.portal-ui :where(.feature-card, .feature-card.tall, .docs-entry-card, .detail-panel, .feature-related-card, .feature-flow-step, .form-card, .contact-context) { border: 1px solid var(--line); border-radius: 8px; box-shadow: none; background: #fff; }
+.portal-ui :where(.feature-card, .docs-entry-card, .feature-related-card):hover { transform: none; box-shadow: none; border-color: #8aaecb; }
+.portal-ui .feature-card-preview { aspect-ratio: 16 / 9; }
+.portal-ui .feature-card-preview img { object-fit: contain; transform: none; }
+.portal-ui .feature-card-body { min-height: 0; padding: 24px; }
+.portal-ui .feature-card-heading h2 { font-size: 24px; line-height: 1.3; }
+.portal-ui .feature-card-heading .feature-icon { width: 40px; height: 40px; border-radius: 6px; }
+.portal-ui .feature-card-summary { font-size: 15px; margin-top: 16px; }
+.portal-ui .feature-card-benefits { font-size: 14px; margin-block: 16px 24px; }
+.portal-ui .feature-visual { padding: 12px; background: var(--bg-soft); border-radius: 8px; box-shadow: none; }
+.portal-ui .feature-visual img { height: auto; aspect-ratio: auto; object-fit: contain; border-radius: 4px; }
+.portal-ui .detail-panel { min-height: 0; padding: 28px; }
+.portal-ui .detail-panel h2 { font-size: 22px; line-height: 1.35; }
+.portal-ui .detail-panel .check-list { font-size: 15px; }
+.portal-ui .accent-panel { background: var(--bg-panel); }
+.portal-ui .docs-hero-redesign { min-height: 0; gap: 48px; padding-block: 56px 40px; }
+.portal-ui .docs-hero-media { padding: 12px; border-radius: 8px; background: var(--bg-soft); box-shadow: none; }
+.portal-ui .docs-hero-media::before { content: none; }
+.portal-ui .docs-hero-media-label { position: static; padding: 0 0 10px; background: none; font-size: 11px; letter-spacing: .04em; }
+.portal-ui .docs-hero-media img { border-radius: 4px; box-shadow: none; }
+.portal-ui .docs-entry-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.portal-ui .docs-entry-card { min-height: 0; padding: 24px; }
+.portal-ui .docs-entry-card .card-kicker { min-height: 0; margin-top: 20px; }
+.portal-ui .docs-entry-card h3 { font-size: 22px; }
+.portal-ui .docs-card-index { color: var(--muted); font-weight: 500; }
+.portal-ui .docs-entry-grid .docs-card { padding: 24px; }
+.portal-ui .docs-card h2 { font-size: 22px; }
+.portal-ui .sdk-terms-check a { color: var(--brand-dark); text-decoration: underline; }
+.portal-ui .sdk-terms-check input { width: 18px; height: 18px; accent-color: var(--brand); vertical-align: middle; }
+.portal-ui .table-wrap { max-width: 100%; }
+.portal-ui th { background: var(--bg-soft); font-weight: 600; letter-spacing: .02em; }
+
+/* Long-form documentation and legal text remain readable at any width. */
+.portal-ui .portal-manual-layout { display: grid; grid-template-columns: minmax(0, 1fr) 230px; align-items: start; gap: 64px; }
+.portal-ui .manual-content { min-width: 0; max-width: 78ch; overflow-wrap: anywhere; line-height: 1.8; }
+.portal-ui .manual-content > :first-child { margin-top: 0; }
+.portal-ui .manual-content h2 { margin-top: 40px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 26px; line-height: 1.35; }
+.portal-ui .manual-content h3 { margin-top: 28px; font-size: 20px; }
+.portal-ui .manual-content a { color: var(--brand-dark); text-decoration: underline; text-underline-offset: 3px; }
+.portal-ui .manual-content img { height: auto; aspect-ratio: auto; object-fit: contain; }
+.portal-ui .manual-content pre { max-width: 100%; overflow-x: auto; padding: 20px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg-soft); font-size: 13px; line-height: 1.65; }
+.portal-ui .manual-content table { display: block; width: 100%; min-width: 0; overflow-x: auto; }
+.portal-ui .manual-content blockquote { margin-inline: 0; padding: 12px 20px; border-left: 3px solid var(--brand); background: var(--bg-panel); }
+.portal-ui .portal-toc { position: sticky; top: 104px; padding-left: 20px; border-left: 1px solid var(--line); max-height: calc(100vh - 128px); overflow-y: auto; }
+.portal-ui .portal-toc h2 { margin: 0 0 12px; font-size: 13px; }
+.portal-ui .portal-toc ol { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.portal-ui .portal-toc a { display: block; color: var(--muted); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.portal-ui .portal-toc a:hover { color: var(--brand-dark); text-decoration: underline; }
+.portal-ui .sdk-terms { max-width: 78ch; }
+.portal-ui .contact-section { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 40px; align-items: start; }
+.portal-ui .contact-context { padding: 32px; background: var(--bg-panel); border-top: 3px solid var(--brand); }
+.portal-ui .contact-context h2 { font-size: 26px; line-height: 1.35; }
+.portal-ui .form-card { padding: 32px; }
+.portal-ui .form-field label { font-size: 14px; font-weight: 600; }
+.portal-ui :where(.form-field input, .form-field select, .form-field textarea, .search-form textarea) { min-height: 44px; border-radius: 6px; border: 1px solid #7b8998; background: #fff; padding: 10px 12px; font: inherit; font-size: 16px; box-shadow: none; }
+.portal-ui .form-field [aria-invalid="true"] { border-color: #b42318; }
+.portal-ui .form-error-summary { border-radius: 6px; }
+.portal-ui .form-note a { text-decoration: underline; }
+.portal-ui .site-footer { width: 100%; margin: 0; padding: 48px max(32px, calc((100vw - 1200px) / 2)); grid-template-columns: 1fr; gap: 32px; background: var(--bg-soft); color: var(--text); }
+.portal-ui .footer-brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px 28px; }
+.portal-ui .footer-brand p { max-width: 600px; margin: 0; color: var(--muted); font-size: 13px; }
+.portal-ui .footer-film-link { color: var(--brand-dark); font-size: 13px; }
+.portal-ui .footer-sitemap { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px; }
+.portal-ui .footer-sitemap-group a { font-size: 13px; font-weight: 400; }
+.portal-ui .footer-sitemap-group h2 { color: var(--navy); font-weight: 650; }
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .portal-ui .site-header { gap: 12px; padding-inline: 20px; }
+  .portal-ui .main-nav { gap: 12px; font-size: 13px; }
+  .portal-ui .nav-service-login { padding-inline: 12px; font-size: 12px; }
+  .portal-ui .brand-logo { width: 92px; }
+  .portal-ui .brand-product { font-size: 14px; }
+  .portal-ui .home-hero { gap: 32px; }
+}
+@media (max-width: 960px) {
+  .portal-ui .home-hero { grid-template-columns: 1fr; gap: 36px; padding-block: 48px; }
+  .portal-ui .home-hero .hero-copy { max-width: 720px; }
+  .portal-ui .home-hero h1 { max-width: 720px; }
+  .portal-ui .hero-product-frame { max-width: 760px; }
+  .portal-ui .docs-hero-redesign { grid-template-columns: 1fr; gap: 28px; }
+  .portal-ui .docs-hero-media { max-width: 680px; }
+  .portal-ui .docs-entry-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .portal-ui .architecture-visual { padding: 16px; grid-template-columns: 1fr 24px 1fr 24px 1fr; }
+  .portal-ui .architecture-stage { padding: 16px; }
+  .portal-ui .architecture-arrow span { width: 14px; }
+  .portal-ui .portal-manual-layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .portal-ui .portal-toc { position: static; grid-row: 1; max-height: none; padding: 20px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg-soft); }
+  .portal-ui .manual-content { max-width: 100%; }
+}
+@media (max-width: 900px) {
+  .portal-ui .site-header:not(.is-nav-enhanced) { height: auto; flex-wrap: wrap; padding-block: 16px; }
+  .portal-ui .site-header:not(.is-nav-enhanced) .header-nav-shell { width: 100%; }
+  .portal-ui .site-header:not(.is-nav-enhanced) .main-nav { flex-wrap: wrap; }
+}
+@media (max-width: 760px) {
+  .portal-ui .site-header { height: 66px; min-height: 66px; padding-inline: 20px; gap: 12px; }
+  .portal-ui .brand-logo { width: 100px; }
+  .portal-ui .brand { gap: 8px; }
+  .portal-ui .brand-product { font-size: 14px; }
+  .portal-ui .main-nav > a:not(.nav-service-login) { padding: 12px 8px; min-height: 44px; }
+  .portal-ui .main-nav a[aria-current="page"] { background: var(--bg-panel); border-radius: 4px; }
+  .portal-ui .main-nav a[aria-current="page"]::after { content: none; }
+  .portal-ui .mobile-only-login { display: flex; }
+  .portal-ui .desktop-login { display: none; }
+  .portal-ui :where(.section, .page-hero, .hero, .contact-section, .portal-breadcrumb) { width: calc(100% - 40px); }
+  .portal-ui .section { padding-block: 40px; }
+  .portal-ui .home-hero h1 { font-size: 36px; }
+  .portal-ui .home-hero h1 span:first-child { font-size: .7em; white-space: normal; }
+  .portal-ui .home-hero { padding-block: 40px; }
+  .portal-ui .section-heading h2 { font-size: 28px; }
+  .portal-ui .home-core-services { width: 100%; padding: 40px 20px; }
+  .portal-ui .managed-story { grid-template-columns: 1fr; }
+  .portal-ui .managed-story-copy { padding: 28px 24px; }
+  .portal-ui .managed-story-copy h3 { font-size: 28px; }
+  .portal-ui .managed-story-visual { padding: 20px; }
+  .portal-ui .private-cloud-row { grid-template-columns: auto 1fr; padding: 20px; }
+  .portal-ui .private-cloud-row > .button { grid-column: 1 / -1; }
+  .portal-ui .trust-strip { grid-template-columns: 1fr; }
+  .portal-ui .trust-strip > div + div { border-left: 0; border-top: 1px solid var(--line); }
+  .portal-ui .core-panel-content { grid-template-columns: 1fr; min-height: 0; }
+  .portal-ui .core-panel-copy { padding: 24px; border-right: 0; }
+  .portal-ui .core-ui-frame { padding: 16px; }
+  .portal-ui .architecture-visual { grid-template-columns: 1fr; padding: 20px; }
+  .portal-ui .architecture-stage { min-height: 0; padding: 24px; }
+  .portal-ui .architecture-arrow { min-height: 32px; }
+  .portal-ui .architecture-links { grid-template-columns: 1fr; }
+  .portal-ui .final-cta { padding: 28px 24px; margin-bottom: 40px; }
+  .portal-ui .page-hero { padding-block: 36px 24px; }
+  .portal-ui .page-hero h1 { font-size: 32px; }
+  .portal-ui .feature-grid { grid-template-columns: 1fr; gap: 20px; }
+  .portal-ui .feature-card-heading h2 { font-size: 22px; }
+  .portal-ui .contact-section { grid-template-columns: 1fr; gap: 24px; }
+  .portal-ui :where(.form-card, .contact-context, .detail-panel) { padding: 24px; }
+  .portal-ui .footer-sitemap { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 24px; }
+  .portal-ui .site-footer { padding: 36px 20px; }
+}
+@media (max-width: 540px) {
+  .portal-ui .docs-entry-grid { grid-template-columns: 1fr; }
+  .portal-ui .hero-actions { display: flex; flex-direction: column; align-items: stretch; }
+  .portal-ui .hero-actions .button { width: 100%; }
+  .portal-ui .feature-hero-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 360px) {
+  .portal-ui .site-header { padding-inline: 12px; gap: 6px; }
+  .portal-ui .brand-logo { width: 88px; }
+  .portal-ui .mobile-header-controls { gap: 4px; }
+  .portal-ui .home-hero h1 { font-size: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .portal-ui *, .portal-ui *::before, .portal-ui *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

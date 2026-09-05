@@ -5,13 +5,13 @@
     <h1>{{.DocsPage.Title}}</h1>
     <p class="docs-hero-subtitle">{{.DocsPage.Subtitle}}</p>
     <div class="hero-actions">
-      <a class="button primary" href="{{localizedPath . "/contact"}}" data-analytics-cta="docs_cta_primary"><span class="button-icon">{{icon "mail"}}</span>{{t . "docs.cta.primary"}}</a>
+      <a class="button primary" href="{{localizedPath . "/manual"}}" data-analytics-cta="docs_cta_manual"><span class="button-icon">{{icon "document"}}</span>{{t . "portal.manual.cta"}}</a>
       <a class="button secondary" href="{{localizedPath . "/features/app-sdk"}}"><span class="button-icon">{{icon "phone-code"}}</span>{{t . "docs.cta.secondary"}}</a>
     </div>
   </div>
   {{if .DocsPage.HeroImage}}
   <figure class="docs-hero-media">
-    <div class="docs-hero-media-label">Realtek Connect+ / Documentation</div>
+    <div class="docs-hero-media-label">Realtek Connect+ / {{t . "nav.docs"}}</div>
     <img src="{{asset .DocsPage.HeroImage}}" alt="{{.DocsPage.HeroImageAlt}}">
   </figure>
   {{end}}
