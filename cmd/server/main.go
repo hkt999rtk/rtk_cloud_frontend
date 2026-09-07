@@ -108,6 +108,9 @@ func run(ctx context.Context, logger *zap.Logger) error {
 			return err
 		}
 		sdkDownloadService = sdkdownloads.NewService(store, envOrDefault("SDK_LATEST_OBJECT_KEY", "sdk/latest.json"), 5*time.Minute)
+		if err := sdkDownloadService.SetExamplesPrefix(os.Getenv("PRO2_EXAMPLES_PREFIX")); err != nil {
+			return err
+		}
 	}
 	if searchEnabled {
 		searchDatabasePath := envOrDefault("SEARCH_DATABASE_PATH", "data/search.db")
