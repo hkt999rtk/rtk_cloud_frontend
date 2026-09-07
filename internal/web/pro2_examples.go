@@ -39,7 +39,7 @@ func (s *Server) handlePRO2Examples(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Accept evaluation terms first", 400)
 			return
 		}
-		session := sdkSessionID(w, r)
+		session := sdkSessionIDForPath(w, r, "/api/pro2-examples")
 		if s.sdkDownloadLimit != nil && !s.sdkDownloadLimit.Allow(contactSubmissionKey(r)+":"+session) {
 			http.Error(w, "Too many requests", 429)
 			return

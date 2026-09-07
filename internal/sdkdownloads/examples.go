@@ -74,7 +74,7 @@ func (s *Service) Examples(ctx context.Context, version string) (ExamplesCatalog
 	if e = json.Unmarshal(b, &c); e != nil {
 		return c, e
 	}
-	if c.Schema != "rtk-pro2-examples/v1" || c.Version != version || !versionPattern.MatchString(c.TermsVersion) || c.Terms == "" || !c.TestOnly || len(c.Examples) != 3 || len(c.SourceCommit) != 40 {
+	if c.Schema != "rtk-pro2-examples/v1" || c.Version != version || !versionPattern.MatchString(c.TermsVersion) || strings.TrimSpace(c.Terms) == "" || !c.TestOnly || len(c.Examples) != 3 || len(c.SourceCommit) != 40 {
 		return c, errors.New("invalid examples release")
 	}
 	if _, e = time.Parse(time.RFC3339, c.CreatedAt); e != nil {

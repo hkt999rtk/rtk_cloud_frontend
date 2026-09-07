@@ -49,7 +49,7 @@ func TestExamplesVersionedDownloads(t *testing.T) {
 	}
 }
 func TestExamplesRejectUnsafeCatalog(t *testing.T) {
-	for _, change := range []func(*ExamplesCatalog){func(c *ExamplesCatalog) { c.TestOnly = false }, func(c *ExamplesCatalog) { c.Artifacts[0].Filename = "../secret" }, func(c *ExamplesCatalog) { c.Artifacts[1].SHA256 = "bad" }, func(c *ExamplesCatalog) { c.Examples[0].FlashOffset = 4096 }, func(c *ExamplesCatalog) { c.Examples[0].FirmwareID = "missing" }} {
+	for _, change := range []func(*ExamplesCatalog){func(c *ExamplesCatalog) { c.Terms = " \t\n" }, func(c *ExamplesCatalog) { c.TestOnly = false }, func(c *ExamplesCatalog) { c.Artifacts[0].Filename = "../secret" }, func(c *ExamplesCatalog) { c.Artifacts[1].SHA256 = "bad" }, func(c *ExamplesCatalog) { c.Examples[0].FlashOffset = 4096 }, func(c *ExamplesCatalog) { c.Examples[0].FirmwareID = "missing" }} {
 		c := exampleFixture()
 		change(&c)
 		b, _ := json.Marshal(c)

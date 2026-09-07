@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httptest"
 	"net/url"
 	"realtek-connect/internal/sdkdownloads"
@@ -46,6 +47,31 @@ func TestPRO2CatalogAndTermsDownload(t *testing.T) {
 		}
 		if r.Code == http.StatusOK && !strings.Contains(r.Body.String(), "expires_at") {
 			t.Fatal("no expiration")
+		}
+	}
+	// A browser must retain the API acceptance session between artifact downloads.
+	server := httptest.NewServer(h)
+	defer server.Close()
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+	var previous string
+	for i := 0; i < 2; i++ {
+		response, err := client.PostForm(server.URL+"/api/pro2-examples/download", url.Values{"accepted": {"true"}, "artifact": {"mqtt"}, "version": {"v1"}, "terms_version": {"eval-v1"}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		response.Body.Close()
+		if response.StatusCode != 200 {
+			t.Fatal(response.StatusCode)
+		}
+		endpoint, _ := url.Parse(server.URL + "/api/pro2-examples/download")
+		cookies := jar.Cookies(endpoint)
+		if len(cookies) != 1 || (previous != "" && cookies[0].Value != previous) {
+			t.Fatal("acceptance session not retained")
+		}
+		previous = cookies[0].Value
+		if i == 1 && len(response.Cookies()) != 0 {
+			t.Fatal("existing session replaced")
 		}
 	}
 	delete(store.objects, "pro2-examples/releases/v1/manifest.json")

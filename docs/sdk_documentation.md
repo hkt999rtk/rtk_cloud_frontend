@@ -54,12 +54,22 @@ records an anonymous acceptance row, and redirects to a ten-minute presigned
 URL. SDK binaries are not copied into the Portal image.
 
 Enable this surface with `SDK_DOWNLOADS_ENABLED=true` and a read-only,
-`sdk/`-scoped credential in `SDK_ARTIFACT_ACCESS_KEY_ID` and
+credential with read access to `sdk/` in `SDK_ARTIFACT_ACCESS_KEY_ID` and
 `SDK_ARTIFACT_SECRET_ACCESS_KEY`. Set `SDK_ARTIFACT_BUCKET`,
 `SDK_ARTIFACT_ENDPOINT`, `SDK_ARTIFACT_REGION`, and optionally
 `SDK_LATEST_OBJECT_KEY` (default `sdk/latest.json`). If the pointer, catalog,
 terms, or credentials are invalid, the rest of the site remains available and
 the SDK cards fail closed.
+
+PRO2 examples use this same read-only runtime credential. Before enabling the
+examples catalog, grant read access to **both** `sdk/` and the configured
+`PRO2_EXAMPLES_PREFIX` (default `pro2-examples/`; Dev uses
+`pro2-examples/dev/`). An existing key restricted to `sdk/` must be updated or
+replaced; deploying the route alone does not grant storage access. Verify a
+versioned examples catalog and a signed artifact download with the runtime
+identity before activating `latest.json`. Keep upload/write credentials out of
+the Portal runtime. Missing prefix access returns an unavailable catalog without
+affecting the existing SDK downloads.
 
 ### Safe catalog projection
 
