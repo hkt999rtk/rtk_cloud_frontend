@@ -55,6 +55,18 @@
 .portal-ui .hero-benefits li { font-size: 13px; }
 .portal-ui .hero-product-frame { width: 100%; transform: none; border-radius: 8px; box-shadow: var(--shadow); }
 .portal-ui .hero-product-frame img { width: 100%; height: auto; aspect-ratio: auto; object-fit: contain; }
+
+.portal-ui .portal-not-found { align-items: center; display: grid; gap: clamp(36px, 8vw, 120px); grid-template-columns: minmax(0, 1fr) minmax(280px, .75fr); min-height: min(620px, calc(100vh - 210px)); padding-block: 72px; }
+.portal-ui .portal-not-found-copy { max-width: 580px; }
+.portal-ui .portal-not-found h1 { color: var(--brand-dark); font-size: clamp(38px, 5vw, 64px); letter-spacing: -.045em; line-height: 1.08; margin: 8px 0 18px; }
+.portal-ui .portal-not-found-copy > p:not(.eyebrow) { color: var(--muted); font-size: 17px; line-height: 1.7; max-width: 48ch; }
+.portal-ui .portal-not-found-art { aspect-ratio: 1; background: radial-gradient(circle at 50% 45%, #f5fcff 0 29%, #e4f4fa 30% 56%, transparent 57%); min-height: 300px; overflow: hidden; position: relative; }
+.portal-ui .not-found-orbit { border: 1px solid rgba(0, 104, 183, .2); border-radius: 50%; left: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); }
+.portal-ui .orbit-one { height: 72%; width: 72%; }.portal-ui .orbit-two { height: 92%; width: 92%; }
+.portal-ui .not-found-cloud { background: linear-gradient(145deg, #0068b7, #168dc9); border-radius: 45% 45% 38% 38%; box-shadow: 0 20px 45px rgba(0, 104, 183, .22); height: 34%; left: 32%; position: absolute; top: 28%; width: 42%; }
+.portal-ui .not-found-cloud span { background: inherit; border-radius: 50%; position: absolute; }.portal-ui .not-found-cloud span:nth-child(1) { height: 84%; left: -22%; top: 22%; width: 55%; }.portal-ui .not-found-cloud span:nth-child(2) { height: 108%; right: 8%; top: -40%; width: 62%; }.portal-ui .not-found-cloud span:nth-child(3) { height: 62%; right: -18%; top: 34%; width: 48%; }
+.portal-ui .not-found-device { background: #fff; border: 7px solid #25384c; border-radius: 15px; bottom: 19%; box-shadow: var(--shadow); height: 35%; left: 39%; position: absolute; width: 28%; }.portal-ui .not-found-device::before { background: #e4f4fa; border-radius: 4px; content: ''; inset: 15% 13%; position: absolute; }.portal-ui .not-found-device i { background: #6dcedd; border-radius: 50%; bottom: 8%; height: 7px; position: absolute; width: 7px; }.portal-ui .not-found-device i:nth-child(1) { left: 18%; }.portal-ui .not-found-device i:nth-child(2) { left: 46%; }.portal-ui .not-found-device i:nth-child(3) { left: 74%; }
+.portal-ui .not-found-signal { border: 2px solid var(--brand); border-left-color: transparent; border-bottom-color: transparent; border-radius: 0 100% 0 0; height: 16%; position: absolute; transform: rotate(-25deg); width: 16%; }.portal-ui .signal-one { right: 20%; top: 19%; }.portal-ui .signal-two { bottom: 22%; left: 22%; transform: rotate(155deg); }
 .portal-ui .product-frame-bar { height: 36px; padding-inline: 12px; }
 .portal-ui .product-frame-bar strong { font-size: 11px; font-weight: 500; letter-spacing: .01em; }
 .portal-ui .home-plans { padding-top: 40px; border-top: 1px solid var(--line); }
@@ -211,6 +223,9 @@
   .portal-ui .mobile-only-login { display: flex; }
   .portal-ui .desktop-login { display: none; }
   .portal-ui :where(.section, .page-hero, .hero, .contact-section, .portal-breadcrumb) { width: calc(100% - 40px); }
+  .portal-ui .portal-not-found { grid-template-columns: 1fr; padding-block: 48px; text-align: center; }
+  .portal-ui .portal-not-found-copy { margin-inline: auto; }.portal-ui .portal-not-found-copy > p:not(.eyebrow) { margin-inline: auto; }
+  .portal-ui .portal-not-found-art { margin-inline: auto; max-width: 340px; width: 100%; }
   .portal-ui .section { padding-block: 40px; }
   .portal-ui .home-hero h1 { font-size: 36px; }
   .portal-ui .home-hero h1 span:first-child { font-size: .7em; white-space: normal; }

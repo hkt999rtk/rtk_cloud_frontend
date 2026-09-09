@@ -330,6 +330,10 @@ func (s *Server) staticHandler() http.Handler {
 }
 
 func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/admin" || r.URL.Path == "/api" || strings.HasPrefix(r.URL.Path, "/admin/") || strings.HasPrefix(r.URL.Path, "/api/") {
+		http.NotFound(w, r)
+		return
+	}
 	locale, publicPath, ok := content.LocaleFromPath(r.URL.Path)
 	if !ok {
 		http.NotFound(w, r)
@@ -359,8 +363,24 @@ func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
 	case publicPath == "/search":
 		s.handleSearchPage(w, r, locale, publicPath)
 	default:
-		http.NotFound(w, r)
+		s.handleNotFound(w, r, locale, publicPath)
 	}
+}
+
+func (s *Server) handleNotFound(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+	data := s.basePageData(
+		r,
+		locale,
+		publicPath,
+		content.CatalogFor(locale).T("not_found.title")+" | Realtek Connect+",
+		content.CatalogFor(locale).T("not_found.description"),
+	)
+	data.MetaRobots = "noindex, nofollow"
+	s.render(w, http.StatusNotFound, "404.html", data)
 }
 
 func (s *Server) handleHome(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
