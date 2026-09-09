@@ -360,7 +360,7 @@ func zhTWText() map[string]string {
 		"privacy.rights.title":                          "查詢、更正或刪除請求",
 		"privacy.rights.body":                           "如需查詢、更正或刪除已提交的詢問資料，或詢問第一方 analytics，請聯絡 privacy@example.com。正式公開前需將此 placeholder 信箱替換為正式隱私聯絡窗口。",
 		"privacy.video.title":                           "本站託管品牌影片",
-		"privacy.video.body":                            "首頁品牌影片以本站 local MP4 資產託管。影片播放器不會建立 YouTube iframe，也不會連線到 YouTube 服務。網站不載入第三方 analytics services、advertising pixels 或 fingerprinting scripts。",
+		"privacy.video.body":                            "首頁品牌影片以本站 local MP4 資產託管。影片播放器不會建立 YouTube iframe，也不會連線到 YouTube 服務。Dev 與 Staging 可載入設定的 Google Analytics 4 標籤做彙總網站量測，不會傳送表單內容、token 或帳戶識別資訊。",
 		"privacy.search.title":                          "文件查詢",
 		"privacy.search.body":                           "當 SEARCH_ENABLED=true 時，文件查詢會送至 OpenAI 產生 query embeddings。如果命中網站來源文件，query 與檢索到的片段會送至 OpenAI Responses API，以來源文件為限制生成回答。如果查不到相關文件，則不呼叫回答模型。Raw search query text 不會存入 analytics event payload。",
 		"privacy.admin.title":                           "內部存取",

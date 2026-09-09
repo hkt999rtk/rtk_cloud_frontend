@@ -12,7 +12,7 @@ The App SDK, SDK docs, homepage, and manual now summarize the `rtk_cloud_client`
 
 The homepage includes a locally hosted Realtek corporate brand film at `static/assets/realtek-brand-film.mp4`, with a generated poster image and `preload="metadata"`. The video supports brand trust after the platform architecture section and is not used as autoplay hero media.
 
-Privacy readiness is intentionally lightweight for this prototype: `/privacy` describes contact form data, first-party SQLite analytics when `ANALYTICS_ENABLED=true`, OpenAI-backed documentation query behavior when search is enabled, the analytics event types collected, referrer-origin-only handling, ephemeral session ids, 90-day raw analytics event retention, the 24-month lead retention intent, data request handling, admin protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior. Replace the placeholder `privacy@example.com` contact before public launch and complete legal review.
+Privacy readiness is intentionally lightweight for this prototype: `/privacy` describes contact form data, first-party SQLite analytics when `ANALYTICS_ENABLED=true`, optional Google Analytics 4 page measurement when `GOOGLE_ANALYTICS_MEASUREMENT_ID` is set, OpenAI-backed documentation query behavior when search is enabled, the analytics event types collected, referrer-origin-only handling, ephemeral session ids, 90-day raw analytics event retention, the 24-month lead retention intent, data request handling, admin protection, and local video behavior. The Google tag is enabled only for explicitly configured Dev/Staging deployments and must not receive form values, tokens, or account identifiers. Replace the placeholder `privacy@example.com` contact before public launch and complete legal review.
 
 The full roadmap and developer issue backlog live in [`docs/spec.md`](docs/spec.md).
 The service logging migration to `rtk_cloud_logger` zap and central journald
@@ -81,6 +81,7 @@ Environment variables:
 - `DISABLE_SEARCH_INDEXING`: set to `true` on private/test deployments to emit `X-Robots-Tag: noindex, nofollow, noarchive`, add page-level `robots` meta tags, disallow all crawling in `/robots.txt`, and hide `/sitemap.xml`.
 - `PUBLIC_BASE_URL`: optional public origin such as `https://webtest.mgmeet.io`. When empty, canonical URLs, social image URLs, `hreflang`, robots sitemap references, and sitemap locations are built from the incoming request host and forwarded headers.
 - `SERVICE_LOGIN_URL`: absolute HTTP(S) URL used by the homepage “Start using the service” CTA. Defaults to `https://admin.video-cloud-staging.realtekconnect.com/login`; production deployments should override it with the production service login URL.
+- `GOOGLE_ANALYTICS_MEASUREMENT_ID`: optional GA4 Web stream ID such as `G-XXXXXXXXXX`. Leave unset in production; Dev/Staging values are supplied through environment settings.
 - `ENABLE_ASSET_FINGERPRINTS`: optional. Set to `true` to append content hashes to template-rendered static URLs, for example `/static/styles.css?v=<hash>`.
 - `ENABLE_CDN_CACHE_HEADERS`: optional. Set to `true` to emit CDN-friendly cache headers for static assets, public HTML, admin/contact POST responses, health, robots, and sitemap.
 

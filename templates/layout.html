@@ -84,6 +84,15 @@
   </footer>
 
   <script src="{{asset "/static/site.js"}}" defer></script>
+  {{if and .GoogleAnalyticsID (not (hasPrefix .PublicPath "/admin"))}}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{.GoogleAnalyticsID}}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{.GoogleAnalyticsID}}');
+  </script>
+  {{end}}
   {{if .Analytics.Enabled}}
   <script>
     (function () {

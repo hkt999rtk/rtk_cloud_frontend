@@ -47,6 +47,7 @@ func (s *Server) basePageData(r *http.Request, locale content.Locale, publicPath
 		},
 		AnalyticsEndpoint: "/api/event",
 		AnalyticsPage:     analyticsPageKey(publicPath),
+		GoogleAnalyticsID: s.googleAnalyticsID,
 		ServiceLoginURL:   s.serviceLoginURL,
 		InterestOptions:   catalog.ContactInterestOptions(),
 		SearchEnabled:     searchEnabled,
