@@ -49,6 +49,7 @@ type Config struct {
 	DisableSearchIndexing   bool
 	PublicBaseURL           string
 	ServiceLoginURL         string
+	GoogleAnalyticsID       string
 	EnableAssetFingerprints bool
 	EnableCDNCacheHeaders   bool
 	SearchEnabled           bool
@@ -74,6 +75,7 @@ type Server struct {
 	disableSearchIndexing   bool
 	publicBaseURL           string
 	serviceLoginURL         string
+	googleAnalyticsID       string
 	enableAssetFingerprints bool
 	enableCDNCacheHeaders   bool
 	searchEnabled           bool
@@ -114,6 +116,7 @@ type pageData struct {
 	Analytics           pageAnalyticsView
 	AnalyticsEndpoint   string
 	AnalyticsPage       string
+	GoogleAnalyticsID   string
 	AdminAnalytics      adminAnalyticsView
 	Features            []features.Feature
 	Feature             features.Feature
@@ -200,6 +203,7 @@ func NewServer(cfg Config) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+	googleAnalyticsID := normalizeGoogleAnalyticsID(cfg.GoogleAnalyticsID)
 	if cfg.SDKDownloadURLTTL <= 0 || cfg.SDKDownloadURLTTL > 15*time.Minute {
 		cfg.SDKDownloadURLTTL = 10 * time.Minute
 	}
@@ -226,6 +230,7 @@ func NewServer(cfg Config) (*Server, error) {
 		disableSearchIndexing:   cfg.DisableSearchIndexing,
 		publicBaseURL:           normalizePublicBaseURL(cfg.PublicBaseURL),
 		serviceLoginURL:         serviceLoginURL,
+		googleAnalyticsID:       googleAnalyticsID,
 		enableAssetFingerprints: cfg.EnableAssetFingerprints,
 		enableCDNCacheHeaders:   cfg.EnableCDNCacheHeaders,
 		searchEnabled:           cfg.SearchEnabled,
@@ -253,6 +258,16 @@ func normalizeServiceLoginURL(value string) (string, error) {
 		return "", fmt.Errorf("SERVICE_LOGIN_URL must be an absolute HTTP or HTTPS URL")
 	}
 	return parsed.String(), nil
+}
+
+var googleAnalyticsIDPattern = regexp.MustCompile(`^G-[A-Z0-9]+$`)
+
+func normalizeGoogleAnalyticsID(value string) string {
+	value = strings.ToUpper(strings.TrimSpace(value))
+	if !googleAnalyticsIDPattern.MatchString(value) {
+		return ""
+	}
+	return value
 }
 
 func (s *Server) Routes() http.Handler {

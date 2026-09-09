@@ -150,6 +150,7 @@ func run(ctx context.Context, logger *zap.Logger) error {
 		DisableSearchIndexing:   truthyEnv("DISABLE_SEARCH_INDEXING"),
 		PublicBaseURL:           os.Getenv("PUBLIC_BASE_URL"),
 		ServiceLoginURL:         os.Getenv("SERVICE_LOGIN_URL"),
+		GoogleAnalyticsID:       os.Getenv("GOOGLE_ANALYTICS_MEASUREMENT_ID"),
 		EnableAssetFingerprints: truthyEnv("ENABLE_ASSET_FINGERPRINTS"),
 		EnableCDNCacheHeaders:   truthyEnv("ENABLE_CDN_CACHE_HEADERS"),
 		SearchEnabled:           searchEnabled,
