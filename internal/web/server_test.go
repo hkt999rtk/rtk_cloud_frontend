@@ -214,6 +214,38 @@ func TestSearchRoutesReturnOKWhenEnabled(t *testing.T) {
 	}
 }
 
+func TestPublicNotFoundPageIsLocalizedAndDoesNotExposeProtectedRoutes(t *testing.T) {
+	handler := testServer(t, &memoryLeadStore{})
+	for _, tc := range []struct {
+		path string
+		want string
+	}{
+		{"/missing-page", "This page has drifted out of range."},
+		{"/zh-tw/missing-page", "這個頁面已不在連線範圍內。"},
+		{"/zh-cn/missing-page", "这个页面已不在连线范围内。"},
+	} {
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, tc.path, nil))
+		if rec.Code != http.StatusNotFound {
+			t.Fatalf("%s status = %d, want 404", tc.path, rec.Code)
+		}
+		body := rec.Body.String()
+		if !strings.Contains(body, tc.want) || !strings.Contains(body, `name="robots" content="noindex, nofollow"`) {
+			t.Fatalf("%s did not render the localized noindex 404 page: %s", tc.path, body)
+		}
+	}
+	for _, path := range []string{"/api/not-found", "/admin/not-found", "/static/not-found.css"} {
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+		if rec.Code != http.StatusNotFound {
+			t.Fatalf("%s status = %d, want 404", path, rec.Code)
+		}
+		if strings.Contains(rec.Body.String(), "This page has drifted out of range.") {
+			t.Fatalf("%s unexpectedly rendered the public 404 page", path)
+		}
+	}
+}
+
 func TestSearchDisabledReturnsNotFound(t *testing.T) {
 	handler := testServerWithConfig(t, Config{LeadStore: &memoryLeadStore{}})
 	for _, path := range []string{"/search", "/zh-tw/search", "/zh-cn/search"} {
@@ -936,9 +968,7 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 				"product-marketing improvement",
 				"service quality observation",
 				"may not be able to reliably map a raw analytics row back to a specific person",
-				"third-party analytics services",
-				"advertising pixels",
-				"fingerprinting scripts",
+				"Dev and Staging may load the configured Google Analytics 4 tag",
 				"analytics records may still be personal data",
 			},
 		},
@@ -964,9 +994,7 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 				"產品行銷改善",
 				"服務品質觀察",
 				"無法可靠地將單筆 raw analytics row 對應到特定個人",
-				"第三方 analytics services",
-				"advertising pixels",
-				"fingerprinting scripts",
+				"Google Analytics 4",
 				"analytics 記錄仍可能屬於個人資料",
 			},
 		},
@@ -992,9 +1020,7 @@ func TestPrivacyPagesIncludeLocalizedNoticeAndMetadata(t *testing.T) {
 				"产品营销改善",
 				"服务质量观察",
 				"无法可靠地将单笔 raw analytics row 对应到特定个人",
-				"第三方 analytics services",
-				"advertising pixels",
-				"fingerprinting scripts",
+				"Google Analytics 4",
 				"analytics 记录仍可能属于个人资料",
 			},
 		},

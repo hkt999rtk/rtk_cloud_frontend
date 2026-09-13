@@ -142,11 +142,15 @@ func (s *Server) handleSDKDownload(w http.ResponseWriter, r *http.Request) {
 }
 
 func sdkSessionID(w http.ResponseWriter, r *http.Request) string {
+	return sdkSessionIDForPath(w, r, "/manual/sdk")
+}
+
+func sdkSessionIDForPath(w http.ResponseWriter, r *http.Request, path string) string {
 	if cookie, err := r.Cookie(sdkSessionCookie); err == nil && sdkSessionIDPattern.MatchString(cookie.Value) {
 		return cookie.Value
 	}
 	value := newOpaqueID()
-	http.SetCookie(w, &http.Cookie{Name: sdkSessionCookie, Value: value, Path: "/manual/sdk", MaxAge: 86400, HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteLaxMode})
+	http.SetCookie(w, &http.Cookie{Name: sdkSessionCookie, Value: value, Path: path, MaxAge: 86400, HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteLaxMode})
 	return value
 }
 

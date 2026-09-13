@@ -15,7 +15,7 @@ This system is for operational product-marketing insight only. It must not becom
 
 Default posture:
 
-- No third-party analytics service.
+- Google Analytics 4 is optional and only enabled when an environment-specific measurement ID is supplied.
 - No advertising pixels.
 - No fingerprinting.
 - No collection of names, email addresses, company names, precise location, or account identifiers.
@@ -73,7 +73,7 @@ Configuration:
 - `ANALYTICS_DATABASE_PATH`: default `data/analytics.db`.
 - `ANALYTICS_RETENTION_DAYS`: default `90`.
 
-When `ANALYTICS_ENABLED=true`, the public pages may emit the first-party analytics JavaScript described in this specification. The default enabled mode must remain privacy-friendly: no third-party scripts, no persistent browser storage, no raw IP storage, no full referrer URL storage, and no form field capture.
+When `ANALYTICS_ENABLED=true`, the public pages may emit the first-party analytics JavaScript described in this specification. When `GOOGLE_ANALYTICS_MEASUREMENT_ID` is set, public pages also emit the GA4 tag for that environment. The tag must not receive form field values, tokens, or account identifiers. Admin pages do not emit the GA4 tag.
 
 When `ANALYTICS_ENABLED=false`, the public pages must not emit analytics JavaScript and `/api/event` should return `404` or `204` without storing data.
 

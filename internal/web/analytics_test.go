@@ -118,6 +118,26 @@ func TestPublicPageRendersAnalyticsConfigWhenStoreExists(t *testing.T) {
 	}
 }
 
+func TestPublicPageRendersGoogleAnalyticsTagWhenConfigured(t *testing.T) {
+	handler := testServerWithConfig(t, Config{
+		LeadStore:         &memoryLeadStore{},
+		GoogleAnalyticsID: " g-test1234 ",
+	})
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	body := rec.Body.String()
+	if !strings.Contains(body, "googletagmanager.com/gtag/js?id=G-TEST1234") || !strings.Contains(body, "gtag('config', 'G-TEST1234')") {
+		t.Fatalf("Google Analytics tag missing: %s", body)
+	}
+
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/admin/leads", nil))
+	if strings.Contains(rec.Body.String(), "googletagmanager.com/gtag/js") {
+		t.Fatal("admin page must not emit Google Analytics tag")
+	}
+}
+
 func TestAnalyticsEventEndpointRejectsInvalidEvents(t *testing.T) {
 	cases := []struct {
 		name    string

@@ -96,10 +96,11 @@ type ObjectStore interface {
 }
 
 type Service struct {
-	store     ObjectStore
-	latestKey string
-	cacheTTL  time.Duration
-	now       func() time.Time
+	store          ObjectStore
+	latestKey      string
+	examplesPrefix string
+	cacheTTL       time.Duration
+	now            func() time.Time
 
 	mu       sync.Mutex
 	catalog  Catalog
@@ -114,7 +115,7 @@ func NewService(store ObjectStore, latestKey string, cacheTTL time.Duration) *Se
 	if cacheTTL <= 0 {
 		cacheTTL = 5 * time.Minute
 	}
-	return &Service{store: store, latestKey: latestKey, cacheTTL: cacheTTL, now: time.Now}
+	return &Service{store: store, examplesPrefix: ExamplesPrefix, latestKey: latestKey, cacheTTL: cacheTTL, now: time.Now}
 }
 
 func (s *Service) Catalog(ctx context.Context) (Catalog, error) {

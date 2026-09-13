@@ -49,6 +49,7 @@ type Config struct {
 	DisableSearchIndexing   bool
 	PublicBaseURL           string
 	ServiceLoginURL         string
+	GoogleAnalyticsID       string
 	EnableAssetFingerprints bool
 	EnableCDNCacheHeaders   bool
 	SearchEnabled           bool
@@ -74,6 +75,7 @@ type Server struct {
 	disableSearchIndexing   bool
 	publicBaseURL           string
 	serviceLoginURL         string
+	googleAnalyticsID       string
 	enableAssetFingerprints bool
 	enableCDNCacheHeaders   bool
 	searchEnabled           bool
@@ -114,6 +116,7 @@ type pageData struct {
 	Analytics           pageAnalyticsView
 	AnalyticsEndpoint   string
 	AnalyticsPage       string
+	GoogleAnalyticsID   string
 	AdminAnalytics      adminAnalyticsView
 	Features            []features.Feature
 	Feature             features.Feature
@@ -200,6 +203,7 @@ func NewServer(cfg Config) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+	googleAnalyticsID := normalizeGoogleAnalyticsID(cfg.GoogleAnalyticsID)
 	if cfg.SDKDownloadURLTTL <= 0 || cfg.SDKDownloadURLTTL > 15*time.Minute {
 		cfg.SDKDownloadURLTTL = 10 * time.Minute
 	}
@@ -226,6 +230,7 @@ func NewServer(cfg Config) (*Server, error) {
 		disableSearchIndexing:   cfg.DisableSearchIndexing,
 		publicBaseURL:           normalizePublicBaseURL(cfg.PublicBaseURL),
 		serviceLoginURL:         serviceLoginURL,
+		googleAnalyticsID:       googleAnalyticsID,
 		enableAssetFingerprints: cfg.EnableAssetFingerprints,
 		enableCDNCacheHeaders:   cfg.EnableCDNCacheHeaders,
 		searchEnabled:           cfg.SearchEnabled,
@@ -255,6 +260,16 @@ func normalizeServiceLoginURL(value string) (string, error) {
 	return parsed.String(), nil
 }
 
+var googleAnalyticsIDPattern = regexp.MustCompile(`^G-[A-Z0-9]+$`)
+
+func normalizeGoogleAnalyticsID(value string) string {
+	value = strings.ToUpper(strings.TrimSpace(value))
+	if !googleAnalyticsIDPattern.MatchString(value) {
+		return ""
+	}
+	return value
+}
+
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("/manual/sdk/reference/", http.StripPrefix("/manual/sdk/reference/", s.sdkDocsHandler("html/reference")))
@@ -264,6 +279,8 @@ func (s *Server) Routes() http.Handler {
 	mux.Handle("/content-assets/", http.StripPrefix("/content-assets/", s.contentAssetsHandler()))
 	mux.HandleFunc("/manual/sdk/download", s.handleSDKDownload)
 	mux.HandleFunc("/api/sdk/catalog", s.handleSDKCatalogAPI)
+	mux.HandleFunc("/api/pro2-examples/catalog", s.handlePRO2Examples)
+	mux.HandleFunc("/api/pro2-examples/download", s.handlePRO2Examples)
 	mux.HandleFunc("/robots.txt", s.handleRobotsTxt)
 	mux.HandleFunc("/sitemap.xml", s.handleSitemapXML)
 	mux.HandleFunc("/admin/leads", s.handleAdminLeads)
@@ -313,6 +330,10 @@ func (s *Server) staticHandler() http.Handler {
 }
 
 func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/admin" || r.URL.Path == "/api" || strings.HasPrefix(r.URL.Path, "/admin/") || strings.HasPrefix(r.URL.Path, "/api/") {
+		http.NotFound(w, r)
+		return
+	}
 	locale, publicPath, ok := content.LocaleFromPath(r.URL.Path)
 	if !ok {
 		http.NotFound(w, r)
@@ -342,8 +363,24 @@ func (s *Server) handlePublic(w http.ResponseWriter, r *http.Request) {
 	case publicPath == "/search":
 		s.handleSearchPage(w, r, locale, publicPath)
 	default:
-		http.NotFound(w, r)
+		s.handleNotFound(w, r, locale, publicPath)
 	}
+}
+
+func (s *Server) handleNotFound(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
+	if r.Method != http.MethodGet {
+		methodNotAllowed(w)
+		return
+	}
+	data := s.basePageData(
+		r,
+		locale,
+		publicPath,
+		content.CatalogFor(locale).T("not_found.title")+" | Realtek Connect+",
+		content.CatalogFor(locale).T("not_found.description"),
+	)
+	data.MetaRobots = "noindex, nofollow"
+	s.render(w, http.StatusNotFound, "404.html", data)
 }
 
 func (s *Server) handleHome(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
