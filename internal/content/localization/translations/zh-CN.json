@@ -1,0 +1,1800 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "entries": {
+    "page.contact.description": {
+      "sourceHash": "e643b69f14e973768d38c85c1a0ce020feb7a8b1bdf36e8b56d3b62a27bba199",
+      "fingerprint": "6a4ebc6791e46a6df89b65de6165080af35b3f356f96b3f57374deeef6edc451",
+      "text": "联络 Realtek Connect+ 团队，讨论配网、OTA、装置营运、App SDK、洞察或私有云评估。",
+      "status": "approved"
+    },
+    "page.contact.title": {
+      "sourceHash": "4710915ea49b75003b5e056d4f2833cf24cf2b71b26d2f1afaf460d16b367b93",
+      "fingerprint": "b0137b46529e22aec9d535dd4492a8775b2bdc8f939568c3398e61ba345b1da5",
+      "text": "联络我们 | Realtek Connect+",
+      "status": "approved"
+    },
+    "page.docs.description": {
+      "sourceHash": "db3c6897b1a0604063d5403e0542a8ad95af05053c7547a1879cc4a162f8679d",
+      "fingerprint": "01cf213fe658f67f7005b7d3de9f5a802a0c0b39199145878424a5f1bb4a477b",
+      "text": "浏览 Realtek Connect+ 的产品总览、开发、API、SDK、韧体、CLI、部署与版本信息文件入口。",
+      "status": "approved"
+    },
+    "page.docs.title": {
+      "sourceHash": "728021c418c6b57475f747f35ec7718f211acf13670f60eaa6a02d120bb13ed6",
+      "fingerprint": "076f47bafe21f45a0780551cde31a2fa291f41bf2434306b97328c6b8f2de76a",
+      "text": "开发者文件 | Realtek Connect+",
+      "status": "approved"
+    },
+    "page.features.description": {
+      "sourceHash": "36afad00d3ac066a2878944d15de5e4c4d53425305ee63a3c78f4156954591f0",
+      "fingerprint": "ca58bb84e82a4e3516bd59525017e7b90f2645f9589610e90a495697fc86fe15",
+      "text": "探索 Realtek Connect+ 为联网产品提供的配网、OTA、装置管理、App SDK、洞察、私有云与生态系整合能力。",
+      "status": "approved"
+    },
+    "page.features.title": {
+      "sourceHash": "3a13431119484ccd78a429c1883dabbf52417ca20fb4466c9b3f654b67ce5b97",
+      "fingerprint": "5366af524afe3a34cf147246ffdcfc8c93c90941a943070b05efb80386f6e915",
+      "text": "功能服务 | Realtek Connect+",
+      "status": "approved"
+    },
+    "page.home.description": {
+      "sourceHash": "d9909501cb3b0f35a75d0bca8805b310d9ab84a36f3f5b840fbc65cf1ec6a879",
+      "fingerprint": "fbd44deedab9af0bfa4e319b1d0102fa4fc638e873c9b4246538dcfbfcfe8174",
+      "text": "Realtek Connect+ 是面向 Realtek 装置的物联网云端平台，提供 Realtek 托管的用量型服务、Private Cloud、配网、OTA、装置营运、App SDK、洞察与整合能力。",
+      "status": "approved"
+    },
+    "page.home.title": {
+      "sourceHash": "9d39cefb9fe8ff735910fec4cf0f02e72737d66b209eb6ab9786dcc875cfac64",
+      "fingerprint": "0343a4ee1d22f97d48499f310854e1c0992b211d55e2afb48728716e43d3965d",
+      "text": "Realtek Connect+ | 物联网云端平台",
+      "status": "approved"
+    },
+    "page.privacy.description": {
+      "sourceHash": "6463dc0669672bd95e76416b95610ec03568e0a6e75e088141fffb4712c60f16",
+      "fingerprint": "48d32b5e42288fd4ccf2a2ee2d8891b2b1c83a63715a6816eef4f196cdb79726",
+      "text": "了解 Realtek Connect+ 如何处理网站询问、联络表单资料、保存期限、资料请求与本站托管影片。",
+      "status": "approved"
+    },
+    "page.privacy.title": {
+      "sourceHash": "c98c396f7305fcd5fc603e49c399cf96ee1a965b51a38de7a322a5e091723fa5",
+      "fingerprint": "9022dc00608c41793c52c695a0391a55eeaff89cf1be535cd9b3146157692cf1",
+      "text": "隐私权声明 | Realtek Connect+",
+      "status": "approved"
+    },
+    "page.search.description": {
+      "sourceHash": "2c747938b790c233fd94dd48a5dd037b066614cd8c1ce8de41ecd229f211630c",
+      "fingerprint": "5d3bc958e87bdf530e481bd91d5bfd6d617836f6019261aa6a037c04d5f05fd8",
+      "text": "針对 Realtek Connect+ 网站文件提出问題，取得以來源文件为依據的回答。",
+      "status": "approved"
+    },
+    "page.search.title": {
+      "sourceHash": "756d635e9061894b590a3e4e9363c4c456cd57169de470b36da0e2fb99c220ee",
+      "fingerprint": "ace565698efece61bfae959b583df02f8ba538127b5e3d20e0e203f3e724d2e9",
+      "text": "文件查询 | Realtek Connect+",
+      "status": "approved"
+    },
+    "text.brand.home": {
+      "sourceHash": "7ff195236d0b72edcf7f2f8786e091da694fa14f96dc1597c8d06fc4c8bb8751",
+      "fingerprint": "62b2a2299a5094241dd8d7b46d780762c85ff9d7f6ec565c5e59451803aa102d",
+      "text": "Realtek Connect+ 首页",
+      "status": "approved"
+    },
+    "text.contact.body": {
+      "sourceHash": "68d7f8e63e36ad1ef23c7e12cc8f89b8f451913bbcdc019e74ad1cce4f842926",
+      "fingerprint": "cfed5ce3434125eb0e1610623b168b6fcffae3adc57d9606f48dc251a58a4274",
+      "text": "告訴我们你的产品团队最关注哪一項服务。Realtek Connect+ 团队会審閱需求，并与你联繫合适的后續步驟。",
+      "status": "approved"
+    },
+    "text.contact.company": {
+      "sourceHash": "ce415d9ec594ba5b45cfc0f468658d2d100e0548455a13f2d1bbc0be0b36a5cf",
+      "fingerprint": "52269d580ca09c97c0757d6a5e365969ef000aa3e0aaff98f816fe8cdc9a022d",
+      "text": "公司",
+      "status": "approved"
+    },
+    "text.contact.context.body": {
+      "sourceHash": "70ebce3dcf1ccf89d51df60aa66de5ebb458772f8d7fe2ea321e146aab635fe8",
+      "fingerprint": "f077c8a10154e492d812f1be401d9e2b4d8dcd4ce5c7333533fdc5d4662ca664",
+      "text": "可用此表单讨论 Realtek 托管服务、配网、OTA、装置群管理、App SDK、洞察、Private Cloud 或整合需求。",
+      "status": "approved"
+    },
+    "text.contact.context.eyebrow": {
+      "sourceHash": "261dc075d425cacf4fd7a3aa96a59072114249861d821ff1c2f27931e4518eae",
+      "fingerprint": "ea01b77acfc5ce2ede0f230cb0ef20f3de499ff34915f40028a6abf2d489a4a1",
+      "text": "早期评估",
+      "status": "approved"
+    },
+    "text.contact.context.title": {
+      "sourceHash": "c95715f3eb03d570537f08dd82ef6c66e2fb0ed253a45aa025b0b5d1eb3a19fe",
+      "fingerprint": "2dd1952c1dfd0d6bf1a5618d1754c4bbf6aabeb2917f204fe3fa88abe7914a88",
+      "text": "面向物联网产品规划、Realtek 托管服务与 Private Cloud 评估。",
+      "status": "approved"
+    },
+    "text.contact.email": {
+      "sourceHash": "0f86572e82f7d6a21445635af988f7768e8a44754985184c9634393796463700",
+      "fingerprint": "802a7852569bd7bf42ebc4a3cb5139e88117b001e0cd0945173bdcfb31664ec2",
+      "text": "Email",
+      "status": "approved"
+    },
+    "text.contact.error.summary": {
+      "sourceHash": "4503e5fd3a08e9a4312f11c92ccebd511f13a43257f50a9fd235147b9bff1156",
+      "fingerprint": "4cd7baf65775c936a63bc60a6613f8f8791c6234876f82dd7f5bd567686981ab",
+      "text": "送出前请检查下列栏位。",
+      "status": "approved"
+    },
+    "text.contact.eyebrow": {
+      "sourceHash": "cba92ed1bd4cf1b88492b0917e7b35ebc359e18f9405b4ac14998a3d01c32114",
+      "fingerprint": "4add228441f2949abe3a16931b38181356975901095a4d3a923415d02036627e",
+      "text": "联络",
+      "status": "approved"
+    },
+    "text.contact.interest": {
+      "sourceHash": "519b557d69ca82bbd536a6703f8999de4f498485c34d4cc9d7d595c6c3d20e14",
+      "fingerprint": "8ca97c7f7b9d2b71ff00a4194646f19cab9c3bc93b320d86f3126b8da6c690d1",
+      "text": "询问类型",
+      "status": "approved"
+    },
+    "text.contact.interest.option.commercial-deployment": {
+      "sourceHash": "98728ddefe376f99be89e193fbf427ea9c574a52cfacb8485e989f82581d3092",
+      "fingerprint": "dabed4e38191b358b52a79a2f0bf10d49783530d7c0d48ccf8e975c2c3a27837",
+      "text": "商业部署（托管服务、Private Cloud、報價、簽约）",
+      "status": "approved"
+    },
+    "text.contact.interest.option.evaluation-access": {
+      "sourceHash": "78067c850cbf8af2f3452131d22e7255f6c14ad1a37f224adfa76007c0a4f668",
+      "fingerprint": "f28bb728c7b5f2d501b6ae02bf67d20f0bf9f9b097f6790cdbf1da478139c3d0",
+      "text": "评估方案（免費試用注册或申请放寬额度）",
+      "status": "approved"
+    },
+    "text.contact.interest.option.other": {
+      "sourceHash": "8766306e5214a5a8e3d1fb77d84c5a6261679981ebd9ca9a5e2a5770421987c4",
+      "fingerprint": "b95d647b3651c6da4c7a68e577d2653c2a3954c7ac295d013551241147f366da",
+      "text": "其他",
+      "status": "approved"
+    },
+    "text.contact.interest.option.partnership": {
+      "sourceHash": "94a734e50e972df85dafd82a02550fdb1edda9abd740af181ab322d88e705d0a",
+      "fingerprint": "d3ae558f9876128f74aa54249f7a4e78b8ecccf6a5a2e3e7d42994cb982f2b2f",
+      "text": "合作夥伴或商业开发",
+      "status": "approved"
+    },
+    "text.contact.interest.option.technical-question": {
+      "sourceHash": "420c536577e15396db542d6411143795d67b05484548047cf4daa2b14fd23796",
+      "fingerprint": "cc98c17df2b3000352eb7a9199ad837c3cf93c07be1f5091c4760c31691ca6e8",
+      "text": "技术问題（现有客户或评估中）",
+      "status": "approved"
+    },
+    "text.contact.message": {
+      "sourceHash": "7ddc35f438a469050289051a3c47fe6ed05d4c662e4d8295dc03a3ea48a93167",
+      "fingerprint": "e3ace00d14148d672e1666d94f710fabcecfc60bed128f1babf5e9d5cd51ea7d",
+      "text": "讯息",
+      "status": "approved"
+    },
+    "text.contact.name": {
+      "sourceHash": "43b4a8602f424dd75e1e9a1112fe63dffc09b08c03dd0adf61c58bad8ddb9798",
+      "fingerprint": "fcaa5f25a691583e69c85b65e6661fff94d79597cb82edea0cb2256dae981bf2",
+      "text": "姓名",
+      "status": "approved"
+    },
+    "text.contact.privacy": {
+      "sourceHash": "2d5ab6a8cbf0659d250fa2a1055961e94c7b16fb46111be7724ac243924aa40b",
+      "fingerprint": "ce5bb855f2afe201cbf074000ff2ede6b9fe7b0f7c0822fd9fb735dcb637e836",
+      "text": "送出此表单即表示你理解我们会依 Realtek Connect+ 隐私权声明处理你的询问资料。",
+      "status": "approved"
+    },
+    "text.contact.privacy.link": {
+      "sourceHash": "164e5dda44cf2cd258f85b1619e29dd92bc1083dd4b726a26bf423063ee9eb1f",
+      "fingerprint": "dee3354158696175e053b41ce0ffdc3f3d9f49ea6a8deaf134565c89a27dc790",
+      "text": "隐私权声明",
+      "status": "approved"
+    },
+    "text.contact.recorded": {
+      "sourceHash": "2a54e9d7afcbdf9c83f2cd2e075417a7aff317d6f6317bbf9eb79acc041f12bd",
+      "fingerprint": "1c5f32469032eae767bdea72c9ed32c4c0af5e6a3bcb0c5d62fb2800c6fe5cc5",
+      "text": "你的 Realtek Connect+ 请求已记录。",
+      "status": "approved"
+    },
+    "text.contact.review": {
+      "sourceHash": "2843f78f2ec54172d63262247d0ff9c20c8f975d2a3d7f0de874ae4798f35181",
+      "fingerprint": "0b65c9c018994ad4d454247a8b4ec8c0dfe2eb79adb052d6e6c9d0641b955b27",
+      "text": "查看功能",
+      "status": "approved"
+    },
+    "text.contact.select": {
+      "sourceHash": "2b9bd3f2613c311636ccb44a6f53277652abd79c463be2723dc41fcd91726caa",
+      "fingerprint": "698f473835acb5182d10cb0d611a8cef6e66eaafc2fb5ddc2f22a2a625856c9e",
+      "text": "选择询问类型",
+      "status": "approved"
+    },
+    "text.contact.submit": {
+      "sourceHash": "39e430682a57c916563609b15102d0a7407e5c4d20de6ad95adb7601af6f110a",
+      "fingerprint": "35ac0117e9374d56725f8e4224d1a44b201ec3a8bffe4f5bb85e3fa16fb7d4f1",
+      "text": "送出需求",
+      "status": "approved"
+    },
+    "text.contact.thanks": {
+      "sourceHash": "8ca3c9693c5b61c0eee78fef0177df44457fdeae757d34418ac05d2a046a0c2f",
+      "fingerprint": "ad6f1785e5faf3dc4af4aed113d425c970c70d18b501f6fc610de25ff6f0e6bc",
+      "text": "谢谢",
+      "status": "approved"
+    },
+    "text.contact.title": {
+      "sourceHash": "09644b20e5357e46328f43387125627070d18f41facb2827c798e4cf5a32455a",
+      "fingerprint": "36801f2c7e6aa5a0b2d52121702cfef17f287293e3fcc1db1f8e6d1fd15b87e2",
+      "text": "登记 Realtek Connect+ 评估需求。",
+      "status": "approved"
+    },
+    "text.contact.website": {
+      "sourceHash": "6e58e8ade7273f4556fb53114ae0079791e194360060967c3ef04336e6791554",
+      "fingerprint": "c9e666964a948a547a5d53e6441743dbc0567d89c35e0839cc18ce4a1157587c",
+      "text": "网站",
+      "status": "approved"
+    },
+    "text.doc.audience": {
+      "sourceHash": "d17fcce5a3f8626189ebe7e391d935a9932be2a09fbb9887936255396db8a5e0",
+      "fingerprint": "a83502904799853cadd0f5563eef1d636b058638327876b2ca345282b36574e5",
+      "text": "主要读者",
+      "status": "approved"
+    },
+    "text.doc.audience.title": {
+      "sourceHash": "0f01e106b074e36ba7e18f5e32ad03193b459ca188e40fc99356700a83e66931",
+      "fingerprint": "ceaa590ed3f0b21019165ee262fff8f69306860857012df97ae0487c75e0cb03",
+      "text": "誰应该从这里开始",
+      "status": "approved"
+    },
+    "text.doc.back": {
+      "sourceHash": "ef0689fff521d4b454061e58fd0a35558a645342ceb440b6a6109a84d9aef1d9",
+      "fingerprint": "8b4f71d1d725e66138ce4649285ee00510d4450d5c31b3dc04e05851f29f3475",
+      "text": "返回文件",
+      "status": "approved"
+    },
+    "text.doc.coverage": {
+      "sourceHash": "38832bbf36635b30fa89911f58517ee8e97c7fa2dff0ea81da76b459e206019f",
+      "fingerprint": "8f191990d453d7dc55a2aec8daef6be0da92cdd0d64bc754f7d457aae857bf3d",
+      "text": "涵盖范围",
+      "status": "approved"
+    },
+    "text.doc.coverage.title": {
+      "sourceHash": "484910efb9cbf41c39921aaacb085293a99ecb6261e8d2dfa8864baec390040a",
+      "fingerprint": "c820f0947743f9aebc249524e8dba8ac66ad8c069f53211985d2d9ea6fdd79b3",
+      "text": "本章節说明内容",
+      "status": "approved"
+    },
+    "text.doc.discuss": {
+      "sourceHash": "d0f02686c85b5cdaa68555cc08c11c53114b98d3d686918f8f3b6ea46136705c",
+      "fingerprint": "b086842af3b93c8340787c9fe4e16abd02723e0958830ad1c58cc4d9d242d704",
+      "text": "讨论实作",
+      "status": "approved"
+    },
+    "text.doc.next": {
+      "sourceHash": "b468373e34a8a130e912c9922b8b65994bf8e64ec1efc04565a817680ac739f0",
+      "fingerprint": "ba2e797e2c5f5d9c68dbc561974d7529c48a2b6a84045f5f9552e7ba9213a0bc",
+      "text": "相关文件",
+      "status": "approved"
+    },
+    "text.doc.next.title": {
+      "sourceHash": "c8c4affced7fc1ee0a8de4ab92a2e6bbf5c07c5a3f383a1ff9a4748b3025ef3b",
+      "fingerprint": "b80dc832035615307588425097bdfb1b72aad6f0189ea4b7712afc448392fcee",
+      "text": "繼續閱读相鄰的开发者主題。",
+      "status": "approved"
+    },
+    "text.doc.outputs": {
+      "sourceHash": "03fb9de3f6d23d1a73594075a4ad734a5fbd3ffc85ba90f43f2ccd69ee8c6d44",
+      "fingerprint": "1de05b9f2dfb63e6316a83bb046c1a4290c0a5b3ae6dd11382245ab3313d4282",
+      "text": "预期产出",
+      "status": "approved"
+    },
+    "text.doc.outputs.title": {
+      "sourceHash": "7a4e7d2a93f9019b55e7d5f1151e308e94e11199d4257b6d12791653bf34c919",
+      "fingerprint": "8dea23f524acb67229877f37831bc1b0a72a708766daec7ed2c9e97876d1b022",
+      "text": "团队读完后应能取得什么",
+      "status": "approved"
+    },
+    "text.doc.view": {
+      "sourceHash": "152aa9203a2f889125c8ec19e55fbc0b6268132d3c348dcb45d4addcf7139853",
+      "fingerprint": "480eb301ca8e1c9bbe73f0c187308e9544cd7a04a259108e55bd8f9e458107ae",
+      "text": "查看章節",
+      "status": "approved"
+    },
+    "text.docs.body": {
+      "sourceHash": "18535ab938e0de85173f03a4770577d49d6eecc8eec788e1bc2a3c6ca213f786",
+      "fingerprint": "b94868ac38180c2fa2ae77c3cd7edb88891b52c5b0acc341e95be72094bc6ba6",
+      "text": "Realtek Connect+ 提供伺服器端渲染的文件入口，涵盖平台总览、开发、API、SDK、韧体、CLI、部署与版本信息。",
+      "status": "approved"
+    },
+    "text.docs.cta.primary": {
+      "sourceHash": "3bc15a4293d9741f8a7e2710dc3548ed8f1b78b94b780d3cc497d62e46dd9c9e",
+      "fingerprint": "0ff8f897db631670f0656ef4c58a8a4a2348a73d1acfe8e0a96777164a4d369a",
+      "text": "联络平台团队",
+      "status": "approved"
+    },
+    "text.docs.cta.secondary": {
+      "sourceHash": "2bb3490e35630b2cd5dcb27039bafecb4b836c7dcd262be8e1743e176ac88bba",
+      "fingerprint": "6fe7eab568ab6ee7f0c2dfe5b132d1117bf9c981b4822e89f0d463ebe1c37494",
+      "text": "查看 App 平台脈络",
+      "status": "approved"
+    },
+    "text.docs.depth.body": {
+      "sourceHash": "3c5203c1ce04c5997483e061a7ac7a3ec1eb14a713adf74d57247c98e2a64743",
+      "fingerprint": "9cbb4f197e7a8e671d7e4ff9c8771e170184d127153f9aed38d72cc52683c558",
+      "text": "分开韧体、API、行動 SDK、部署与版本議題，让各团队直達自己的实作面。",
+      "status": "approved"
+    },
+    "text.docs.depth.title": {
+      "sourceHash": "d50ee064f38a41bcb0caf7364d942b2e1dcbe2514b19ab935ff0d065ee3af27d",
+      "fingerprint": "61f2dfe5dddd363f90b63011d1dceeda91b7b42e02873ca1c906c476b7df1f43",
+      "text": "依工作流分層",
+      "status": "approved"
+    },
+    "text.docs.eyebrow": {
+      "sourceHash": "d686c75327a0a68f9105111f216894edcdf2a9e3faef0e130036b60acdf00651",
+      "fingerprint": "29c9f958e1ca9b12171628b16a31ec3a83a6bbeb1c32f7cb7a78229c031c6b53",
+      "text": "开发者文件",
+      "status": "approved"
+    },
+    "text.docs.portal.eyebrow": {
+      "sourceHash": "0e53bd7898b3c07c22462da8d17f5e281e542742e43577161940dab5b33efca6",
+      "fingerprint": "d258092afb190f6862b7f6a6c28501ce8defa12b6d754c1d8e024f6c5f2c3e5f",
+      "text": "入口結构",
+      "status": "approved"
+    },
+    "text.docs.portal.title": {
+      "sourceHash": "f046ba55c8ac17d1ac122f840d78549c1ec1eb8585995f35003fa60812284a7f",
+      "fingerprint": "d32b070b3cb962edac0e88f737a55d2ae37a46214c691fcce977cb5a8e4e6cc9",
+      "text": "选择符合你工作流的文件軌道。",
+      "status": "approved"
+    },
+    "text.docs.shared.body": {
+      "sourceHash": "7b8baf6fde62b05db5b4d252501cb1bc6a0dfeb3190d74997658427f3fdfd7fe",
+      "fingerprint": "07927b7b88178d4aa68ec2f1f7fdfc74eaac051a975f6e3a436a427ded25f2eb",
+      "text": "让产品、业务与工程利害关系人，在深入实作前先理解生命周期范围。",
+      "status": "approved"
+    },
+    "text.docs.shared.title": {
+      "sourceHash": "2fa7f3a8560af281f7bcab724c02f6e9c8d6b48dbc82ec73fba3917cd23919c6",
+      "fingerprint": "3fc71ce4a949c4295bfe580cf437794910574758599e790bc5ba5ca55ca72e8c",
+      "text": "共同平台敘事",
+      "status": "approved"
+    },
+    "text.docs.static.body": {
+      "sourceHash": "99242e8fb7272be9ccaaccd7de2fa023e9fa54de57f84f350e369ad60f5585fe",
+      "fingerprint": "d141afb1fd06751f541ae437a85b23cf787666027297b7a38a13c1f114344d70",
+      "text": "透过开发者手册查閱 SDK 套件、整合指南与 API 参考资料。",
+      "status": "approved"
+    },
+    "text.docs.static.title": {
+      "sourceHash": "63249b3b1337949173bd775fb40846c7f25d280ac472998e8097742a79da24c8",
+      "fingerprint": "3d7a2ac6c5124c648fc4985a208d215a019c02daa3bcf39171c88f1f09bba448",
+      "text": "SDK 参考资料",
+      "status": "approved"
+    },
+    "text.docs.title": {
+      "sourceHash": "179beaf15a15a9566269403616fe161744d3de350e659df6be6ad7d177f9c2b1",
+      "fingerprint": "0979d7927b1b35d13e907332bc029ef5131f89a22f5b7b8acae8e0121a08685c",
+      "text": "云端、韧体、App 与部署团队的文件入口。",
+      "status": "approved"
+    },
+    "text.docs.why.eyebrow": {
+      "sourceHash": "fe8b087b16b7993d778f547b656afe5d635b51451b09071fbd2bd8b8312d54d2",
+      "fingerprint": "e4ef56c9bdf5f9ed74ca3ce4f454b3233d170bf5fcddb5e5b4136b30bca4e8b0",
+      "text": "为什么重要",
+      "status": "approved"
+    },
+    "text.docs.why.title": {
+      "sourceHash": "ec7fd98779702b580b692f71baa1b95bc810ef0dd32757620d8ab690453168a5",
+      "fingerprint": "218c0b6bbf41390df55984bc80462b6070b3a819a1bc612a7586f0975776f445",
+      "text": "对齐产品上市前各团队期待的文件介面。",
+      "status": "approved"
+    },
+    "text.feature.all": {
+      "sourceHash": "b9e0506ffefdbc017146127aa391abfd89e5d4fdb38e01348ef1749c2fe2e1c2",
+      "fingerprint": "45979fe3ea8f93640b680771549e77916a6c875ff0c3412f243ab330707dc23d",
+      "text": "所有功能",
+      "status": "approved"
+    },
+    "text.feature.capabilities": {
+      "sourceHash": "7bbb5014e946bc09151ad1c17f5f329822bbafc14877664a17f3240b5c0e28b7",
+      "fingerprint": "52273b28f35dac2ba0f6c73c1ff561440939c1f1bd16c5931df2df1cf4539b08",
+      "text": "能力",
+      "status": "approved"
+    },
+    "text.feature.capabilities.title": {
+      "sourceHash": "9322981ddf5bd7ae1968e9bc560520ace158f80c93cf849d8b60769db96f7822",
+      "fingerprint": "90045e06136687994d1995cc675cb6bd2ef2aaa34b27a2417e1872fa052185c8",
+      "text": "平台基础能力",
+      "status": "approved"
+    },
+    "text.feature.contact.cta": {
+      "sourceHash": "e8807e2853713017c913b886530395ab85b321137a27f0bb1b5093143a5ab3f8",
+      "fingerprint": "360728198f514a6f641f5dfb07835ce5ac5ef3a61c879069a74dc0acea4c6b6a",
+      "text": "联络业务",
+      "status": "approved"
+    },
+    "text.feature.cta.body": {
+      "sourceHash": "0fec8c1fa227378de0f6afecccfce4ca321b67dbc40f81514534822421c22185",
+      "fingerprint": "f86a95b3ee8b43b8254884c2cf7836fa8b2035f229c14e81ee45ebeed3e10397",
+      "text": "分享你的产品类别、目标部署与云端需求，让 Realtek Connect+ 团队协助评估。",
+      "status": "approved"
+    },
+    "text.feature.cta.prefix": {
+      "sourceHash": "4e298c6f06c57c097fc032963825a7e91c5ee135684b0a302272effe5de113b7",
+      "fingerprint": "4399843c3677f27b3edabc4b892ea0656fabd1a506aef69af2ecc67243671d14",
+      "text": "评估",
+      "status": "approved"
+    },
+    "text.feature.cta.suffix": {
+      "sourceHash": "14fce60cea3fac91a84b7b23759e634c2081c6fe70ac80b2e6c15f26bac1d3ad",
+      "fingerprint": "60c0a0dd237dc3909bde5aa28123bcba1d11c8b1c1f840f341409c44f577d94e",
+      "text": "如何支援你的产品路线圖。",
+      "status": "approved"
+    },
+    "text.feature.discuss.prefix": {
+      "sourceHash": "1b169abde5c2171447d03fe3a8645da446093c1c8e05414307a946d14fc47bd2",
+      "fingerprint": "0581a21744283b602738a5d7db90b9648f2de1d342a9a78b637085e87dc37253",
+      "text": "讨论",
+      "status": "approved"
+    },
+    "text.feature.highlights": {
+      "sourceHash": "a11167641962ee0692b4f586c9f19956ee2a1ed7d58f1767218a175c31a33587",
+      "fingerprint": "e29ecc243ff3e037d0009c40912cd4240c3c15a29ea987fc0b7f3ed5e4379aa6",
+      "text": "重点",
+      "status": "approved"
+    },
+    "text.feature.highlights.title": {
+      "sourceHash": "00e817e968ca6be719aea3fda2c095bb97921867649dce2e6a437266ffecf041",
+      "fingerprint": "a9532ccf7cfb6746b33ecacec6abdf82bac484ffc618dddf9dc83b6b1985813b",
+      "text": "此服务涵盖什么",
+      "status": "approved"
+    },
+    "text.feature.next": {
+      "sourceHash": "0578a2e88401d2e63e03b4105ae545a10843207a3b3a3caa22777938976c6a24",
+      "fingerprint": "b377c3e4517b122a504a483e5908f08f42607624e85d10c1db70084f78953257",
+      "text": "下一步",
+      "status": "approved"
+    },
+    "text.feature.outcomes": {
+      "sourceHash": "0e66158928aa0dabc4618adc5edd59162c51440afd4217a6a9c097b444cf59fd",
+      "fingerprint": "296c00d2f51aa9cd1e88bf978d37c5f3143ac3917b39cd15f1a97961f0dca04b",
+      "text": "成果",
+      "status": "approved"
+    },
+    "text.feature.outcomes.title": {
+      "sourceHash": "6494872f7573d7a49d6af6db7b5a64bff31b81d240eefbc82374345af86865e7",
+      "fingerprint": "df7a8c82ba2af5e5828f79328ad61ffe9a7b937b911927a0a599298ec5ab8b28",
+      "text": "产品团队为何使用",
+      "status": "approved"
+    },
+    "text.feature.related": {
+      "sourceHash": "6d47687964f9efd0a389b97ed7496b46dbd50d50920937791d3304e1d2d4bdd2",
+      "fingerprint": "3da4298ad8268315d662ef43e70807714a17e4b93147ba359073e792bc2185b4",
+      "text": "相关内容",
+      "status": "approved"
+    },
+    "text.feature.related.title": {
+      "sourceHash": "5b5fc8d13b410ada65b815a372a1a412d636176abccf8b50c2bc75b0906894c9",
+      "fingerprint": "b71750f8173d729689f9335c160947ac3bb2de4dca2ab0e484c384ff51a581c5",
+      "text": "繼續整合路徑",
+      "status": "approved"
+    },
+    "text.features.body": {
+      "sourceHash": "b79bdba3fbe4f3eefa249c4fdfc5b51127da9fb494fcafd8f2e0379b3d9aaab7",
+      "fingerprint": "7fad864e0133baf1b6dde7e6a5103de1e0cbc18ba72c61c7c11683e78743672e",
+      "text": "Realtek Connect+ 呈现商用联网装置平台应具备的核心能力。",
+      "status": "approved"
+    },
+    "text.features.eyebrow": {
+      "sourceHash": "5cd400f0d51efe81f8443dc6f739775ef5b8415e0f7b5d4b5e29b6e33466c851",
+      "fingerprint": "0b25d6cfeb6e3402c638a8c00a080f9bccca80c935c99f0811113684fabaf092",
+      "text": "功能",
+      "status": "approved"
+    },
+    "text.features.open": {
+      "sourceHash": "26cbe6ffac1c0497dc7420301becd0898c829107c0a3e43f4ed75b2977208601",
+      "fingerprint": "4f90aa46dfe19763087db8d16f245d1f487b8d7e2629de7cc9688b6fb7fc0763",
+      "text": "开启功能",
+      "status": "approved"
+    },
+    "text.features.title": {
+      "sourceHash": "0c46dd32736ebf7ec96e1a9cf659a9d83525a912adb6ca5a6948cb57d22b6dc3",
+      "fingerprint": "b88a1be5ffe8978c338132ee9102e2f009703ff12ef0d6aae4aed15116145007",
+      "text": "涵盖完整物联网产品生命周期的云端服务。",
+      "status": "approved"
+    },
+    "text.footer.contact": {
+      "sourceHash": "b79b572bd6638facd70ad7e9815c7d772b6d954ed5f816414352a819a6e99765",
+      "fingerprint": "eaafe2cf5c19530faa0517ae02cc75e40dcfb770450a94730540b1953a27dd51",
+      "text": "联络我们",
+      "status": "approved"
+    },
+    "text.footer.docs": {
+      "sourceHash": "8ed964f9624e42342e67ef60a5449238a7004990973cdc4bbbe1766364cb9485",
+      "fingerprint": "f0bff2ec9f23fad3e3fc0b54913cd4e64b8ef5bb5d73702217659f99c051f3a8",
+      "text": "开发者文件",
+      "status": "approved"
+    },
+    "text.footer.features": {
+      "sourceHash": "19a2aae8bfe513140d33d8114ef78fa9131846892449b69df61be97d94901d57",
+      "fingerprint": "9e164dd6d1f749ed17e876a2f10ce00c2b856812790d5164a74a8a395eebb8f7",
+      "text": "功能服务",
+      "status": "approved"
+    },
+    "text.footer.group.company": {
+      "sourceHash": "aa6fe415599e920a57605776075693278d8bbfb028f2208b9cc07abb0d247ce5",
+      "fingerprint": "e25315357ed8145fffa9ce6ef6d1f0940a33e289d8acc943e76a9b0d1fe3b100",
+      "text": "网站信息",
+      "status": "approved"
+    },
+    "text.footer.group.docs": {
+      "sourceHash": "35606b148b5aab9792ea935759a01bf7eb563ad6c5dc65fc097fdc2383626bb5",
+      "fingerprint": "487548a742980a738a7bc319cb9cd51885352b3e177715649cde33698278c730",
+      "text": "开发者文件",
+      "status": "approved"
+    },
+    "text.footer.group.features": {
+      "sourceHash": "d14963f5d5a380f82a58407fa59c200f1a9b118cd298ef6c33c6ab21974c5c64",
+      "fingerprint": "9aecb2f05c2ec4761a2512c94b0979f12e1466db26761deff4f6387de0482e72",
+      "text": "功能服务",
+      "status": "approved"
+    },
+    "text.footer.group.manual": {
+      "sourceHash": "b506ba37ce5021e9a28cb9b4d32b819148f788f6f6421a6e39217a8ad8b811e0",
+      "fingerprint": "6fe4c7cf5ffb2ef1544af3cffcea55a749d814dee69be14a670ffb18d5bd04ee",
+      "text": "使用手册",
+      "status": "approved"
+    },
+    "text.footer.group.platform": {
+      "sourceHash": "1da463016a1db1a5c2ab8efe3425d117b640313a97f00097d53a64cf494204a0",
+      "fingerprint": "f34a7ab55d4c93f9e97656f8a455f147e9ac228a2c20b28836e3c9a9613947b0",
+      "text": "平台",
+      "status": "approved"
+    },
+    "text.footer.home": {
+      "sourceHash": "e32eb1284f1a5f9f266d9a3d465b6eb9342baca207934cd6c7afa931e3c6b471",
+      "fingerprint": "756a451d86f92974526a76791603fd542a8ac72a4924c40371ff60dd64174179",
+      "text": "首页",
+      "status": "approved"
+    },
+    "text.footer.manual": {
+      "sourceHash": "3e309db996f756ee81b11dc11fa9b6d6d5dd075c1d122a16d86d921ab4f64691",
+      "fingerprint": "91338ec40e02123bf1d520d00586354324830342beaee495f381e91b1e52470a",
+      "text": "使用手册",
+      "status": "approved"
+    },
+    "text.footer.privacy": {
+      "sourceHash": "d4953e2a0be348540cb994f67a20a08e96856d9036a3a45f2d8b641b1353f001",
+      "fingerprint": "d4249774be581c0e2d121efaa30c1ce28871630978704f69de4713c23fffceca",
+      "text": "隐私权",
+      "status": "approved"
+    },
+    "text.footer.search": {
+      "sourceHash": "4404613ebd08b660e8324353dddb32e39a33e98609e86c58571a1bb8daaff31f",
+      "fingerprint": "86385345d57a088d53ed4664d02c83ad3772f75fb8a2a38a2a7bd885a47e32b8",
+      "text": "文件查询",
+      "status": "approved"
+    },
+    "text.footer.sitemap.label": {
+      "sourceHash": "2a67d23314e91cb9d3f7d4493e56fb4faf28adf1908777a9da22bc08c898d8ae",
+      "fingerprint": "5e4fa5875ba0b5cf4a6d72de25148ee5e8616d2c73354e9693860499f9f20ca5",
+      "text": "页尾网站导览",
+      "status": "approved"
+    },
+    "text.footer.tagline": {
+      "sourceHash": "3454b6c448c07d8e6ecacd1ee4a6ec6a6144346cb093b477f8e1199cf7e7e01b",
+      "fingerprint": "d326a7b0fd716bf8e9f550b59355bf2ecce81f4044b1314b552fb524b5bb6503",
+      "text": "面向 Realtek 联网产品的物联网云端平台概念网站。",
+      "status": "approved"
+    },
+    "text.home.arch.app.body": {
+      "sourceHash": "ead44ddd332b87abbb67ee3120451df5ad1eb235acd104047b5754f749da09ab",
+      "fingerprint": "e5bc491049aa57e7fca416f22e0d888291313b19ede808f3b8830b23923748f7",
+      "text": "行動配网、产品控制、洞察与支援流程。",
+      "status": "approved"
+    },
+    "text.home.arch.app.title": {
+      "sourceHash": "22badd46d88f030f10dd1c570fb483439aae486c8137cd2d84f3d3b98a64eb57",
+      "fingerprint": "500a429689d1fba0044b594e43d58869d3fdf0dc54320ed02a4dd582bd037d6f",
+      "text": "App SDK 与仪表板",
+      "status": "approved"
+    },
+    "text.home.arch.aria": {
+      "sourceHash": "df5f782001a357efb95c007c94d4b733813c93b11f129d3c087eb955a9441fa5",
+      "fingerprint": "cb3304c011cd885230f357cfed1588cb1226d2116470d225e022b3a1041ccf47",
+      "text": "由装置 SDK 經安全云端到应用程式与仪表板的平台流程",
+      "status": "approved"
+    },
+    "text.home.arch.cloud.body": {
+      "sourceHash": "ca9d15039739da462b3bcd5c8f91f034ce892aa9d2ebd2a9ba134aead72bd7ae",
+      "fingerprint": "618706a5e3e53d8207c31d79f6454ff98ddaefb008c96d6401ce007f92c443c6",
+      "text": "装置登录、OTA 活動、使用者装置关联与 API。",
+      "status": "approved"
+    },
+    "text.home.arch.cloud.title": {
+      "sourceHash": "1e49fb4117999aa013b9932db1383078c9132712fc53b9355a654d15815d47af",
+      "fingerprint": "4626b536409b209344a352c92007408d613dd6a5b92de70be75fdc4a50aacc1b",
+      "text": "安全云端",
+      "status": "approved"
+    },
+    "text.home.arch.device.body": {
+      "sourceHash": "1fccc15853823fcff0618f7a672046d36049adf7e0846137fbbc27363fc4f64a",
+      "fingerprint": "692efaae2d385e7df6ed70d74625ac9669bf4426e33d22cd1c5c41508f464ba0",
+      "text": "身分、配网、韧体服务与装置讯号。",
+      "status": "approved"
+    },
+    "text.home.arch.device.title": {
+      "sourceHash": "e70e2301af106284981bc216ce661ad50bd84637349ff68155f5efcd37422c8a",
+      "fingerprint": "86490d4145b90a5b37d0c85407d1e2dbae9b86e68e3080fd665712ce027245bc",
+      "text": "Realtek 装置 SDK",
+      "status": "approved"
+    },
+    "text.home.arch.eyebrow": {
+      "sourceHash": "db2215e8333236651e7c067f7f0490a4ad8221755ee3eb6a029e3c335ff63bee",
+      "fingerprint": "c8b06c7d5a5c184bb2aa566b8e12bbce3907f96ec434cb89b7ec613dec3f93b8",
+      "text": "架构",
+      "status": "approved"
+    },
+    "text.home.arch.title": {
+      "sourceHash": "c548a482f0158931b1aec58db807653a01696b69d48e91dcbb2ba0f987fa7e8c",
+      "fingerprint": "456d68cbcfc283c3dec42f095ce57254541979d5c7c69c3413f4f2149580cd35",
+      "text": "从装置到日常营运，一條完整连接的路徑。",
+      "status": "approved"
+    },
+    "text.home.benefit.login": {
+      "sourceHash": "80fcd1cfc1fcc76f72ccb3078a0086e01a6a8bf9871244fdab93d1da05dfb464",
+      "fingerprint": "a110450b499dec4b03c4fbbfbf8c10a14a1ebe1e3ed4bc3c8e12af47bd99a2fe",
+      "text": "可直接登入开始使用",
+      "status": "approved"
+    },
+    "text.home.benefit.managed": {
+      "sourceHash": "7c0404bbb4c994b7db53c88576ba6c19324baed9cb45165ae0aaa54fb155175d",
+      "fingerprint": "c76f952e7d01fd6efa4b9e697f34631b8717c712fc392ed6149b2384f15da69f",
+      "text": "由 Realtek 建置与维运",
+      "status": "approved"
+    },
+    "text.home.benefit.usage": {
+      "sourceHash": "c77eefae4d1e4f57f4fc21a84008cbd2a737a734eac4ef05cbdd5f193527808b",
+      "fingerprint": "37167cbf9630489e2c7862403fbba2653a06f6083e232dde3c291cb0929ebd5a",
+      "text": "依实际使用量弹性付费",
+      "status": "approved"
+    },
+    "text.home.benefits.aria": {
+      "sourceHash": "721466c50474f2ce159de1ac404a22d913b857e841b853dc9090f8f2608e3c5b",
+      "fingerprint": "db7327fa35522b7b661e2f59fca9ca135fc3d58e483b719a6daa019c0d03ecce",
+      "text": "服务效益",
+      "status": "approved"
+    },
+    "text.home.capabilities.lede": {
+      "sourceHash": "36fdbad847c38337a3214bf0f1398eb901529ae32e48007ee6ca43adb5534c0f",
+      "fingerprint": "041095898fe2f87f7ed7ce7f0f7426dcc60489375c83c0592f86c674448d0bd8",
+      "text": "支援服务串连装置軟体、云端营运、应用程式与企业整合。",
+      "status": "approved"
+    },
+    "text.home.capability.app.body": {
+      "sourceHash": "102971a9aab6f5cf13530ad175310d536e34d1d34237c941dc78b8bfcfdbf8a2",
+      "fingerprint": "86395ce88c757e851aee4d669ddb7516528b798fc5bef42ed10e08ffb0054878",
+      "text": "提供配网、控制与帳戶体验所需的参考 App 与 SDK 路徑。",
+      "status": "approved"
+    },
+    "text.home.capability.app.title": {
+      "sourceHash": "4e95004dc8c1887c69a1b1da7fd07f02e321c64e35c0d6cdcf9e770365b6cbea",
+      "fingerprint": "a34057d91a6c4f565342402e16e4fcfce820fa796d2bc19d7282ea7a17e78b1e",
+      "text": "App SDK",
+      "status": "approved"
+    },
+    "text.home.capability.insights.body": {
+      "sourceHash": "3ede029e01811c6c057fc833c84678cfb4ee148579b0a719da5f10a65ade1fb9",
+      "fingerprint": "d41fb3a3f0ee4968d8b518d5365a8dd03083dcda6e8a6cb47f0b16338aa355be",
+      "text": "将装置讯号轉化为健康度及产品营运可视性。",
+      "status": "approved"
+    },
+    "text.home.capability.insights.title": {
+      "sourceHash": "907614fed6d37433594e4c11da165a236600611b782adf2057ccf1fd604d4e48",
+      "fingerprint": "0b2e5b5eaeeeb5f38d0fc34d362a42c18b41840d680cb0662efa86ae34fe2581",
+      "text": "洞察",
+      "status": "approved"
+    },
+    "text.home.capability.integrations.body": {
+      "sourceHash": "34b2e92c2b13f46dea98a84e8975683eaef894964935c20b390cb8401847d443",
+      "fingerprint": "e7188360f6d3af873e4a76cc5d48dfcec98e694704d3110fca7dc01b32f0dfb6",
+      "text": "透过 API、事件及生态系服务连接产品营运。",
+      "status": "approved"
+    },
+    "text.home.capability.integrations.title": {
+      "sourceHash": "55329c7780c79e1e52129bebce6473cce82d231e496f28e34edecb53bd6dfe23",
+      "fingerprint": "ac7c919bb8973eb1b49afd1107d339f99e65a433f7a57fcb2bc6813280116299",
+      "text": "整合",
+      "status": "approved"
+    },
+    "text.home.capability.security.body": {
+      "sourceHash": "ba74025a88e98168e2af93daa7c809d9783693d39880166ba08b60fbba7222ba",
+      "fingerprint": "1a3909d440b38458ca02092a62a483ffba4b22d4414960f4cab49ba582d08cda",
+      "text": "涵盖装置身分、凭证、存取控制与可稽核营运。",
+      "status": "approved"
+    },
+    "text.home.capability.security.title": {
+      "sourceHash": "8c26b325d4fb4ea7a7fc868bf8a0e5c9abda5472a26486313d4a43cb5c35e51a",
+      "fingerprint": "920b06f07830ea19c0149decaeaa56ef0b9d769adb4df9d729974344658de96d",
+      "text": "安全",
+      "status": "approved"
+    },
+    "text.home.capability.users.body": {
+      "sourceHash": "b4f5fb1edb901c9029ee0885c2c84f3491731c6beb338688b4c4f56594b53321",
+      "fingerprint": "f705b4b004fdaa7e3d54f7b6cdaef091003077b45682c99984589f1e8ca44034",
+      "text": "管理帳戶、装置关联、分享与支援流程。",
+      "status": "approved"
+    },
+    "text.home.capability.users.title": {
+      "sourceHash": "7a2208b3042b13f19d5632565977530312769a781f273194a53770686b21c733",
+      "fingerprint": "e9bd0413646605fdc92b4e210b850eac0d44a5f063a29efe3e9820376b8204d6",
+      "text": "使用者管理",
+      "status": "approved"
+    },
+    "text.home.capability.video.body": {
+      "sourceHash": "95ce52a795e3e3459c95340a8c6fbabc537b4889fe991a452d23165eb61ca82b",
+      "fingerprint": "750047f3a5e6c3bc77c25447d92ddce2e4dd32cc8d52e25c31754cca403a18a1",
+      "text": "将即时影像与装置体验连接至托管云端流程。",
+      "status": "approved"
+    },
+    "text.home.capability.video.title": {
+      "sourceHash": "c0a41906468eb7c792a3fec512cc4d91d50a22885a3ac56dc1155029a8d59cd0",
+      "fingerprint": "9321fc4b49493a9123755c94cd5fe171c1b442ff58ef6215e06a15d5d0d59978",
+      "text": "Video Cloud",
+      "status": "approved"
+    },
+    "text.home.chip.cloud": {
+      "sourceHash": "8d8732350b5c06a3f335110149e5330bfc3fd0f265481282d6eb567a76884928",
+      "fingerprint": "8f84f15e932694b39a9d0179b8351de56de0b4bdd788a8b1bfa1a613122c0202",
+      "text": "云端",
+      "status": "approved"
+    },
+    "text.home.chip.ops": {
+      "sourceHash": "5d7df1be8bb25ee0c2a4af19ccf7e07c81f217b4509b04744db32f0000b7630c",
+      "fingerprint": "63dd4649e17ba0cf58b17ee10d68bf2d7fde59057c0637da47c8835051026186",
+      "text": "营运",
+      "status": "approved"
+    },
+    "text.home.chip.sdk": {
+      "sourceHash": "905759bda39d4e9a2d5f76b30c3704a0b997f22c290216e9150b660c1c87d04f",
+      "fingerprint": "8d1e5f21ce893c996ada36ed34e0b43c7e6c484967de23d19aad54d288ef3a77",
+      "text": "装置 SDK",
+      "status": "approved"
+    },
+    "text.home.chip.silicon": {
+      "sourceHash": "f3a83ae3171f4f22dba591c21c8c91ba1a213f2ac30e70c54c328ff8b6738580",
+      "fingerprint": "e1230d1f187ae7b177b007ccb3c0ade976f5baa50a1752650d487fd560a65969",
+      "text": "晶片",
+      "status": "approved"
+    },
+    "text.home.contact.cta": {
+      "sourceHash": "d5fec663ba1e7fea9eb023c6b32f0927341acf4a59ab13ea10ebf7895b7ce7c3",
+      "fingerprint": "43c3cdbb3491bca921c55b0fef88fc9a2cc055bd2801c4737feb5aec8a6faae6",
+      "text": "联络业务",
+      "status": "approved"
+    },
+    "text.home.core.eyebrow": {
+      "sourceHash": "579059b2101136564c20899dcdedb35656ca235302eb2c6fe2ba2f6f174b9451",
+      "fingerprint": "5e81124d355597068c313f912d4e2c7ec927681a0a2b5ee79081aec8a011f893",
+      "text": "核心能力",
+      "status": "approved"
+    },
+    "text.home.core.fleet.body": {
+      "sourceHash": "40256fba348594f3968551573e37eb5e77e90fdb882e92fde41c2a54ec3ebc16",
+      "fingerprint": "2b78fd15eb44adc02819d2ac945e7eb2666d19f17f3abebdbb5ecca2f99d59ba",
+      "text": "整理装置群组、检视健康度与告警，并对装置群執行一致的批次操作。",
+      "status": "approved"
+    },
+    "text.home.core.fleet.image.alt": {
+      "sourceHash": "b9169e8c3b7c6b18f224d3ddce2b55e23adb19b8fc5a92c4d1c873d15a5e6dc4",
+      "fingerprint": "46a4ab09f1d686d5cb2d308b51d946b5eede8d943e5e9d8c2ad2ef73dc1cf565",
+      "text": "包含群组、健康度、告警与操作的装置群营运畫面",
+      "status": "approved"
+    },
+    "text.home.core.fleet.title": {
+      "sourceHash": "4a6d32e97507e7edb50a824a2564d1ffe5ee95d58ebc1a76877e7f681129e2dc",
+      "fingerprint": "589ff1bdd5ae1aac677cafec671b9ec0aae7e218a4deaca8589d565fe3ab19f6",
+      "text": "装置群管理",
+      "status": "approved"
+    },
+    "text.home.core.lede": {
+      "sourceHash": "ffe32ace18a3b9fd9eab58d38a3e6552440a789b5501079803337a2b02099270",
+      "fingerprint": "949590beddce79c40526dc7b0d61957925250f7cf16bb36b71f4dc275fd0c0ac",
+      "text": "从装置上线、韧体发布到日常健康管理，使用一致的视觉营运模型。",
+      "status": "approved"
+    },
+    "text.home.core.ota.body": {
+      "sourceHash": "47ae726c1153d749e2de06825b3e04f5a4667aaeca69940d3cf55a790cc9c13f",
+      "fingerprint": "f2bd42696b40d0006afb80b013815a2966fdd1061de0dc4ef07dc1b761ee4554",
+      "text": "安排韧体版本、控制分批发布群组、掌握进度，并预备安全的回復路徑。",
+      "status": "approved"
+    },
+    "text.home.core.ota.image.alt": {
+      "sourceHash": "141719f7ce37663844a68f0a1805be8b9d141491027645bcd19c3b6d8e66dd57",
+      "fingerprint": "c5ca555e400c9be9f5c371616be94f02dce7855a48233ea8c97e6123f7a7854c",
+      "text": "韧体版本与分批发布控制中心",
+      "status": "approved"
+    },
+    "text.home.core.ota.title": {
+      "sourceHash": "b87162872159d12085c06732107e80ea0d2a23db032cc3ec34af54f6e8edaf92",
+      "fingerprint": "b4a3c4c4bb111df00157dfb8df3332128d155920cd53d4b4ebcea7d3456b01f1",
+      "text": "OTA 韧体更新",
+      "status": "approved"
+    },
+    "text.home.core.provision.body": {
+      "sourceHash": "f682df3d446a3464f3589a4b4217a120c84a7265cd59b0d991e17b1d577db965",
+      "fingerprint": "a96e0f4958a096b26ec58a07e5cd445c540c9c4e74ad329e8f9f59387003031e",
+      "text": "透过 QR Code、Bluetooth 或 Wi-Fi 引导产品完成配网，并安全注册至云端及建立装置身分。",
+      "status": "approved"
+    },
+    "text.home.core.provision.image.alt": {
+      "sourceHash": "f9e8ae9c318e483111ef50c0e8c8fcfcb9dae29bfc770068cde950efe14e1857",
+      "fingerprint": "61cf7739c562f8dd4b448b7c04b9a18a8096a6fb07ade9f3d3d1cc96ac0b1b69",
+      "text": "从 QR Code 与无线配网到安全云端注册的流程",
+      "status": "approved"
+    },
+    "text.home.core.provision.title": {
+      "sourceHash": "db65969638b03013177b8008c85056e55294ad969a21b7566cb9837141ff5530",
+      "fingerprint": "a853221608cb89455a3fdc1c3b7c649cbf4ef602887c21cc7fcb96523f524c39",
+      "text": "Provision 配网",
+      "status": "approved"
+    },
+    "text.home.core.tabs.aria": {
+      "sourceHash": "ed95dbf6d538206008e04715570f3ec92000347f3940e5454fc79d013eac83a1",
+      "fingerprint": "ef01caa8250e56500a8f2f6b393abf3e91183d7df0ab41af9bcdd4cb12416bec",
+      "text": "核心平台能力",
+      "status": "approved"
+    },
+    "text.home.core.title": {
+      "sourceHash": "c3a4681894c33bc4341063208b7821a610dea1706eaddf41b454e8adcb3c56fc",
+      "fingerprint": "a4af6ccb19d4946226e895b9888a57ce37d1b68f912801a58bfeda0eee23bcbb",
+      "text": "用三个连續流程，营运装置生命周期。",
+      "status": "approved"
+    },
+    "text.home.core.title.line1": {
+      "sourceHash": "f7b1cde0490972027d302bcd42bf2ea3690bfd2b493c065de2bd5043fea9428b",
+      "fingerprint": "75dc2c72b947403353a30363e375a31b20cb7cc21ac473f00874e161d14161f6",
+      "text": "用三个连續流程，",
+      "status": "approved"
+    },
+    "text.home.core.title.line2": {
+      "sourceHash": "26f0fc9514d2a2330ce2129fbbb6092331fea8e258519b12c169d65b4266e6c8",
+      "fingerprint": "6de0b2fae74a8a58456b5725695dec5d434613b43b9bfa6325a94dfe6f04b15d",
+      "text": "营运装置生命周期。",
+      "status": "approved"
+    },
+    "text.home.cta.body": {
+      "sourceHash": "ffba63fad8f5e15b7a9e5c602a20912e9f7fee4d7f6a96c47242d34544445e1d",
+      "fingerprint": "f5aa7895e9dc8167c392502f9e4b8e5ad268fb9b8142a09d1d2334166ef1c866",
+      "text": "立即登入开始使用，或联络 Realtek 团队讨论托管及 Private Cloud 方案。",
+      "status": "approved"
+    },
+    "text.home.cta.eyebrow": {
+      "sourceHash": "df63d27ff7cb59621647e0dc39d11ee8b8d29ed9c8e04017a8ac3a8df68ccad3",
+      "fingerprint": "d7127cad38f6e9b306a6d380bc1e118c8ba5a2cb8058b6fee81762e937b222a0",
+      "text": "开始产品旅程",
+      "status": "approved"
+    },
+    "text.home.cta.primary": {
+      "sourceHash": "d20df8125d403355ab0ebd4d6ea348cdaa189e21d116ef26c3ae701c3a49c341",
+      "fingerprint": "1375517c6d597f670a43eb49b656512f637d558a1b581fafb4680ed22b0e1dff",
+      "text": "立即开始使用",
+      "status": "approved"
+    },
+    "text.home.cta.secondary": {
+      "sourceHash": "1d6b65da418e89de515a939eeaf26ed038567e8dc34db4d33be948bb5685e8ac",
+      "fingerprint": "bcfbc1399cb348d2458347f07b938c86529d749e661fa7776f3bad1a3a143743",
+      "text": "查看方案与额度",
+      "status": "approved"
+    },
+    "text.home.cta.title": {
+      "sourceHash": "c16ab9844f65a9fbf19bf68a18e96a36bf9c29f6b80a695cfdcfa4d13891ef08",
+      "fingerprint": "859ca554186deea5a98aeb8a2d691859652126b1157953e63ae5826283808a0a",
+      "text": "使用 Realtek Connect+，让下一个联网产品上线。",
+      "status": "approved"
+    },
+    "text.home.deploy.discuss": {
+      "sourceHash": "f2b7aa9fc4de1c74189cb2566414cd4acb7f88e2014bfaeee61be69cd965191e",
+      "fingerprint": "409e0d2ba002feab7395adc8a61570b17bbc80f184f099202f0b6e6606b1f943",
+      "text": "讨论私有云",
+      "status": "approved"
+    },
+    "text.home.deploy.docs": {
+      "sourceHash": "de9a140b29eda4d2fda0da9336917104c8922e6d63e358807990c7feb41764d9",
+      "fingerprint": "e9f5df90a41428f69a8051d627754e88b78253442310d8c97185b0eb93abceef",
+      "text": "查看方案与额度",
+      "status": "approved"
+    },
+    "text.home.deploy.eyebrow": {
+      "sourceHash": "fafe48facb08e7c17ab854f8e7ed295d4c7aecc6d66b1b8945db12e005f74363",
+      "fingerprint": "e58dd7a9661aa4bb2639d06cfd6c747369e61ea37cbae651d718ade3d970a1a5",
+      "text": "云端营运模式",
+      "status": "approved"
+    },
+    "text.home.deploy.image.alt": {
+      "sourceHash": "f80adf91734cdb1d15506d3df916fba4e22ecf5200a7d6ff111c453e8ab586f2",
+      "fingerprint": "ffaecc3ab8f2d7e5a1d98147fd9d86bdae652e41cd421ad48129761ac2af38f5",
+      "text": "去識别化的托管服务帳务与营运 Portal",
+      "status": "approved"
+    },
+    "text.home.deploy.private": {
+      "sourceHash": "95619b2112756a3b0da4805d643ec552015afcff7a9a8a6ba94714a529cc1bff",
+      "fingerprint": "ccf9151aaa36c21374fde6be3d3b175d80474721946d6b5846f8f6fd0a097f03",
+      "text": "私有商用云",
+      "status": "approved"
+    },
+    "text.home.deploy.private.body": {
+      "sourceHash": "b1b2618f0753408d0a38bed0cc59b0442b812ef44b3203b9d7c1787a4496551e",
+      "fingerprint": "6d3c943b0b84c605e5d322c1ad245eb42c9cfc620fab3117e88aa7628d663934",
+      "text": "当产品需要自有基础架构、资料位置或治理边界时，Realtek 团队会依需求共同规划专属部署。",
+      "status": "approved"
+    },
+    "text.home.deploy.private.title": {
+      "sourceHash": "dd9bce9088b007d6de1b91c8e3c19b09f21f52b22a75d648aafa3f9cdd10da31",
+      "fingerprint": "e9979e194617e7eaeab76fbf4c295210467bd68fad240fc9732d6bc60b3d4053",
+      "text": "专属基础架构需求，可规划 Private Cloud。",
+      "status": "approved"
+    },
+    "text.home.deploy.public": {
+      "sourceHash": "1c41ab5cf9a280b3c01a78ddbbfe253e9053f1facfaea4f2426443995af369d7",
+      "fingerprint": "9cd56789b5556a306a5a9a90653679811520cd45ddece32695cd199df4895d8c",
+      "text": "推薦方案 · Realtek 托管服务",
+      "status": "approved"
+    },
+    "text.home.deploy.public.body": {
+      "sourceHash": "c2ce94db65de44983dbd428ebb2076329876a68afc0c4d4b67b68c4b3e84292d",
+      "fingerprint": "1419742e769add320caceabab3be8e1779ea2b6d5ebdff309844f69d84c962c9",
+      "text": "由 Realtek 建置、托管与维运，客户依实际使用量弹性付费。详细服务方案请洽询 Realtek 团队。",
+      "status": "approved"
+    },
+    "text.home.deploy.public.title": {
+      "sourceHash": "6af8fb5d7b8ba4cabab615ab46084cf81c49333181320e6f7976bdd060dfe58c",
+      "fingerprint": "fe48994b6fea315ceccd2d632794e4c7db8a213d5518b09d3bade80391c3dd7f",
+      "text": "使用多少，支付多少。",
+      "status": "approved"
+    },
+    "text.home.deploy.title": {
+      "sourceHash": "81bbb6a03ff0c5d63297ef9a1de4b295e8b401a020ab9842adc607af4eef2e6d",
+      "fingerprint": "9bec7f490db8e6dac9f1dd42169711a8ed504c790845265b61d70d05b117edd7",
+      "text": "由 Realtek 托管营运，或部署在客户自己的环境。",
+      "status": "approved"
+    },
+    "text.home.docs.body": {
+      "sourceHash": "f41f7c3b56d24d84e44400c115ad6c2361b49121c9cc1ca434fd4f14dfbf8762",
+      "fingerprint": "e608ea9a7da6a704629d7022d038edc1b88ff6db8042d0d5ccad4b9345c51d1d",
+      "text": "在同一入口查找平台概念、整合指南、API 参考与 SDK 范例。",
+      "status": "approved"
+    },
+    "text.home.docs.cta": {
+      "sourceHash": "95dcab643d9fe39fa6f49368739de3e0eed570cadf8c6efc35310c34bfddf91d",
+      "fingerprint": "6c8e9a99468298566399ecda8b129423be3543d4e70e54f446099ced8237f6ac",
+      "text": "前往开发者文件",
+      "status": "approved"
+    },
+    "text.home.docs.eyebrow": {
+      "sourceHash": "6718da71aeaf19b1eb7135485442f50618bf1dceb53993f2ad570e96da912572",
+      "fingerprint": "5139504879c30990bd772dcc145a1d9c289b0dc191eefb406da727900ed92220",
+      "text": "开发者入口",
+      "status": "approved"
+    },
+    "text.home.docs.open": {
+      "sourceHash": "3273bb1e528859575bc6ca5211cfcebe6203a785f4f25ba4f44a5cd8083553a9",
+      "fingerprint": "9ade2c65e63763403ee73ea46c11076d81b7c7c68ad37694da68fe6a9afe6f91",
+      "text": "开启章節",
+      "status": "approved"
+    },
+    "text.home.docs.title": {
+      "sourceHash": "ea443c25d75ba7b72446cf332098acc44f374269e6f3dbecfd66df99dc57a41d",
+      "fingerprint": "1934a09f809dab482c2e54720761abd1206d8ad9b0f8db0ec72e138ea3832496",
+      "text": "为产品、韧体、App 与云端团队建立共同文件主軸。",
+      "status": "approved"
+    },
+    "text.home.eyebrow": {
+      "sourceHash": "523c5e69e1ed5e108f09bcda72a4748e28bfa313f301a7790fa4d3205abdac23",
+      "fingerprint": "407fa4087b46d73c988fcd2c173078b36a053dc3bba2072a0e4903ebfe9426c8",
+      "text": "Realtek 托管的物联网云端",
+      "status": "approved"
+    },
+    "text.home.feature.details": {
+      "sourceHash": "a212ead4675f3d2e94e6abb798dcc6914582d59aeb26e8fca73693f510da4973",
+      "fingerprint": "483749c3d7c40c39623d1e8386e7967bd97e3429fd93a3be3c6ac69f68c4499b",
+      "text": "查看细節",
+      "status": "approved"
+    },
+    "text.home.film.body": {
+      "sourceHash": "6365c48781cff51d8cd74e7f457a6fb4f8f3ef827bdd3f88dec27e962c7651ed",
+      "fingerprint": "b9c67f4d732dd7a0a33f2fb10b1eccc56956ba04551729ca2989f55f7317ad14",
+      "text": "Realtek Connect+ 将半导体与连线技术基础延伸为云端平台敘事，协助产品团队打造可商用規模化的联网装置。",
+      "status": "approved"
+    },
+    "text.home.film.cta": {
+      "sourceHash": "daf9611a5b0aec9e1ad275f0507104c7cfecdc7f841737b5d014f36117014f4d",
+      "fingerprint": "9790bc8ef246443836e81d0816605460e0122c7d961a2305e2b43d7264ccbb17",
+      "text": "观看品牌影片",
+      "status": "approved"
+    },
+    "text.home.film.eyebrow": {
+      "sourceHash": "ea8d473925dba27782f9442bd8e854a490dce275c12a39a81e8a40c85e3a9113",
+      "fingerprint": "abfe4e5c16a84352314070b473a737795c562c43f2f73de097edf1f4582f6373",
+      "text": "品牌基础",
+      "status": "approved"
+    },
+    "text.home.film.fallback": {
+      "sourceHash": "524d74224d5c695233a94c1d1d885d521e566afc1ab64f9998f8ffe7c2d84c20",
+      "fingerprint": "7715c6d583286b1f12433520fceee23a041c9dd5b3591040eed3c1c7d5f7b424",
+      "text": "你的浏览器不支援 video 标签。",
+      "status": "approved"
+    },
+    "text.home.film.point.ecosystem": {
+      "sourceHash": "4ad9c1b6bec211967f2867b52beb0404feb6d7611a8624bac1070fedfd8aca2f",
+      "fingerprint": "6048a4c9fa35529c7f5ce3945a5b0bac4c4cddd3077856327440bc96bd89aa54",
+      "text": "联网产品生态系",
+      "status": "approved"
+    },
+    "text.home.film.point.enterprise": {
+      "sourceHash": "b24ed59d96f51949514f27d057ed923757749d774c4e79db6cd1affbb138b3d0",
+      "fingerprint": "239f98c2ba41e5a1259a3704883ad060d01ea916601cf601b1d244706ab43b2b",
+      "text": "企业部署信任",
+      "status": "approved"
+    },
+    "text.home.film.point.silicon": {
+      "sourceHash": "f9a4d0923b217553afe26e2498cc0c80bd7ee7f1a44c8826fb957a4f87bd556c",
+      "fingerprint": "bb4467a9ae91faf1c2bc65c47fd88b68cb3afe78c1252a4b59eef4fdcb1a7925",
+      "text": "半导体技术基础",
+      "status": "approved"
+    },
+    "text.home.film.title": {
+      "sourceHash": "6994dba8150eec02db85cf70a5172f38a7369ec167c76e9b3aeca9a1055e8422",
+      "fingerprint": "949656cdcf35399f7b17cc27fe56fccbf3d574ac23266c83b3a476054626a85e",
+      "text": "建立在 Realtek 的联网智能之上。",
+      "status": "approved"
+    },
+    "text.home.film.title.attr": {
+      "sourceHash": "129096ea46114c297506b38b916fce405c2db9246351f76f02a93959b28648ed",
+      "fingerprint": "82fdd85f7223a4e80df2e926e4a1c983cd399ae9fb4b8593274b8c2044895049",
+      "text": "Realtek 企业形象影片",
+      "status": "approved"
+    },
+    "text.home.hero.image.alt": {
+      "sourceHash": "082d538a41e08424a4ad663975f4345c345acbe31e319e2c832c3340da577335",
+      "fingerprint": "c7d1047c32d14963bfe22bc1e969ba705e40270f98891f1a0caf5a6d5526eeb0",
+      "text": "去識别化的 Realtek Connect+ 韧体与装置营运 Portal",
+      "status": "approved"
+    },
+    "text.home.hero.line1": {
+      "sourceHash": "4a493ec0fcb5f3da910aa7ea1a69fa40a4a689820417ad8ddaa0f52f60511855",
+      "fingerprint": "ed867bc514574b876eb9a457197fe60287063ea2af4c883834889e1e419fd858",
+      "text": "Realtek 托管 IoT 云端",
+      "status": "approved"
+    },
+    "text.home.hero.line2": {
+      "sourceHash": "b3e92ad36c08b1fd85ba1d9c8d4d4549100e25f884c72c2bb90be248f8600eac",
+      "fingerprint": "b28fd58e200fd81afa9df74ab45b1884ff879724d3d71121c53c7ff5631271c3",
+      "text": "让装置上线、持续营运",
+      "status": "approved"
+    },
+    "text.home.hero.title": {
+      "sourceHash": "10c3c1c53ac8f818b4c1545f38799b535f563a42e69ff06715623d49e67f20c7",
+      "fingerprint": "96795c9a539007d2f7f2b67545dccedf260df8769d26aee7cf4796ece76b9389",
+      "text": "Realtek 托管 IoT 云端，让装置上线、持续营运",
+      "status": "approved"
+    },
+    "text.home.lede": {
+      "sourceHash": "4e948a314cf246e8a1df3dac8d41171039411cafa9917f4bd057a2c1c7244b63",
+      "fingerprint": "01e5ae007330eac04f04c5865054289556ee61f35800064864a66392737fbf7c",
+      "text": "以托管配网、安全韧体更新、装置群营运与完整平台服务，协助联网产品更快进入市场并持续营运。",
+      "status": "approved"
+    },
+    "text.home.overview.eyebrow": {
+      "sourceHash": "215e5e3a52e8f7af4cd5395ead95b05a9a748a959b0d9f88f215c3a72622aa27",
+      "fingerprint": "b50505d79567abec62d77dbe090a39f4e08ede4e4bd34f132765cb361abdda73",
+      "text": "平台总览",
+      "status": "approved"
+    },
+    "text.home.overview.lede": {
+      "sourceHash": "537cc6a2e926c52fd03888c737723967213cb53da934326a97ce3a6ecdd06fdb",
+      "fingerprint": "8917b8fa6e8ebfb3cc854b3d59beb3214a25dec9b3f772b2a611aa6d719d10e2",
+      "text": "Connect+ 将 Realtek 连线晶片、韧体能力、云端服务、行動 App 流程与营运工具整合成一條商用物联网产品路徑。",
+      "status": "approved"
+    },
+    "text.home.overview.title": {
+      "sourceHash": "37d9d66c84458b8c869760c5e04c4ee7f3a2e316bb0c08f20488549a00de8eb6",
+      "fingerprint": "7e752ed8d2c8d794c59a420a7906cc1f6e25ee0cba670bca353cd65d6889052d",
+      "text": "从晶片到联网产品生命周期。",
+      "status": "approved"
+    },
+    "text.home.principle.active": {
+      "sourceHash": "1e6ecc3ef0ecddfcd1b3fbb829f51120552043c11e606ff79a4e941da08fb871",
+      "fingerprint": "b29b4088b53ce5be1ddaf6d66ec2cbd7569c9ab1143d6c220dd7978584412b42",
+      "text": "可管理性",
+      "status": "approved"
+    },
+    "text.home.principle.body": {
+      "sourceHash": "0787e22855092db1d36bd4f86c76e0694fdb286345d123d5ff8871aadc397d05",
+      "fingerprint": "d5ff5a1b6770c527ecb494f087f25d475053b95c49a1b05348aee03a51449c6c",
+      "text": "Realtek Connect+ 以生命周期系统呈现：导入配网、云端身分、OTA、App SDK、指标与企业部署相互銜接。",
+      "status": "approved"
+    },
+    "text.home.principle.cost": {
+      "sourceHash": "d4171e72b21c352ff1d3ccf7c010e60c5bbecae96868009ac67752b5b454e2da",
+      "fingerprint": "6ab41c402e76af262a4f012bf84534539134d4a557eb6ef478cdce6496d0e344",
+      "text": "成本控制",
+      "status": "approved"
+    },
+    "text.home.principle.custom": {
+      "sourceHash": "8a3116674af7d4ac796b6af5ea29cb21ba1c724bdb329618e2f0112816f7d6d7",
+      "fingerprint": "498ce3524f6d04656303ce9b297eac30f73fc62b95059bd7b5cd4fe6683d023c",
+      "text": "可客製化",
+      "status": "approved"
+    },
+    "text.home.principle.panel": {
+      "sourceHash": "df2e42195c39069f596e414a5fae0cd54a7273531a56670c37f9ef26b6275248",
+      "fingerprint": "870c8c0bcd9f34373bb5063ea247c7fc1eabc2cf6ef5dc5ed4dbcc43049b502f",
+      "text": "用同一个平台敘事管理韧体、使用者、装置群与支援流程。",
+      "status": "approved"
+    },
+    "text.home.principle.privacy": {
+      "sourceHash": "be1c5529348609b924256c8d5edb6115cf880d3c4ca0476e4323290fbd4b5eff",
+      "fingerprint": "1b2f4e5b5a283877eebf3eba0a06e67cac04f63b40fbcb86bf5cbb71053c7191",
+      "text": "隐私",
+      "status": "approved"
+    },
+    "text.home.principle.scale": {
+      "sourceHash": "ac84b336f5c54438e09387503b390865a1aee62cb1fb51175a41bb2fb4c25bee",
+      "fingerprint": "9555d65f678825615264092c831a752b4967ba1240627b21f86e6b0b6aa074e6",
+      "text": "可扩展性",
+      "status": "approved"
+    },
+    "text.home.principle.security": {
+      "sourceHash": "40a32026b0df37aefbe5397e4fe2806c6a5b25c6aa6639a7af8277c6f600f459",
+      "fingerprint": "146b4d3f0b39454bf47f460621dd099ea2c95c93e32a60f49a3daba9faa21514",
+      "text": "安全性",
+      "status": "approved"
+    },
+    "text.home.principles.eyebrow": {
+      "sourceHash": "9d3907c31b8e3b48d051c8072897c21cd7fa2b2ae0d0c32647133017e67f3ea5",
+      "fingerprint": "c6ab3f0052346fb6fa3270c84d66850806e9a597f2d1e5ec3f7bccb555b7045b",
+      "text": "設計原則",
+      "status": "approved"
+    },
+    "text.home.principles.title": {
+      "sourceHash": "2e0e4757355132ac457b884ff244098069c522a82d541f609d764ed5d55268bf",
+      "fingerprint": "19427e68f23c8fb22faae326694a4a37dcadd36d115bf19804b711e70cad86ad",
+      "text": "为企业級联网产品計畫而設計。",
+      "status": "approved"
+    },
+    "text.home.samples.app": {
+      "sourceHash": "9ba750fb51075a3825415a9e23d27a5242f49345e94df450b7f00adb76d34a14",
+      "fingerprint": "b0f21493887acb96fe001f9443b822dc01029eb0272abbac84c0e4e8990b9c04",
+      "text": "App 客户端",
+      "status": "approved"
+    },
+    "text.home.samples.body": {
+      "sourceHash": "e02534ea361ab47105bfaee1db6fb13b4775624185ed23fc2afdad9011e81ce7",
+      "fingerprint": "20fab2d5c1159ea8a4cb1ecb33b2c68a3b61a860982fef11cdef0fa35e571aef",
+      "text": "Android、iOS、WebApp、Linux 模拟器与 PRO2 装置范例协助客户跨 App 与装置介面验证 Realtek Connect+ SDK 流程。",
+      "status": "approved"
+    },
+    "text.home.samples.cta": {
+      "sourceHash": "79feb67cc056039872c1acb47cc00fe5ab6143020094c9c8e9bcc65e17c7972d",
+      "fingerprint": "fbfb79a9638e05b2e3d15165faa668c51eb84bd0f50a7f80624492003e76f339",
+      "text": "开启范例指南",
+      "status": "approved"
+    },
+    "text.home.samples.device": {
+      "sourceHash": "2fa9d8ad42679ee2b39d968f4833554250feb79c1f2b03bdebd7a61e6f1eacfa",
+      "fingerprint": "f3fd66344376b8daac5f656cd3c942c26e2642f628d2e7c08190b099dd06ada9",
+      "text": "装置参考",
+      "status": "approved"
+    },
+    "text.home.samples.eyebrow": {
+      "sourceHash": "9326be9c7190b3edfa6dc07dfc9b24bfdc456988e2f51d7d47b9728c90776360",
+      "fingerprint": "08c79e0929b4e59096f6e2dd1cbf11b13e2ed0ac589d9e837512dd8f8065175d",
+      "text": "SDK 范例生态系",
+      "status": "approved"
+    },
+    "text.home.samples.title": {
+      "sourceHash": "3a361d7615d3e53c8f408aba203810cb19af18c351e92985abeb04cc6746ef1d",
+      "fingerprint": "367f1b1e75829ffb55ed23566953af1274d9844da28783931cd06ab0ca701eda",
+      "text": "投入产品整合前，先跑 App 与装置参考范例。",
+      "status": "approved"
+    },
+    "text.home.services.eyebrow": {
+      "sourceHash": "6c80dfca0458a9c3a5b9e68f41e05a9fe5bbf6c6c8d37e7c87beba6c8b0393c1",
+      "fingerprint": "180234f7668498fdef20c24a6e83b5562f283e826e5928b2b050a4012e52081a",
+      "text": "核心服务",
+      "status": "approved"
+    },
+    "text.home.services.title": {
+      "sourceHash": "72a04b9076e3a527a462d74c7df0766b5adcf8fd676356f554d6adf92f2afc7a",
+      "fingerprint": "9d7f43d0dc414e58a9f884f5d9eaf1c58d06ec81e2c2e4f0a0da36a653a4c290",
+      "text": "为联网产品团队封装 Realtek 云端能力。",
+      "status": "approved"
+    },
+    "text.home.surface.insights": {
+      "sourceHash": "aa80b1dffa8b23be4b466c0f19096dee430df50cf2bb3d4d9483d8925b694308",
+      "fingerprint": "2cf8bd9510825aab9b8a2ec5b19204c7b5719b665392c1511850cf97ecea1fc1",
+      "text": "营运洞察",
+      "status": "approved"
+    },
+    "text.home.surface.onboarding": {
+      "sourceHash": "c66243d172b4067bc754d1f8dcb6df58a67a48663f1e92ec1c389dc4a904b024",
+      "fingerprint": "e88fe55c857369aea7dfbd2bc99f2d63e658e665db9eec86523a706786e0ad46",
+      "text": "导入配网",
+      "status": "approved"
+    },
+    "text.home.surface.rollouts": {
+      "sourceHash": "270aae81352e9570372e9aec2512fe9187c629ef37979afe919fdbdc2c562506",
+      "fingerprint": "649118e0c7c5203ef247a68681515848ab588ec45c53d2eaa47547fead088246",
+      "text": "韧体发布",
+      "status": "approved"
+    },
+    "text.home.surface.security": {
+      "sourceHash": "7e5f5817054adcce7f76dd32030fc3aa5fd9244403c4a7cfdd3f40558d5dac5a",
+      "fingerprint": "aa5a0e9120ac4c6bcded895a99c8533885cf57ba50bad03e25596b39ce2e7c99",
+      "text": "安全",
+      "status": "approved"
+    },
+    "text.home.surfaces.card.body": {
+      "sourceHash": "4bd78c36fb773469cd1a7a2ec9ea24850244a61383c4eb85b414b30ad72b6958",
+      "fingerprint": "c4468dca840d6e4a4a51ca548bebf0437cc40b6bb37c06c25cc50b7bdbdb1358",
+      "text": "网站以产品介面呈现装置、云端安全营运与仪表板工作流，让平台價值更具体。",
+      "status": "approved"
+    },
+    "text.home.surfaces.card.title": {
+      "sourceHash": "9d66a7657ead3533194a09e838dcf5cf6252877137ed89de2e8cfa575f3a4b87",
+      "fingerprint": "186bcec59348d07cf3168b40dd8b7134db96151bdd09f5a1b93d74b346d73424",
+      "text": "配网、OTA 与装置健康使用一致的视觉语言。",
+      "status": "approved"
+    },
+    "text.home.surfaces.eyebrow": {
+      "sourceHash": "65f5f8bdb28aaa380c728dfe9996566f4392789def53fc22f64c05131393f50b",
+      "fingerprint": "b6c7ffec47ecc1d31766cd824ce03e3ad4c4226f287fa30e9d42abed4bf29273",
+      "text": "平台介面",
+      "status": "approved"
+    },
+    "text.home.surfaces.title": {
+      "sourceHash": "41e6ce96ea7163b6ce61e6ce84892e41ecb1252a6dda0c303a0ea3d3660e295d",
+      "fingerprint": "ff3f15f6d87c3a309b023b9b5c22e04da7b2594b1ffe717764c08a75efa8bf59",
+      "text": "呈现完整产品系统，而不只是功能清单。",
+      "status": "approved"
+    },
+    "text.home.trust.eyebrow": {
+      "sourceHash": "08df37fb12d2ae0a8951e9bb1a92681e2a0f199733e59c759c087a6b5cf9cac0",
+      "fingerprint": "4fb163431bd0ffbeb2078212d815aad0170aef05cb81538435f24029773f943b",
+      "text": "企业級基础",
+      "status": "approved"
+    },
+    "text.home.trust.flexible.body": {
+      "sourceHash": "d794e1080171cbcd92258dda17ad176a6c7b0c739143f0679d22375f52b2d180",
+      "fingerprint": "da09b026243ce3e10f0bce0f34599b08a4f2b372a86593c85a5bcfa243f6f3aa",
+      "text": "需要专属环境时，可延伸相同产品路徑。",
+      "status": "approved"
+    },
+    "text.home.trust.flexible.title": {
+      "sourceHash": "625d638fd9942cca918e8bf6eebdf0c48ea2b29c61910181d1ccd45678912aa8",
+      "fingerprint": "bf03542788a550adb651ff24b8f19dcfc8dc9219ffa7484094817d694229edc4",
+      "text": "托管延伸至 Private Cloud",
+      "status": "approved"
+    },
+    "text.home.trust.managed.body": {
+      "sourceHash": "9055103d4b162ac61a62eb8f12ad8c14c8672e00418dcf50e785d8e6dfe9de29",
+      "fingerprint": "8536a4a41a24c0673e583f998f3a06f548366e30680dc31ede6dc2668adb35ef",
+      "text": "由 Realtek 负责平台建置及持续营运。",
+      "status": "approved"
+    },
+    "text.home.trust.managed.title": {
+      "sourceHash": "16f12f810e8f51cad82bbb6fab75b92d59c8cc29377c4337ec343ff8e2b335cd",
+      "fingerprint": "fd7b8aaf0ec85fa0cc24c5a0c0ce18425306f5559e73cd5b7b388e92851be92d",
+      "text": "Realtek 建置与维运",
+      "status": "approved"
+    },
+    "text.home.trust.security.body": {
+      "sourceHash": "28bed96b3f72975b3b3801fed526f37474ce305441dac4d02cd05d945bfd7367",
+      "fingerprint": "5b820ec598de83eea1104e264fa37b5e7382c2bb963f64687d1c2671fd9b5062",
+      "text": "以安全基础串连装置身分与云端存取。",
+      "status": "approved"
+    },
+    "text.home.trust.security.title": {
+      "sourceHash": "e683b9c1ae7352b50c1c2d6c393bab04fda31252d8a8f12e9b2539fb262bef24",
+      "fingerprint": "49a85d0d22c1c09fab554eec734536e7ca88a76dbd7356df18cda814afc5507c",
+      "text": "装置身分与 PKI",
+      "status": "approved"
+    },
+    "text.home.trust.title": {
+      "sourceHash": "9e9f4a6d81623e916dd5160cac7cef26a728afb6d1390b504e5a922f5628a8b3",
+      "fingerprint": "7d26a62fbe0d7692797b6d2d5a1074cbecd8a9dd771e13bd2902ad40d74a2f5e",
+      "text": "为联网产品打造的云端营运路徑。",
+      "status": "approved"
+    },
+    "text.home.use.appliance.body": {
+      "sourceHash": "fbd65a2b2e05f17e33e1d2c5ea8baa5b156d380b8be6c7a2e4bc772753f24b2e",
+      "fingerprint": "ac4364c4de3f379f9f1ed3e171bf6d4dfe7bf771d05dd599e23c7cd60694d256",
+      "text": "長生命周期韧体维护、启用资料、品牌 App 与支援診斷。",
+      "status": "approved"
+    },
+    "text.home.use.eyebrow": {
+      "sourceHash": "dc44eb538decfb4fd5ec3d8942ff37255a9776ea45134a180b6fdcdfd246e349",
+      "fingerprint": "409b1971e71335dc1e9f2813909003e202955e38eee7f5126cfa19179c206113",
+      "text": "使用情境",
+      "status": "approved"
+    },
+    "text.home.use.industrial.body": {
+      "sourceHash": "d6f2c75d6744c074f8113b3197954f53540e10573c142441dd2113ae202b1246",
+      "fingerprint": "a9134e2712d850a0cfdcba077e057dd608ed4564911c8a81bc3c97ab82807ff1",
+      "text": "装置群分组、中繼资料、安全更新、私有云与营运可视性。",
+      "status": "approved"
+    },
+    "text.home.use.smart.body": {
+      "sourceHash": "9c35783df9a8860f4b755cda92b4ce7c2d2e1e1ce4332a04e6082027ae3d713a",
+      "fingerprint": "816a59a00e93246e1da9155da76360eefa1450ba05312557b18577344acf0a74",
+      "text": "App 配网、分享、推播通知、语音助理路徑与 OTA 维护。",
+      "status": "approved"
+    },
+    "text.home.use.title": {
+      "sourceHash": "cb8de6b1e606d94d7e64990f1961e04f702f02248787169e508049a11adfbb02",
+      "fingerprint": "723c5d189b6dbce275c0e2b115405324371c4a878b37e692a312c0390030bac1",
+      "text": "为商用联网装置团队打造。",
+      "status": "approved"
+    },
+    "text.manual.back": {
+      "sourceHash": "cce4966becf697e81d6f4eb7d7d780afa8b789f954ea17038c6f4e35d3ede12b",
+      "fingerprint": "ec7d0db412f616c0babe724bc01c3b6d00fe8a25f41fde929ec368d2a636b869",
+      "text": "返回使用手册",
+      "status": "approved"
+    },
+    "text.manual.chapter": {
+      "sourceHash": "35b1ed10f7db33c212d32cf321c7bb4c59e3430ec387080e752c1cbb31e5a4b1",
+      "fingerprint": "a4339b7140abc06b82308bea98ddcdf056ef85d0eb1c488faa31ca8e54278e12",
+      "text": "手册章節",
+      "status": "approved"
+    },
+    "text.manual.download": {
+      "sourceHash": "9acb6d9f6e8dd54014dd86f20f93923cf58299996aff5fe9493bc4c4cd663d3e",
+      "fingerprint": "b856fe69520d8ddc4aa81594cae775113956172ae2cd40a5c9e05b9acba2dd7d",
+      "text": "下载完整 PDF",
+      "status": "approved"
+    },
+    "text.manual.eyebrow": {
+      "sourceHash": "86f82bdf1b0c5674abe6c12860038dee56d1c056f001893f631e9e3a7e2b32d0",
+      "fingerprint": "846d746c6333a55b2526f5331507a1bdaf4041bdd29dd6a18034ed8912e5f2ba",
+      "text": "使用手册",
+      "status": "approved"
+    },
+    "text.manual.more": {
+      "sourceHash": "b3c8826c8a3160f1147ec0025167f3195d6bef2419dad56b93b01c346507074f",
+      "fingerprint": "03af2a859231341c30976511b9615b254d9ab76ea560288b1600761e5a3d6c6c",
+      "text": "其他手册章節",
+      "status": "approved"
+    },
+    "text.manual.more.title": {
+      "sourceHash": "aead059e526182c9615489535683d007e89b4486efd99a584d09fbd07f7c1190",
+      "fingerprint": "ff3636533915d4663baaf7c1822593bc8cc8f1a7311633b6474c8757ed9939ba",
+      "text": "繼續閱读相关手册章節。",
+      "status": "approved"
+    },
+    "text.manual.offline": {
+      "sourceHash": "d523df4f9dc5db8125dd218dafe513308c4adb3fec711d1245d13f3990178822",
+      "fingerprint": "a0e9bad5023cef6eac3966d941aca12b6270551a5b504135906766829297a09d",
+      "text": "離线文件",
+      "status": "approved"
+    },
+    "text.manual.offline.title": {
+      "sourceHash": "25d5ce9f3b5cb989601846e1aac2fb20797a046d904605dd9c1458fe43724de9",
+      "fingerprint": "bbe3f3e83dca58c145e7555486d31ff99155a60447cf3f9fdeb0c7cb7a4ce88c",
+      "text": "线上閱读或下载同语言、可验证的完整 PDF。",
+      "status": "approved"
+    },
+    "text.manual.open": {
+      "sourceHash": "fd0d660e6450dc98c7d1718bd4158e6279292a42ba2c9dc1b135083083aa8868",
+      "fingerprint": "3833cbfa64f3ed5d47af1072be1fac8f94fc71160a61580065cb20d10f590299",
+      "text": "开启章節",
+      "status": "approved"
+    },
+    "text.manual.reference": {
+      "sourceHash": "aba20316a655b88296436347cb2a7b2006dcec9adbb343b173219de678a614c1",
+      "fingerprint": "c69ae3ebac6ee448c6bf8369993c19c8d3a352548053a7c6a99617b3f8dcbac0",
+      "text": "开启 API reference",
+      "status": "approved"
+    },
+    "text.nav.architecture": {
+      "sourceHash": "0cbba85070c845d18f614a591ce9ef06de6cf0f254ae6e563d14b426d83bec1d",
+      "fingerprint": "eb7af6cbd98f20f4f8654d0c10e53185312e3c537b8aa383da52a4f443c1adb2",
+      "text": "架构",
+      "status": "approved"
+    },
+    "text.nav.contact": {
+      "sourceHash": "83104858b36fad06284e358c11b0a972be4809bfb903a8b595afcbdd8421089d",
+      "fingerprint": "142775c643d8f16a505bbbad52642b212814943d4709b96864306ff327944fe1",
+      "text": "联络",
+      "status": "approved"
+    },
+    "text.nav.docs": {
+      "sourceHash": "5fedee5109e519d6474191600766d0d8217d15f20f68761f67d437bd27f4bf0b",
+      "fingerprint": "a8a2dcebeac6adeb2c3ea01c6332b01e8a84f10d8a4f23b31307c287b88400b5",
+      "text": "文件",
+      "status": "approved"
+    },
+    "text.nav.features": {
+      "sourceHash": "da75f361e26da15a7813305842b4b03613c2f96679b4504df36efd51b9747b34",
+      "fingerprint": "245080d4d1aa8b87331a634f601c75f2b5c919628a76210046ce95a955c37ef5",
+      "text": "功能",
+      "status": "approved"
+    },
+    "text.nav.language": {
+      "sourceHash": "3adcf297a9e5028c6647fc831923b8d3ee980fe55e907890c6b52957ea2b2768",
+      "fingerprint": "7dfb3ff134cb441a90037236c5221f3cc1f48a9a1090cd0db77e77c2e9a4e498",
+      "text": "语言",
+      "status": "approved"
+    },
+    "text.nav.menu": {
+      "sourceHash": "874c681c7d9819e16f2ffe7d21df042fccd9892fb41ef1ae2cd14aa7d85e65f1",
+      "fingerprint": "c9e67f9a1852b29c49c4c0fec165db5a0bec0de91a8f56ff111dcb3a4354bff2",
+      "text": "开启导览选单",
+      "status": "approved"
+    },
+    "text.nav.search": {
+      "sourceHash": "74d8f5f55acca67b510b68d6ad6f16e7dee838d1b7bf0e48ebf1980c448eca94",
+      "fingerprint": "3d85321efbbf2f7da1d7c0896f2618a26b26076e0448a737c2d3c06c2d602f85",
+      "text": "查询",
+      "status": "approved"
+    },
+    "text.not_found.actions": {
+      "sourceHash": "79665c9989a2bef9a9854f2ce480ffa3da2493c77c56237ffe1fb9ac9de025ee",
+      "fingerprint": "0f8b5efb8c4c00ad3e776abab78de8f2689e6ec5194febeafeb52977d2705de6",
+      "text": "页面復原操作",
+      "status": "approved"
+    },
+    "text.not_found.back": {
+      "sourceHash": "ba4b51c4867f7794cee89f2e8fcd831986bc7aa35f88264b861bcf44d31b1552",
+      "fingerprint": "69e44d3c2019bc83d27826fc5f0c7789bbf067455e02be5a86e9f419442ce220",
+      "text": "返回上一页",
+      "status": "approved"
+    },
+    "text.not_found.body": {
+      "sourceHash": "b567934707116d974b8e5ddd029f63d72e514015878f175b2aebedfbe58c7c53",
+      "fingerprint": "d141b65567214ee20b41a977f35ebc980573e5ea3dc245e8b76253a45f1310d1",
+      "text": "连結可能已过期，或页面已移動。请返回入口网站，繼續探索 Realtek Connect+。",
+      "status": "approved"
+    },
+    "text.not_found.description": {
+      "sourceHash": "f70db442b6017804a18034ee41f433db6cdd27bfb076a96e6a9f93a837739835",
+      "fingerprint": "3f70cf9566e2cbe035e65e3c47864d12f7f0fe5cb42fb972def222b42160a9e6",
+      "text": "找不到您要求的 Realtek Connect+ 页面。",
+      "status": "approved"
+    },
+    "text.not_found.heading": {
+      "sourceHash": "4930cc25dddb587220b9ed86de4d0599d82259d47b655930320c8f7c00af1bda",
+      "fingerprint": "9bc3efc2cc627534857c59507429253b2032223ce63553f4481d1ed19f7abecc",
+      "text": "这个页面已不在连线范围内。",
+      "status": "approved"
+    },
+    "text.not_found.home": {
+      "sourceHash": "9d6f28791568a1e87912f2cb75c49bcdaf574eb5831de6b827bf11ab2319e145",
+      "fingerprint": "f7a891afb1b186f3c841c335e4641b56d89c1b425e7c861efd890ba7fcc4c006",
+      "text": "返回首页",
+      "status": "approved"
+    },
+    "text.not_found.title": {
+      "sourceHash": "2a8636b93b7182b2dd8c7b5aaaf3669773575892a8df092ba44643a185d93446",
+      "fingerprint": "e9a174914b189fd7804923d6e4de3c77d7e02774a288f9778d258f577ace5819",
+      "text": "找不到页面",
+      "status": "approved"
+    },
+    "text.portal.breadcrumb": {
+      "sourceHash": "d43211fae26f4a2b62d18da990650568f1cd8e3a4a7c6656165a5e5fc3247e3e",
+      "fingerprint": "07e8d31ef5d117771315aff401de4f8c5769895972cd09164e76c34a3fce67ba",
+      "text": "导览路徑",
+      "status": "approved"
+    },
+    "text.portal.manual.cta": {
+      "sourceHash": "0c073d183fe6a1f2fbec2abb25026964fdbccc03e297673492ad4dec9cbae0c7",
+      "fingerprint": "513a46dfe24fb990350661b3b6058d32eb9621b50ea11817030d34c1d1e3d3d8",
+      "text": "閱读开发者手册",
+      "status": "approved"
+    },
+    "text.portal.toc": {
+      "sourceHash": "3764a4ea36ea79fbbf63179a3bd7d1691c9a82dcdf08c48fead5726f518a89e2",
+      "fingerprint": "a17eb30e3302822bad21e90c8cfa19f9c56776966ae59b50541639676d425c04",
+      "text": "本页内容",
+      "status": "approved"
+    },
+    "text.privacy.admin.body": {
+      "sourceHash": "a36001d576e3695e27f5dfdca806d9761bf5e60469cb0c43924af03d65495a38",
+      "fingerprint": "dce136b89e526eead40c7efcb5855dd561b6fbc8201b92f4be95ab27b7e091dd",
+      "text": "Lead review 以 admin token 保護。Admin 页面不会放入 sitemap，并标示 noindex。",
+      "status": "approved"
+    },
+    "text.privacy.admin.title": {
+      "sourceHash": "4835aa053e1b6362897a6898b2d2ccfe122490b36dfa0d6b7c15f90b6016a6a7",
+      "fingerprint": "c5b57e1d10f2e550c7cb345d0a3ff25bddc83ad132947bf2a421d657dc38bd02",
+      "text": "内部存取",
+      "status": "approved"
+    },
+    "text.privacy.data.body": {
+      "sourceHash": "0fea1bf4b9b2bb5f94c486a17c35d5cb9cfeb0e478826606dd84ce7e5772a2b0",
+      "fingerprint": "8711baa776640f401698d1751d56b28cf2aec94a5acfec688bf2752cd7e7b1e1",
+      "text": "联络表单可能收集姓名、公司、Email、关注服务与选填讯息。Analytics event rows 僅限 page_view、click_cta、scroll milestone 与 engaged-duration events、canonical page 或 CTA keys、必要时的粗略 scroll percent 或 engagement duration、referrer origin only，以及短期 ephemeral session id。不使用 cookies、localStorage。Analytics 不收集姓名、Email、公司、表单讯息、raw IP addresses、full referrer URLs 或 account identifiers，无法可靠地将单笔 raw analytics row 对应到特定个人，analytics 记录仍可能属于个人资料。",
+      "status": "approved"
+    },
+    "text.privacy.data.title": {
+      "sourceHash": "4ba4d12ae7d02a891becb7087319d70dff0e6cf00cf18d23dc7f7f0523c8e127",
+      "fingerprint": "df32373756c48b10ff30a749d5b0fbdd68b83935645b52d9dc47f98380da7b47",
+      "text": "我们收集的资料",
+      "status": "approved"
+    },
+    "text.privacy.eyebrow": {
+      "sourceHash": "6a5c05f42b9248fe7c2ed364bc7a415a01a84c9a478d6eae19845d610c64c082",
+      "fingerprint": "d079cdfc77fcbb194c395d521019c4b6ba4e657f6ba1b3b176e4cebf2a919c02",
+      "text": "隐私权",
+      "status": "approved"
+    },
+    "text.privacy.intro": {
+      "sourceHash": "4cd671de9dfbb28458ab776e377c2256d775ca1eef136021dba79504e51ec8eb",
+      "fingerprint": "a0c20752764659f9e3ed406175e7aed315c7a135fcc5ec9b74ca1adbb107402b",
+      "text": "第一版网站只收集回覆 Realtek Connect+ 商务询问与早期评估请求所需的信息。当 ANALYTICS_ENABLED=true 时，也会使用第一方 SQLite analytics 做基本网站量测。当文件查询启用时，会使用 OpenAI 产生 query embeddings，并生成以來源文件为依據的回答。",
+      "status": "approved"
+    },
+    "text.privacy.legal.body": {
+      "sourceHash": "85e080fd93300af69f8eed1dc9bf77407ff08430011d42263be191b9ad851321",
+      "fingerprint": "f79f69f56c861c352180faca1f18396306650a8fd5712bef5fb4eba2fc6abf1f",
+      "text": "此声明是网站 prototype 的 GDPR-lite 实作，不是完整法律合規套件，公开上线前应完成審閱。",
+      "status": "approved"
+    },
+    "text.privacy.legal.title": {
+      "sourceHash": "6039f83c147576f9f850c3fc862f790e894f45eb542dc7ce69eee2cef823a2bb",
+      "fingerprint": "2e389e859f1fa7641ad54f7ec2450fce12dde076e08ced2726aebaee2ec4231e",
+      "text": "法务審閱",
+      "status": "approved"
+    },
+    "text.privacy.retention.body": {
+      "sourceHash": "74a128bb5aaa8a08c023a71dc5aaaf79750e0f799977e0ce48523fe9f777d9fb",
+      "fingerprint": "c336039475a4c71a2ad4926e0f7f8e35a23ca91205dcbe2b096dfc7035c993ce",
+      "text": "网站 leads 预期最多保存 24 个月，除非仍有进行中的商务讨论或必要营运紀录需要更長期間。Raw analytics event rows 预設透过 ANALYTICS_RETENTION_DAYS 保存 90 天。aggregate metrics 若有实作，可保留更久，但必須獨立限定并另行记录。",
+      "status": "approved"
+    },
+    "text.privacy.retention.title": {
+      "sourceHash": "b113acd4060e9a8ec66b45cdfe80f351520d5b684b7c0889f83c8f73e9acc913",
+      "fingerprint": "8b3c95aac10c4c6a6bf291b94c34f54a4a4444d7d6132b7e61758979e4e57a01",
+      "text": "保存期限",
+      "status": "approved"
+    },
+    "text.privacy.rights.body": {
+      "sourceHash": "3bd3f00f85c87daf3d06c5e435a801730b7f7665a14f95e24e6690d4ae897125",
+      "fingerprint": "14ba2a9f5f92958ab4245ce14cbef8f3c7526545ef1fd4db332509636dfe5870",
+      "text": "如需查询、更正或刪除已提交的询问资料，或询问第一方 analytics，请联络 privacy@example.com。正式公开前需将此 placeholder 信箱替換为正式隐私联络窗口。",
+      "status": "approved"
+    },
+    "text.privacy.rights.title": {
+      "sourceHash": "24ef3e98b5309646e6ac39f90942104b7f2db7118871cb19500e4831254c3604",
+      "fingerprint": "79a1ef0df51a04b8cae04e1c447c8cdceb4fcbd2b3388643fbbeba6580ef61dc",
+      "text": "查询、更正或刪除请求",
+      "status": "approved"
+    },
+    "text.privacy.search.body": {
+      "sourceHash": "9e044e8cbb3bbb9669ddc8377d12711cd71534161140b8110feab7ab598636cf",
+      "fingerprint": "db72d238ac0c0ae79ac2a3a27336fd08451f79e09609fb3eab29c4eef1036955",
+      "text": "当 SEARCH_ENABLED=true 时，文件查询会送至 OpenAI 产生 query embeddings。如果命中网站來源文件，query 与检索到的片段会送至 OpenAI Responses API，以來源文件为限制生成回答。如果查不到相关文件，則不呼叫回答模型。Raw search query text 不会存入 analytics event payload。",
+      "status": "approved"
+    },
+    "text.privacy.search.title": {
+      "sourceHash": "a16ad98af21cadc31ebf2649f13d0fa57105882b30a8a57ac6a1a7a7e40afa6d",
+      "fingerprint": "5eb5d175ec3b2a87d80ba59830814064d0f10984f324599ba4036674e17f40cb",
+      "text": "文件查询",
+      "status": "approved"
+    },
+    "text.privacy.title": {
+      "sourceHash": "d0796ab19d344f768e4d5014b2afef685ef9e00aa40af505b8cf94e6034a08ff",
+      "fingerprint": "7b7d9875e052cccf52a55542f98b43b6c30abafafa21081c697ddcab2fa8df3d",
+      "text": "Realtek Connect+ 网站询问隐私权声明。",
+      "status": "approved"
+    },
+    "text.privacy.use.body": {
+      "sourceHash": "c4928541136d79997dc76c53d82afac292d8d11cb9b6c7b034077c0a48d08318",
+      "fingerprint": "6394da90d39ee48e9dab2f126460771978a9aa0bb5c0f801eb2d5c4b7a15f0b0",
+      "text": "我们使用提交资料來回覆询问、规划产品讨论、了解 Realtek Connect+ 服务需求，并保護网站免于 spam 或濫用。当 ANALYTICS_ENABLED=true 时，第一方 SQLite analytics 僅用于了解此网站的粗略流量來源、页面互動、网站效能、CTA conversion、scroll milestone 与 engaged-duration events、engagement duration、内容成效、产品营销改善与服务质量观察。",
+      "status": "approved"
+    },
+    "text.privacy.use.title": {
+      "sourceHash": "a8b682033594edba426464ddb4a1834c8b2bb32e02237cdf7f6d6d96c8031716",
+      "fingerprint": "3a9855c8e07e76f5ab46b0e9ac9c429c5c3b2c4a90d645c4b3f4fa5fc738e7af",
+      "text": "资料使用方式",
+      "status": "approved"
+    },
+    "text.privacy.video.body": {
+      "sourceHash": "6188e9279709c47e59b710bece44955571a806d0c5b9e16504cc532a19b977f7",
+      "fingerprint": "3ddc8d309e8f0a27900ed958053d23cc3ce071742d249b1408d6c878539a59e5",
+      "text": "首页品牌影片以本站 local MP4 资产托管。影片播放器不会建立 YouTube iframe，也不会连线到 YouTube 服务。Dev 与 Staging 可载入設定的 Google Analytics 4 标签做汇总网站量测，不会傳送表单内容、token 或帳戶識别信息。",
+      "status": "approved"
+    },
+    "text.privacy.video.title": {
+      "sourceHash": "2d4180a976633b5bb41b94313240a1909447fd852333a7a41d1bba822a36bcc7",
+      "fingerprint": "2e9c6837341b8f9403fa0caa4c768bb4306b04a2470efc8bbdd6730602971741",
+      "text": "本站托管品牌影片",
+      "status": "approved"
+    },
+    "text.sdk.downloads.accept": {
+      "sourceHash": "09a4598a9e173f5e2ba75ea813dba5d1f8f2beb2c8d7d522f04549c6bf657757",
+      "fingerprint": "ffe660b8cc1fca27be5dc37d07483bcc3018b0b3a2c8db73d282f5160a78f1af",
+      "text": "我同意",
+      "status": "approved"
+    },
+    "text.sdk.downloads.body": {
+      "sourceHash": "53d28db1a74cb54709ccbb7722752c8be2aaf795fde5645a01f7047074de1b93",
+      "fingerprint": "b6a801a006f65575d2d6a14411537c818d6f204e4620da6fd4ba533d0fd088d9",
+      "text": "公开评估版本",
+      "status": "approved"
+    },
+    "text.sdk.downloads.bundle": {
+      "sourceHash": "48fae5c663c54d1596ceac5639e95189432eb4b5272e5f76bc994c3e0cde5c8e",
+      "fingerprint": "2a19008045627da0b5dcbc62cdd7b26f4fcf3fdb6f27b92eb6f8ec0dee06292b",
+      "text": "下载完整套件包",
+      "status": "approved"
+    },
+    "text.sdk.downloads.eyebrow": {
+      "sourceHash": "37416f149bc9f469bd1a733570fc70c5351eec674fb15a1f14a0db0286211b4b",
+      "fingerprint": "ef03b55dfa50991b0e5488d8f8e44f248335dd34841587f62cb8d857ef4269e1",
+      "text": "SDK 下载",
+      "status": "approved"
+    },
+    "text.sdk.downloads.latest": {
+      "sourceHash": "b8bb7c4ca41d56395d3e229272f3f37a36c22d55334a29e7e5ce893d0c5cd21f",
+      "fingerprint": "1099a992123d748eef4d2c4cdd609f1dbf93da170f7e877f20a63708bf4910fa",
+      "text": "僅顯示最新且已验证的版本",
+      "status": "approved"
+    },
+    "text.sdk.downloads.package": {
+      "sourceHash": "c88e0596bad3644e9eb06f9ad9e90d263183db311ac74abf19d689c007dbed6f",
+      "fingerprint": "5222a7904449cfbc9a7688ee05141d3a0068c6edb4482a2549a8f50456bc0363",
+      "text": "下载套件",
+      "status": "approved"
+    },
+    "text.sdk.downloads.terms": {
+      "sourceHash": "640d4d3ca1da3d1e9b060a1a40277c30b98872d6f29df271828673325e628a83",
+      "fingerprint": "f37b4f89478d345e986c72b5d1a158088bfc001a15d7f9b7ba667d14b5771b0f",
+      "text": "SDK 评估條款",
+      "status": "approved"
+    },
+    "text.sdk.downloads.title": {
+      "sourceHash": "8f5da969609314d1a233b66befe65f43dc883d81281fe364215e9d0f6518b4fb",
+      "fingerprint": "e5c81e6bde105212c66d94b00617297705038eea72235ee84cefcdf6f446f357",
+      "text": "下载最新版 Realtek Connect+ Cloud SDK。",
+      "status": "approved"
+    },
+    "text.sdk.downloads.unsigned": {
+      "sourceHash": "52c182a5e42cb81594f91c70900f2b4b3e8789351d3ed9803dfb36d7c1e46269",
+      "fingerprint": "c7c2f57446ed16358c0a59bba74f663e127bddafbc854080d63417a9a926b2ee",
+      "text": "评估产物尚未簽署，下载后请验证 SHA-256",
+      "status": "approved"
+    },
+    "text.search.answer.title": {
+      "sourceHash": "8e835943c77907639c0081cd0f43a3384d054d154442eb4985844b2a8cda13b6",
+      "fingerprint": "a3e5955876a8a34e05017a89a99b78a4bb4dd59de5e52822cb5855083d19ffcc",
+      "text": "回答",
+      "status": "approved"
+    },
+    "text.search.body": {
+      "sourceHash": "401780c67df88544a61fbe5b0c07e77dec88ea6327c01f500d0db12b843c74c0",
+      "fingerprint": "48f11429ee09a2287ed74b88f7644a565dc1a9e19cc75beadb77621f7a4c26e4",
+      "text": "透过 OpenAI embeddings 检索网站文件，并产生以來源文件为依據的回答。如果索引文件没有涵盖问題，工具会直接告知查不到。",
+      "status": "approved"
+    },
+    "text.search.disabled.body": {
+      "sourceHash": "3751051862691b56cb8500c912e56eb8247ebdcc28f3689028666917ce7a60f4",
+      "fingerprint": "d58bc7ffccf9f41837eee53796bf0f5f9827c9623b9e315cececadab08b02023",
+      "text": "此环境尚未提供文件索引。",
+      "status": "approved"
+    },
+    "text.search.disabled.title": {
+      "sourceHash": "4516263769b52c3d79cdd2cea6c5e6b2791bf26db8b262880348c0627d999a4b",
+      "fingerprint": "ca8f8c61e9566e133de9a94fa8b4cff572f88a63b564801bd408a13e667b7df4",
+      "text": "查询未启用",
+      "status": "approved"
+    },
+    "text.search.empty.body": {
+      "sourceHash": "294c439c71fd2f0f964fa1cc99290520633e53de470000a10d2b7cfcea60551e",
+      "fingerprint": "552b1131c6a39c9f38484b8eb154a2c53c5bbb79f4d5185b2e0f7a2ee44eec39",
+      "text": "結果会包含回答，以及用來产生回答的來源文件。",
+      "status": "approved"
+    },
+    "text.search.empty.title": {
+      "sourceHash": "5b29d7927966a0c758499efe6ce299c69f6846320a71a543887d5c6ad78466a9",
+      "fingerprint": "3e32d9207116d1e9654a67f417325e1e5333078e90752c1e756a4f31425aba1b",
+      "text": "先输入一个聚焦的产品或文件问題。",
+      "status": "approved"
+    },
+    "text.search.error.body": {
+      "sourceHash": "97821390f15345e61db3a59d91c6dc0e270bab50d52d5e478bec7a252a75d9be",
+      "fingerprint": "9ea2feab02c2bbfdc29d85d37c792b9118d4c49e4c8c5266ee95aac04fb06a45",
+      "text": "查询服务暫时无法使用。",
+      "status": "approved"
+    },
+    "text.search.error.title": {
+      "sourceHash": "0cc65abc6bb18d8d4fb61f6b0c7effabeda95b275a5464ff5a9146fdfd4095c7",
+      "fingerprint": "bab4964f06f4590a915f9fe1ce14d2296525d5897d5729e62fb902b79518b579",
+      "text": "查询暫时无法使用",
+      "status": "approved"
+    },
+    "text.search.eyebrow": {
+      "sourceHash": "2da1d2cb3bceeaf7edd31b126540c8ec9e6cfa7aed7074d56c39ab5dc1a4c4aa",
+      "fingerprint": "2d9994b540e5e21ddd07cc6dc1ab8365e45e32aa3a02ff08e8bd444e7d963e06",
+      "text": "文件查询",
+      "status": "approved"
+    },
+    "text.search.invalid.body": {
+      "sourceHash": "400012f25838e6ce9cf585a3acb1a2ee6211675ccdeda54dfbf195c50da4ff03",
+      "fingerprint": "a5d66ff1dc077ba16a3c34a9066ae7e17535feed780ea469a3b176ccf6ab120f",
+      "text": "最多 500 个字元。",
+      "status": "approved"
+    },
+    "text.search.invalid.title": {
+      "sourceHash": "58bb5a42a60c8946a3e21971e30321a7c7e9e8e611f4a5cdcd5fda95b451154b",
+      "fingerprint": "2948bb2767be504369a4c0009e4d1653f5297a27ee5ab21968a49d89befdf04b",
+      "text": "请输入问題",
+      "status": "approved"
+    },
+    "text.search.label": {
+      "sourceHash": "08fd001cc0f65e5c3061e57361fbe6ee519a73253eac7fb5368f75fe7f881d88",
+      "fingerprint": "c15cd110dcf16bec8bfd4c5e92be8a36726f3ae9f70f582dd7f6bda7fff4c0d4",
+      "text": "问題",
+      "status": "approved"
+    },
+    "text.search.loading.body": {
+      "sourceHash": "18cfd20e96fc1ce1cd4bd32fe91ab69796639d39f016374f679252ee7ae604ec",
+      "fingerprint": "59496ba8c3ab8c192d1dd73f9c8b99f0b995400ceda2b827742c3cb642f38397",
+      "text": "先检索來源片段，再产生回答。",
+      "status": "approved"
+    },
+    "text.search.loading.title": {
+      "sourceHash": "a49806734b0756d41b3075e7fa5fa75e2e4cad57fcaf8a6cd9278efac06bd235",
+      "fingerprint": "9dc326e159e68cb873410532f94b7ec0eb9f9b92c12a23dd70a799b4c04f768f",
+      "text": "正在查询文件",
+      "status": "approved"
+    },
+    "text.search.nohit.body": {
+      "sourceHash": "d939e76a1e8c838ebcc6f763c60dae2ebc58d0ee31949aff147ccce484a3961a",
+      "fingerprint": "1dd21115f72683a2e8c6959792b3e05d9b1ee69d913d585f94a06c8dd83a3273",
+      "text": "查不到相关文件。",
+      "status": "approved"
+    },
+    "text.search.nohit.title": {
+      "sourceHash": "4177db1b9f2aa60278b590a16dd5d2774462f525718e9997eccb1d545f61678f",
+      "fingerprint": "ff8b53d6d18b3a06c1b13a5c5863bfc5f09f4806628bdfcff66d55d27e291561",
+      "text": "查不到相关文件",
+      "status": "approved"
+    },
+    "text.search.note": {
+      "sourceHash": "53616ee33c44436c62a3ee3bacc3d3c4962e41b606d76a9eb8b5c29eee1b45e6",
+      "fingerprint": "ed273b05ac79ef2d1015b216f044dd3488ab23ca24c2257cea56e0398ce99b6e",
+      "text": "查询范围限制在本网站已索引文件。",
+      "status": "approved"
+    },
+    "text.search.placeholder": {
+      "sourceHash": "7354bbb6534a146241888dd50c251e03663ea353661615a3c364f4761faa576b",
+      "fingerprint": "0eea92dc62fb667408ba10636cc452c0a16cd8c3272a485fdb3e95f3dff03e22",
+      "text": "询问 OTA、SDK 范例、私有云部署、配网或平台功能。",
+      "status": "approved"
+    },
+    "text.search.sources.title": {
+      "sourceHash": "84fd1adee4f2f2e74fb84ef4f5d1767f54b93288fb05ee47544f8ad3a9bcde48",
+      "fingerprint": "396a9297abae670c16b6382f415d0c977f009a5c02fd4d380b1e53f2652e1eb8",
+      "text": "來源",
+      "status": "approved"
+    },
+    "text.search.submit": {
+      "sourceHash": "4f2ea81a9a0a267dcd4865a82fdc9ff57371e6f6e3302c8045700c6d49a43d4c",
+      "fingerprint": "2bdef4fe3da70b7cc9aa72dc243d0a605e5224d1b78f51e9ef9191797438330f",
+      "text": "查询文件",
+      "status": "approved"
+    },
+    "text.search.title": {
+      "sourceHash": "de7999b57b223fabad4b846188d0601ac4a936d2d0f2eff9704f235cede0651f",
+      "fingerprint": "92387a73780754ced69d5e2cb65ee8e92c957bc41125bfac7562bc6881868c52",
+      "text": "询问 Realtek Connect+ 文件。",
+      "status": "approved"
+    },
+    "text.skip.main": {
+      "sourceHash": "ab5b8851c137209f25b969f7324181c335bf89edbbca23538021cb082a4b56c9",
+      "fingerprint": "40f77cc1ace950d51c37e1f5309dcd342682cc784979d841ed85e5ee21f6d4b7",
+      "text": "跳到主要内容",
+      "status": "approved"
+    }
+  }
+}
