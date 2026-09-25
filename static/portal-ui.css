@@ -154,6 +154,7 @@
 .portal-ui .portal-manual-layout { display: grid; grid-template-columns: minmax(0, 1fr) 230px; align-items: start; gap: 64px; }
 .portal-ui .manual-content { min-width: 0; max-width: 78ch; overflow-wrap: anywhere; line-height: 1.8; }
 .portal-ui .manual-content > :first-child { margin-top: 0; }
+.portal-ui .sdk-terms h1 { font-size: clamp(32px, 3.5vw, 44px); line-height: 1.2; letter-spacing: -.03em; }
 .portal-ui .manual-content h2 { margin-top: 40px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 26px; line-height: 1.35; }
 .portal-ui .manual-content h3 { margin-top: 28px; font-size: 20px; }
 .portal-ui .manual-content a { color: var(--brand-dark); text-decoration: underline; text-underline-offset: 3px; }

@@ -137,7 +137,7 @@ type pageData struct {
 	SDKCatalog          sdkdownloads.Catalog
 	SDKDownloadsEnabled bool
 	SDKDownloadError    string
-	SDKTerms            string
+	SDKTerms            template.HTML
 	SDKTermsVersion     string
 }
 

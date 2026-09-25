@@ -30,7 +30,7 @@ func sdkDownloadTestService(t *testing.T) *sdkdownloads.Service {
 	catalog := sdkdownloads.Catalog{Schema: sdkdownloads.CatalogSchema, Version: "0.1.0-rc.2", ReleaseTrain: "rtk-cloud-client-0.1.0-rc.2", CreatedAt: "2026-08-29T00:00:00Z", Distribution: "public-evaluation", SigningStatus: "not_configured", TermsVersion: "eval-v1", TermsObjectKey: "sdk/releases/0.1.0-rc.2/EVALUATION_LICENSE.txt", Packages: packages, CompleteBundle: sdkdownloads.Artifact{Slug: "all", Title: "Complete", Description: "All SDKs", Filename: "all.tgz", ObjectKey: "sdk/releases/0.1.0-rc.2/artifacts/all.tgz", SHA256: strings.Repeat("b", 64), SizeBytes: 2048, ValidationStatus: "PASS", Capabilities: []string{"All packages"}, Limitations: []string{"No media runtime"}}}
 	catalogJSON, _ := json.Marshal(catalog)
 	latestJSON := []byte(`{"schema":"rtk-portal-sdk-latest/v1","version":"0.1.0-rc.2","catalog_object_key":"sdk/releases/0.1.0-rc.2/catalog.json","terms_version":"eval-v1"}`)
-	return sdkdownloads.NewService(webSDKStore{objects: map[string][]byte{"sdk/latest.json": latestJSON, "sdk/releases/0.1.0-rc.2/catalog.json": catalogJSON, catalog.TermsObjectKey: []byte("Approved evaluation terms")}}, "", time.Minute)
+	return sdkdownloads.NewService(webSDKStore{objects: map[string][]byte{"sdk/latest.json": latestJSON, "sdk/releases/0.1.0-rc.2/catalog.json": catalogJSON, catalog.TermsObjectKey: []byte("# Approved evaluation terms\n\n## 1. Purpose\n\n**Evaluation only** applies.\n\n<script>alert('x')</script>")}}, "", time.Minute)
 }
 
 func TestSDKCatalogAPIIsPublicAndRedacted(t *testing.T) {
@@ -83,6 +83,27 @@ func TestSDKCatalogAndTermsArePublic(t *testing.T) {
 		body, _ := io.ReadAll(response.Result().Body)
 		if response.Code != http.StatusOK || !strings.Contains(string(body), test.want) {
 			t.Fatalf("GET %s = %d, body missing %q", test.path, response.Code, test.want)
+		}
+	}
+}
+
+func TestSDKTermsRendersMarkdown(t *testing.T) {
+	handler := testServerWithConfig(t, Config{SDKDownloads: sdkDownloadTestService(t)})
+	for _, path := range []string{"/legal/sdk-evaluation-terms", "/zh-tw/legal/sdk-evaluation-terms"} {
+		request := httptest.NewRequest(http.MethodGet, path, nil)
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, request)
+		body := response.Body.String()
+		if response.Code != http.StatusOK || !strings.Contains(body, "<h1>Approved evaluation terms</h1>") || !strings.Contains(body, "<h2>1. Purpose</h2>") || !strings.Contains(body, "<strong>Evaluation only</strong>") {
+			t.Fatalf("GET %s did not render terms Markdown: %s", path, body)
+		}
+		if strings.Count(body, "<h1>") != 1 {
+			t.Fatalf("GET %s rendered duplicate page headings", path)
+		}
+		for _, unwanted := range []string{"<pre class=\"sdk-terms\">", "## 1. Purpose", "<script>alert('x')</script>"} {
+			if strings.Contains(body, unwanted) {
+				t.Fatalf("GET %s rendered unwanted %q", path, unwanted)
+			}
 		}
 	}
 }
