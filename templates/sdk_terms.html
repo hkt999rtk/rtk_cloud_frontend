@@ -1,14 +1,14 @@
 {{define "content"}}
 <section class="page-hero docs-hero">
   <p class="eyebrow">SDK evaluation</p>
-  <h1>SDK Evaluation Terms</h1>
+  {{if .SDKDownloadError}}<h1>SDK Evaluation Terms</h1>{{end}}
   {{if .SDKTermsVersion}}<p>Terms version: <strong>{{.SDKTermsVersion}}</strong></p>{{end}}
 </section>
-<section class="section manual-content">
+<section class="section">
   {{if .SDKDownloadError}}
   <p class="form-error">{{.SDKDownloadError}}</p>
   {{else}}
-  <pre class="sdk-terms">{{.SDKTerms}}</pre>
+  <article class="manual-content sdk-terms">{{.SDKTerms}}</article>
   {{end}}
 </section>
 {{end}}

@@ -13,6 +13,7 @@ import (
 
 	"realtek-connect/internal/analytics"
 	"realtek-connect/internal/content"
+	"realtek-connect/internal/manual"
 )
 
 const sdkSessionCookie = "rtk_sdk_session"
@@ -80,7 +81,7 @@ func (s *Server) handleSDKTerms(w http.ResponseWriter, r *http.Request, locale c
 		if err != nil {
 			data.SDKDownloadError = "SDK evaluation terms are temporarily unavailable."
 		} else {
-			data.SDKTerms = terms
+			data.SDKTerms = manual.RenderMarkdown([]byte(terms))
 			data.SDKTermsVersion = version
 		}
 	}
