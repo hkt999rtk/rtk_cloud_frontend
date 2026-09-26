@@ -76,10 +76,6 @@ func (s *Server) footerSitemap(locale content.Locale, catalog content.Catalog) [
 			Links: make([]footerSitemapLink, 0, len(catalog.Features)),
 		},
 		{
-			Title: catalog.T("footer.group.docs"),
-			Links: make([]footerSitemapLink, 0, len(catalog.Docs)),
-		},
-		{
 			Title: catalog.T("footer.group.manual"),
 			Links: make([]footerSitemapLink, 0, len(manualIndex.Sections)),
 		},
@@ -101,14 +97,8 @@ func (s *Server) footerSitemap(locale content.Locale, catalog content.Catalog) [
 			Href:  content.PathForLocale(locale, "/features/"+feature.Slug),
 		})
 	}
-	for _, section := range catalog.Docs {
-		groups[2].Links = append(groups[2].Links, footerSitemapLink{
-			Label: section.Title,
-			Href:  content.PathForLocale(locale, "/docs/"+section.Slug),
-		})
-	}
 	for _, section := range manualIndex.Sections {
-		groups[3].Links = append(groups[3].Links, footerSitemapLink{
+		groups[2].Links = append(groups[2].Links, footerSitemapLink{
 			Label: section.Title,
 			Href:  content.PathForLocale(locale, "/manual/"+section.Slug),
 		})
@@ -228,10 +218,6 @@ func publicSitemapPaths(searchOption ...bool) []string {
 		"/features",
 		"/contact",
 		"/privacy",
-		"/manual/getting-started",
-		"/manual/deployment-notes",
-		"/manual/reference",
-		"/manual/sdk-samples",
 		"/manual/sdk",
 		"/manual/sdk/overview",
 		"/manual/sdk/getting-started",
@@ -250,9 +236,6 @@ func publicSitemapPaths(searchOption ...bool) []string {
 	}
 	if searchEnabled {
 		basePaths = append(basePaths, "/search")
-	}
-	for _, section := range catalog.Docs {
-		basePaths = append(basePaths, "/docs/"+section.Slug)
 	}
 	for _, feature := range catalog.Features {
 		basePaths = append(basePaths, "/features/"+feature.Slug)

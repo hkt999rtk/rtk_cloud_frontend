@@ -70,7 +70,7 @@ Legal text must remain intact. Styling does not constitute legal approval. Do no
 ## Localization and accessibility
 
 - All new navigation labels must exist in English and Traditional Chinese; the existing catalog derives Simplified Chinese. File-owned content requires all three locale files.
-- Keep localized destinations, canonical links, alternate-language metadata, and route slugs unchanged.
+- Keep canonical links, alternate-language metadata, and route slugs stable. The docs and manual entry CTAs use the configured Cloud Admin host for signup and sign-in.
 - Verify 1440px, 768px, 390px, and 320px layouts, keyboard controls, long Chinese headings, and focus visibility.
 - Target WCAG AA text contrast. Cyan is not a text color on white. Validate actual component combinations, including hover and invalid states, before introducing new colors.
 - Keep the skip link, semantic headings, accessible names, reduced-motion support, and progressive enhancement. Automated checks are not a complete accessibility certification.
@@ -88,8 +88,8 @@ GOWORK=off go run ./cmd/visual-smoke -portal-review -timeout 8m -screenshot-dir 
 
 The visual command uses the existing Chrome/chromedp dependency and starts a local server unless `-base-url` is specified. Use a loopback preview for interaction checks. The contact check submits an empty form and expects validation errors, not a stored lead. Search is excluded from the default visual matrix because the feature is disabled by default; enabled-search behavior has separate existing server tests.
 
-Review screenshots as well as test results. Check header, first viewport, lower sections, footer, cards, forms, and the longest SDK content. Preserve analytics hooks and do not reinterpret historical CTA events when changing a destination; the new manual CTA uses `docs_cta_manual`.
+Review screenshots as well as test results. Check header, first viewport, lower sections, footer, cards, forms, and the longest SDK content. Preserve analytics hooks and do not reinterpret historical CTA events when changing a destination; the public docs invitation uses `docs_cta_signup` and `docs_cta_login`.
 
 ## Content-quality gate before public release
 
-Visual consistency alone does not make documentation production-ready. Existing generic manual chapters contain placeholder imagery and sample instructions. Some legal/contact content still requires owner approval. Replace placeholders with reviewed technical guidance, approve actual privacy contact details and terms, and audit claims against available functionality before publishing. Do not silently hide these gaps with polished styling.
+Visual consistency alone does not make documentation production-ready. Existing generic manual chapters contain placeholder imagery and sample instructions, so the public manual index no longer promotes them. Their legacy URLs remain available for old links and should be replaced with reviewed technical guidance before renewed promotion. Some legal/contact content still requires owner approval; approve actual privacy contact details and terms, and audit claims against available functionality before publishing.

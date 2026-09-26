@@ -140,7 +140,7 @@ func TestServiceBuildsAnswerFromRetrievedChunksOnly(t *testing.T) {
 	}
 }
 
-func TestCollectWebsiteDocumentsIncludesFeatureDocsAndManual(t *testing.T) {
+func TestCollectWebsiteDocumentsIncludesPublicFeaturesAndSDKManual(t *testing.T) {
 	docs, err := CollectWebsiteDocuments(CollectionConfig{
 		RepoRoot:    filepath.Join("..", ".."),
 		ContentRoot: filepath.Join("..", "..", "content"),
@@ -159,8 +159,8 @@ func TestCollectWebsiteDocumentsIncludesFeatureDocsAndManual(t *testing.T) {
 		"feature:video-cloud:en",
 		"feature:video-cloud:zh-TW",
 		"feature:video-cloud:zh-CN",
-		"doc:sdks:en",
-		"manual:sdk-samples:en",
+		"docs-index:en",
+		"manual-index:en",
 		"manual:sdk/video-workflows:en",
 		"manual:sdk/video-workflows:zh-TW",
 		"manual:sdk/video-workflows:zh-CN",

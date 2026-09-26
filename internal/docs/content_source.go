@@ -16,6 +16,8 @@ import (
 type ContentPage struct {
 	Title        string
 	Subtitle     string
+	SignupCTA    string
+	LoginCTA     string
 	HeroImage    string
 	HeroImageAlt string
 	Sections     []ContentSection
@@ -38,6 +40,8 @@ type ContentSEO struct {
 type contentFrontmatter struct {
 	Title        string           `yaml:"title"`
 	Subtitle     string           `yaml:"subtitle"`
+	SignupCTA    string           `yaml:"signup_cta"`
+	LoginCTA     string           `yaml:"login_cta"`
 	HeroImage    string           `yaml:"hero_image"`
 	HeroImageAlt string           `yaml:"hero_image_alt"`
 	Sections     []ContentSection `yaml:"sections"`
@@ -101,10 +105,15 @@ func ParseContentPage(input []byte) (ContentPage, error) {
 	if strings.TrimSpace(meta.Subtitle) == "" {
 		return ContentPage{}, fmt.Errorf("docs frontmatter subtitle is required")
 	}
+	if strings.TrimSpace(meta.SignupCTA) == "" || strings.TrimSpace(meta.LoginCTA) == "" {
+		return ContentPage{}, fmt.Errorf("docs frontmatter signup_cta and login_cta are required")
+	}
 
 	return ContentPage{
 		Title:        meta.Title,
 		Subtitle:     meta.Subtitle,
+		SignupCTA:    meta.SignupCTA,
+		LoginCTA:     meta.LoginCTA,
 		HeroImage:    strings.TrimSpace(meta.HeroImage),
 		HeroImageAlt: strings.TrimSpace(meta.HeroImageAlt),
 		Sections:     meta.Sections,

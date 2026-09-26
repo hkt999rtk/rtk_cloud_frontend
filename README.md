@@ -166,24 +166,27 @@ Feature and docs slugs stay in English across all locales. This keeps links stab
 
 The admin, health, and static routes are not localized.
 
-## Content Authoring (Docs Placeholder, Issue #75)
+## Documentation Entry
 
-This project is adding a lightweight docs content source in two phases:
+The public `/docs` page is a short invitation to create a Connect+ account and
+read the full Cloud Service developer documentation in the authenticated Admin
+console at `/console/developer-docs`. Existing `/docs/{slug}` pages remain
+available as legacy public routes, but the landing page no longer promotes them.
+The public `/manual` page now points to account registration for Cloud Service
+guides while retaining a direct link to the canonical public SDK manual under
+`/manual/sdk`. Legacy general-manual chapters remain reachable by direct URL
+but are no longer promoted in the manual index.
 
-- Phase 1 (this issue): `/docs` uses content files only, as a layout/rendering preview.
-- Phase 2 (later issues): expand the same model to other docs pages and features.
+The `/docs` invitation is authored in three locale files:
 
-Phase 1 conventions:
-
-- Content format: YAML frontmatter + Markdown body.
-- File location: `content/docs/<locale>/docs.yaml` (locale examples: `en`, `zh-TW`, `zh-CN`).
-- The Markdown body supports embedded media links, for example `![alt text](/static/assets/...)`.
-- Reload behavior: content is cached at startup, with a manual admin reload endpoint.
+- Content format: YAML frontmatter for title, summary, calls to action, and SEO,
+  followed by a short Markdown explanation.
+- File location: `content/docs/<locale>/docs.yaml` (`en`, `zh-TW`, `zh-CN`).
+- Content is cached at startup, with a manual admin reload endpoint.
 
 Admin helper for development/test refresh:
 
 - `POST /admin/reload-content` (requires `ADMIN_TOKEN`) clears cached content and reloads from files.
-- Existing routes and locales remain unchanged for all other pages in this issue.
 
 Admin requests can authenticate with either:
 
