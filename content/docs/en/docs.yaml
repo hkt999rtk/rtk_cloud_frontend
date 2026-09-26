@@ -1,25 +1,10 @@
 ---
-title: "Documentation"
-subtitle: "Explore platform concepts, integration guides, and SDK references for your connected product."
-hero_image: "/static/assets/connectplus-platform-surfaces-corporate-v2.jpg"
-hero_image_alt: "Realtek Connect+ platform surfaces across device, cloud, app, and operations teams"
-sections:
-  - title: "Understand the platform"
-    icon: "document"
-    body: "Start with the product overview to understand how device software, cloud services, and applications work together."
-  - title: "Plan your integration"
-    icon: "grid"
-    body: "Find the API, SDK, and firmware documentation relevant to your team's implementation."
-  - title: "Prepare for operations"
-    icon: "refresh"
-    body: "Review deployment guidance and release notes before moving your connected product into operation."
+title: "Cloud Service developer docs"
+subtitle: "The full integration guides are available in the Connect+ console."
+signup_cta: "Create an account"
+login_cta: "Already have an account? Sign in to the docs"
 seo:
-  meta_title: "Developer Documentation | Realtek Connect+"
-  meta_description: "Explore Realtek Connect+ documentation entry points for product, firmware, app, cloud, and operations teams."
-  social_image: "/static/assets/connectplus-platform-surfaces-corporate-v2.jpg"
+  meta_title: "Cloud Service Developer Docs | Realtek Connect+"
+  meta_description: "Create a Connect+ account to access Cloud Service developer documentation in the console."
 ---
-Use the documentation tracks to move from platform evaluation to integration planning.
-
-![Documentation architecture preview](/static/assets/connectplus-platform-surfaces-corporate-v2.jpg)
-
-The developer manual provides SDK guidance and reference material. Contact the Realtek team to discuss your product requirements.
+Create and verify your Connect+ account, then sign in to read the Cloud Service guides for MQTT, Device Shadow, credentials, quickstarts, and API examples.

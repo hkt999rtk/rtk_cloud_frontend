@@ -1,25 +1,10 @@
 ---
-title: "开发者文档"
-subtitle: "探索平台概念、集成指南与 SDK 参考资料，开始打造您的联网产品。"
-hero_image: "/static/assets/connectplus-platform-surfaces-corporate-v2.jpg"
-hero_image_alt: "Realtek Connect+ 设备、云端、App 与运营团队的平台界面"
-sections:
-  - title: "了解平台"
-    icon: "document"
-    body: "从产品概览了解设备软件、云服务与应用程序如何协同工作。"
-  - title: "规划集成"
-    icon: "grid"
-    body: "根据团队的实施需求，查阅 API、SDK 与固件文档。"
-  - title: "准备运营"
-    icon: "refresh"
-    body: "在联网产品投入运营前，查阅部署指南与版本信息。"
+title: "Cloud Service 开发文档"
+subtitle: "完整集成指南位于 Connect+ 服务控制台。"
+signup_cta: "注册账号"
+login_cta: "已有账号？登录阅读文档"
 seo:
-  meta_title: "开发者文档 | Realtek Connect+"
-  meta_description: "浏览 Realtek Connect+ 面向产品、固件、App、云端与运营团队的文档入口。"
-  social_image: "/static/assets/connectplus-platform-surfaces-corporate-v2.jpg"
+  meta_title: "Cloud Service 开发文档 | Realtek Connect+"
+  meta_description: "注册 Connect+ 账号，在服务控制台阅读 Cloud Service 开发文档。"
 ---
-按照文档分类，从平台评估逐步进入集成规划。
-
-![文档架构预览](/static/assets/connectplus-platform-surfaces-corporate-v2.jpg)
-
-开发者手册提供 SDK 指南与参考资料。如需讨论产品需求，请联系 Realtek 团队。
+创建 Connect+ 账号并完成验证后，登录即可阅读 MQTT、Device Shadow、凭证设置、快速入门与 API 示例。

@@ -333,21 +333,37 @@ func TestSearchAPIReturnsAnswerWithSources(t *testing.T) {
 }
 
 func TestDocsLandingRendersFileBackedContent(t *testing.T) {
-	handler := testServer(t, &memoryLeadStore{})
-
-	req := httptest.NewRequest(http.MethodGet, "/docs", nil)
-	rec := httptest.NewRecorder()
-	handler.ServeHTTP(rec, req)
-
-	body := rec.Body.String()
-	for _, expected := range []string{
-		"Understand the platform",
-		`class="docs-hero-media-label">Realtek Connect+ / Docs</div>`,
-		`<meta property="og:image" content="http://example.com/static/assets/connectplus-platform-surfaces-corporate-v2.jpg">`,
+	handler := testServerWithConfig(t, Config{
+		LeadStore:       &memoryLeadStore{},
+		ServiceLoginURL: "https://portal.example.com/login?source=website",
+	})
+	for _, tc := range []struct {
+		path  string
+		title string
+		cta   string
+	}{
+		{"/docs", "Cloud Service developer docs", "Create an account"},
+		{"/zh-tw/docs", "Cloud Service 開發文件", "註冊帳號"},
+		{"/zh-cn/docs", "Cloud Service 开发文档", "注册账号"},
 	} {
-		if !strings.Contains(body, expected) {
-			t.Fatalf("/docs missing %q", expected)
-		}
+		t.Run(tc.path, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, tc.path, nil))
+			body := rec.Body.String()
+			for _, expected := range []string{
+				tc.title,
+				tc.cta,
+				`href="https://portal.example.com/signup"`,
+				`href="https://portal.example.com/login?next=%2Fconsole%2Fdeveloper-docs&amp;source=website"`,
+			} {
+				if !strings.Contains(body, expected) {
+					t.Fatalf("%s missing %q", tc.path, expected)
+				}
+			}
+			if strings.Contains(body, `class="docs-entry-grid"`) {
+				t.Fatal("public docs landing still renders legacy documentation cards")
+			}
+		})
 	}
 }
 
@@ -360,14 +376,18 @@ func TestManualLandingRendersFileBackedContent(t *testing.T) {
 
 	body := rec.Body.String()
 	for _, expected := range []string{
-		"User Manual",
-		"Getting Started",
-		"Deployment Notes",
-		"Reference Material",
+		"Documentation and SDK manual",
+		`data-analytics-cta="manual_cta_signup"`,
+		`href="https://admin.video-cloud-staging.realtekconnect.com/signup"`,
+		`href="/manual/sdk"`,
+		"Read the SDK manual",
 	} {
 		if !strings.Contains(body, expected) {
 			t.Fatalf("/manual missing %q", expected)
 		}
+	}
+	if strings.Contains(body, `class="docs-entry-grid"`) {
+		t.Fatal("public manual landing still renders placeholder chapter cards")
 	}
 }
 
@@ -688,6 +708,8 @@ func writeDocsContent(t *testing.T, root, title string) {
 	body := `---
 title: "` + title + `"
 subtitle: "Runtime docs"
+signup_cta: "Create an account"
+login_cta: "Sign in"
 seo:
   meta_title: "` + title + ` | Realtek Connect+"
   meta_description: "Runtime docs description"
@@ -1344,8 +1366,8 @@ func TestFooterSitemapRendersPublicNavigation(t *testing.T) {
 				"<h2>Platform</h2>",
 				`href="/features/ota"`,
 				`href="/features/video-cloud"`,
-				`href="/docs/apis"`,
-				`href="/manual/sdk-samples"`,
+				`href="/docs"`,
+				`href="/manual/sdk"`,
 				`href="/privacy"`,
 			},
 		},
@@ -1355,8 +1377,8 @@ func TestFooterSitemapRendersPublicNavigation(t *testing.T) {
 				"<h2>平台</h2>",
 				`href="/zh-tw/features/ota"`,
 				`href="/zh-tw/features/video-cloud"`,
-				`href="/zh-tw/docs/apis"`,
-				`href="/zh-tw/manual/sdk-samples"`,
+				`href="/zh-tw/docs"`,
+				`href="/zh-tw/manual/sdk"`,
 				`href="/zh-tw/privacy"`,
 			},
 		},
@@ -1366,8 +1388,8 @@ func TestFooterSitemapRendersPublicNavigation(t *testing.T) {
 				"<h2>平台</h2>",
 				`href="/zh-cn/features/ota"`,
 				`href="/zh-cn/features/video-cloud"`,
-				`href="/zh-cn/docs/apis"`,
-				`href="/zh-cn/manual/sdk-samples"`,
+				`href="/zh-cn/docs"`,
+				`href="/zh-cn/manual/sdk"`,
 				`href="/zh-cn/privacy"`,
 			},
 		},
@@ -1388,7 +1410,7 @@ func TestFooterSitemapRendersPublicNavigation(t *testing.T) {
 					t.Fatalf("%s footer missing %q: %s", tt.path, want, footer)
 				}
 			}
-			for _, forbidden := range []string{"/admin/", "/healthz", "/robots.txt", "/sitemap.xml", "/content-assets/"} {
+			for _, forbidden := range []string{"/admin/", "/healthz", "/robots.txt", "/sitemap.xml", "/content-assets/", "/docs/apis", "/manual/getting-started"} {
 				if strings.Contains(footer, `href="`+forbidden) {
 					t.Fatalf("%s footer should not contain %s: %s", tt.path, forbidden, footer)
 				}
@@ -1426,7 +1448,7 @@ func TestDetailNavigationDoesNotLinkToCurrentPage(t *testing.T) {
 		{
 			path:     "/manual/sdk-samples",
 			forbid:   `class="feature-card docs-card" href="/manual/sdk-samples"`,
-			required: `class="feature-card docs-card" href="/manual/getting-started"`,
+			required: `class="feature-card docs-card" href="/manual/sdk"`,
 		},
 	}
 
@@ -2497,19 +2519,19 @@ func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 	for _, want := range []string{
 		`<?xml version="1.0" encoding="UTF-8"?>`,
 		`<loc>http://example.com/</loc>`,
-		`<loc>http://example.com/docs/product-overview</loc>`,
+		`<loc>http://example.com/docs</loc>`,
 		`<loc>http://example.com/features/ota</loc>`,
 		`<loc>http://example.com/features/video-cloud</loc>`,
 		`<loc>http://example.com/contact</loc>`,
 		`<loc>http://example.com/privacy</loc>`,
-		`<loc>http://example.com/manual/sdk-samples</loc>`,
+		`<loc>http://example.com/manual/sdk</loc>`,
 		`<loc>http://example.com/zh-tw/features/ota</loc>`,
 		`<loc>http://example.com/zh-tw/features/video-cloud</loc>`,
-		`<loc>http://example.com/zh-tw/manual/sdk-samples</loc>`,
+		`<loc>http://example.com/zh-tw/manual/sdk</loc>`,
 		`<loc>http://example.com/zh-tw/privacy</loc>`,
-		`<loc>http://example.com/zh-cn/docs/apis</loc>`,
+		`<loc>http://example.com/zh-cn/docs</loc>`,
 		`<loc>http://example.com/zh-cn/features/video-cloud</loc>`,
-		`<loc>http://example.com/zh-cn/manual/sdk-samples</loc>`,
+		`<loc>http://example.com/zh-cn/manual/sdk</loc>`,
 		`<loc>http://example.com/zh-cn/contact</loc>`,
 		`<loc>http://example.com/zh-cn/privacy</loc>`,
 	} {
@@ -2519,6 +2541,11 @@ func TestSitemapXMLIncludesPublicRoutes(t *testing.T) {
 	}
 	if strings.Contains(body, "/admin/leads") {
 		t.Fatalf("sitemap should not contain admin routes: %s", body)
+	}
+	for _, legacy := range []string{"/docs/apis", "/manual/getting-started"} {
+		if strings.Contains(body, legacy) {
+			t.Fatalf("sitemap should not promote legacy documentation %s", legacy)
+		}
 	}
 }
 

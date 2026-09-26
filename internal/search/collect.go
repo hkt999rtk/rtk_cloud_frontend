@@ -43,17 +43,6 @@ func CollectWebsiteDocuments(cfg CollectionConfig) ([]Document, error) {
 				Body:       body,
 			})
 		}
-		for _, section := range catalog.Docs {
-			body := docBody(section)
-			documents = append(documents, Document{
-				ID:         fmt.Sprintf("doc:%s:%s", section.Slug, locale.Code),
-				Locale:     locale.Code,
-				SourceType: "docs",
-				Title:      section.Title,
-				URL:        content.PathForLocale(locale, "/docs/"+section.Slug),
-				Body:       body,
-			})
-		}
 	}
 	docPages, err := docs.NewContentSource(filepath.Join(contentRoot, "docs")).Load()
 	if err == nil {
@@ -209,20 +198,6 @@ func appendFeatureTable(parts []string, table features.FeatureTable) []string {
 		}
 	}
 	return parts
-}
-
-func docBody(section docs.Section) string {
-	parts := []string{section.Title, section.Kicker, section.Summary, section.Description}
-	parts = append(parts, section.Highlights...)
-	parts = append(parts, section.Deliverables...)
-	parts = append(parts, section.Audience...)
-	if section.Table.Title != "" {
-		parts = append(parts, section.Table.Eyebrow, section.Table.Title, section.Table.Intro)
-		for _, row := range section.Table.Rows {
-			parts = append(parts, row.Cells...)
-		}
-	}
-	return strings.Join(parts, "\n")
 }
 
 func docsContentBody(page docs.ContentPage) string {
