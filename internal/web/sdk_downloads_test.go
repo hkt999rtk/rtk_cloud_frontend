@@ -100,6 +100,9 @@ func TestSDKTermsRendersMarkdown(t *testing.T) {
 		if strings.Count(body, "<h1>") != 1 {
 			t.Fatalf("GET %s rendered duplicate page headings", path)
 		}
+		if !strings.Contains(body, "Applicable terms version: <strong>eval-v1</strong>") {
+			t.Fatalf("GET %s omitted the catalog terms version", path)
+		}
 		for _, unwanted := range []string{"<pre class=\"sdk-terms\">", "## 1. Purpose", "<script>alert('x')</script>"} {
 			if strings.Contains(body, unwanted) {
 				t.Fatalf("GET %s rendered unwanted %q", path, unwanted)

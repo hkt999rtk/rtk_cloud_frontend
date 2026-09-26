@@ -1,14 +1,17 @@
 {{define "content"}}
-<section class="page-hero docs-hero">
-  <p class="eyebrow">SDK evaluation</p>
-  {{if .SDKDownloadError}}<h1>SDK Evaluation Terms</h1>{{end}}
-  {{if .SDKTermsVersion}}<p>Terms version: <strong>{{.SDKTermsVersion}}</strong></p>{{end}}
-</section>
-<section class="section">
-  {{if .SDKDownloadError}}
-  <p class="form-error">{{.SDKDownloadError}}</p>
-  {{else}}
-  <article class="manual-content sdk-terms">{{.SDKTerms}}</article>
-  {{end}}
+<section class="legal-page">
+  <div class="legal-paper">
+    <div class="legal-paper-masthead" aria-hidden="true">
+      <span>Realtek Connect+</span>
+      <span>SDK evaluation</span>
+    </div>
+    {{if .SDKTermsVersion}}<p class="legal-paper-record">Applicable terms version: <strong>{{.SDKTermsVersion}}</strong></p>{{end}}
+    {{if .SDKDownloadError}}
+    <h1>SDK Evaluation Terms</h1>
+    <p class="form-error">{{.SDKDownloadError}}</p>
+    {{else}}
+    <article class="manual-content sdk-terms" aria-label="SDK Evaluation Terms">{{.SDKTerms}}</article>
+    {{end}}
+  </div>
 </section>
 {{end}}
