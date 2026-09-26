@@ -168,6 +168,26 @@
 .portal-ui .portal-toc a { display: block; color: var(--muted); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
 .portal-ui .portal-toc a:hover { color: var(--brand-dark); text-decoration: underline; }
 .portal-ui .sdk-terms { max-width: 78ch; }
+
+/* Keep the legal text in a centered, printable document rather than the site content grid. */
+.portal-ui .legal-page { width: 100%; padding: 64px 24px 88px; background: #f2f4f7; }
+.portal-ui .legal-paper { width: min(100%, 860px); margin-inline: auto; padding: clamp(36px, 6vw, 72px); border: 1px solid #d9e0e7; background: #fff; box-shadow: 0 16px 40px rgb(22 43 64 / 8%); }
+.portal-ui .legal-paper-masthead { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 42px; padding-bottom: 16px; border-bottom: 1px solid #cbd4dd; color: #526172; font-size: 11px; font-weight: 650; letter-spacing: .11em; text-transform: uppercase; }
+.portal-ui .legal-paper > h1 { margin: 0 0 20px; font-family: Georgia, "Noto Serif TC", serif; font-size: 36px; line-height: 1.25; }
+.portal-ui .sdk-terms { max-width: none; color: #27313d; font-family: Georgia, "Noto Serif TC", serif; font-size: 16px; line-height: 1.78; overflow-wrap: break-word; }
+.portal-ui .sdk-terms h1 { max-width: 23ch; margin: 0 0 18px; color: #1c2d3d; font-family: inherit; font-size: clamp(32px, 3.3vw, 40px); font-weight: 700; letter-spacing: -.02em; line-height: 1.22; }
+.portal-ui .sdk-terms > h1 + p { margin: 0 0 28px; padding-bottom: 26px; border-bottom: 1px solid #cbd4dd; color: #526172; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif; font-size: 13px; line-height: 1.7; }
+.portal-ui .sdk-terms > h1 + p strong:not(:first-child) { margin-left: 22px; }
+.portal-ui .sdk-terms > h1 + p code { padding: 0; background: none; color: #27313d; font-family: inherit; font-size: inherit; }
+.portal-ui .sdk-terms blockquote { margin: 0 0 34px; padding: 17px 22px; border-left: 3px solid #a87338; background: #faf6ef; color: #4b3f32; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif; font-size: 14px; line-height: 1.65; }
+.portal-ui .sdk-terms blockquote p { margin: 0; }
+.portal-ui .sdk-terms p { margin: 0 0 1.15em; }
+.portal-ui .sdk-terms h2 { margin: 40px 0 14px; padding-top: 26px; border-top: 1px solid #d9e0e7; color: #1c2d3d; font-family: inherit; font-size: 22px; font-weight: 700; letter-spacing: 0; line-height: 1.35; }
+.portal-ui .sdk-terms h2 + p { margin-top: 0; }
+.portal-ui .sdk-terms :where(ol, ul) { margin: 0 0 1.3em; padding-left: 1.7em; }
+.portal-ui .sdk-terms li { margin: .4em 0; padding-left: .25em; }
+.portal-ui .sdk-terms li::marker { color: #526172; font-variant-numeric: tabular-nums; }
+.portal-ui .sdk-terms > p:last-child { margin-top: 38px; padding-top: 18px; border-top: 1px solid #d9e0e7; color: #526172; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif; font-size: 12px; }
 .portal-ui .contact-section { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 40px; align-items: start; }
 .portal-ui .contact-context { padding: 32px; background: var(--bg-panel); border-top: 3px solid var(--brand); }
 .portal-ui .contact-context h2 { font-size: 26px; line-height: 1.35; }
@@ -269,6 +289,25 @@
   .portal-ui .brand-logo { width: 88px; }
   .portal-ui .mobile-header-controls { gap: 4px; }
   .portal-ui .home-hero h1 { font-size: 32px; }
+}
+@media (max-width: 760px) {
+  .portal-ui .legal-page { padding: 0; background: #fff; }
+  .portal-ui .legal-paper { width: 100%; padding: 32px 20px 52px; border: 0; box-shadow: none; }
+  .portal-ui .legal-paper-masthead { flex-wrap: wrap; margin-bottom: 30px; }
+  .portal-ui .sdk-terms { font-size: 15.5px; }
+  .portal-ui .sdk-terms h1 { font-size: 31px; }
+  .portal-ui .sdk-terms h2 { font-size: 21px; }
+  .portal-ui .sdk-terms > h1 + p strong:not(:first-child) { margin-left: 12px; }
+  .portal-ui .sdk-terms blockquote { padding: 16px 18px; }
+}
+@media print {
+  @page { margin: 18mm 17mm; }
+  .portal-ui .site-header, .portal-ui .site-footer, .portal-ui .skip-link { display: none !important; }
+  .portal-ui .legal-page { padding: 0; background: #fff; }
+  .portal-ui .legal-paper { width: 100%; padding: 0; border: 0; box-shadow: none; }
+  .portal-ui .sdk-terms h1 { font-size: 28pt; }
+  .portal-ui .sdk-terms h2 { break-after: avoid; }
+  .portal-ui .sdk-terms :where(p, li, blockquote) { orphans: 3; widows: 3; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
