@@ -5,6 +5,7 @@
       <span>Realtek Connect+</span>
       <span>SDK evaluation</span>
     </div>
+    {{if .SDKTermsVersion}}<p class="legal-paper-record">Applicable terms version: <strong>{{.SDKTermsVersion}}</strong></p>{{end}}
     {{if .SDKDownloadError}}
     <h1>SDK Evaluation Terms</h1>
     <p class="form-error">{{.SDKDownloadError}}</p>
