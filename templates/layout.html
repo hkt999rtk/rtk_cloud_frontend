@@ -24,6 +24,7 @@
   {{if .MetaRobots}}<meta name="robots" content="{{.MetaRobots}}">{{end}}
   <link rel="stylesheet" href="{{asset "/static/styles.css"}}">
   {{if not (hasPrefix .PublicPath "/admin")}}<link rel="stylesheet" href="{{asset "/static/portal-ui.css"}}">{{end}}
+  {{if eq .PublicPath "/legal/sdk-evaluation-terms"}}<link rel="stylesheet" href="{{asset "/static/legal-terms.css"}}">{{end}}
 </head>
 <body{{if not (hasPrefix .PublicPath "/admin")}} class="portal-ui"{{end}}>
   <a class="skip-link" href="#main-content">{{t . "skip.main"}}</a>

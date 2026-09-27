@@ -170,6 +170,7 @@
 .portal-ui .portal-toc a { display: block; color: var(--muted); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
 .portal-ui .portal-toc a:hover { color: var(--brand-dark); text-decoration: underline; }
 .portal-ui .sdk-terms { max-width: 78ch; }
+
 .portal-ui .contact-section { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 40px; align-items: start; }
 .portal-ui .contact-context { padding: 32px; background: var(--bg-panel); border-top: 3px solid var(--brand); }
 .portal-ui .contact-context h2 { font-size: 26px; line-height: 1.35; }
