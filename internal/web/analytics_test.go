@@ -118,6 +118,34 @@ func TestPublicPageRendersAnalyticsConfigWhenStoreExists(t *testing.T) {
 	}
 }
 
+func TestManualLandingPageEnablesAnalytics(t *testing.T) {
+	repo, _ := openAnalyticsTestStore(t)
+	defer repo.Close()
+
+	handler := testServerWithConfig(t, Config{
+		LeadStore:      &memoryLeadStore{},
+		AnalyticsStore: repo,
+	})
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/manual", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	for _, want := range []string{`page: "manual"`, `manual_cta_signup`, `manual_cta_login`} {
+		if !strings.Contains(rec.Body.String(), want) {
+			t.Fatalf("manual analytics missing %q", want)
+		}
+	}
+
+	rec = httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"click_cta","page":"manual","cta":"manual_cta_signup","session_id":"manual-test"}`))
+	req.Header.Set("Content-Type", "application/json")
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusAccepted {
+		t.Fatalf("manual CTA status = %d, want 202: %s", rec.Code, rec.Body.String())
+	}
+}
+
 func TestPublicPageRendersGoogleAnalyticsTagWhenConfigured(t *testing.T) {
 	handler := testServerWithConfig(t, Config{
 		LeadStore:         &memoryLeadStore{},

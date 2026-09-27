@@ -27,6 +27,7 @@ var (
 			"home":     {},
 			"features": {},
 			"docs":     {},
+			"manual":   {},
 			"contact":  {},
 			"privacy":  {},
 		}

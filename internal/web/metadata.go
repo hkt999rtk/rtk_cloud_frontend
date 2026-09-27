@@ -267,6 +267,8 @@ func analyticsPageKey(publicPath string) string {
 		return strings.TrimPrefix(path, "/features/")
 	case path == "/docs":
 		return "docs"
+	case path == "/manual":
+		return "manual"
 	case strings.HasPrefix(path, "/docs/"):
 		return strings.TrimPrefix(path, "/docs/")
 	case path == "/contact":
