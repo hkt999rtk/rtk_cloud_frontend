@@ -23,8 +23,8 @@ func TestPortalDesignNavigationAndManualMarkup(t *testing.T) {
 						t.Errorf("missing %s", want)
 					}
 				}
-				if path == "/docs" && !strings.Contains(body, `data-analytics-cta="docs_cta_manual"`) {
-					t.Error("docs must offer the manual as its primary developer entry")
+				if path == "/docs" && !strings.Contains(body, `data-analytics-cta="docs_cta_signup"`) {
+					t.Error("docs must offer account registration")
 				}
 				if path == "/manual/getting-started" {
 					for _, want := range []string{`class="portal-breadcrumb"`, `data-manual-article`, `data-manual-toc hidden`} {
@@ -50,15 +50,17 @@ func TestPortalDesignDoesNotStylePrivateAdmin(t *testing.T) {
 	}
 }
 
-func TestPortalManualCTAAnalyticsIsAccepted(t *testing.T) {
+func TestPortalDocsCTAAnalyticsIsAccepted(t *testing.T) {
 	repo, _ := openAnalyticsTestStore(t)
 	defer repo.Close()
 	handler := testServerWithConfig(t, Config{LeadStore: &memoryLeadStore{}, AnalyticsStore: repo})
-	req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"click_cta","page":"docs","cta":"docs_cta_manual","session_id":"portal-design-test"}`))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusAccepted {
-		t.Fatalf("manual CTA status = %d: %s", rec.Code, rec.Body.String())
+	for _, cta := range []string{"docs_cta_signup", "docs_cta_login"} {
+		req := httptest.NewRequest(http.MethodPost, "/api/event", strings.NewReader(`{"event":"click_cta","page":"docs","cta":"`+cta+`","session_id":"portal-design-test"}`))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		if rec.Code != http.StatusAccepted {
+			t.Fatalf("%s CTA status = %d: %s", cta, rec.Code, rec.Body.String())
+		}
 	}
 }

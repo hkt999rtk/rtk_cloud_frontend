@@ -48,7 +48,7 @@ func TestStartLocalServerUsesRepoRootedContentDir(t *testing.T) {
 	if res.StatusCode != http.StatusOK {
 		t.Fatalf("/docs status = %d, want %d: %s", res.StatusCode, http.StatusOK, string(body))
 	}
-	if !strings.Contains(string(body), "Understand the platform") {
+	if !strings.Contains(string(body), "Cloud Service developer docs") {
 		t.Fatalf("/docs did not render file-backed content: %s", string(body))
 	}
 }

@@ -1,4 +1,16 @@
 {{define "content"}}
+{{if eq .PublicPath "/manual"}}
+<section class="page-hero docs-access">
+  <p class="eyebrow">{{t . "manual.eyebrow"}}</p>
+  <h1>{{.ManualIndex.Title}}</h1>
+  <p>{{.ManualIndex.Description}}</p>
+  <div class="hero-actions">
+    <a class="button primary" href="{{.ServiceSignupURL}}" data-analytics-cta="manual_cta_signup"><span class="button-icon">{{icon "arrow-right"}}</span>{{.DocsPage.SignupCTA}}</a>
+    {{range .ManualIndex.Sections}}<a class="button secondary" href="{{localizedPath $ (printf "/manual/%s" .Slug)}}">{{.Title}}</a>{{end}}
+  </div>
+  <p class="docs-access-signin"><a href="{{.ServiceDocsLoginURL}}" data-analytics-cta="manual_cta_login">{{.DocsPage.LoginCTA}}</a></p>
+</section>
+{{else}}
 <section class="page-hero docs-hero">
   <p class="eyebrow">{{t . "manual.eyebrow"}}</p>
   <h1>{{.ManualIndex.Title}}</h1>
@@ -78,4 +90,5 @@
     {{end}}
   </div>
 </section>
+{{end}}
 {{end}}

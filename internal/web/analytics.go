@@ -27,6 +27,7 @@ var (
 			"home":     {},
 			"features": {},
 			"docs":     {},
+			"manual":   {},
 			"contact":  {},
 			"privacy":  {},
 		}
@@ -59,6 +60,10 @@ var (
 		"doc_cta_primary":          {},
 		"docs_cta_primary":         {},
 		"docs_cta_manual":          {},
+		"docs_cta_signup":          {},
+		"docs_cta_login":           {},
+		"manual_cta_signup":        {},
+		"manual_cta_login":         {},
 		"feature_cta_all":          {},
 		"feature_cta_primary":      {},
 		"home_cta_band":            {},

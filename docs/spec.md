@@ -20,15 +20,15 @@ Implemented today:
 - Corporate hero/platform image stored in `static/assets/connectplus-hero-corporate-v2.jpg`.
 - Corporate feature and platform visuals stored under `static/assets/`, including the SDK sample ecosystem diagram at `static/assets/connectplus-sample-ecosystem-corporate-v2.jpg`.
 - Per-page title, description, canonical, Open Graph, and Twitter card metadata.
-- Developer docs landing and detail pages covering Product Overview, Development, APIs, SDKs, Firmware, CLI, Deployment, and Release Notes.
+- Public `/docs` invitation to register for the fuller Cloud Service documentation in the authenticated Admin console. Older public detail routes remain reachable for existing links but are no longer promoted or indexed.
 - Feature overview and detail pages for Provision, OTA, Fleet Management, Smart Home Experience, User Management, App SDK, Insights, Private Cloud, and Integrations, including production-grade OTA rollout detail, a structured end-user smart-home workflow story, App SDK reference sample application coverage, a structured private deployment comparison story, and ecosystem integration coverage across Matter Fabric, voice assistants, REST APIs, MQTT over TLS, and webhooks.
 - Public authorization wording is intentionally bounded: human product roles and permission assignments belong to the account-side product authorization contract, service bearer scopes remain integration credentials, and this marketing site does not claim to implement or expose the product ACL system.
-- File-backed manual routes for customer-facing guides, including the single-source `/manual/sdk` handbook, generated API references, PDF downloads, and sample evaluation paths.
+- File-backed manual routes for customer-facing guides. The `/manual` index directs visitors to account registration for Cloud Service documentation and keeps the single-source `/manual/sdk` handbook, generated API references, PDF downloads, and sample evaluation paths public.
 - Locale-aware public site support for English, Traditional Chinese, and Simplified Chinese. English keeps the existing unprefixed URL structure; Traditional Chinese uses `/zh-tw/...`; Simplified Chinese uses `/zh-cn/...`.
 - Language switcher in the shared header that points to the same public page in each supported locale.
 - Localized public page metadata with canonical URLs, `hreflang` alternates, and localized sitemap entries.
 - `robots.txt` and `sitemap.xml` routes for crawl and link discovery.
-- Shared footer sitemap for human navigation across platform entry points, features, developer docs, manual chapters, contact, and privacy.
+- Shared footer sitemap for human navigation across platform entry points, features, the documentation invitation, the public SDK manual, contact, and privacy.
 - Localized privacy notice routes describing contact form data, first-party SQLite analytics, analytics event types, referrer-origin-only handling, ephemeral session ids, retention intent, data request handling, admin protection, no third-party analytics or advertising pixels or fingerprinting, and local video behavior.
 - Contact / early access registration form.
 - SQLite lead capture through `DATABASE_PATH`, defaulting to `data/connectplus.db`.
@@ -339,9 +339,9 @@ The matrix below tracks website v1 representation, not live cloud-service implem
 Routes:
 
 - `GET /`: homepage.
-- `GET /docs`: developer/documentation portal landing page.
-- `GET /docs/{slug}`: developer/documentation section detail pages.
-- `GET /manual`: file-backed customer manual landing page.
+- `GET /docs`: account-registration invitation for Cloud Service developer documentation.
+- `GET /docs/{slug}`: legacy public detail pages, no longer linked from the landing page or sitemap.
+- `GET /manual`: account-registration invitation with a public SDK manual link.
 - `GET /manual/{slug}`: file-backed customer manual detail pages, including nested SDK chapters.
 - `GET /manual/sdk/reference/{package}/`: generated package API symbol reference.
 - `GET /manual/sdk/downloads/{file}`: generated complete and per-package PDF manuals.

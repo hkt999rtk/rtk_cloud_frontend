@@ -134,6 +134,8 @@ type pageData struct {
 	LeadPagination      adminLeadPagination
 	SearchEnabled       bool
 	ServiceLoginURL     string
+	ServiceSignupURL    string
+	ServiceDocsLoginURL string
 	SDKCatalog          sdkdownloads.Catalog
 	SDKDownloadsEnabled bool
 	SDKDownloadError    string
@@ -410,6 +412,7 @@ func (s *Server) handleDocs(w http.ResponseWriter, r *http.Request, locale conte
 	}
 	data := s.basePageData(r, locale, publicPath, title, description)
 	data.DocsPage = docsPage
+	data.ServiceSignupURL, data.ServiceDocsLoginURL = docsAccessURLs(s.serviceLoginURL)
 	if docsPage.SEO.SocialImage != "" {
 		data.SocialImageURL = s.absoluteURL(r, s.assetPath(docsPage.SEO.SocialImage))
 	}
@@ -562,6 +565,9 @@ func (s *Server) handleDocDetail(w http.ResponseWriter, r *http.Request, locale 
 	)
 	data.Doc = doc
 	data.RelatedDocs = relatedDocs(catalog.Docs, slug)
+	if data.MetaRobots == "" {
+		data.MetaRobots = "noindex, follow"
+	}
 	s.render(w, http.StatusOK, "doc.html", data)
 }
 
@@ -829,7 +835,21 @@ func (s *Server) handleManualIndex(w http.ResponseWriter, r *http.Request, local
 	title := index.Title + " | Realtek Connect+"
 	data := s.basePageData(r, locale, publicPath, title, index.Description)
 	data.ManualIndex = index
+	data.DocsPage = s.docsPageFor(locale)
+	data.ServiceSignupURL, data.ServiceDocsLoginURL = docsAccessURLs(s.serviceLoginURL)
 	s.render(w, http.StatusOK, "manual_index.html", data)
+}
+
+func docsAccessURLs(serviceLoginURL string) (string, string) {
+	loginURL, _ := url.Parse(serviceLoginURL) // Validated by normalizeServiceLoginURL.
+	signupURL := *loginURL
+	signupURL.Path = "/signup"
+	signupURL.RawQuery = ""
+	signupURL.Fragment = ""
+	query := loginURL.Query()
+	query.Set("next", "/console/developer-docs")
+	loginURL.RawQuery = query.Encode()
+	return signupURL.String(), loginURL.String()
 }
 
 func (s *Server) handleManualPage(w http.ResponseWriter, r *http.Request, locale content.Locale, publicPath string) {
@@ -874,6 +894,9 @@ func (s *Server) handleManualPage(w http.ResponseWriter, r *http.Request, locale
 	data.ManualIndex = index
 	data.ManualPage = page
 	data.RelatedManual = relatedManualSections(index.Sections, slug)
+	if data.MetaRobots == "" && !strings.HasPrefix(slug, "sdk/") && slug != "sdk-samples" {
+		data.MetaRobots = "noindex, follow"
+	}
 	s.render(w, http.StatusOK, "manual_page.html", data)
 }
 

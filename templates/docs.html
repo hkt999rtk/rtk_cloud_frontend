@@ -1,80 +1,12 @@
 {{define "content"}}
-<section class="page-hero docs-hero docs-hero-redesign">
-  <div class="docs-hero-copy">
-    <p class="eyebrow">{{t . "docs.eyebrow"}}</p>
-    <h1>{{.DocsPage.Title}}</h1>
-    <p class="docs-hero-subtitle">{{.DocsPage.Subtitle}}</p>
-    <div class="hero-actions">
-      <a class="button primary" href="{{localizedPath . "/manual"}}" data-analytics-cta="docs_cta_manual"><span class="button-icon">{{icon "document"}}</span>{{t . "portal.manual.cta"}}</a>
-      <a class="button secondary" href="{{localizedPath . "/features/app-sdk"}}"><span class="button-icon">{{icon "phone-code"}}</span>{{t . "docs.cta.secondary"}}</a>
-    </div>
-  </div>
-  {{if .DocsPage.HeroImage}}
-  <figure class="docs-hero-media">
-    <div class="docs-hero-media-label">Realtek Connect+ / {{t . "nav.docs"}}</div>
-    <img src="{{asset .DocsPage.HeroImage}}" alt="{{.DocsPage.HeroImageAlt}}">
-  </figure>
-  {{end}}
-</section>
-
-<section class="section">
-  <div class="section-heading">
-    <p class="eyebrow">{{t . "docs.portal.eyebrow"}}</p>
-    <h2>{{t . "docs.portal.title"}}</h2>
-  </div>
-  <div class="docs-entry-grid">
-    {{range $index, $doc := .Docs}}
-    <a class="docs-entry-card" href="{{localizedPath $ (printf "/docs/%s" $doc.Slug)}}">
-      <div class="docs-card-topline"><span class="icon-box feature-icon">{{icon $doc.Icon}}</span><span class="docs-card-index">{{printf "%02d" $index}}</span></div>
-      <p class="card-kicker">{{$doc.Kicker}}</p>
-      <h3>{{$doc.Title}}</h3>
-      <p class="docs-card-summary">{{$doc.Summary}}</p>
-      <ul>
-        {{range $doc.Highlights}}
-        <li>{{.}}</li>
-        {{end}}
-      </ul>
-      <span class="text-link">{{t $ "home.docs.open"}} <span class="text-link-icon">{{icon "arrow-right"}}</span></span>
-    </a>
-    {{end}}
-  </div>
-</section>
-
-{{if .DocsPage.Sections}}
-<section class="section docs-structure docs-why-section">
-  <div class="use-case-list">
-    {{range .DocsPage.Sections}}
-    <article>
-      <span class="icon-box use-case-icon">{{icon .Icon}}</span>
-      <h3>{{.Title}}</h3>
-      <p>{{.Body}}</p>
-    </article>
-    {{end}}
-  </div>
-</section>
-{{end}}
-
-<section class="section docs-structure">
-  <div class="section-heading">
-    <p class="eyebrow">{{t . "docs.why.eyebrow"}}</p>
-    <h2>{{t . "docs.why.title"}}</h2>
-  </div>
-  <div class="use-case-list">
-    <article>
-      <span class="icon-box use-case-icon">{{icon "document"}}</span>
-      <h3>{{t . "docs.shared.title"}}</h3>
-      <p>{{t . "docs.shared.body"}}</p>
-    </article>
-    <article>
-      <span class="icon-box use-case-icon">{{icon "grid"}}</span>
-      <h3>{{t . "docs.depth.title"}}</h3>
-      <p>{{t . "docs.depth.body"}}</p>
-    </article>
-    <article>
-      <span class="icon-box use-case-icon">{{icon "package"}}</span>
-      <h3>{{t . "docs.static.title"}}</h3>
-      <p>{{t . "docs.static.body"}}</p>
-    </article>
+<section class="page-hero docs-access">
+  <p class="eyebrow">{{t . "docs.eyebrow"}}</p>
+  <h1>{{.DocsPage.Title}}</h1>
+  <p class="docs-access-subtitle">{{.DocsPage.Subtitle}}</p>
+  <div class="docs-access-description">{{.DocsPage.BodyHTML}}</div>
+  <div class="hero-actions">
+    <a class="button primary" href="{{.ServiceSignupURL}}" data-analytics-cta="docs_cta_signup"><span class="button-icon">{{icon "arrow-right"}}</span>{{.DocsPage.SignupCTA}}</a>
+    <a class="button secondary" href="{{.ServiceDocsLoginURL}}" data-analytics-cta="docs_cta_login">{{.DocsPage.LoginCTA}}</a>
   </div>
 </section>
 {{end}}

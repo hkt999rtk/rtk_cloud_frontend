@@ -11,6 +11,8 @@ func TestParseContentPageRendersMarkdownImage(t *testing.T) {
 	page, err := ParseContentPage([]byte(`---
 title: "Docs"
 subtitle: "Source-backed docs"
+signup_cta: "Create an account"
+login_cta: "Sign in"
 hero_image: "/static/assets/example.png"
 hero_image_alt: "Example"
 sections:
@@ -49,6 +51,8 @@ func TestContentSourceFallsBackMissingLocaleToEnglish(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(enDir, "docs.yaml"), []byte(`---
 title: "English Docs"
 subtitle: "Fallback"
+signup_cta: "Create an account"
+login_cta: "Sign in"
 ---
 Fallback body.
 `), 0o644); err != nil {
