@@ -3,9 +3,13 @@ package leads
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 	"strings"
 	"time"
 )
+
+//go:embed schema_metadata.sql
+var schemaMetadataSQL string
 
 type Lead struct {
 	Name     string
@@ -68,7 +72,8 @@ CREATE TABLE IF NOT EXISTS leads (
 		}
 	}
 
-	return nil
+	_, err := r.db.Exec(schemaMetadataSQL)
+	return err
 }
 
 func (r *Repository) Insert(ctx context.Context, lead Lead) error {

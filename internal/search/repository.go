@@ -3,12 +3,16 @@ package search
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"math"
 	"sort"
 	"strings"
 )
+
+//go:embed schema_metadata.sql
+var schemaMetadataSQL string
 
 type Repository struct {
 	db *sql.DB
@@ -44,7 +48,8 @@ func (r *Repository) Init(ctx context.Context) error {
 			return err
 		}
 	}
-	return nil
+	_, err := r.db.ExecContext(ctx, schemaMetadataSQL)
+	return err
 }
 
 func (r *Repository) Replace(ctx context.Context, chunks []IndexedChunk) error {

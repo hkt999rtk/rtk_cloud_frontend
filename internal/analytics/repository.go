@@ -3,12 +3,16 @@ package analytics
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 	"os"
 	"path/filepath"
 	"time"
 
 	_ "modernc.org/sqlite"
 )
+
+//go:embed schema_metadata.sql
+var schemaMetadataSQL string
 
 type Repository struct {
 	db            *sql.DB
@@ -131,6 +135,10 @@ CREATE TABLE IF NOT EXISTS sdk_download_acceptances (
 CREATE INDEX IF NOT EXISTS idx_sdk_download_acceptances_time
   ON sdk_download_acceptances(accepted_at);
 `)
+	if err != nil {
+		return err
+	}
+	_, err = r.db.Exec(schemaMetadataSQL)
 	return err
 }
 
