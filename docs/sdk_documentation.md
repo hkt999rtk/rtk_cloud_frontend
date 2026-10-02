@@ -47,6 +47,9 @@ manifest is missing.
 
 ## SDK Package Downloads
 
+Bucket selection, key-family naming, and retention follow the workspace
+[Object Storage policy](https://github.com/hkt999rtk/rtk_cloud_workspace/blob/main/docs/object-storage-policy.md). The configuration below describes this service's reader bindings.
+
 `/manual/sdk` also renders the latest five-package public-evaluation catalog.
 The Portal reads the private `sdk/latest.json` and versioned catalog from
 Linode Object Storage, requires acceptance of the catalog's evaluation terms,

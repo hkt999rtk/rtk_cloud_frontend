@@ -2,6 +2,9 @@
 
 Realtek Connect+ is a Go-rendered HTTP website for a Realtek-style IoT cloud platform concept. It uses `net/http`, `html/template`, SQLite, and static CSS. There is no npm, React, Tailwind, or frontend build step.
 
+Object Storage bucket names, object-key families, ownership, and retention follow the
+workspace [Object Storage policy](https://github.com/hkt999rtk/rtk_cloud_workspace/blob/main/docs/object-storage-policy.md). The link also works from a standalone checkout.
+
 ## Project Status
 
 Current status: **v0.1 Marketing Foundation**.
