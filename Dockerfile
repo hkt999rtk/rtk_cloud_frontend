@@ -7,10 +7,6 @@ RUN go mod download
 
 COPY cmd ./cmd
 COPY internal ./internal
-COPY content ./content
-COPY templates ./templates
-COPY static ./static
-
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /out/realtek-connect ./cmd/server
 
 FROM alpine:3.22
@@ -23,9 +19,9 @@ RUN apk add --no-cache ca-certificates \
     && chown -R app:app /app /data
 
 COPY --from=builder /out/realtek-connect /app/realtek-connect
-COPY --from=builder /src/content /app/content
-COPY --from=builder /src/templates /app/templates
-COPY --from=builder /src/static /app/static
+COPY content /app/content
+COPY templates /app/templates
+COPY static /app/static
 
 ENV PORT=8080
 ENV DATABASE_PATH=/data/connectplus.db
