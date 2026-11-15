@@ -89,7 +89,7 @@ jobs:
             command -v google-chrome >/dev/null 2>&1 || \
             command -v chromium >/dev/null 2>&1 || \
             command -v chromium-browser >/dev/null 2>&1; then
-            go run ./cmd/visual-smoke -no-sandbox
+            go run ./cmd/visual-smoke -no-sandbox -timeout 5m
             echo "result=PASS" >> "$GITHUB_OUTPUT"
           else
             echo "Chrome is not available on this runner; recording visual smoke as SKIP."
