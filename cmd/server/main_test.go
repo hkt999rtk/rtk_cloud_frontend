@@ -98,10 +98,36 @@ func TestDockerfileUsesPersistentSQLitePaths(t *testing.T) {
 	for _, expected := range []string{
 		"ENV DATABASE_PATH=/data/connectplus.db",
 		"ENV ANALYTICS_DATABASE_PATH=/data/analytics.db",
-		"COPY --from=builder /src/content /app/content",
 	} {
 		if !strings.Contains(text, expected) {
 			t.Fatalf("Dockerfile missing %q", expected)
+		}
+	}
+}
+
+func TestDockerfileCopiesRuntimeAssetsIntoFinalImage(t *testing.T) {
+	contents, err := os.ReadFile("../../Dockerfile")
+	if err != nil {
+		t.Fatalf("read Dockerfile: %v", err)
+	}
+	text := string(contents)
+	finalStage := strings.LastIndex(text, "\nFROM ")
+	if finalStage < 0 {
+		t.Fatal("Dockerfile has no final image stage")
+	}
+	destinations := map[string]bool{"/app/content": false, "/app/templates": false, "/app/static": false}
+	for _, line := range strings.Split(text[finalStage:], "\n") {
+		fields := strings.Fields(line)
+		if len(fields) >= 3 && strings.EqualFold(fields[0], "COPY") {
+			destination := strings.TrimSuffix(fields[len(fields)-1], "/")
+			if _, ok := destinations[destination]; ok {
+				destinations[destination] = true
+			}
+		}
+	}
+	for path, found := range destinations {
+		if !found {
+			t.Errorf("final image does not copy assets to %s", path)
 		}
 	}
 }
