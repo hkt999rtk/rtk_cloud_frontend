@@ -88,6 +88,7 @@ func main() {
 		chromedp.Flag("hide-scrollbars", false),
 		chromedp.NoDefaultBrowserCheck,
 		chromedp.NoFirstRun,
+		chromedp.WSURLReadTimeout(*timeout),
 		chromedp.CombinedOutput(os.Stderr),
 	)
 	if *noSandbox {
